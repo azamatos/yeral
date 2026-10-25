@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Menu } from '@yeral/contract/services'
-import { localized } from '@yeral/domain/model'
+import { localized, type Localized } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
 import { AvatarStack } from '@yeral/ui/avatar-stack'
 import { Button } from '@yeral/ui/button'
@@ -11,10 +11,12 @@ import { Switch } from '@yeral/ui/switch'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { Ellipsis, EyeOff, Globe, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useId, useMemo, useRef, useState } from 'react'
+import { useId, useMemo, useRef, useState, type ComponentProps, type RefObject } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
+import { GROUP_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
+import { writtenIn } from '@/shared/lib'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 import { teamLookup, whoDoes } from '../model/rows'
@@ -28,10 +30,11 @@ type Lookup = ReturnType<typeof teamLookup>
  * The row's columns (B-Services `.srow`): the name, duration, price, who does it, online, actions. They follow the
  * pane's width (a container query), not the window's, since the sidebar and the settings menu take their share: from
  * 760 all of them; narrower without «Who does it»; under 520 the name with a line under it (duration · price · who),
- * the switch and the actions, as the board's phone.
+ * the switch and the actions, as the board's phone. Rows sit in their group's card, so the columns' heading above
+ * takes the card's border as an inset too.
  */
 const ROW =
-  'grid grid-cols-[minmax(200px,1.6fr)_96px_132px_minmax(140px,1fr)_92px_40px] items-center gap-x-3 px-2 @max-[760px]:grid-cols-[minmax(0,1fr)_88px_120px_84px_40px] @max-[520px]:grid-cols-[minmax(0,1fr)_52px_40px] @max-[520px]:px-1'
+  'grid grid-cols-[minmax(200px,1.6fr)_96px_132px_minmax(140px,1fr)_92px_40px] items-center gap-x-3 px-4 @max-[760px]:grid-cols-[minmax(0,1fr)_88px_120px_84px_40px] @max-[520px]:grid-cols-[minmax(0,1fr)_52px_40px] @max-[520px]:px-3'
 
 /**
  * Settings → Services (B-Services, design §8 «Hyzmatlar» and §28.6, book B-38): the menu as clients see it, group by
@@ -116,8 +119,9 @@ function ServicesSection({ slug }: { slug: string }) {
         />
       )}
       <div className="@container">
-        <div className="flex flex-col">
-          <div aria-hidden className={`${ROW} min-h-10 border-y border-n-200 text-label text-n-500 uppercase @max-[520px]:hidden`}>
+        {/* each group its own card (the owner, 25.10.2026): the name in a tinted band above its services */}
+        <div className="flex flex-col gap-4">
+          <div aria-hidden className={`${ROW} min-h-9 border-x border-transparent text-label text-n-500 uppercase @max-[520px]:hidden`}>
             <span>{t('columns.service')}</span>
             <span>{t('columns.duration')}</span>
             <span>{t('columns.price')}</span>
@@ -131,6 +135,7 @@ function ServicesSection({ slug }: { slug: string }) {
               slug={slug}
               groupId={g.id}
               name={localized(g.name, locale)}
+              written={g.name}
               services={g.services}
               lookup={lookup}
               openId={openId}
@@ -160,62 +165,163 @@ function ServicesSection({ slug }: { slug: string }) {
 }
 
 /**
- * «Add group» (B-Services `.ngf`): the name, Enter or «Add group» adds it at the end of the list, Escape or «Cancel»
- * closes the box.
+ * A group's name box (B-Services `.ngf`): Enter or the save button sends the name, Escape or «Cancel» closes the box,
+ * neither while it's on its way (the box would go before it hears how it went). The api's limit, 60 characters.
  */
+function GroupNameField({
+  initial,
+  saveLabel,
+  savingLabel,
+  pending,
+  size,
+  onSave,
+  onCancel,
+  ...input
+}: {
+  initial: string
+  saveLabel: string
+  savingLabel: string
+  pending: boolean
+  size: 'm' | 's'
+  onSave: (name: string) => void
+  onCancel: () => void
+} & Pick<ComponentProps<typeof Input>, 'id' | 'aria-label' | 'placeholder' | 'ref' | 'onFocus' | 'className'>) {
+  const t = useTranslations('settings.services')
+  const [name, setName] = useState(initial)
+  const text = name.trim()
+  // Enter pressed again while it's on its way sends nothing more
+  const save = () => {
+    if (text && !pending) onSave(text)
+  }
+  const cancel = () => {
+    if (!pending) onCancel()
+  }
+  return (
+    <>
+      <Input
+        {...input}
+        autoFocus
+        maxLength={GROUP_NAME_MAX}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            save()
+          }
+          if (e.key === 'Escape') cancel()
+        }}
+      />
+      <Button variant="ghost" size={size} disabled={pending} onClick={cancel}>
+        {t('cancel')}
+      </Button>
+      <Button variant="secondary" size={size} disabled={!text} loading={pending} loadingLabel={savingLabel} onClick={save}>
+        {saveLabel}
+      </Button>
+    </>
+  )
+}
+
+/** «Add group» (B-Services `.ngf`): the name adds a group at the end of the list. */
 function NewGroup({ slug, onDone }: { slug: string; onDone: () => void }) {
   const t = useTranslations('settings.services')
   const locale = useLocale()
   const sdk = useSdk()
   const errorText = useErrorText()
   const add = useMutation(sdk.settings.addGroup(slug))
-  const [name, setName] = useState('')
   const labelId = useId()
-  const save = () => {
-    const text = name.trim()
-    // Enter pressed again while it's on its way adds nothing more
-    if (!text || add.isPending) return
-    add.mutate(
-      { name: { [locale]: text } },
-      {
-        onSuccess: () => {
-          toast(t('groupAdded', { name: text }))
-          onDone()
-        },
-        onError: (error) => toast(errorText(error)),
-      },
-    )
-  }
   return (
     <div role="group" aria-labelledby={labelId} className="mb-6 flex flex-col gap-2 rounded-card border border-n-200 bg-n-50 p-4">
       <label id={labelId} htmlFor={`${labelId}-input`} className="text-dense font-semibold text-n-900">
         {t('newGroupName')}
       </label>
       <div className="flex flex-wrap gap-2">
-        <Input
+        <GroupNameField
           id={`${labelId}-input`}
-          autoFocus
-          maxLength={60}
           className="h-11 min-w-0 flex-[1_1_240px]"
           placeholder={t('newGroupPlaceholder')}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              save()
-            }
-            if (e.key === 'Escape') onDone()
-          }}
+          initial=""
+          size="m"
+          saveLabel={t('addGroup')}
+          savingLabel={t('adding')}
+          pending={add.isPending}
+          onCancel={onDone}
+          onSave={(name) =>
+            add.mutate(
+              { name: { [locale]: name } },
+              {
+                onSuccess: () => {
+                  toast(t('groupAdded', { name }))
+                  onDone()
+                },
+                onError: (error) => toast(errorText(error)),
+              },
+            )
+          }
         />
-        <Button variant="ghost" disabled={add.isPending} onClick={onDone}>
-          {t('cancel')}
-        </Button>
-        <Button variant="secondary" disabled={!name.trim()} loading={add.isPending} loadingLabel={t('adding')} onClick={save}>
-          {t('addGroup')}
-        </Button>
       </div>
       <span className="text-dense text-n-600">{t('newGroupNote')}</span>
+    </div>
+  )
+}
+
+/**
+ * «Rename group» (the owner, 25.10.2026; not drawn: the «Add group» box in the group's band): the name as it is, saved
+ * in the reader's language (the market's others kept) and put in the menu at once; the same name changes nothing.
+ */
+function RenameGroup({
+  slug,
+  groupId,
+  name,
+  names,
+  inputRef,
+  onDone,
+}: {
+  slug: string
+  groupId: string
+  name: string
+  names: Localized
+  inputRef: RefObject<HTMLInputElement | null>
+  onDone: () => void
+}) {
+  const t = useTranslations('settings.services')
+  const locale = useLocale()
+  const sdk = useSdk()
+  const queryClient = useQueryClient()
+  const errorText = useErrorText()
+  const rename = useMutation(sdk.settings.renameGroup(slug))
+  return (
+    <div className="flex min-w-0 flex-[1_1_320px] flex-wrap items-center gap-2">
+      <GroupNameField
+        ref={inputRef}
+        aria-label={t('groupNameLabel', { name })}
+        className="h-10 min-w-0 flex-[1_1_200px] bg-n-0"
+        onFocus={(e) => e.currentTarget.select()}
+        initial={name}
+        size="s"
+        saveLabel={t('renameSave')}
+        savingLabel={t('renaming')}
+        pending={rename.isPending}
+        onCancel={onDone}
+        onSave={(next) => {
+          if (next === name) return onDone()
+          rename.mutate(
+            { groupId, name: writtenIn(names, locale, next) },
+            {
+              onSuccess: (group) => {
+                // the answer is the group as it is now, whether or not the menu's refetch comes back
+                queryClient.setQueryData(
+                  sdk.settings.menu(slug).queryKey,
+                  (menu) => menu && { groups: menu.groups.map((g) => (g.id === group.id ? { ...g, name: group.name } : g)) },
+                )
+                toast(t('groupRenamed', { name: next }))
+                onDone()
+              },
+              onError: (error) => toast(errorText(error)),
+            },
+          )
+        }}
+      />
     </div>
   )
 }
@@ -224,6 +330,7 @@ function Group({
   slug,
   groupId,
   name,
+  written: names,
   services,
   lookup,
   openId,
@@ -235,6 +342,8 @@ function Group({
   slug: string
   groupId: string
   name: string
+  /** Every language of its name: a rename keeps the market's others. */
+  written: Localized
   services: Service[]
   lookup: Lookup | null
   openId: string | null
@@ -249,13 +358,32 @@ function Group({
   const removeGroup = useMutation(sdk.settings.deleteGroup(slug))
   const headId = useId()
   const actions = useRef<HTMLButtonElement>(null)
+  const [renaming, setRenaming] = useState(false)
+  // «Rename group» chosen: the menu closing gives the focus to the name box, not back to its button
+  const renameInput = useRef<HTMLInputElement>(null)
+  const toRename = useRef(false)
   return (
-    <div role="group" aria-labelledby={headId}>
-      <div className="flex min-h-15 items-center gap-2 border-b border-n-200 px-2 pt-4 pb-2 @max-[520px]:px-1 @max-[520px]:pt-3">
-        <h3 id={headId} className="m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900">
+    <div role="group" aria-labelledby={headId} className="overflow-hidden rounded-card border border-n-200 bg-n-0">
+      <div className="flex min-h-14 flex-wrap items-center gap-x-2 gap-y-1 border-b border-n-200 bg-group py-2 pr-2 pl-4 @max-[520px]:pl-3">
+        <h3 id={headId} className={`m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900 ${renaming ? 'sr-only' : ''}`}>
           {name}
         </h3>
-        <span className="text-dense text-n-600">{t('count', { n: services.length })}</span>
+        {renaming ? (
+          <RenameGroup
+            slug={slug}
+            groupId={groupId}
+            name={name}
+            names={names}
+            inputRef={renameInput}
+            onDone={() => {
+              setRenaming(false)
+              // the box goes with the focus in it
+              requestAnimationFrame(() => actions.current?.focus())
+            }}
+          />
+        ) : (
+          <span className="text-dense text-n-600">{t('count', { n: services.length })}</span>
+        )}
         <span className="flex-1" />
         <Actions>
           <MenuTrigger asChild>
@@ -263,10 +391,26 @@ function Group({
               <Ellipsis />
             </Button>
           </MenuTrigger>
-          <MenuContent>
+          <MenuContent
+            onCloseAutoFocus={(e) => {
+              if (!toRename.current) return
+              toRename.current = false
+              e.preventDefault()
+              renameInput.current?.focus()
+            }}
+          >
             <MenuItem onSelect={() => actions.current && onAdd(actions.current)}>
               <Plus aria-hidden />
               {t('addHereMenu')}
+            </MenuItem>
+            <MenuItem
+              onSelect={() => {
+                toRename.current = true
+                setRenaming(true)
+              }}
+            >
+              <Pencil aria-hidden />
+              {t('renameGroup')}
             </MenuItem>
             {services.length ? (
               <MenuItem disabled className="h-auto min-h-10 flex-wrap py-1.5">
@@ -307,7 +451,7 @@ function Group({
           />
         ))
       ) : (
-        <p className="m-0 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-n-200 px-2 py-3.5 text-small text-n-600">
+        <p className="m-0 flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3.5 text-small text-n-600 @max-[520px]:px-3">
           {t('emptyGroup')}
           <button
             type="button"
@@ -384,7 +528,7 @@ function ServiceRow({
 
   return (
     <div
-      className={`${ROW} relative min-h-15 border-b border-n-200 py-2 text-small text-n-900 @max-[520px]:py-2.5 ${open ? 'bg-a-50' : 'hover:bg-n-50'}`}
+      className={`${ROW} relative min-h-15 border-b border-n-200 py-2 text-small text-n-900 last:border-b-0 @max-[520px]:py-2.5 ${open ? 'bg-a-50' : 'hover:bg-n-50'}`}
     >
       <div className="flex min-w-0 flex-col gap-0.5">
         {/* the whole row opens it (B-Services `.rbtn::after`); the switch and the menu sit above */}

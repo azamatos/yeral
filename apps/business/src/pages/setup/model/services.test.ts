@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formFromMenu, formFromStarters, servicesInput, servicesProblem, withNewRow, withStarters } from './services'
+import { formFromMenu, formFromStarters, savedOwnGroupId, servicesInput, servicesProblem, withNewRow, withStarters } from './services'
 
 const starters = [
   {
@@ -93,5 +93,53 @@ describe('the services step (B-Onboarding step 5)', () => {
         .groups.filter((g) => g.key === 'own')
         .map((g) => g.id),
     ).toEqual(['g2'])
+  })
+
+  it('names a group as the owner writes it: the own one always, a starter or saved one only when changed', () => {
+    let form = withNewRow(formFromStarters(starters), 'New services')
+    form = { ...form, rows: form.rows.map((r) => (r.key === 'new:0' ? { ...r, name: 'Henna', price: '120' } : r)) }
+    // the own group renamed, the starter group left: the starter by id only
+    form = { ...form, groups: form.groups.map((g) => (g.key === 'own' ? { ...g, name: ' Brows ' } : g)) }
+    expect(servicesInput(form, 'en').groups.map(({ services: _, ...g }) => g)).toEqual([{ starter: 'hair' }, { name: { en: 'Brows' } }])
+    // a starter group renamed goes with its new name
+    const starter = { ...form, groups: form.groups.map((g) => (g.starter ? { ...g, name: 'Hair and colour' } : g)) }
+    expect(servicesInput(starter, 'en').groups[0]).toMatchObject({ starter: 'hair', name: { en: 'Hair and colour' } })
+    // a group with a picked row needs a name; an empty one of nothing picked doesn't hold Continue
+    const blank = { ...form, groups: form.groups.map((g) => (g.key === 'own' ? { ...g, name: ' ' } : g)) }
+    expect(servicesProblem(blank)).toBe('groupName')
+    expect(servicesProblem({ ...blank, rows: blank.rows.map((r) => (r.group === 'own' ? { ...r, on: false } : r)) })).toBeNull()
+    // a saved group renamed: by id, over the app's language, the market's languages kept
+    const cut = {
+      id: 's1',
+      groupId: 'g1',
+      name: { en: 'Haircut' },
+      description: null,
+      durationMin: 60,
+      priceType: 'fixed' as const,
+      priceAmount: 80,
+      bufferMin: null,
+      online: true,
+      staffIds: [],
+      futureBookings: 0,
+    }
+    const saved = formFromMenu({ groups: [{ id: 'g1', name: { tk: 'Saç', en: 'Hair' }, services: [cut] }] }, 'en', 'New services')
+    expect(servicesInput(saved, 'en').groups[0]).not.toHaveProperty('name')
+    const renamed = { ...saved, groups: saved.groups.map((g) => ({ ...g, name: 'Hair and colour' })) }
+    expect(servicesInput(renamed, 'en').groups[0]).toMatchObject({ id: 'g1', name: { en: 'Hair and colour' } })
+    // after a save the own group is found by its place, not its name: named like the starter group, new services
+    // still go to it
+    const twin = { ...form, groups: form.groups.map((g) => (g.key === 'own' ? { ...g, name: 'Hair' } : g)) }
+    const menu = {
+      groups: [
+        { id: 'g1', name: { en: 'Hair' }, services: [{ ...cut, id: 's1' }] },
+        { id: 'g2', name: { en: 'Hair' }, services: [{ ...cut, id: 's2', groupId: 'g2' }] },
+      ],
+    }
+    expect(savedOwnGroupId(twin, menu)).toBe('g2')
+    const back = formFromMenu(menu, 'en', 'New services', savedOwnGroupId(twin, menu))
+    expect(withNewRow(back, 'New services').groups.map((g) => [g.key, g.id])).toEqual([
+      ['menu:g1', 'g1'],
+      ['own', 'g2'],
+    ])
   })
 })

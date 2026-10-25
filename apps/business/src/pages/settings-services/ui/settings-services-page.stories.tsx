@@ -151,6 +151,13 @@ const fakeApi = (): (() => typeof fetch) => () => {
       current = { groups: [...current.groups, { id: `group-${current.groups.length + 1}`, name: body.name, services: [] }] }
       return json(current.groups.at(-1), 201)
     }
+    const renamed = /^PATCH \/w\/glow-studio\/services\/groups\/([^/]+)$/.exec(route)
+    if (renamed) {
+      const body = (await request.json()) as { name: { en: string } }
+      calls.push(`${route} ${body.name.en}`)
+      current = { groups: current.groups.map((g) => (g.id === renamed[1] ? { ...g, name: body.name } : g)) }
+      return json(current.groups.find((g) => g.id === renamed[1]))
+    }
     const group = /^DELETE \/w\/glow-studio\/services\/groups\/([^/]+)$/.exec(route)
     if (group) {
       calls.push(route)
@@ -397,6 +404,34 @@ export const Groups: Story = {
     await userEvent.click(await within(document.body).findByRole('menuitem', { name: 'Delete group' }))
     await waitFor(() => expect(calls).toContain('DELETE /w/glow-studio/services/groups/spa'))
     await expect(await within(document.body).findByText('Group deleted: Spa')).toBeInTheDocument()
+  },
+}
+
+/**
+ * «Rename group» from a group's menu: the name in the group's band, Enter saves it in the reader's language and the
+ * focus goes back to the group's menu; Escape leaves it as it was.
+ */
+export const RenameGroup: Story = {
+  name: 'Rename group',
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Spa group: actions' }))
+    await userEvent.click(await within(document.body).findByRole('menuitem', { name: 'Rename group' }))
+    const spa = await canvas.findByRole('textbox', { name: 'New name for Spa' })
+    await userEvent.type(spa, '{Escape}')
+    await waitFor(() => expect(canvas.queryByRole('textbox', { name: 'New name for Spa' })).toBeNull())
+    await expect(calls).toEqual([])
+    await userEvent.click(canvas.getByRole('button', { name: 'Nails group: actions' }))
+    await userEvent.click(await within(document.body).findByRole('menuitem', { name: 'Rename group' }))
+    const box = await canvas.findByRole('textbox', { name: 'New name for Nails' })
+    await expect(box).toHaveValue('Nails')
+    // the menu closing leaves the focus in the box
+    await waitFor(() => expect(box).toHaveFocus())
+    await userEvent.clear(box)
+    await userEvent.type(box, 'Nails and brows{Enter}')
+    await waitFor(() => expect(calls).toEqual(['PATCH /w/glow-studio/services/groups/nails Nails and brows']))
+    await expect(await within(document.body).findByText('Group renamed: Nails and brows')).toBeInTheDocument()
+    await expect(await canvas.findByRole('group', { name: 'Nails and brows' })).toBeVisible()
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Nails and brows group: actions' })).toHaveFocus())
   },
 }
 

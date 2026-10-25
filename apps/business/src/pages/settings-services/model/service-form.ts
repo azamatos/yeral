@@ -1,8 +1,8 @@
 import type { Menu, ServiceInput, ServiceUpdate } from '@yeral/contract/services'
-import type { Localized, PriceType } from '@yeral/domain/model'
+import type { PriceType } from '@yeral/domain/model'
 import { localized } from '@yeral/domain/model'
-import { MARKET } from '@yeral/domain/market'
 import { PRICE_MAX, SERVICE_MINUTES } from '@yeral/domain/services'
+import { writtenIn as written } from '@/shared/lib'
 
 type Service = Menu['groups'][number]['services'][number]
 type Locale = Parameters<typeof localized>[1]
@@ -75,17 +75,6 @@ export function formProblems(form: ServiceForm): { name?: true; amount?: true; d
 
 const amountOf = (form: ServiceForm) => (takesAmount(form.priceType) ? Number(form.amount) || 0 : 0)
 const bufferOf = (form: ServiceForm) => (form.buffer === 'rule' ? null : form.buffer)
-
-/**
- * The text in the reader's language, with the market's other languages the business wrote kept. A starter service
- * keeps every language it came with (tk, ru, en), and the api takes only the market's, so the rest stay out.
- */
-function written(before: Localized | null, locale: Locale, text: string): Localized {
-  const kept = Object.fromEntries(
-    Object.entries(before ?? {}).filter(([l, v]) => l !== locale && v && (MARKET.languages as readonly string[]).includes(l)),
-  )
-  return { ...kept, [locale]: text.trim() }
-}
 
 /** `POST …/services`: a new service, last in its group. */
 export function addInput(form: ServiceForm, locale: Locale): ServiceInput {
