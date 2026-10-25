@@ -133,6 +133,12 @@ components in Storybook, then the apps.
 - 2026-10-25: "i dont wanna check locally, go live on our domains." Asked, the owner chose the business app only at
   `business.yeral.app` (the apex keeps the coming-soon page) with the sign-in code on the screen, open to anyone
   (test data only); the book's chapter 9, 25.10.2026.
+- 2026-10-25 (after testing it live): six fixes asked (the disabled button, the toast, digits in selects, «Create a
+  business» again for someone who has one, naming the own services' group, clearer service groups) and the done step's
+  QR as clear as Settings'. "Go with recommendation. The main idea is not overcomplicating things. For example if we
+  can use some library for date picker and etc. Lets use it, no need for making own one." (ADR 0011 amended: forms are
+  plain state; AGENTS.md rule 10a.) A business chooses its own page address instead of `turkmen-barber-2` ("add it to
+  the plan"); updates feel slow rather than instant (Next steps).
 
 ## Decisions
 
@@ -196,6 +202,10 @@ launch's real SMS sign-in; while the code shows on the screen the api verifies n
 [0023](../decisions/0023-one-deployment-per-market.md) amended, #138). [0019](../decisions/0019-own-phone-login-and-sessions.md)
 amended: the demo workspace's sessions in a cookie of their own (#145). The book has no open question left.
 
+2026-10-25: [0011](../decisions/0011-state-management.md) amended: a form is the owning slice's hook with plain state,
+no TanStack Form; a well-known library before our own component (AGENTS.md rule 10a). The business app live with the
+code on the screen (no ADR; the book's chapter 9, 25.10.2026).
+
 2026-10-23: [0027](../decisions/0027-geocoder-port.md) the address search behind a geocoder port (Photon over
 OpenStreetMap, #153); e-mail (no ADR; the book's chapter 9, 23.10.2026): `hello@yeral.app` received through Cloudflare
 Email Routing, nothing sent, DMARC reject (the owner; the details Claude's, delegated).
@@ -223,6 +233,16 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
+0. **The owner's 25.10 test of business.yeral.app:** the six fixes and the done step's QR (under way), then a deploy.
+   Planned with slice 2's end: (a) **the page address a business chooses** (`yeral.app/b/<slug>`): an editable
+   address on the business step and in Link and QR, checked as it's typed (letters, digits and hyphens, a length, taken
+   and reserved words), an old address redirecting to the new one and kept for its business (a migration for the old
+   addresses), the client site's page following it; book rows first. (b) **instant updates**: the server answers in
+   8 ms (p50, Caddy's log, 25.10), but a change made elsewhere shows within the 10-second poll of `GET /v1/events`
+   by design, and the app's own saves wait for the server and a refetch (no optimistic updates). Plan: optimistic
+   updates where a switch or a save should feel instant; a push channel (server-sent events) for `events` with
+   slice 3, when new booking requests must show at once; fewer repeated reads of `me`, the workspaces and the setup.
+   (c) the special days' dates through `react-day-picker` (rule 10a).
 1. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
    chapter 10): its endpoints are merged (the setup draft #112 and its card #141, photos #116, the logo #140, the floor
    #120, step 4's settings, the address search #153). Built: the whole wizard (#154–#173, all 8 steps and the phone

@@ -35,8 +35,9 @@ and milestones: `docs/memory-bank/progress.md`.
 ## Rules
 
 1. Place code by Feature-Sliced Design; a package never imports an app (ADR 0004).
-2. State has one owner: server data → TanStack Query via `@yeral/sdk`; shareable → URL search params; form input →
-   TanStack Form; local → `useState`; shared client-only → a Zustand store in the owning slice (ADR 0011).
+2. State has one owner: server data → TanStack Query via `@yeral/sdk`; shareable → URL search params; form input → a
+   form hook in the owning slice (`useState`, rules in `model/`); local → `useState`; shared client-only → a Zustand
+   store in the owning slice (ADR 0011).
 3. UI talks to the API only through `@yeral/sdk`. No `fetch` in components.
 4. No user-visible string in code, `aria-label` included: i18n with English as the source; each market adds its
    languages (Turkmenistan: `tk`, `ru`), and for screens still drawn in Turkmen their Turkmen is the reference for `tk`
@@ -51,6 +52,8 @@ and milestones: `docs/memory-bank/progress.md`.
 8. UI components live in `@yeral/ui` with Storybook stories for every variant; scaffold with `pnpm gen ui-component` (ADR 0012).
 9. Tests come with the change: domain rule → unit test; component → stories; endpoint → API test; bug fix → a failing test first (ADR 0013).
 10. Check "Where shared things live" in `techContext.md` before writing a helper; add new shared helpers there.
+10a. Keep it simple (owner, 2026-10-25): a well-known library before a component of our own (a date picker →
+   `react-day-picker`), styled to the design; no layer, abstraction or option the work doesn't need yet.
 11. Commits and PR titles: Conventional Commits, scope = app or package. No changesets: releases are paused until the
     MVP works (ADR 0009, amended 2026-10-21).
 12. Architecture, core library or process change → ADR + memory-bank update in the same commit.

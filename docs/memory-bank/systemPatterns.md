@@ -127,7 +127,7 @@ component ─► useQuery(sdk.businesses.detail(slug)) ─► hc client ─► G
 ## State
 
 One owner per kind of state (ADR 0011): server data → TanStack Query; anything a link should restore → router search
-params (zod); unsaved form input → TanStack Form; one subtree → `useState`; client-only state shared by distant components
+params (zod); unsaved form input → the slice's form hook (`useState`, rules in `model/`; ADR 0011 amended 2026-10-25); one subtree → `useState`; client-only state shared by distant components
 → a Zustand store in the owning slice's `model/`; changes made elsewhere → events → query invalidation. No global store.
 
 ## Rendering

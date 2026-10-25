@@ -16,7 +16,7 @@ before any code used them were edited in place (marked "revised").
 | [0008](0008-i18n-use-intl.md) | i18n with use-intl | Accepted 2026-10-13, amended by 0016 |
 | [0009](0009-versioning-changesets.md) | Versioning with Changesets, trunk-based flow | Accepted 2026-10-13 · amended 2026-10-21 (releases paused) |
 | [0010](0010-ci-cd-github-actions.md) | CI/CD on GitHub Actions | Accepted 2026-10-13 (revised; release workflow removed 2026-10-21) |
-| [0011](0011-state-management.md) | State management: each kind of state has one owner | Accepted 2026-10-13 |
+| [0011](0011-state-management.md) | State management: each kind of state has one owner | Accepted 2026-10-13; amended 2026-10-25 (forms: plain state) |
 | [0012](0012-design-system-and-storybook.md) | Design system in `@yeral/ui`, documented and tested in Storybook | Accepted 2026-10-13 (revised 2026-10-14) |
 | [0013](0013-testing-strategy.md) | Testing strategy | Accepted 2026-10-13 |
 | [0014](0014-parallel-agents.md) | Working with several agents in parallel | Accepted 2026-10-13 |
