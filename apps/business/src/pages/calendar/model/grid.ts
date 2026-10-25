@@ -10,6 +10,20 @@ const DAY_MINUTES = 1440
 const QUIET = { from: 8, to: 21 }
 
 type Booking = CalendarView['bookings'][number]
+type Move = CalendarView['moves'][number]
+type Day = CalendarView['columns'][number]['days'][number]
+type Stretch = { start: number; end: number }
+
+/** How a date's minutes sit on this day's grid: as they are, or the night before's after midnight; null for another day. */
+function shiftOn(date: string, of: string): number | null {
+  return of === date ? 0 : of === addDays(date, -1) ? -DAY_MINUTES : null
+}
+
+/** A stretch of a date (a block, time busy elsewhere) on this day's grid: the night before's past midnight too. */
+export function stretchOn<T extends { date: string; start: number; end: number }>(date: string, x: T): (T & Stretch) | null {
+  const shift = shiftOn(date, x.date)
+  return shift === null || x.end + shift <= 0 ? null : { ...x, start: x.start + shift, end: x.end + shift }
+}
 
 /**
  * A booking in one person's column: their part of it (`items`; a booking shared with a colleague shows each part in
@@ -19,9 +33,8 @@ type Booking = CalendarView['bookings'][number]
 export type Placed = { booking: Booking; items: Booking['items']; start: number; end: number }
 
 export function placedIn(bookings: readonly Booking[], staffId: string, date: string): Placed[] {
-  const before = addDays(date, -1)
   return bookings.flatMap((b) => {
-    const shift = b.date === date ? 0 : b.date === before ? -DAY_MINUTES : null
+    const shift = shiftOn(date, b.date)
     const items = b.items.filter((i) => i.staffId === staffId)
     if (shift === null || !items.length) return []
     const end = Math.max(...items.map((i) => i.end)) + shift
@@ -31,11 +44,11 @@ export function placedIn(bookings: readonly Booking[], staffId: string, date: st
 }
 
 /**
- * The day's hours, whole: an hour before the earliest start and after the latest end of anyone's working day or any
- * booking (B-Calendar: Glow Studio open 09:00–20:00 shows 08:00–21:00), within the day and the night after it; from
+ * The day's hours, whole: an hour before the earliest start and after the latest end of anyone's working day, any
+ * booking or a move's asked time (B-Calendar: Glow Studio open 09:00–20:00 shows 08:00–21:00), within the day and the night after it; from
  * midnight when the night before runs past it.
  */
-export function gridHours(view: Pick<CalendarView, 'columns' | 'bookings'>, date: string): { from: number; to: number } {
+export function gridHours(view: Pick<CalendarView, 'columns' | 'bookings' | 'moves'>, date: string): { from: number; to: number } {
   const starts: number[] = []
   const ends: number[] = []
   for (const c of view.columns) {
@@ -44,7 +57,7 @@ export function gridHours(view: Pick<CalendarView, 'columns' | 'bookings'>, date
         starts.push(d.working.open)
         ends.push(d.working.close)
       }
-    for (const p of placedIn(view.bookings, c.staffId, date)) {
+    for (const p of [...placedIn(view.bookings, c.staffId, date), ...movesIn(view.moves, c.staffId, date)]) {
       starts.push(Math.max(0, p.start))
       ends.push(p.end)
     }
@@ -58,12 +71,63 @@ export const pxOf = (minute: number, fromHour: number) => ((minute - fromHour * 
 
 /**
  * A stretch's place: top and height, a pixel in from its quarter lines (B-Calendar `top: px + 1`, `height: ph - 2`),
- * cut at the grid's top.
+ * cut at the grid's top and bottom.
  */
-export function placeOf(start: number, end: number, fromHour: number) {
+export function placeOf(start: number, end: number, fromHour: number, toHour = 48) {
   const top = Math.max(start, fromHour * 60)
-  return { top: pxOf(top, fromHour) + 1, height: Math.max(((end - top) * HOUR_PX) / 60 - 2, 16) }
+  const bottom = Math.min(end, toHour * 60)
+  return { top: pxOf(top, fromHour) + 1, height: Math.max(((bottom - top) * HOUR_PX) / 60 - 2, 16) }
 }
+
+/** A client's move waiting in one person's column (B-21): their part of it at the asked time. */
+export type PlacedMove = { move: Move; items: Move['items']; start: number; end: number }
+
+export function movesIn(moves: readonly Move[], staffId: string, date: string): PlacedMove[] {
+  return moves.flatMap((m) => {
+    const items = m.items.filter((i) => i.staffId === staffId)
+    if (m.date !== date || !items.length) return []
+    return [{ move: m, items, start: Math.min(...items.map((i) => i.start)), end: Math.max(...items.map((i) => i.end)) }]
+  })
+}
+
+/**
+ * The time a person doesn't work on the grid (B-Calendar `.shd`): before and after their hours, or the whole day with
+ * why (a day off, time off, the business closed by a special day's name; nothing for someone removed).
+ */
+export type Shade = Stretch & { off?: { kind: 'dayoff' | 'timeoff' | 'closed'; name: string | null } }
+
+export function shadesOf(day: Day | undefined, fromHour: number, toHour: number): Shade[] {
+  const top = fromHour * 60
+  const bottom = toHour * 60
+  if (!day?.working) {
+    const off = day?.off
+    if (!off) return [{ start: top, end: bottom }]
+    const kind = off.kind === 'business-closed' ? 'closed' : off.kind === 'exception' ? 'timeoff' : 'dayoff'
+    return [{ start: top, end: bottom, off: { kind, name: kind === 'closed' ? off.name : null } }]
+  }
+  return [
+    ...(day.working.open > top ? [{ start: top, end: day.working.open }] : []),
+    ...(day.working.close < bottom ? [{ start: day.working.close, end: bottom }] : []),
+  ]
+}
+
+/**
+ * The buffer after each live booking (B-Calendar `.buf`, «Buffer · 10 min»): the one after the person's last part, up
+ * to the next booking and no further than their day's end (a booking past it keeps none).
+ */
+export function buffersOf(column: readonly Placed[], day: Day | undefined): (Stretch & { minutes: number })[] {
+  const live = column.filter((p) => p.booking.status !== 'cancelled')
+  return live.flatMap((p) => {
+    const last = p.items.reduce((a, b) => (b.end > a.end ? b : a))
+    const next = Math.min(...live.filter((o) => o !== p && o.start >= p.end).map((o) => o.start))
+    const close = day?.working ? Math.max(day.working.close, p.end) : Infinity
+    const end = Math.min(p.end + last.bufferAfter, next, close)
+    return end > p.end ? [{ start: p.end, end, minutes: last.bufferAfter }] : []
+  })
+}
+
+/** Whether a stretch overlaps any of these. */
+export const overlaps = (x: Stretch, list: readonly Stretch[]) => list.some((o) => o.start < x.end && x.start < o.end)
 
 /** A cancelled booking at the time of a live one (shown with «Show cancelled») takes the right half (B-Calendar `half`). */
 export function besideLive(p: Placed, column: readonly Placed[]): boolean {

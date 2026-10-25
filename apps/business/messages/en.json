@@ -1348,7 +1348,23 @@
       "walkIn": "walk-in",
       "alert": "alert note about the client",
       "timeLength": "{time} · {length}",
-      "more": ", {more}"
+      "more": ", {more}",
+      "when": "{date} · {time}",
+      "moveTo": "→ {when}?",
+      "moveAsked": "time change request: {when}",
+      "newTime": "New time?",
+      "moveFrom": "from {when}",
+      "previous": "previous time {when}"
+    },
+    "layers": {
+      "break": "Break",
+      "closed": "Closed",
+      "closedFor": "Closed · {reason}",
+      "dayOff": "Day off",
+      "timeOff": "Time off",
+      "elsewhere": "Busy elsewhere",
+      "buffer": "Buffer · {length}",
+      "at": ", {time}"
     }
   }
 }
