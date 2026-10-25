@@ -8,8 +8,8 @@ owner's other projects (ADR 0023). From this Mac it's `ssh yeral-vps` (an alias 
 | Path on the server | What | From the repo |
 |---|---|---|
 | `/srv/edge` | the shared Caddy: ports 80 and 443, HTTPS certificates for every project; each project adds `sites/<project>.caddy` | `infra/server/edge/` |
-| `/srv/yeral` | Ýeral: Postgres 18 and the api; `.env` holds the database password (server only) | `infra/server/yeral/` |
-| `/srv/yeral/src` | the source of the last deploy (a `git archive`), from which the api image is built | the repo |
+| `/srv/yeral` | Ýeral: Postgres 18, the api and the business app; `.env` holds the database password (server only) | `infra/server/yeral/` |
+| `/srv/yeral/src` | the source of the last deploy (a `git archive`), from which the api and business images are built | the repo |
 
 Projects share the Docker network `edge`; only Caddy publishes ports, so the firewall (SSH, 80, 443) is the whole
 surface. Each project has its own compose project, network, database and memory limits.
@@ -38,10 +38,10 @@ ssh yeral-vps 'rm -rf /srv/yeral/src && mkdir -p /srv/yeral/src && tar -x -C /sr
 ssh yeral-vps "COMMIT=$(git rev-parse HEAD) PUBLIC=1 bash /srv/yeral/src/infra/server/yeral/deploy.sh"
 ```
 
-`deploy.sh` builds the api image on the server, saves the database first
+`deploy.sh` builds the api and business images on the server, saves the database first
 (`/srv/yeral/backup-<date>-before-<commit>.sql.gz`, mode 600; a failed dump stops the deploy; the way back from a bad
 migration, operations.md "Rollback"), runs the migrations and the category catalogue (never the demo), starts the api
-and checks `/v1/health`. `PUBLIC=1` also copies Ýeral's sites (`yeral.caddy`) to Caddy and reloads it: always, since
+and the business app, and checks the api's `/v1/health` and the business app's `/version.json`. `PUBLIC=1` also copies Ýeral's sites (`yeral.caddy`) to Caddy and reloads it: always, since
 the DNS records point at the server (2026-10-22); without it a change to `yeral.caddy` doesn't ship. Delete old
 backups by hand when the disk needs it.
 
@@ -75,8 +75,9 @@ the client site takes it over; live since 2026-10-22 21:18 UTC):
 4. The owner deleted the Worker `yeral-web` on 23.10.2026; `apps/legacy` and its deploy option left the repo the same
    day.
 
-The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. `business` and
-`cms` answer with a certificate error until their apps join `yeral.caddy`: harmless, nobody is sent there before.
+The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. `business`
+serves the business app since 25.10.2026 (the owner: to try it live, with the sign-in code on the screen). `cms`
+answers with a certificate error until its app joins `yeral.caddy`: harmless, nobody is sent there before.
 
 **E-mail: received at `hello@yeral.app`, nothing sent** (the owner's choice, 23.10.2026). Cloudflare Email Routing
 (free) forwards mail for the address to the owner's inbox; Ýeral sends no e-mail. The owner sets it up:
@@ -114,8 +115,8 @@ another certificate authority when Let's Encrypt fails, and the proxied records 
 ## Still to do
 
 - Deploys from GitHub Actions over SSH with the `deploy` user, after the owner approves a release (ADR 0020).
-- The client site replaces the apex's coming-soon page in `yeral.caddy`; the business and cms sites join with their
-  apps.
+- The client site replaces the apex's coming-soon page in `yeral.caddy`; the cms site joins with its app (the
+  business app joined 25.10.2026).
 - With the real working MVP, before any real business's data (book chapter 10, P6; not for the demo launch, owner
   22.10.2026): a nightly database backup to Cloudflare R2 with the `media` volume and `.env`, which needs an R2 token
   the owner creates and puts in the server's `.env` (never in chat or git); error tracking and uptime alerts.

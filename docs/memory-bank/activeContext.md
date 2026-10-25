@@ -118,7 +118,11 @@ components in Storybook, then the apps.
   `infra/server/README.md`, "DNS records"). Docker Desktop stays as it is (so the api tests run in CI, not locally).
   "Lets continue on tasks, u have one more 2 hours": the rest of the wizard, #157–#173, no wall.
 - 2026-10-24: "Go for 2 hours, email settings leave for other session. Focus on yeral." The run builds the Settings
-  sections; the e-mail records wait.
+  sections; the e-mail records wait. Extended by 2 hours the same night: Settings built but Team's add and drawer,
+  #174–#191.
+- 2026-10-25: "i dont wanna check locally, go live on our domains." Asked, the owner chose the business app only at
+  `business.yeral.app` (the apex keeps the coming-soon page) with the sign-in code on the screen, open to anyone
+  (test data only); the book's chapter 9, 25.10.2026.
 
 ## Decisions
 
