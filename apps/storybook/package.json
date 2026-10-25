@@ -13,6 +13,7 @@
     "deploy:production": "storybook build --quiet -o storybook-static && node ../../scripts/version-stamp.mjs storybook storybook-static && wrangler deploy"
   },
   "dependencies": {
+    "@yeral/i18n": "workspace:*",
     "@yeral/ui": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"

@@ -658,6 +658,9 @@ importers:
 
   apps/storybook:
     dependencies:
+      '@yeral/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@yeral/ui':
         specifier: workspace:*
         version: link:../../packages/ui
