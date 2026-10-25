@@ -16,8 +16,13 @@ export type StepperProps = {
   orientation?: 'horizontal' | 'vertical'
   /** vertical: a line under each done step («Glow Studio · Beauty»); clamped to two lines. */
   summaries?: ReactNode[]
-  /** vertical: the furthest step reached (default `current`); a step after the current one up to it shows as reachable. */
+  /** The furthest step reached (default `current`): a step after the current one up to it opens again on click. */
   reached?: number
+  /**
+   * horizontal: `m` the booking flow's header (22 markers, the current step underlined, «2/4 · Specialist» under 768);
+   * `compact` a modal's steps (B-Team invite: 24 markers, 20 px separators, no underline, wrapping on phones).
+   */
+  size?: 'm' | 'compact'
   /** vertical: which steps open on click (default: every step up to `reached`); the others are disabled. */
   canOpen?: (index: number) => boolean
   /** vertical: the done check's accessible name («Done»). */
@@ -25,51 +30,72 @@ export type StepperProps = {
 }
 
 /**
- * Steps of a flow. Horizontal: the booking steps in the focused header (Booking `.stps`): done steps are links back
- * (tint circle with a check), the current step has an ink circle and an a-500 underline; under 768 it collapses to
- * «2/4 · Hünärmen». Vertical: see `VerticalSteps`.
+ * Steps of a flow. Horizontal: the booking steps in the focused header (Booking `.stps`, `size="m"`): done steps are
+ * links back (tint circle with a check), the current step has an ink circle and an a-500 underline, a step reached
+ * before (after going back) opens again; under 768 it collapses to «2/4 · Specialist». The move mode's three steps
+ * (Specialist · Time · Confirm) are the same header with other steps. `size="compact"`: a modal's steps (B-Team
+ * invite), no underline, wrapping. Vertical: see `VerticalSteps`.
  */
 export function Stepper({ orientation = 'horizontal', ...props }: StepperProps) {
   if (orientation === 'vertical') return <VerticalSteps {...props} />
-  const { steps, current, onStepClick, 'aria-label': ariaLabel, className } = props
-  return (
-    <nav aria-label={ariaLabel} className={cn('flex h-full items-stretch', className)}>
-      <ol className="m-0 hidden list-none items-stretch gap-3 p-0 sm:flex">
-        {steps.map((label, i) => {
-          const done = i < current
-          const cur = i === current
-          return (
-            <Fragment key={i}>
-              {i > 0 && <li aria-hidden className="h-px w-4 flex-none self-center bg-n-300" />}
-              <li className="flex items-stretch">
-                <button
-                  type="button"
-                  disabled={!done}
-                  aria-current={cur ? 'step' : undefined}
-                  onClick={() => onStepClick?.(i)}
+  const { steps, current, onStepClick, 'aria-label': ariaLabel, className, reached = current, size = 'm' } = props
+  const top = Math.max(reached, current)
+  const compact = size === 'compact'
+  const list = (
+    <ol className={cn('m-0 list-none p-0', compact ? 'flex flex-wrap items-center gap-2.5' : 'hidden items-stretch gap-3 sm:flex')}>
+      {steps.map((label, i) => {
+        const done = i < current
+        const cur = i === current
+        // reached before and gone back from: it opens again, as the steps before
+        const ahead = i > current && i <= top
+        return (
+          <Fragment key={i}>
+            {i > 0 && <li aria-hidden className={cn('h-px flex-none self-center bg-n-300', compact ? 'w-5' : 'w-4')} />}
+            <li className={cn('flex', compact ? 'items-center' : 'items-stretch')}>
+              <button
+                type="button"
+                disabled={!done && !ahead}
+                aria-current={cur ? 'step' : undefined}
+                onClick={() => onStepClick?.(i)}
+                className={cn(
+                  'group inline-flex items-center gap-2 border-0 bg-transparent text-small font-medium whitespace-nowrap text-n-500',
+                  'focus-visible:shadow-focus-inset focus-visible:outline-none disabled:cursor-default',
+                  compact
+                    ? 'min-h-8 rounded-sm pr-1.5 pl-0.5 leading-4.5 focus-visible:shadow-focus'
+                    : 'border-b-2 border-transparent px-0.5 focus-visible:rounded-input',
+                  (done || ahead) && 'cursor-pointer text-n-900',
+                  cur && 'font-semibold text-n-900',
+                  cur && !compact && 'border-a-500',
+                )}
+              >
+                <span
                   className={cn(
-                    'group inline-flex items-center gap-2 border-0 border-b-2 border-transparent bg-transparent px-0.5 text-small font-medium whitespace-nowrap text-n-500',
-                    'focus-visible:rounded-input focus-visible:shadow-focus-inset focus-visible:outline-none disabled:cursor-default',
-                    done && 'cursor-pointer text-n-900',
-                    cur && 'border-a-500 font-semibold text-n-900',
+                    'inline-flex flex-none items-center justify-center rounded-pill border border-n-300 font-bold text-n-500',
+                    compact ? 'size-6 text-micro' : 'size-5.5 text-micro',
+                    cur && 'border-n-900 bg-n-900 text-white',
+                    done && 'border-a-line bg-a-50 text-a-600',
+                    ahead && 'bg-n-0 text-n-900',
                   )}
                 >
-                  <span
-                    className={cn(
-                      'inline-flex size-5.5 flex-none items-center justify-center rounded-pill border border-n-300 text-micro font-bold text-n-500',
-                      cur && 'border-n-900 bg-n-900 text-white',
-                      done && 'border-a-line bg-a-50 text-a-600',
-                    )}
-                  >
-                    {done ? <Check className="size-3.5" strokeWidth={2.5} /> : i + 1}
-                  </span>
-                  <span className={cn(done && 'group-hover:underline')}>{label}</span>
-                </button>
-              </li>
-            </Fragment>
-          )
-        })}
-      </ol>
+                  {done ? <Check className="size-3.5" strokeWidth={2.5} /> : i + 1}
+                </span>
+                <span className={cn((done || ahead) && 'group-hover:underline')}>{label}</span>
+              </button>
+            </li>
+          </Fragment>
+        )
+      })}
+    </ol>
+  )
+  if (compact)
+    return (
+      <nav aria-label={ariaLabel} className={className}>
+        {list}
+      </nav>
+    )
+  return (
+    <nav aria-label={ariaLabel} className={cn('flex h-full items-stretch', className)}>
+      {list}
       <span className="inline-flex items-center text-small font-semibold text-n-900 sm:hidden">
         <span className="mr-1.5 font-medium text-n-500">
           {current + 1}/{steps.length}
