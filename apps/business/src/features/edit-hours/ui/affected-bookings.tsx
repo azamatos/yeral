@@ -15,6 +15,11 @@ type ModalProps = {
   saving: boolean
   onSave: (choice: AffectedChoice) => void
   onClose: () => void
+  /**
+   * Another change's words (B-Team: a shift, time off): the title from the count («5 bookings and 1 request»), the lead
+   * as given, Keep them's caption, the line under the list and the button. Without them, the business hours'.
+   */
+  words?: { title: (what: string, n: number) => string; keepCaption: string; foot: string; save: string }
 }
 
 /**
@@ -35,18 +40,25 @@ export function HoursAffectedBookings({ details, saving, onClose, ...rest }: Mod
   )
 }
 
-function AffectedBody({ details, lead, saving, onSave, onClose }: ModalProps & { details: BookingsAffectedDetails }) {
+function AffectedBody({ details, lead, saving, onSave, onClose, words }: ModalProps & { details: BookingsAffectedDetails }) {
   const t = useTranslations('affected')
   const count = useAffectedCount()
   const [choice, setChoice] = useState<AffectedChoice>('keep')
   const labelId = useId()
   return (
     <ModalContent size={560} className="gap-4.5">
-      <ModalHeader title={t('hoursTitle', { what: count(details.counts, 'and'), n: details.count })} closeLabel={t('close')}>
-        <ModalDescription>{t('hoursLead', { days: lead })}</ModalDescription>
+      <ModalHeader
+        title={
+          words
+            ? words.title(count(details.counts, 'and'), details.count)
+            : t('hoursTitle', { what: count(details.counts, 'and'), n: details.count })
+        }
+        closeLabel={t('close')}
+      >
+        <ModalDescription>{words ? lead : t('hoursLead', { days: lead })}</ModalDescription>
       </ModalHeader>
       <OptionCardGroup value={choice} onValueChange={(v) => setChoice(v as AffectedChoice)} aria-label={t('what')} className="gap-2">
-        <OptionCard value="keep" indicator="start" title={t('keep')} caption={t('keepCaption')} />
+        <OptionCard value="keep" indicator="start" title={t('keep')} caption={words?.keepCaption ?? t('keepCaption')} />
         <OptionCard value="cancel" indicator="start" title={t('cancel')} caption={t('cancelCaption')} />
       </OptionCardGroup>
       <div className="flex flex-col gap-2">
@@ -58,13 +70,13 @@ function AffectedBody({ details, lead, saving, onSave, onClose }: ModalProps & {
           <span className="text-dense text-n-600">{t('more', { n: details.count - details.bookings.length })}</span>
         )}
       </div>
-      <p className="m-0 text-dense text-n-600">{t('hoursEither')}</p>
+      <p className="m-0 text-dense text-n-600">{words?.foot ?? t('hoursEither')}</p>
       <ModalActions>
         <Button variant="secondary" disabled={saving} onClick={onClose}>
           {t('back')}
         </Button>
         <Button variant="primary" loading={saving} loadingLabel={t('saving')} onClick={() => onSave(choice)}>
-          {t('save')}
+          {words?.save ?? t('save')}
         </Button>
       </ModalActions>
     </ModalContent>

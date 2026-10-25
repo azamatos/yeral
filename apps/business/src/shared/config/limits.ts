@@ -10,3 +10,6 @@ export const TEAM_NAME_MAX = 40
 /** A team member's full name (80) and specialization (60), the api's: «Add a team member» and the staff drawer. */
 export const FULL_NAME_MAX = 80
 export const SPECIALIZATION_MAX = 60
+
+/** A team member's day off: its note, the api's name (40). */
+export const DAY_OFF_NOTE_MAX = 40
