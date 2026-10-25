@@ -89,7 +89,7 @@ const booking = (
   cancelledBy: status === 'cancelled' ? 'client' : null,
   source: 'web',
   client: { id: null, name: client, phone: '+99365000000' },
-  items: [{ serviceId: null, service, staffId: id(who), staff: staff[who - 1]!.name, start, end, bufferAfter: 10 }],
+  items: [{ serviceId: id(5), service, staffId: id(who), staff: staff[who - 1]!.name, start, end, bufferAfter: 10 }],
   price: null,
   internalStatusId: null,
   alert: false,
@@ -206,7 +206,6 @@ const fakeApi =
   () => {
     // the requests confirmed in this story
     const answered = new Set<string>()
-    // eslint-disable-next-line @typescript-eslint/require-await -- the fetch it stands in for answers a promise
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const url = new URL(request.url)
@@ -235,11 +234,28 @@ const fakeApi =
             : []
         return json({ items: [...items, ...arrived].filter((r) => !answered.has(r.code)) })
       }
-      const confirm = /^POST \/w\/glow-studio\/requests\/([^/]+)\/confirm$/.exec(route)
-      if (confirm) {
-        answered.add(confirm[1]!)
-        return json({ code: confirm[1] })
+      const answer = /^POST \/w\/glow-studio\/requests\/([^/]+)\/(confirm|decline)$/.exec(route)
+      if (answer) {
+        // a decline names its reason (another one in words) and up to 3 offered times
+        if (answer[2] === 'decline') {
+          const body = (await request.json()) as { reason: string; text?: string; offers?: unknown[] }
+          if (body.reason === 'other' && !body.text) return json({ error: { code: 'validation_error' } }, 400)
+        }
+        answered.add(answer[1]!)
+        return json({ code: answer[1] })
       }
+      if (route === 'GET /w/glow-studio/free-times')
+        return json({
+          nearest: [
+            { date: DAY, start: 990, end: 1110, staffId: id(1) },
+            { date: DAY, start: 1020, end: 1140, staffId: id(1) },
+            { date: TOMORROW, start: 600, end: 720, staffId: id(1) },
+            { date: TOMORROW, start: 660, end: 780, staffId: id(3) },
+          ],
+          date: DAY,
+          slots: [],
+          days: [],
+        })
       return json({ error: { code: 'not_found' } }, 404)
     }
   }
@@ -460,5 +476,44 @@ export const RequestGone: Story = {
     await expect(await drawer.findByText(/isn’t waiting any more/)).toBeVisible()
     await userEvent.click(drawer.getByRole('button', { name: 'Next request' }))
     await expect(await within(page.getByRole('dialog')).findByText('1 / 2')).toBeVisible()
+  },
+}
+
+/** Decline with a reason and two other times the client can take in one tap. */
+export const DeclineWithTimes: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: '2 requests — open the most urgent' }))
+    const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
+    await userEvent.click(await drawer.findByRole('button', { name: 'Decline' }))
+    const modal = within(await page.findByRole('dialog', { name: 'Decline the request' }))
+    const decline = modal.getByRole('button', { name: 'Decline' })
+    await expect(decline).toBeDisabled()
+    await userEvent.click(modal.getByRole('radio', { name: 'This time isn’t free' }))
+    await userEvent.click(modal.getByRole('switch', { name: 'Offer another time' }))
+    await userEvent.click(await modal.findByRole('button', { name: '16:30' }))
+    await userEvent.click(modal.getByRole('button', { name: '10:00' }))
+    await expect(modal.getByText('2 / 3 times selected')).toBeVisible()
+    await userEvent.click(decline)
+    const declined = await page.findByText('Request declined · the client sees the reason and 2 other times')
+    await waitFor(() => expect(declined).toBeVisible())
+  },
+}
+
+/** A client's move: the reason only, «Another reason» in words; the booking stays at its time. */
+export const DeclineMove: Story = {
+  args: { path: '/w/glow-studio/calendar?request=YR-49001' },
+  play: async () => {
+    const drawer = within(await page.findByRole('dialog', { name: 'Time change request' }))
+    await userEvent.click(await drawer.findByRole('button', { name: 'Decline' }))
+    const modal = within(await page.findByRole('dialog', { name: 'Decline the new time' }))
+    await expect(modal.queryByRole('switch')).toBeNull()
+    await expect(modal.queryByRole('radio', { name: 'We can’t do this service' })).toBeNull()
+    await userEvent.click(modal.getByRole('radio', { name: 'Another reason' }))
+    const decline = modal.getByRole('button', { name: 'Decline' })
+    await expect(decline).toBeDisabled()
+    await userEvent.type(modal.getByRole('textbox', { name: 'Another reason' }), 'The specialist is ill that day')
+    await userEvent.click(decline)
+    const declined = await page.findByText('New time declined · the booking stays at its time · the client sees the reason')
+    await waitFor(() => expect(declined).toBeVisible())
   },
 }
