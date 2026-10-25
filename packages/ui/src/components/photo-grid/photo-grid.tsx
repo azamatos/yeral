@@ -207,7 +207,8 @@ export function PhotoGrid({
                 <X aria-hidden className="size-4" />
               </button>
               {index === 0 ? (
-                <span className="absolute bottom-1.5 left-1.5 inline-flex h-6 items-center rounded-pill bg-ink-btn px-2 text-micro font-semibold whitespace-nowrap text-white">
+                // a longer language's words wrap inside the tile rather than past it
+                <span className="absolute bottom-1.5 left-1.5 inline-flex min-h-6 max-w-[calc(100%-0.75rem)] items-center rounded-pill bg-ink-btn px-2 py-0.5 text-micro leading-4 font-semibold text-white">
                   {words.cover}
                 </span>
               ) : (
@@ -221,7 +222,7 @@ export function PhotoGrid({
                     focusAfterChange({ photo: photo.id })
                     onReorder(moveTo(ids, photo.id, 0))
                   }}
-                  className="absolute bottom-1.5 left-1.5 h-7 cursor-pointer rounded-pill border-0 bg-n-0 px-2.5 text-micro font-semibold whitespace-nowrap text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none aria-disabled:cursor-default aria-disabled:text-n-500"
+                  className="absolute bottom-1.5 left-1.5 min-h-7 max-w-[calc(100%-0.75rem)] cursor-pointer rounded-pill border-0 bg-n-0 px-2.5 py-1 text-left text-micro leading-4 font-semibold text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none aria-disabled:cursor-default aria-disabled:text-n-500"
                 >
                   {words.makeCover}
                 </button>

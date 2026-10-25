@@ -702,6 +702,11 @@ export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('progressbar', { name: 'Setup steps' })).toHaveAttribute('aria-valuetext', 'Step 2 of 8')
+    // «Continue later» stays inside the header, up to half of it (B-Onboarding `.mb`): longer words wrap
+    const later = canvas.getAllByRole('button', { name: 'Continue later' }).find((b) => b.closest('header'))!
+    const header = later.closest('header')!.getBoundingClientRect()
+    await expect(later.getBoundingClientRect().right).toBeLessThanOrEqual(header.right)
+    await expect(later.getBoundingClientRect().width).toBeLessThanOrEqual(header.width / 2)
   },
 }
 

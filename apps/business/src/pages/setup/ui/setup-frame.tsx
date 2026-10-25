@@ -140,7 +140,12 @@ export function SetupFrame({
               <span className="whitespace-nowrap text-n-500">{t('setup.stepShort', { n, total })}</span> · {name(current, more)}
             </span>
             <div className="flex-1" />
-            {later && <span className="max-w-1/2 flex-none text-right">{later}</span>}
+            {/* B-Onboarding `.mb`: the words alone, up to half the row, wrapping (a longer language's too) */}
+            {onLater && (
+              <button type="button" onClick={onLater} className={`${textLink} max-w-1/2 flex-none text-right text-small`}>
+                {t('setup.later')}
+              </button>
+            )}
           </div>
           <ProgressBar variant="flow" label={t('setup.progress')} value={n} max={total} valueText={t('setup.stepOf', { n, total })} />
         </header>

@@ -80,7 +80,8 @@ export function DateStrip({
                 aria-pressed={on}
                 onClick={() => onValueChange(d.date)}
                 className={cn(
-                  'group flex h-19 flex-[0_0_64px] cursor-pointer flex-col items-center justify-center gap-1 rounded-m border border-n-200 bg-n-0 p-0 text-n-900 sm:min-w-16 sm:flex-[0_0_calc((100%-48px)/7)]',
+                  // `relative`: the day's hidden words stay inside it, so the strip scrolls and the page doesn't (phones)
+                  'group relative flex h-19 flex-[0_0_64px] cursor-pointer flex-col items-center justify-center gap-1 rounded-m border border-n-200 bg-n-0 p-0 text-n-900 sm:min-w-16 sm:flex-[0_0_calc((100%-48px)/7)]',
                   'hover:border-a-500 focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-n-200',
                   on && 'border-a-500 bg-a-500 text-white',
                 )}
