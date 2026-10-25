@@ -1,4 +1,5 @@
-# Ýeral on the owner's server (ADR 0023): Postgres, the api and the business app, behind the shared Caddy (../edge).
+# Ýeral on the owner's server (ADR 0023): Postgres, the api, the client site and the business app, behind the shared
+# Caddy (../edge).
 # Lives at /srv/yeral with its .env (secrets, never in git: .env.example). Deploy: infra/server/README.md.
 name: yeral
 services:
@@ -45,9 +46,9 @@ services:
       # the first launch's sign-in code on the screen (book Q-036): anyone who types a number signs in as it. On since
       # 25.10.2026 (the owner), so the business app can be tried live before the launch: test data only (operations.md)
       SIGN_IN_CODE_ON_SCREEN: 'true'
-      # the first launch's example businesses (book Q-004): `setup` adds them, marked "Example" and confirming at once;
-      # on with the code on the screen when the first launch opens (operations.md)
-      EXAMPLE_BUSINESSES: 'false'
+      # the first launch's example businesses (book Q-004): `setup` adds them, marked "Example" and confirming at once.
+      # On since 25.10.2026 (the owner), so slice 3's booking can be tried live while nothing can be verified
+      EXAMPLE_BUSINESSES: 'true'
       # the phone every example shows and "Call" reaches: the market's support line (MARKET.support.phone) unless set
       # EXAMPLE_PHONE: '+993…'
       # the business app's demo workspace (book F-242): the jobs make it and make it again every night at 04:00; on
@@ -76,6 +77,21 @@ services:
       edge:
         aliases: [yeral-api]
     mem_limit: 512m
+
+  # the client site (client.Dockerfile): its Node server renders the pages and asks the api inside this network
+  client:
+    image: ${YERAL_CLIENT_IMAGE:?set by deploy.sh}
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:3004
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      default:
+      edge:
+        aliases: [yeral-client]
+    mem_limit: 384m
 
   # the business app's static build (business.Dockerfile, its own Caddy); the shared Caddy adds TLS and proxies to it
   business:
