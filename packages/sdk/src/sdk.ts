@@ -544,8 +544,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   /** The business team (ADR 0025): the switcher, invites, and the team the owner manages. */
   const w = v1.w[':slug']
   // the page shows the team's specialists with their pictures
+  // the requests too: who answers them, and whether a client's move fits now (its specialist back, bookable or not)
   const teamChanged = (slug?: string) =>
-    invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug)] : []))
+    invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug), keys.requests(slug)] : []))
   // and when someone joins with services, or leaves them, the menu's «who does it» changes too
   const staffChanged = (slug: string) => Promise.all([teamChanged(slug), invalidate(keys.menu(slug), keys.availabilityAll(slug))])
   /** The person isn't on that team any more: nothing of it stays (every workspace key names it second), nor what they saw as its team. */
