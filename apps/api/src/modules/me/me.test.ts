@@ -473,6 +473,7 @@ describe('account', () => {
         '/v1/w/{slug}/team/{staffId}/remove',
         '/v1/w/{slug}/team/{staffId}/schedule',
         '/v1/w/{slug}/team/{staffId}/reactivate',
+        '/v1/w/{slug}/team/{staffId}/services',
         '/v1/w/{slug}/leave',
         '/v1/w/{slug}/settings/rules',
         '/v1/w/{slug}/settings/statuses',

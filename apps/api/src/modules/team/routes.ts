@@ -11,6 +11,7 @@ import {
   inviteListSchema,
   inviteSentSchema,
   inviteTokenParamSchema,
+  memberServicesSchema,
   phoneOnlyInputSchema,
   removeMemberSchema,
   staffBookingsResultSchema,
@@ -37,15 +38,19 @@ import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
 import { loadHours } from '../availability/context'
+import { lockMenu } from '../menu/service'
+import { emit } from '../../notify'
 import { leaveCounts, refuseMovesOnto, removeMember, scheduleOf, updateSchedule } from './away'
 import { uploadGuard } from '../media/photos'
 import { removeStaffPhoto, setStaffPhoto } from './photo'
 import {
+  cancelOpenInvites,
   hasJoined,
   hasServices,
   inviteCards,
   inviteLink,
   issueInvite,
+  lockOpenInvites,
   member,
   members,
   removeRow,
@@ -157,9 +162,18 @@ const updateRoute = createRoute({
   method: 'patch',
   path: '/w/{slug}/team/{staffId}',
   tags,
-  summary: 'Change a level or the right to answer one’s own requests (owner)',
+  summary:
+    'Change someone’s profile, level, right to answer their own requests, or stop their use of the app (owner); the owner’s own row takes its names only',
   request: { params: staffIdParamSchema, ...jsonBody(updateMemberSchema) },
-  responses: { 200: json(teamMemberSchema), 400: errors[400], ...ownerOnly },
+  responses: { 200: json(teamMemberSchema), 400: errors[400], 409: errors[409], ...ownerOnly },
+})
+const servicesRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/team/{staffId}/services',
+  tags,
+  summary: 'Set the services someone does (owner or administrator); any makes them bookable',
+  request: { params: staffIdParamSchema, ...jsonBody(memberServicesSchema) },
+  responses: { 200: json(teamMemberSchema), 400: errors[400], 409: errors[409], ...ownerOnly },
 })
 const removeRoute = createRoute({
   method: 'post',
@@ -427,13 +441,9 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     assertOwner(actor)
     const { deps } = c.var
     await deps.db.transaction(async (tx) => {
-      const cancelled = await tx
-        .update(invites)
-        .set({ status: 'cancelled', answeredAt: new Date(deps.now()) })
-        .where(and(eq(invites.businessId, business.id), eq(invites.staffId, staffId), eq(invites.status, 'pending')))
-        .returning({ phone: invites.phone })
-      if (!cancelled.length) throw new ApiError('not_found')
-      await teamChanged(tx, business.id, { phone: cancelled[0]!.phone })
+      const [phone] = await cancelOpenInvites(tx, business.id, staffId, deps.now())
+      if (!phone) throw new ApiError('not_found')
+      await teamChanged(tx, business.id, { phone })
     })
     return c.body(null, 204)
   })
@@ -443,18 +453,69 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     assertOwner(actor)
     const body = c.req.valid('json')
     const { deps } = c.var
+    const now = deps.now()
     const updated = await deps.db.transaction(async (tx) => {
-      const row = await teamRow(tx, business.id, staffId)
-      notOwnerRow(row)
+      // in the order an accept takes them, so the two wait for each other instead of deadlocking
+      await lockOpenInvites(tx, business.id, staffId)
+      const row = await teamRow(tx, business.id, staffId, { lock: true })
+      if (row.status === 'removed') throw new ApiError('invalid_status')
+      const appOff = body.hasApp === false && row.hasApp !== false
+      const newLevel = body.level !== undefined && body.level !== row.level
+      const newPhone = body.phone !== undefined && body.phone !== row.phone
+      // the owner's own row: the profile clients and the team see, nothing about access
+      if (newLevel || appOff || newPhone || (body.canAnswerOwn !== undefined && body.canAnswerOwn !== row.canAnswerOwn)) notOwnerRow(row)
+      // an administrator always uses the app (book Q-216): asked only of what changes here
+      if (row.level !== 'owner' && (body.level ?? row.level) === 'admin' && (appOff || (newLevel && !row.hasApp)))
+        throw invalid({ path: [appOff ? 'hasApp' : 'level'], code: 'invalid' })
+      if (newPhone) {
+        // the number is how someone with the app signs in, or someone who had joined: theirs to change (book Q-270)
+        if ((row.hasApp && !appOff) || row.userId) throw invalid({ path: ['phone'], code: 'signs_in' })
+        const { rows } = await rowsForPhone(tx, business.id, body.phone!)
+        if (rows.some((r) => r.id !== row.id && r.status !== 'removed')) throw new ApiError('already_on_team')
+      }
       const [next] = await tx
         .update(staff)
         .set({
+          ...(body.name !== undefined ? { name: body.name } : {}),
+          ...(body.fullName !== undefined ? { fullName: body.fullName } : {}),
+          ...(body.specialization !== undefined ? { specialization: body.specialization } : {}),
+          ...(body.phone !== undefined ? { phone: body.phone } : {}),
           ...(body.level ? { level: body.level } : {}),
           ...(body.canAnswerOwn !== undefined ? { canAnswerOwn: body.canAnswerOwn } : {}),
+          // without the app they're on the team at once, as a specialist added without it is (book Q-216)
+          ...(appOff ? { hasApp: false, status: 'active' as const } : {}),
         })
         .where(eq(staff.id, row.id))
         .returning()
+      // an open invite can't be accepted any more (the app off, or sent to a number that's no longer theirs); the
+      // bookings stay with them
+      if (appOff || body.hasApp === false || newPhone) await cancelOpenInvites(tx, business.id, row.id, now)
+      await teamChanged(tx, business.id, { userId: row.userId, phone: row.phone })
+      return member(tx, deps, next ?? row, user.lang, now)
+    })
+    return c.json(updated, 200)
+  })
+  .openapi(servicesRoute, async (c) => {
+    const { slug, staffId } = c.req.valid('param')
+    const { business, actor, user } = await requireMember(c, slug)
+    // the administrator changes which services each person does too (§28.4)
+    if (!can(actor, 'services')) throw new ApiError('forbidden')
+    const { serviceIds } = c.req.valid('json')
+    const { deps } = c.var
+    const updated = await deps.db.transaction(async (tx) => {
+      // one menu change at a time, as a service's own «who does it» is saved
+      await lockMenu(tx, business.id)
+      const row = await teamRow(tx, business.id, staffId, { lock: true })
+      if (row.status === 'removed') throw new ApiError('invalid_status')
+      await setServices(tx, business.id, row.id, serviceIds)
+      const [next] = await tx
+        .update(staff)
+        .set({ bookable: serviceIds.length > 0 })
+        .where(eq(staff.id, row.id))
+        .returning()
       await teamChanged(tx, business.id, { userId: row.userId })
+      // who does each service, and the free times with it
+      await emit(tx, { type: 'business.updated', businessId: business.id })
       return member(tx, deps, next ?? row, user.lang, deps.now())
     })
     return c.json(updated, 200)

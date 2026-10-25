@@ -33,6 +33,8 @@ const DAY_TO_DAY: { path: RegExp; methods?: readonly string[] }[] = [
   { path: /^\/team\/phone-only$/ },
   { path: /^\/team\/(?!invites$|phone-only$)[^/]+$/, methods: ['PATCH'] },
   { path: /^\/team\/[^/]+\/(remove|reactivate|schedule)$/ },
+  // who does what, as the services' own «who does it»
+  { path: /^\/team\/[^/]+\/services$/, methods: ['PUT'] },
   // cancelling the design's open invite; sending one is refused
   { path: /^\/team\/[^/]+\/invite$/, methods: ['DELETE'] },
   // taking photos away or reordering them: uploading is refused

@@ -84,10 +84,29 @@ export async function teamChanged(db: Queryable, businessId: string, person?: { 
  */
 export async function removeRow(db: Queryable, row: StaffRow, now: number): Promise<void> {
   if (row.status !== 'removed') await db.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
-  await db
+  await cancelOpenInvites(db, row.businessId, row.id, now)
+}
+
+/** A row's open invites cancelled (nobody can accept them any more); the phones they went to, for their events. */
+export async function cancelOpenInvites(db: Queryable, businessId: string, staffId: string, now: number): Promise<string[]> {
+  const cancelled = await db
     .update(invites)
     .set({ status: 'cancelled', answeredAt: new Date(now) })
-    .where(and(eq(invites.staffId, row.id), eq(invites.status, 'pending')))
+    .where(and(eq(invites.businessId, businessId), eq(invites.staffId, staffId), eq(invites.status, 'pending')))
+    .returning({ phone: invites.phone })
+  return cancelled.map((i) => i.phone)
+}
+
+/**
+ * The row's open invites locked before the row is, in the order accepting one takes them (the invite, then the row),
+ * so a change racing an accept waits instead of deadlocking.
+ */
+export async function lockOpenInvites(db: Queryable, businessId: string, staffId: string): Promise<void> {
+  await db
+    .select({ id: invites.id })
+    .from(invites)
+    .where(and(eq(invites.businessId, businessId), eq(invites.staffId, staffId), eq(invites.status, 'pending')))
+    .for('update')
 }
 
 /** The invite's link for the owner to copy: the business app's invite page. */
@@ -147,19 +166,26 @@ export const reusableRow = (rows: StaffRow[], accountId: string | null): StaffRo
 /** Has the person behind this row joined (accepted, with the app)? An invited row hasn't, whatever it's linked to. */
 export const hasJoined = (row: StaffRow) => row.status !== 'invited' && !!row.userId && row.hasApp
 
-/** Links a row to the services it does (all of them this business's); any makes the row bookable. */
+/**
+ * Links a row to the services it does (all of them on this business's menu); any makes the row bookable. Links to
+ * services taken off the menu stay, for when one comes back.
+ */
 export async function setServices(db: Queryable, businessId: string, staffId: string, serviceIds: readonly string[]): Promise<void> {
   if (serviceIds.length) {
     const own = await db
       .select({ id: services.id })
       .from(services)
-      .where(and(eq(services.businessId, businessId), inArray(services.id, [...serviceIds])))
+      .where(and(eq(services.businessId, businessId), eq(services.archived, false), inArray(services.id, [...serviceIds])))
     if (own.length !== serviceIds.length)
       throw invalid(
         ...serviceIds.flatMap((id, i) => (own.some((s) => s.id === id) ? [] : [{ path: ['serviceIds', i], code: 'not_found' }])),
       )
   }
-  await db.delete(staffServices).where(eq(staffServices.staffId, staffId))
+  const onMenu = db
+    .select({ id: services.id })
+    .from(services)
+    .where(and(eq(services.businessId, businessId), eq(services.archived, false)))
+  await db.delete(staffServices).where(and(eq(staffServices.staffId, staffId), inArray(staffServices.serviceId, onMenu)))
   if (serviceIds.length) await db.insert(staffServices).values(serviceIds.map((serviceId) => ({ staffId, serviceId })))
 }
 

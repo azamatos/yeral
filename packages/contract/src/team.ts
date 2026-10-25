@@ -147,10 +147,29 @@ export const phoneOnlyInputSchema = z.object({ phone: phoneInputSchema, ...perso
 /** The invite's link, shown to the owner to copy: it opens the invite and never signs anyone in. */
 export const inviteSentSchema = z.object({ member: teamMemberSchema, link: z.url() })
 
+/**
+ * The staff drawer's changes (owner, B-Team): the profile (the name clients see, the full name the team sees, `null`
+ * clears it, the specialization, the phone of someone without the app, as theirs is how they sign in otherwise), the
+ * level, the right to answer one's own requests, and `hasApp: false` to stop using the app: an open invite is
+ * cancelled and the person stays active without it, their bookings with them. Turning it on is an invite
+ * (`POST …/invite`). A phone change cancels an invite sent to the old number. The owner's own row takes the profile
+ * (names, specialization) only; what doesn't change is ignored.
+ */
 export const updateMemberSchema = z
-  .object({ level: assignableLevelSchema.optional(), canAnswerOwn: z.boolean().optional() })
-  .refine((x) => x.level !== undefined || x.canAnswerOwn !== undefined, 'Change at least one thing')
+  .object({
+    name: personFields.name.optional(),
+    fullName: personFields.fullName.unwrap().nullable().optional(),
+    specialization: personFields.specialization.unwrap().nullable().optional(),
+    phone: phoneInputSchema.optional(),
+    level: assignableLevelSchema.optional(),
+    canAnswerOwn: z.boolean().optional(),
+    hasApp: z.literal(false).optional(),
+  })
+  .refine((x) => Object.values(x).some((v) => v !== undefined), 'Change at least one thing')
   .meta({ id: 'UpdateMember' })
+
+/** «Services» in the staff drawer (owner or administrator): everything this person does, replacing the last list. */
+export const memberServicesSchema = z.object({ serviceIds: uniqueIdsSchema.max(200) }).meta({ id: 'MemberServices' })
 
 // ── Removing someone (B-50) ──
 
@@ -207,11 +226,11 @@ export type StaffScheduleView = z.infer<typeof staffScheduleSchema>
 /**
  * The schedule, saved at once (owner). Bookings ahead it leaves outside their day make it 409 `bookings_affected`,
  * saving nothing; it's sent again with `move` (each to a free colleague who does its services, else 3 other times
- * offered to the client) or `keep` (they stay; nothing new is booked then). New bookings follow the new schedule
- * either way (book Q-211).
+ * offered to the client), `keep` (they stay; nothing new is booked then) or `cancel` (each client offered 3 other
+ * times: B-Team's «Cancel and offer 3 other times»). New bookings follow the new schedule either way (book Q-211).
  */
 export const staffScheduleUpdateSchema = staffScheduleSchema
-  .extend({ affected: z.enum(['move', 'keep']).optional() })
+  .extend({ affected: z.enum(['move', 'keep', 'cancel']).optional() })
   .strict()
   .meta({ id: 'StaffScheduleUpdate' })
 
