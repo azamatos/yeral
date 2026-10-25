@@ -3,7 +3,6 @@ import { Link } from '@tanstack/react-router'
 import type { MyBooking } from '@yeral/contract/bookings'
 import { useFmt } from '@yeral/i18n'
 import { telHref } from '@yeral/lib/links'
-import { isApiError } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
@@ -12,8 +11,7 @@ import { toast } from '@yeral/ui/toast'
 import { Building2, CalendarDays, CircleAlert, Clock, Hourglass, Phone, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BookingStatusBadge } from '@/entities/booking'
-import { useErrorText } from '@/shared/i18n'
+import { BookingStatusBadge, useUndoFailed } from '@/entities/booking'
 import { OfferTimes, useWhen } from './offer-times'
 
 /** A line under the status (`.bby`): a 14 icon and a 13/18 caption. */
@@ -26,7 +24,8 @@ export function ByLine({ icon, children }: { icon?: ReactNode; children: ReactNo
   )
 }
 
-export const UNDO_REASONS = ['slot_taken', 'session_full', 'already_started', 'request_expired'] as const
+/** The row's link, where the focus goes back to when its booking's drawer closes. */
+export const rowLinkId = (code: string) => `booking-${code}`
 
 /** Who cancelled, in the row's and the drawer's words, with its icon; null while it isn't cancelled. */
 export function useCancelledBy() {
@@ -57,7 +56,7 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
   const fmt = useFmt()
   const lang = useLocale()
   const sdk = useSdk()
-  const errorText = useErrorText()
+  const undoFailedText = useUndoFailed()
   const at = useWhen()
   const cancelledBy = useCancelledBy()
   const restore = useMutation(sdk.bookings.restore(lang))
@@ -86,11 +85,8 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
       { code: b.code, body: undefined },
       {
         onSuccess: () => toast(t('undone')),
-        onError: (error) => {
-          const why = UNDO_REASONS.find((r) => isApiError(error, r))
-          // said in the row, Undo gone: the time isn't coming back (Account-Bookings `undoFailed`)
-          setUndoFailed(why ? words('undo.failed', { reason: words(`undo.reasons.${why}`) }) : errorText(error))
-        },
+        // said in the row, Undo gone: the time isn't coming back (Account-Bookings `undoFailed`)
+        onError: (error) => setUndoFailed(undoFailedText(error)),
       },
     )
 
@@ -110,10 +106,13 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
       <div className="flex min-w-0 flex-col gap-1">
         {/* the whole row opens the booking; what's pressable in it sits above the link (`relative`) */}
         <Link
+          id={rowLinkId(b.code)}
           to="/$lang/account/bookings/$code"
           params={{ lang, code: b.code }}
           search={{ tab: tab === 'past' ? 'past' : undefined }}
           resetScroll={false}
+          // which booking it opens, with the name seen first (axe: label-content-name-mismatch)
+          aria-label={t('openLabel', { business: b.business.name, when })}
           className={cn(
             'text-[16px] leading-[22px] font-semibold text-n-900 outline-none after:absolute after:inset-0 after:rounded-card focus-visible:after:shadow-focus',
             b.cancelledBy === 'client' && 'text-n-600',
@@ -147,7 +146,17 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
             {reason.text ? t('reasonWith', { reason: reason.reason, text: reason.text }) : t('reason', { reason: reason.reason })}
           </span>
         )}
-        {took && <span className="text-dense font-semibold text-a-600">{took}</span>}
+        {took && b.offerTakenBy && (
+          // the booking the offered time became, on Upcoming (Account-Bookings `openNew`)
+          <Link
+            to="/$lang/account/bookings/$code"
+            params={{ lang, code: b.offerTakenBy }}
+            resetScroll={false}
+            className="relative self-start text-dense font-semibold text-a-600 hover:text-a-700"
+          >
+            {took}
+          </Link>
+        )}
         {passed && (
           <span className="relative inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-dense text-n-600">
             {t('offersPassed')}

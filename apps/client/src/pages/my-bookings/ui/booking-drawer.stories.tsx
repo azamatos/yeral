@@ -5,21 +5,26 @@
  * the list, the phone's bottom sheet.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useParams } from '@tanstack/react-router'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { MY_BOOKINGS, myBookingsApi, PageStory } from '@/shared/storybook'
 import { BookingDrawer } from './booking-drawer'
 import { MyBookingsPage } from './my-bookings-page'
 
+// the list with the drawer over it in one route, so the list stays as the drawer opens and closes (the app's child route)
+function ListAndDrawer() {
+  const { code } = useParams({ strict: false })
+  return (
+    <>
+      <MyBookingsPage />
+      {code && <BookingDrawer />}
+    </>
+  )
+}
 const routes = {
   '/$lang': () => null,
   '/$lang/b/$slug': () => <p>Business page</p>,
-  '/$lang/account/bookings': MyBookingsPage,
-  '/$lang/account/bookings/$code': () => (
-    <>
-      <MyBookingsPage />
-      <BookingDrawer />
-    </>
-  ),
+  '/$lang/account/bookings/{-$code}': ListAndDrawer,
 }
 const body = within(document.body)
 const drawer = async () => within(await body.findByRole('dialog'))
@@ -97,7 +102,7 @@ export const MoveWaiting: Story = {
   },
 }
 
-/** Declined with offered times (one taken): a tap books one; «Choose another time» goes to the page. */
+/** Declined with offered times (one taken): a tap books one and the drawer goes on to it; «Choose another time» goes to the page. */
 export const Declined: Story = {
   args: { path: '/en/account/bookings/YR-48230' },
   play: async () => {
@@ -109,6 +114,21 @@ export const Declined: Story = {
     await waitFor(() => expect(ask.getByRole('button', { name: 'Book' })).toBeVisible())
     await userEvent.click(ask.getByRole('button', { name: 'Book' }))
     await toasted(/^Booked: /)
+    const made = await drawer()
+    await expect(await made.findByText('YR-48231')).toBeVisible()
+    await expect(made.getByText(/^Confirmed · /)).toBeVisible()
+  },
+}
+
+/** Undo refused (the time went to someone else): said in the drawer with the way to another time, Undo gone. */
+export const UndoRefused: Story = {
+  args: { path: '/en/account/bookings/YR-48150?tab=past', server: myBookingsApi({ refuse: 'slot_taken' }) },
+  play: async () => {
+    const d = await drawer()
+    await userEvent.click(await d.findByRole('button', { name: 'Undo' }))
+    await expect(await d.findByRole('alert')).toHaveTextContent("Couldn't undo — this time was already given to another client.")
+    await expect(d.queryByRole('button', { name: 'Undo' })).toBeNull()
+    await expect(d.getByRole('link', { name: 'Choose another time' })).toHaveAttribute('href', '/en/b/glow-studio')
   },
 }
 
@@ -160,15 +180,17 @@ export const NotFound: Story = {
   },
 }
 
-/** The row's name opens the booking over the list; Close goes back to the list. */
+/** The row opens its booking over the list; Close goes back to the list, the focus back to the row. */
 export const FromTheList: Story = {
   args: { path: '/en/account/bookings' },
   play: async ({ canvas }) => {
-    await userEvent.click((await canvas.findAllByRole('link', { name: 'Barber Loft' }))[0]!)
+    const row = (await canvas.findAllByRole('link', { name: /^Barber Loft, .*: open the booking$/ }))[0]!
+    await userEvent.click(row)
     const d = await drawer()
     await expect(await d.findByText('YR-48241')).toBeVisible()
     await userEvent.click(d.getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(row).toHaveFocus())
   },
 }
 

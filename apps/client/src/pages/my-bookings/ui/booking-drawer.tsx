@@ -1,9 +1,9 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import type { BookingDetail } from '@yeral/contract/bookings'
 import { localOf, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
-import { directionsUrl, telHref } from '@yeral/lib/links'
+import { telHref } from '@yeral/lib/links'
 import { isApiError } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
@@ -13,17 +13,18 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { KeyValueList } from '@yeral/ui/key-value'
-import { MapDot, MapFrame, MapMarker, MapPin } from '@yeral/ui/map-frame'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Timeline } from '@yeral/ui/timeline'
 import { toast } from '@yeral/ui/toast'
-import { Building2, CircleAlert, Clock, Info, Navigation, Pencil, Phone } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { Building2, CircleAlert, Clock, Info, Pencil, Phone } from 'lucide-react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BookingStatusBadge, NOTE_MAX } from '@/entities/booking'
+import { BookingStatusBadge, NOTE_MAX, useUndoFailed } from '@/entities/booking'
 import { useErrorText } from '@/shared/i18n'
+import { addressLine } from '@/shared/lib'
+import { DirectionsButton, PlaceMap } from '@/shared/ui'
 import { drawerSteps, offersOf } from '../model/drawer'
-import { ByLine, UNDO_REASONS, useCancelledBy } from './booking-row'
+import { ByLine, rowLinkId, useCancelledBy } from './booking-row'
 import { CancelBooking } from './cancel-booking'
 import { OfferTimes, useWhen } from './offer-times'
 
@@ -43,8 +44,9 @@ const Line = () => <div aria-hidden className="h-px flex-none bg-n-200" />
 
 /**
  * `/{lang}/account/bookings/{code}` — a booking in the drawer over My bookings (Account-Bookings `.drw`, book C-28–C-31;
- * a bottom sheet on phones). Closing it goes back to the list on its tab. The booking comes from `GET
- * /me/bookings/{code}`; one not in this account (or a code made up) says so.
+ * a bottom sheet on phones). Closing it goes back to the list on its tab, in place of the drawer's own history entry
+ * (Back doesn't open it again), and the focus back to its row. The booking comes from `GET /me/bookings/{code}`; one
+ * not in this account (or a code made up) says so.
  */
 export function BookingDrawer() {
   const t = useTranslations('bookingDrawer')
@@ -55,13 +57,26 @@ export function BookingDrawer() {
   const lang = useLocale()
   const sdk = useSdk()
   const detail = useQuery(sdk.bookings.detail(code, lang))
-  const close = () => void navigate({ to: '/$lang/account/bookings', params: { lang }, search: { tab: search.tab }, resetScroll: false })
+  const close = () =>
+    void navigate({ to: '/$lang/account/bookings', params: { lang }, search: { tab: search.tab }, replace: true, resetScroll: false })
+  // another booking in the same drawer (the one an offered time became): on Upcoming, where it is
+  const open = (next: string) =>
+    void navigate({ to: '/$lang/account/bookings/$code', params: { lang, code: next }, search: {}, replace: true, resetScroll: false })
   const missing = isApiError(detail.error, 'not_found') || isApiError(detail.error, 'validation_error')
   return (
-    <Drawer open onOpenChange={(open) => !open && close()}>
-      <DrawerContent aria-describedby={undefined}>
+    <Drawer open onOpenChange={(next) => !next && close()}>
+      <DrawerContent
+        aria-describedby={undefined}
+        // opened from the address, not a trigger: the focus goes back to the row that opened it, when it's there
+        onCloseAutoFocus={(e) => {
+          const row = document.getElementById(rowLinkId(code))
+          if (!row) return
+          e.preventDefault()
+          row.focus()
+        }}
+      >
         {detail.data ? (
-          <BookingView booking={detail.data} onClose={close} />
+          <BookingView booking={detail.data} onClose={close} onOpen={open} />
         ) : (
           <>
             <DrawerHeader title={t('title')} closeLabel={t('close')} />
@@ -95,16 +110,21 @@ export function BookingDrawer() {
   )
 }
 
-/** The booking itself: its header, status, offered times or move, history, details, note, address, rule and actions. */
-function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose: () => void }) {
+/**
+ * The booking itself: its header, status, offered times or move, history, details, note, address, rule and actions.
+ * What can be done is the api's (`actions`): past the free cancel there's no Cancel, and the note to call says so.
+ */
+function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; onClose: () => void; onOpen: (code: string) => void }) {
   const t = useTranslations('bookingDrawer')
   const list = useTranslations('myBookings')
   const words = useTranslations()
   const fmt = useFmt()
   const lang = useLocale()
   const sdk = useSdk()
+  const queryClient = useQueryClient()
   const now = useClock()
   const errorText = useErrorText()
+  const undoFailedText = useUndoFailed()
   const at = useWhen()
   const cancelledBy = useCancelledBy()
   const withdraw = useMutation(sdk.bookings.withdrawMove(lang))
@@ -113,6 +133,14 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
   const [cancelling, setCancelling] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
+  const [undoFailed, setUndoFailed] = useState<string | null>(null)
+  const cancelButton = useRef<HTMLButtonElement>(null)
+  const noteField = useRef<HTMLTextAreaElement>(null)
+  // the note's editor while the api still takes a note (a confirmation coming in ends it)
+  const noteEditing = editing && b.actions.editNote
+  useEffect(() => {
+    if (noteEditing) noteField.current?.focus()
+  }, [noteEditing])
 
   const items = b.what.type === 'appointment' ? b.what.items : []
   const staff = [...new Set(items.map((i) => i.staff).filter((s): s is string => Boolean(s)))]
@@ -127,7 +155,8 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
   const live = offers?.times.some((o) => o.state === 'free') ? offers : null
   const passed = offers && !live ? offers : null
   const ahead = b.status === 'pending' || b.status === 'confirmed'
-  const late = ahead && now >= b.cancelDeadline
+  // past the free cancel, by the api's word
+  const late = b.status === 'confirmed' && !b.actions.cancel
   const by = cancelledBy(b)
   const reason = b.decline
     ? { reason: words(`declineReasons.${b.decline.reason}`), text: b.decline.text }
@@ -138,19 +167,19 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
         : null
   const reasonText = (r: { reason: string; text: string | null }) =>
     r.text ? list('reasonWith', { reason: r.reason, text: r.text }) : list('reason', { reason: r.reason })
-  const pos = { lat: b.geo.lat, lng: b.geo.lng }
-  const google = directionsUrl(pos, b.business.name)
-  const place = [b.address, b.floor].filter(Boolean).join(', ')
   const page = { to: '/$lang/b/$slug' as const, params: { lang, slug: b.business.slug } }
+  // a refused action means the booking moved on meanwhile: what it is now
+  const reread = () => void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(b.code, lang).queryKey })
 
   const undo = () =>
     restore.mutate(
       { code: b.code, body: undefined },
       {
         onSuccess: () => toast(t('undone')),
+        // said here, Undo gone: the time isn't coming back (Account-Bookings `undoFailed`, as the row)
         onError: (error) => {
-          const why = UNDO_REASONS.find((r) => isApiError(error, r))
-          toast(why ? words('undo.failed', { reason: words(`undo.reasons.${why}`) }) : errorText(error))
+          setUndoFailed(undoFailedText(error))
+          reread()
         },
       },
     )
@@ -162,7 +191,10 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
           setEditing(false)
           toast(t('noteSaved'))
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => {
+          reread()
+          toast(errorText(error))
+        },
       },
     )
 
@@ -175,7 +207,7 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
   })
 
   const footer: ReactNode[] = []
-  if (b.status === 'pending' && b.actions.editNote && !editing)
+  if (b.actions.editNote && !noteEditing)
     footer.push(
       <Button
         key="note"
@@ -191,16 +223,15 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
     )
   if (b.actions.cancel)
     footer.push(
-      <Button key="cancel" variant="danger" onClick={() => setCancelling(true)}>
+      <Button key="cancel" ref={cancelButton} variant="danger" onClick={() => setCancelling(true)}>
         {t('cancel')}
       </Button>,
     )
-  if (b.status === 'confirmed' && !b.actions.cancel)
+  if (late)
     footer.push(
-      <p key="late" className="m-0 flex basis-full items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
-        <Info aria-hidden className="mt-px size-4.5 flex-none text-n-600" strokeWidth={1.75} />
+      <Callout key="late" tone="neutral" size="s" icon={<Info />} className="basis-full">
         {t('lateCall')}
-      </p>,
+      </Callout>,
       <Button key="call" asChild variant="secondary">
         <a href={telHref(b.business.phone)}>
           <Phone aria-hidden />
@@ -208,15 +239,15 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
         </a>
       </Button>,
     )
-  if (b.actions.restore)
+  if (b.actions.restore && !undoFailed)
     footer.push(
       <Button key="undo" variant="secondary" loading={restore.isPending} onClick={() => !restore.isPending && undo()}>
         {t('undo')}
       </Button>,
     )
-  if (live || passed)
+  if (live || passed || undoFailed)
     footer.push(
-      <Button key="other" asChild variant={passed ? 'primary' : 'secondary'}>
+      <Button key="other" asChild variant={live ? 'secondary' : 'primary'}>
         <Link {...page}>{t('otherTime')}</Link>
       </Button>,
     )
@@ -262,22 +293,31 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
             </p>
           )}
           {b.status === 'pending' && <span className="text-dense text-n-600">{t('pendingSub')}</span>}
-          {late && b.status === 'confirmed' && <span className="text-dense text-n-600">{t('late')}</span>}
+          {late && <span className="text-dense text-n-600">{t('late')}</span>}
           {reason && <span className="text-dense text-n-600">{reasonText(reason)}</span>}
           {b.offerTakenBy && (
             <Link
               to="/$lang/account/bookings/$code"
               params={{ lang, code: b.offerTakenBy }}
-              search={(prev: Record<string, unknown>) => prev}
+              // the booking made is on Upcoming
+              search={{}}
+              replace
+              resetScroll={false}
               className="self-start text-dense font-semibold text-a-600 hover:text-a-700"
             >
               {b.cancelledBy === 'system' ? list('tookRequest', { code: b.offerTakenBy }) : list('tookOffer', { code: b.offerTakenBy })}
             </Link>
           )}
           {passed && <ByLine>{list('offersPassed')}</ByLine>}
+          {undoFailed && (
+            <span role="alert" className="flex items-start gap-1.5 text-dense text-danger-ink">
+              <CircleAlert aria-hidden className="mt-0.5 size-3.5 flex-none" strokeWidth={2} />
+              {undoFailed}
+            </span>
+          )}
         </div>
 
-        {live && <OfferTimes code={b.code} business={b.business.name} services={services} offers={live} />}
+        {live && <OfferTimes code={b.code} business={b.business.name} services={services} offers={live} onTaken={onOpen} />}
 
         {b.reschedule && (
           <section
@@ -306,7 +346,13 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
                 !withdraw.isPending &&
                 withdraw.mutate(
                   { code: b.code, body: undefined },
-                  { onSuccess: () => toast(t('withdrawn')), onError: (e) => toast(errorText(e)) },
+                  {
+                    onSuccess: () => toast(t('withdrawn')),
+                    onError: (error) => {
+                      reread()
+                      toast(errorText(error))
+                    },
+                  },
                 )
               }
             >
@@ -316,7 +362,7 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
         )}
 
         {b.moveRefused && (
-          <Callout tone="neutral" icon={<Info />}>
+          <Callout tone="neutral" size="s" icon={<Info />}>
             <span className="flex flex-col gap-0.5">
               {t('moveRefused')}
               {b.moveRefused.reason && (
@@ -344,83 +390,58 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
           ]}
         />
 
-        {(b.status === 'pending' || b.clientNote) &&
-          (editing ? (
-            <div className="flex flex-col gap-2">
-              <Field
-                label={t('note')}
-                counter={
-                  draft.length > 0
-                    ? { value: draft.length, max: NOTE_MAX, text: t('noteCount', { count: draft.length, max: NOTE_MAX }) }
-                    : undefined
-                }
-              >
-                <Textarea
-                  value={draft}
-                  maxLength={NOTE_MAX}
-                  rows={3}
-                  placeholder={t('notePlaceholder')}
-                  onChange={(e) => setDraft(e.target.value)}
-                  className="h-24 resize-y"
-                />
-              </Field>
-              <div className="flex justify-end gap-2">
-                <Button size="s" variant="ghost" onClick={() => setEditing(false)}>
-                  {t('cancelEdit')}
-                </Button>
-                <Button size="s" variant="secondary" loading={saveNote.isPending} onClick={() => !saveNote.isPending && save()}>
-                  {t('saveNote')}
-                </Button>
-              </div>
+        {noteEditing ? (
+          <div className="flex flex-col gap-2">
+            <Field
+              label={t('note')}
+              counter={
+                draft.length > 0
+                  ? { value: draft.length, max: NOTE_MAX, text: t('noteCount', { count: draft.length, max: NOTE_MAX }) }
+                  : undefined
+              }
+            >
+              <Textarea
+                ref={noteField}
+                value={draft}
+                maxLength={NOTE_MAX}
+                rows={3}
+                placeholder={t('notePlaceholder')}
+                onChange={(e) => setDraft(e.target.value)}
+                className="h-24 resize-y"
+              />
+            </Field>
+            <div className="flex justify-end gap-2">
+              <Button size="s" variant="ghost" onClick={() => setEditing(false)}>
+                {t('cancelEdit')}
+              </Button>
+              <Button size="s" variant="secondary" loading={saveNote.isPending} onClick={() => !saveNote.isPending && save()}>
+                {t('saveNote')}
+              </Button>
             </div>
-          ) : (
+          </div>
+        ) : (
+          (b.status === 'pending' || b.clientNote) && (
             <Part label={t('note')}>
               <span className={b.clientNote ? 'text-small text-n-900' : 'text-small text-n-500'}>{b.clientNote ?? t('noNote')}</span>
             </Part>
-          ))}
+          )
+        )}
 
         <Line />
 
         <Part label={t('address')} labelId={`${b.code}-address`}>
           <span className="flex flex-col gap-0.5">
-            <span className="text-[15px] leading-[22px] font-medium">{fmt.addressIn(place, b.city.name)}</span>
+            <span className="text-[15px] leading-[22px] font-medium">{addressLine(b, fmt)}</span>
             {b.entranceNote && <span className="text-dense text-n-600">{b.entranceNote}</span>}
+            {b.geo.approximate && <span className="text-dense text-n-600">{t('approximate')}</span>}
             <span className="text-dense text-n-600 tabular-nums">{fmt.phone(b.business.phone)}</span>
           </span>
-          {/* a picture of the address written above; the pin names the place */}
-          <MapFrame key={b.code} center={pos} zoom={b.geo.approximate ? 14 : 16} interactive={false} className="h-40 rounded-m">
-            <MapMarker at={pos}>
-              {b.geo.approximate ? (
-                <span className="absolute size-37.5 -translate-1/2 rounded-pill border-[1.5px] border-a-500/45 bg-a-500/14" />
-              ) : (
-                <>
-                  <MapPin hot className="-translate-y-2.5">
-                    {b.business.name}
-                  </MapPin>
-                  <MapDot />
-                </>
-              )}
-            </MapMarker>
-          </MapFrame>
+          <PlaceMap name={b.business.name} geo={b.geo} className="h-40 rounded-m" />
           <div className="flex flex-wrap gap-2 pt-1">
             {!b.geo.approximate && (
-              <Button asChild size="s" variant="secondary">
-                <a
-                  href={google}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  // the phone's own map app where there is one (book Q-108); the link is Google Maps for a computer
-                  onClick={(e) => {
-                    const own = directionsUrl(pos, b.business.name, navigator)
-                    if (own === google) return
-                    e.preventDefault()
-                    location.href = own
-                  }}
-                >
-                  <Navigation aria-hidden />
-                  {t('directions')}
-                </a>
-              </Button>
+              <DirectionsButton name={b.business.name} geo={b.geo}>
+                {t('directions')}
+              </DirectionsButton>
             )}
             <Button asChild size="s" variant="secondary">
               <a
@@ -434,7 +455,7 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
           </div>
         </Part>
 
-        {ahead && !late && (
+        {ahead && b.actions.cancel && (
           <p className="m-0 flex items-start gap-2.5 text-dense text-n-600">
             <Info aria-hidden className="mt-px size-4 flex-none" strokeWidth={1.75} />
             {t('rule', { when: stamp(b.cancelDeadline) })}
@@ -442,7 +463,15 @@ function BookingView({ booking: b, onClose }: { booking: BookingDetail; onClose:
         )}
       </DrawerBody>
       {footer.length > 0 && <DrawerFooter>{footer}</DrawerFooter>}
-      <CancelBooking booking={b} what={what} when={when} open={cancelling} onOpenChange={setCancelling} onCancelled={onClose} />
+      <CancelBooking
+        booking={b}
+        what={what}
+        when={when}
+        open={cancelling}
+        onOpenChange={setCancelling}
+        onCancelled={onClose}
+        returnFocus={cancelButton}
+      />
     </>
   )
 }

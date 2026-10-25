@@ -24,19 +24,22 @@ export function useWhen() {
  * alike: after a decline or the business's cancel «Offered times» with the caption, after an expiry its lead and «Free
  * times»; a taken one disabled with «Already taken», a passed one disabled. A tap asks «… book this time?» and Book
  * takes it (`accept-alternative`; after an expiry it's a new request unless the business confirms at once); a time
- * taken a moment before says so and the booking and the lists are read again.
+ * taken a moment before says so and the booking and the lists are read again. The drawer goes on to the booking made
+ * (`onTaken`, Account-Bookings `take`).
  */
 export function OfferTimes({
   code,
   business,
   services,
   offers,
+  onTaken,
 }: {
   code: string
   business: string
   /** What was booked, for the question («Women's haircut · Aýna»). */
   services: string
   offers: { source: OfferSource; times: readonly OfferedTime[] }
+  onTaken?: (code: string) => void
 }) {
   const t = useTranslations('myBookings')
   const fmt = useFmt()
@@ -46,24 +49,19 @@ export function OfferTimes({
   const errorText = useErrorText()
   const when = useWhen()
   const accept = useMutation(sdk.bookings.acceptAlternative(lang))
-  // the booking the times stand in for now names the one made (`offerTakenBy`): the sdk keeps the new one only
-  const stale = () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey }),
-      queryClient.invalidateQueries({ queryKey: sdk.bookings.list('upcoming', lang).queryKey }),
-    ])
   const take = (index: number) => {
     const offer = offers.times[index]
     accept.mutate(
       { code, body: { source: offers.source, index } },
       {
         onSuccess: (made) => {
-          void stale()
           toast(made.status === 'pending' ? t('requested') : t('booked', { when: offer ? when(offer.date, offer.start, offer.end) : '' }))
+          onTaken?.(made.code)
         },
         onError: (error) => {
           // the times as they are now (the one taken shows as taken), and words that fit a chip
-          void stale()
+          void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey })
+          void queryClient.invalidateQueries({ queryKey: sdk.bookings.list('upcoming', lang).queryKey })
           toast(isApiError(error, 'slot_taken') ? t('offerGone') : errorText(error))
         },
       },

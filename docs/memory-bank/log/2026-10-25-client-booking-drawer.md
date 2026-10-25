@@ -18,7 +18,18 @@
 - Cancel (`ui/cancel-booking.tsx`, `showCancel`): what's cancelled, the move withdrawn with it, the reason chips when
   the business asks (`askCancelReason`; the chip's words go as the client's), «Yes, cancel». Done, the drawer closes
   (as drawn) and the toast's Undo restores it (`mutateAsync`: the drawer is gone by then).
-- Stories `Client/Pages/BookingDrawer` (9); the fake api has each booking (`detailOf` a row, `details` over it), the
+- Stories `Client/Pages/BookingDrawer` (10); the fake api has each booking (`detailOf` a row, `details` over it), the
   cancel, the move's withdrawal and the note; `model/drawer.test.ts`.
+- Review (`code-review`, one round, 15 findings, all fixed): closing replaces the drawer's history entry (Back doesn't
+  reopen it) and gives the focus back to the row (`rowLinkId`), the cancel modal's to the drawer's Cancel; an offered
+  time taken in the drawer goes on to the booking made, and the sdk's `acceptAlternative` marks the old booking stale
+  (no second read of the lists); «past the free cancel» is the api's (`actions.cancel`), not the device's clock; the
+  note's editor only while the api takes a note, focused when it opens; a refused Undo said in the drawer (Undo gone,
+  «Choose another time»); a refused cancel, move withdrawal or note reads the booking again; the reason chips reset
+  on every opening; the row's link named «{business}, {when}: open the booking», and its «Offered time accepted» line
+  opens the booking made (on Upcoming); the map, Directions and `addressLine` shared with the business page
+  (`shared/ui/place-map.tsx`, `shared/lib/address.ts`; an approximate area says so), the undo words in
+  `entities/booking` (`useUndoFailed`); the design's sizes (`.flab` 13/18, `.dnote` as Callout S). The stories put
+  the list and the drawer in one route (`{-$code}`), so the list stays mounted as in the app.
 - Not here yet: «Move to another time» (C7, `book?move=`), the review (C8, G's feature: plugged in when it lands),
   «New address» after the business moved (`movedAt`, Q-215), tables and classes (their flows come later).
