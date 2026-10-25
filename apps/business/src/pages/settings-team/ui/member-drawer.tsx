@@ -38,6 +38,7 @@ import {
   saveOf,
   type MemberForm,
 } from '../model/member'
+import { RemoveMember } from './remove-member'
 import { ServicePicker } from './service-picker'
 
 const TABS = ['profile', 'services', 'access'] as const
@@ -51,6 +52,7 @@ type Tab = (typeof TABS)[number]
  */
 export function MemberDrawer({
   slug,
+  business,
   member,
   people,
   menu,
@@ -58,9 +60,12 @@ export function MemberDrawer({
   myPhone,
   returnFocus,
   onClose,
+  onRemoved,
   onLink,
 }: {
   slug: string
+  /** The workspace's name, for «… loses access to Glow Studio». */
+  business: string
   member: TeamMember | null
   people: TeamMember[]
   menu: Menu
@@ -69,6 +74,8 @@ export function MemberDrawer({
   myPhone: string | null
   returnFocus: RefObject<HTMLElement | null>
   onClose: () => void
+  /** Removed from the team: their row leaves for «No longer on the team», so the focus goes elsewhere. */
+  onRemoved: () => void
   onLink: (name: string, url: string) => void
 }) {
   // nothing closes it while its save runs: the answer, or its error, needs the form (another person's drawer can)
@@ -85,6 +92,7 @@ export function MemberDrawer({
           <MemberEditor
             key={member.id}
             slug={slug}
+            business={business}
             member={member}
             people={people}
             menu={menu}
@@ -92,6 +100,7 @@ export function MemberDrawer({
             me={!!myPhone && member.phone === myPhone}
             onBusy={(b) => setSaving(b ? member.id : null)}
             onClose={onClose}
+            onRemoved={onRemoved}
             onLink={onLink}
           />
         </DrawerContent>
@@ -102,6 +111,7 @@ export function MemberDrawer({
 
 function MemberEditor({
   slug,
+  business,
   member: m,
   people,
   menu,
@@ -109,9 +119,11 @@ function MemberEditor({
   me,
   onBusy,
   onClose,
+  onRemoved,
   onLink,
 }: {
   slug: string
+  business: string
   member: TeamMember
   people: TeamMember[]
   menu: Menu
@@ -119,6 +131,7 @@ function MemberEditor({
   me: boolean
   onBusy: (busy: boolean) => void
   onClose: () => void
+  onRemoved: () => void
   onLink: (name: string, url: string) => void
 }) {
   const t = useTranslations('settings.team.drawer')
@@ -139,6 +152,7 @@ function MemberEditor({
   const [was] = useState(() => formOf(m, menu, now))
   const [form, setForm] = useState<MemberForm>(was)
   const [tab, setTab] = useState<Tab>('profile')
+  const [removing, setRemoving] = useState(false)
   const [saving, setSaving] = useState(false)
   // the api refused the number (someone who joined once keeps theirs): shown on the field until it changes
   const [phoneLocked, setPhoneLocked] = useState(false)
@@ -447,7 +461,19 @@ function MemberEditor({
           </TabsContent>
         </DrawerBody>
       </Tabs>
-      <DrawerFooter>
+      {/* «Remove from the team» on the left beside the owner's Save (B-Team `.drw-f`); otherwise the footer's own */}
+      <DrawerFooter className={owner && !ownerRow ? 'justify-between [&>*]:flex-none' : undefined}>
+        {owner && !ownerRow && (
+          <Button
+            variant="danger-ghost"
+            aria-haspopup="dialog"
+            disabled={saving}
+            className="-ml-1.5 px-1.5"
+            onClick={() => setRemoving(true)}
+          >
+            {t('remove')}
+          </Button>
+        )}
         {canSave ? (
           <Button variant="primary" disabled={!dirty || !valid} loading={saving} loadingLabel={t('saving')} onClick={() => void save()}>
             {t('save')}
@@ -458,6 +484,9 @@ function MemberEditor({
           </Button>
         )}
       </DrawerFooter>
+      {owner && !ownerRow && (
+        <RemoveMember slug={slug} member={m} business={business} open={removing} onOpenChange={setRemoving} onRemoved={onRemoved} />
+      )}
     </>
   )
 }

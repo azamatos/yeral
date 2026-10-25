@@ -1232,7 +1232,31 @@
         "saved": "{name}: changes saved",
         "inviteCreated": "Invite created for {name} · valid until {date} · {name} works without the app until they accept",
         "inviteCancelled": "Invite cancelled · {name} keeps working without the app",
-        "appOff": "{name} no longer uses the app · you and the admins handle {name}’s requests"
+        "appOff": "{name} no longer uses the app · you and the admins handle {name}’s requests",
+        "remove": "Remove from the team"
+      },
+      "remove": {
+        "title": "Remove {name} from the team?",
+        "lead": "{name} loses access to {business}, and clients can’t book {name} any more. Past bookings and reviews stay.",
+        "what": "What happens to the bookings",
+        "move": "Move to another specialist",
+        "moveCaption": "The time and service stay the same. The client sees the new specialist in My bookings.",
+        "to": "To",
+        "toCaption": "Only specialists who do these services are listed.",
+        "movesTo": "Moves to {name}",
+        "keepCaption": "They stay in the calendar as they are. No new bookings for {name}.",
+        "doesnt": "{name} doesn’t do {services}",
+        "nobody": "Nobody else does {services}",
+        "rowAria": "{client}, {when}: what happens",
+        "keepIt": "Keep it",
+        "confirm": "Remove {name}",
+        "removing": "Removing",
+        "moved": "{n, number} moved to {name}",
+        "cancelled": "{n, number} cancelled with 3 other times offered",
+        "kept": "{n, plural, one {# kept as it is} other {# kept as they are}}",
+        "notified": "{sum} · the clients are notified",
+        "removedWith": "{name} removed from the team · {sum}",
+        "removed": "{name} removed from the team"
       }
     }
   }

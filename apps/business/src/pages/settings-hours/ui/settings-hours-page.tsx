@@ -17,14 +17,13 @@ import {
   sameWeek,
   settingsWeek,
   SpecialDays,
-  useAffectedCount,
-  useJoin,
   WeekHoursRows,
   weekOf,
   weekValid,
   type AffectedChoice,
   type EditorWeek,
 } from '@/features/edit-hours'
+import { useAffectedCount, useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useDayName, useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
