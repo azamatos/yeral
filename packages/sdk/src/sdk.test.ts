@@ -626,6 +626,8 @@ describe('live events', () => {
       ['calendar', 'glow-studio'],
       ['business', 'glow-studio'],
       ['settings', 'glow-studio', 'services'],
+      // a waiting move's fit
+      ['requests', 'glow-studio'],
     ])
   })
 
@@ -652,6 +654,7 @@ describe('live events', () => {
       ['business', 'glow-studio'],
       ['availability', 'glow-studio'],
       ['calendar', 'glow-studio'],
+      ['requests', 'glow-studio'],
       ['workspaces'],
       ['setup'],
       ['clients', 'glow-studio'],

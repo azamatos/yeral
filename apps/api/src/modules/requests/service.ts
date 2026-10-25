@@ -127,60 +127,66 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
     () => alertNotesOf(db, clientIds),
     () => loadHours(db, business.id),
   ])
+  const byBooking = new Map<string, RequestItem[]>()
+  for (const i of items) byBooking.set(i.item.bookingId, [...(byBooking.get(i.item.bookingId) ?? []), i])
+  // the ones the viewer may see (a specialist's: those with them)
+  const visible = rows.flatMap((r) => {
+    const mine = byBooking.get(r.id) ?? []
+    const facts = answerFacts(mine)
+    return canOn(actor, 'calendar', facts.staffIds) ? [{ r, mine, facts }] : []
+  })
   // a move confirms only where it fits now (B-21's line: "free at the new time" or not)
-  const moves = rows.filter((r) => r.rescheduleOf)
-  const fitting = await all(
+  const fits = await all(
     db,
-    moves.map(
-      (r) => async () =>
-        !(await moveProblem(
-          db,
-          hours,
-          r,
-          items.flatMap((i) => (i.item.bookingId === r.id ? [i.item] : [])),
-        )),
+    visible.map(
+      ({ r, mine }) =>
+        async () =>
+          r.rescheduleOf
+            ? !(await moveProblem(
+                db,
+                hours,
+                r,
+                mine.map((i) => i.item),
+              ))
+            : null,
     ),
   )
-  const fits = new Map(moves.map((r, i) => [r.id, fitting[i]!]))
-  return rows.flatMap((r) => {
-    const mine = items.filter((i) => i.item.bookingId === r.id)
-    const facts = answerFacts(mine)
-    if (!canOn(actor, 'calendar', facts.staffIds)) return []
+  return visible.map(({ r, mine, facts }, i) => {
     const from = originals.find((o) => o.id === r.rescheduleOf)
     const seen = history.find((h) => h.client.id === r.clientId)
-    return [
-      {
-        code: r.code,
-        kind: r.rescheduleOf ? ('move' as const) : ('new' as const),
-        type: r.type,
-        date: r.date,
-        start: r.start,
-        end: r.end,
-        holdUntil: r.holdUntil!.getTime(),
-        warnAt: expiryWarningAt(r.createdAt.getTime(), r.holdUntil!.getTime(), hours),
-        sentAt: r.createdAt.getTime(),
-        items: mine.map(({ item }) => teamItemOf(item, lang)),
-        price: teamPriceOf(r),
-        note: r.clientNote,
-        from: from ? { date: from.date, start: from.start, end: from.end } : null,
-        fits: fits.get(r.id) ?? null,
-        client: {
-          id: r.clientId,
-          name: r.clientName ?? '',
-          phone: r.clientPhone,
-          visits: seen?.visits ?? 0,
-          noShows: seen?.noShows ?? 0,
-          alerts: (r.clientId && alerts.get(r.clientId)) || [],
-        },
-        canAnswer: canAnswerRequest(actor, answerers, facts),
-        answeredBy: answeredBy(answerers, facts.forPhoneOnlyStaff),
+    return {
+      code: r.code,
+      kind: r.rescheduleOf ? ('move' as const) : ('new' as const),
+      type: r.type,
+      date: r.date,
+      start: r.start,
+      end: r.end,
+      holdUntil: r.holdUntil!.getTime(),
+      warnAt: expiryWarningAt(r.createdAt.getTime(), r.holdUntil!.getTime(), hours),
+      sentAt: r.createdAt.getTime(),
+      items: mine.map(({ item }) => teamItemOf(item, lang)),
+      price: teamPriceOf(r),
+      note: r.clientNote,
+      from: from ? { date: from.date, start: from.start, end: from.end } : null,
+      fits: fits[i] ?? null,
+      client: {
+        id: r.clientId,
+        name: r.clientName ?? '',
+        phone: r.clientPhone,
+        visits: seen?.visits ?? 0,
+        noShows: seen?.noShows ?? 0,
+        alerts: (r.clientId && alerts.get(r.clientId)) || [],
       },
-    ]
+      canAnswer: canAnswerRequest(actor, answerers, facts),
+      answeredBy: answeredBy(answerers, facts.forPhoneOnlyStaff),
+    }
   })
 }
 
-/** The waiting request with this code at this business that the actor may answer; 404 for one they can't see. */
-/** A request this person may answer now (its code, in this business), else the refusal the answer would get. */
+/**
+ * The waiting request with this code at this business that the actor may answer now; 404 for one they can't see, else
+ * the refusal the answer would get.
+ */
 export async function answerable(db: Queryable, business: Business, actor: Actor, code: string, now: number): Promise<BookingRow> {
   const [b] = await db
     .select()

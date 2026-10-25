@@ -115,8 +115,13 @@ describe('the push channel (GET /v1/events/stream)', () => {
       // may show up meanwhile, so only this one is watched
       const [before] = await db.select({ id: max(events.id) }).from(events)
       await emit(db, { type: 'business.updated', businessId: glow })
-      const read = async () => (await b.req(`/v1/events?after=${cursor}`)).json as { items: { id: string }[]; held: boolean }
-      const ours = (items: { id: string }[]) => items.some((e) => Number(e.id) > (before?.id ?? 0))
+      const read = async () =>
+        (await b.req(`/v1/events?after=${cursor}`)).json as {
+          items: { id: string; type: string; business: string | null }[]
+          held: boolean
+        }
+      const ours = (items: { id: string; type: string; business: string | null }[]) =>
+        items.some((e) => Number(e.id) > (before?.id ?? 0) && e.type === 'business.updated' && e.business === 'glow-studio')
       const waiting = await read()
       expect(ours(waiting.items)).toBe(false)
       expect(waiting.held).toBe(true)
