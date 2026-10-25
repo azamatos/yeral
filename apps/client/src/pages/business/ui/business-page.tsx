@@ -14,15 +14,14 @@ import { Pill } from '@yeral/ui/pill'
 import { Rating } from '@yeral/ui/rating'
 import { toast } from '@yeral/ui/toast'
 import { Clock, MapPin, Share2 } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
-import { parseServiceIds, pickedServices, serviceIdsParam, toggleService } from '../model/selection'
 import { openLine } from '../model/when'
 import { BookingBar, BookingCard } from './booking-card'
 import { FavouriteButton } from './favourite'
-import { Services } from './services'
 
 /**
  * How the page can be booked by whoever looks: `online` (Select and Book), `preview` (the owner's own page in review:
@@ -51,6 +50,8 @@ export function BusinessPage() {
   const search: { services?: string } = useSearch({ strict: false })
   const navigate = useNavigate()
   const t = useTranslations('business')
+  const tb = useTranslations('booking')
+  const servicesId = useId()
   const state = bookingState(detail)
   const ids = state === 'online' || state === 'preview' ? parseServiceIds(search.services) : []
   const picked = pickedServices(detail, ids)
@@ -68,12 +69,24 @@ export function BusinessPage() {
         <Header detail={detail} />
         <div className="flex flex-wrap items-stretch gap-12 pt-10 max-sm:pt-6">
           <div className="min-w-0 flex-[999_1_540px]">
-            <Services
-              groups={detail.serviceGroups}
-              picked={picked.map((s) => s.id)}
-              onToggle={(id) => pick(toggleService(ids, id))}
-              canPick={state === 'online' || state === 'preview'}
-            />
+            {/* Venue «Hyzmatlar» (`.sect.first`) */}
+            <section aria-labelledby={servicesId} className="flex flex-col gap-5 pt-8 pb-12 max-sm:pt-6 max-sm:pb-10">
+              <h2 id={servicesId} className="m-0 text-[26px] leading-8 font-bold tracking-[-0.02em] max-sm:text-[22px] max-sm:leading-7">
+                {t('services.title')}
+              </h2>
+              <ServicePicker
+                groups={detail.serviceGroups}
+                picked={picked.map((s) => s.id)}
+                onToggle={(id) => {
+                  const next = toggleService(ids, id)
+                  // one booking takes up to 10 services (the api's limit)
+                  if (next.length > SERVICES_MAX) toast(tb('services.max', { max: SERVICES_MAX }))
+                  else pick(next)
+                }}
+                canPick={state === 'online' || state === 'preview'}
+                groupHeading="h3"
+              />
+            </section>
           </div>
           <aside
             aria-label={t('card.label')}

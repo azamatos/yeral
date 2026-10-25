@@ -125,6 +125,15 @@
     "call": "Call",
     "write": "Write on Telegram"
   },
+  "services": {
+    "groups": "Service groups",
+    "all": "All",
+    "select": "Select",
+    "selected": "Selected",
+    "selectLabel": "Select: {name}",
+    "selectedLabel": "Selected: {name}",
+    "none": "No services yet."
+  },
   "business": {
     "crumbs": "You are here",
     "description": "{name} · {category}",
@@ -161,14 +170,7 @@
     "photoCount": "Photo {n} of {total}",
     "photoOf": "{n} / {total}",
     "services": {
-      "title": "Services",
-      "groups": "Service groups",
-      "all": "All",
-      "select": "Select",
-      "selected": "Selected",
-      "selectLabel": "Select: {name}",
-      "selectedLabel": "Selected: {name}",
-      "none": "No services yet."
+      "title": "Services"
     },
     "card": {
       "label": "Booking",
@@ -203,11 +205,74 @@
     "notOpen": {
       "title": "This page hasn't opened yet",
       "lead": "The business is new on {brand} and its page is being checked. It opens here once it's approved."
+    }
+  },
+  "booking": {
+    "title": "Booking",
+    "pageTitle": "Booking · {name}",
+    "at": "{day} {time}",
+    "stepsLabel": "Booking steps",
+    "steps": {
+      "services": "Services",
+      "staff": "Specialist",
+      "time": "Time",
+      "confirm": "Confirmation"
     },
-    "booking": {
-      "title": "Booking",
-      "lead": "Booking opens with the next part of the site.",
-      "back": "Back to {name}"
+    "back": "Back",
+    "close": "Close",
+    "summaryLabel": "Your booking",
+    "loadFailed": "Couldn't load the free times.",
+    "services": {
+      "title": "Choose services",
+      "lead": "You can choose several services.",
+      "max": "Up to {max} services in one booking."
+    },
+    "staff": {
+      "title": "Choose a specialist",
+      "lead": "Choose «Any specialist» and we'll show the earliest free time.",
+      "label": "Specialist",
+      "any": "Any specialist",
+      "earliest": "Earliest free time: {when}",
+      "next": "Next free time: {when}",
+      "noneSoon": "No free time soon",
+      "cantOne": "Doesn't do the selected service",
+      "cantAll": "Doesn't do all the selected services",
+      "noOneDoesAll": "No one specialist does all the selected services: a free specialist is chosen for each."
+    },
+    "time": {
+      "title": "Choose a time",
+      "lead": "{duration} · {staff}",
+      "dateLabel": "Date",
+      "prevWeek": "Previous week",
+      "nextWeek": "Next week",
+      "today": "Today",
+      "todayTitle": "Today · {date}",
+      "tomorrowTitle": "Tomorrow · {date}",
+      "srOpen": "{month}",
+      "srFull": "{month}, no free time",
+      "srClosed": "{month}, closed",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening",
+      "empty": "No free time on this day",
+      "emptyLead": "Choose another day or go to the next free day.",
+      "nextFreeDay": "Next free day: {date}"
+    },
+    "confirm": {
+      "title": "Confirm your booking",
+      "lead": "Sending the booking comes with the next part of the site."
+    },
+    "summary": {
+      "none": "No service chosen yet.",
+      "when": "{date} · {range}",
+      "total": "Total",
+      "payAtPlace": "Pay at the place",
+      "continue": "Continue",
+      "pickService": "Choose at least one service.",
+      "pickTime": "Choose a time to continue.",
+      "bar": "{count, plural, one {# service} other {# services}} · {total}",
+      "barTime": "{count, plural, one {# service} other {# services}} · {total} · {time}",
+      "barNone": "No service chosen"
     }
   }
 }

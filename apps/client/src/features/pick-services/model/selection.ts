@@ -14,6 +14,9 @@ export function parseServiceIds(raw: string | undefined): string[] {
   return [...new Set(raw.split(',').map((id) => id.trim()))].filter(Boolean)
 }
 
+/** The most services one booking takes (the api's `serviceIds` and free-times lists, `max(10)`). */
+export const SERVICES_MAX = 10
+
 /** The address's value for these ids; none means no `?services=` at all. */
 export function serviceIdsParam(ids: readonly string[]): string | undefined {
   return ids.length > 0 ? ids.join(',') : undefined
