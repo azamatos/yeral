@@ -1,9 +1,9 @@
 import type { Category } from '@yeral/contract/catalog'
 import type { Menu } from '@yeral/contract/services'
 import type { SetupServices } from '@yeral/contract/setup'
-import { MARKET } from '@yeral/domain/market'
 import { localized, type Locale, type Localized, type PriceType } from '@yeral/domain/model'
 import { PRICE_MAX, serviceErrors } from '@yeral/domain/services'
+import { writtenIn } from '@/shared/lib'
 
 /** The step's durations (B-Onboarding step 5): 15 minutes to 4 hours. */
 export const DURATION_CHOICES = [15, 30, 45, 60, 75, 90, 105, 120, 150, 180, 240] as const
@@ -16,9 +16,6 @@ export const PRICE_DIGITS = String(PRICE_MAX).length
 
 /** The group the owner's own services go to («New services» until they name it). */
 export const OWN_GROUP = 'own'
-
-/** A group name's limit (the menu's, `groupInputSchema`). */
-export const GROUP_NAME_MAX = 60
 
 export type ServiceGroupRow = {
   key: string
@@ -78,11 +75,12 @@ export function formFromStarters(groups: Category['starterGroups']): ServicesFor
 }
 
 /**
- * The menu saved before (back at the step, or a menu made in Settings), every row picked; the first group named like
- * the step's own (`ownName`: «New services», or the name the owner just gave it) takes the services added now.
+ * The menu saved before (back at the step, or a menu made in Settings), every row picked; the step's own group takes
+ * the services added now: `ownId` right after a save (whatever the owner named it), otherwise the first group named
+ * `ownName` («New services»).
  */
-export function formFromMenu(menu: Menu, locale: Locale, ownName: string): ServicesForm {
-  const own = menu.groups.find((g) => localized(g.name, locale) === ownName)?.id
+export function formFromMenu(menu: Menu, locale: Locale, ownName: string, ownId?: string): ServicesForm {
+  const own = ownId ?? menu.groups.find((g) => localized(g.name, locale) === ownName)?.id
   const keyOf = (groupId: string) => (groupId === own ? OWN_GROUP : `menu:${groupId}`)
   return {
     groups: menu.groups.map((g) => {
@@ -125,6 +123,16 @@ export function withStarters(form: ServicesForm, groups: Category['starterGroups
   }
 }
 
+/**
+ * The own group's id in the menu a save gave back: the groups come back in the order they were sent (only those with
+ * a picked row), so its place among them finds it, whatever name it has.
+ */
+export function savedOwnGroupId(form: ServicesForm, menu: Menu): string | undefined {
+  const sent = form.groups.filter((g) => form.rows.some((r) => r.group === g.key && r.on))
+  const at = sent.findIndex((g) => g.key === OWN_GROUP)
+  return at >= 0 && sent.length === menu.groups.length ? menu.groups[at]?.id : undefined
+}
+
 /** «Add service»: a blank row in «New services», picked, an hour long (B-Onboarding `addSvc`). */
 export function withNewRow(form: ServicesForm, ownName: string): ServicesForm {
   const groups = form.groups.some((g) => g.key === OWN_GROUP)
@@ -165,10 +173,6 @@ export function servicesProblem(form: ServicesForm): 'none' | 'newName' | 'name'
   return picked.every(priceOk) ? null : 'price'
 }
 
-/** A saved row's names in the market's languages only (the menu may hold the catalogue's others). */
-const marketOnly = (text: Localized | undefined): Localized =>
-  Object.fromEntries(Object.entries(text ?? {}).filter(([lang]) => (MARKET.languages as readonly string[]).includes(lang)))
-
 /**
  * The step's menu for `PUT …/setup/services`: the picked rows in their groups, in the step's order; what was saved
  * before by its id. A name, a group's as a service's, goes only when the owner changed it (or for a new one of their
@@ -181,7 +185,7 @@ export function servicesInput(form: ServicesForm, locale: Locale): SetupServices
     const groupName = g.name.trim()
     const renamed = groupName !== g.original
     const group = g.id
-      ? { id: g.id, ...(renamed && { name: { ...marketOnly(g.written), [locale]: groupName } }) }
+      ? { id: g.id, ...(renamed && { name: writtenIn(g.written, locale, groupName) }) }
       : g.starter
         ? { starter: g.starter, ...(renamed && { name: { [locale]: groupName } }) }
         : { name: { [locale]: groupName } }
@@ -189,7 +193,8 @@ export function servicesInput(form: ServicesForm, locale: Locale): SetupServices
       const name = r.name.trim()
       const changed = name !== r.original
       // a new row of the owner's own always has its name; a starter's or a saved one's only when changed
-      const written = !changed && (r.id || r.starter) ? undefined : r.id ? { ...marketOnly(r.written), [locale]: name } : { [locale]: name }
+      // a saved one's in the market's languages only (the menu may hold the catalogue's others)
+      const written = !changed && (r.id || r.starter) ? undefined : r.id ? writtenIn(r.written, locale, name) : { [locale]: name }
       return {
         ...(r.id ? { id: r.id } : r.starter && { starter: r.starter }),
         ...(written && { name: written }),

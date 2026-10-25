@@ -11,14 +11,15 @@ import { Switch } from '@yeral/ui/switch'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { Ellipsis, EyeOff, Globe, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useId, useMemo, useRef, useState, type RefObject } from 'react'
+import { useId, useMemo, useRef, useState, type ComponentProps, type RefObject } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
+import { GROUP_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
+import { writtenIn } from '@/shared/lib'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 import { teamLookup, whoDoes } from '../model/rows'
-import { written } from '../model/service-form'
 import { useDeleteService } from './delete-service'
 import { ServiceDrawer, type DrawerTarget } from './service-drawer'
 
@@ -164,60 +165,100 @@ function ServicesSection({ slug }: { slug: string }) {
 }
 
 /**
- * «Add group» (B-Services `.ngf`): the name, Enter or «Add group» adds it at the end of the list, Escape or «Cancel»
- * closes the box.
+ * A group's name box (B-Services `.ngf`): Enter or the save button sends the name, Escape or «Cancel» closes the box,
+ * neither while it's on its way (the box would go before it hears how it went). The api's limit, 60 characters.
  */
+function GroupNameField({
+  initial,
+  saveLabel,
+  savingLabel,
+  pending,
+  size,
+  onSave,
+  onCancel,
+  ...input
+}: {
+  initial: string
+  saveLabel: string
+  savingLabel: string
+  pending: boolean
+  size: 'm' | 's'
+  onSave: (name: string) => void
+  onCancel: () => void
+} & Pick<ComponentProps<typeof Input>, 'id' | 'aria-label' | 'placeholder' | 'ref' | 'onFocus' | 'className'>) {
+  const t = useTranslations('settings.services')
+  const [name, setName] = useState(initial)
+  const text = name.trim()
+  // Enter pressed again while it's on its way sends nothing more
+  const save = () => {
+    if (text && !pending) onSave(text)
+  }
+  const cancel = () => {
+    if (!pending) onCancel()
+  }
+  return (
+    <>
+      <Input
+        {...input}
+        autoFocus
+        maxLength={GROUP_NAME_MAX}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            save()
+          }
+          if (e.key === 'Escape') cancel()
+        }}
+      />
+      <Button variant="ghost" size={size} disabled={pending} onClick={cancel}>
+        {t('cancel')}
+      </Button>
+      <Button variant="secondary" size={size} disabled={!text} loading={pending} loadingLabel={savingLabel} onClick={save}>
+        {saveLabel}
+      </Button>
+    </>
+  )
+}
+
+/** «Add group» (B-Services `.ngf`): the name adds a group at the end of the list. */
 function NewGroup({ slug, onDone }: { slug: string; onDone: () => void }) {
   const t = useTranslations('settings.services')
   const locale = useLocale()
   const sdk = useSdk()
   const errorText = useErrorText()
   const add = useMutation(sdk.settings.addGroup(slug))
-  const [name, setName] = useState('')
   const labelId = useId()
-  const save = () => {
-    const text = name.trim()
-    // Enter pressed again while it's on its way adds nothing more
-    if (!text || add.isPending) return
-    add.mutate(
-      { name: { [locale]: text } },
-      {
-        onSuccess: () => {
-          toast(t('groupAdded', { name: text }))
-          onDone()
-        },
-        onError: (error) => toast(errorText(error)),
-      },
-    )
-  }
   return (
     <div role="group" aria-labelledby={labelId} className="mb-6 flex flex-col gap-2 rounded-card border border-n-200 bg-n-50 p-4">
       <label id={labelId} htmlFor={`${labelId}-input`} className="text-dense font-semibold text-n-900">
         {t('newGroupName')}
       </label>
       <div className="flex flex-wrap gap-2">
-        <Input
+        <GroupNameField
           id={`${labelId}-input`}
-          autoFocus
-          maxLength={60}
           className="h-11 min-w-0 flex-[1_1_240px]"
           placeholder={t('newGroupPlaceholder')}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              save()
-            }
-            if (e.key === 'Escape') onDone()
-          }}
+          initial=""
+          size="m"
+          saveLabel={t('addGroup')}
+          savingLabel={t('adding')}
+          pending={add.isPending}
+          onCancel={onDone}
+          onSave={(name) =>
+            add.mutate(
+              { name: { [locale]: name } },
+              {
+                onSuccess: () => {
+                  toast(t('groupAdded', { name }))
+                  onDone()
+                },
+                onError: (error) => toast(errorText(error)),
+              },
+            )
+          }
         />
-        <Button variant="ghost" disabled={add.isPending} onClick={onDone}>
-          {t('cancel')}
-        </Button>
-        <Button variant="secondary" disabled={!name.trim()} loading={add.isPending} loadingLabel={t('adding')} onClick={save}>
-          {t('addGroup')}
-        </Button>
       </div>
       <span className="text-dense text-n-600">{t('newGroupNote')}</span>
     </div>
@@ -225,8 +266,8 @@ function NewGroup({ slug, onDone }: { slug: string; onDone: () => void }) {
 }
 
 /**
- * «Rename group» (the owner, 25.10.2026; not drawn, the «Add group» box's pattern in the group's band): the name as it
- * is, Enter or «Save» renames it in the reader's language (the market's others kept), Escape or «Cancel» leaves it.
+ * «Rename group» (the owner, 25.10.2026; not drawn: the «Add group» box in the group's band): the name as it is, saved
+ * in the reader's language (the market's others kept) and put in the menu at once; the same name changes nothing.
  */
 function RenameGroup({
   slug,
@@ -246,54 +287,41 @@ function RenameGroup({
   const t = useTranslations('settings.services')
   const locale = useLocale()
   const sdk = useSdk()
+  const queryClient = useQueryClient()
   const errorText = useErrorText()
   const rename = useMutation(sdk.settings.renameGroup(slug))
-  const [text, setText] = useState(name)
-  const next = text.trim()
-  const save = () => {
-    // Enter pressed again while it's on its way renames nothing more; the same name changes nothing
-    if (!next || rename.isPending) return
-    if (next === name) return onDone()
-    rename.mutate(
-      { groupId, name: written(names, locale, next) },
-      {
-        onSuccess: () => {
-          toast(t('groupRenamed', { name: next }))
-          onDone()
-        },
-        onError: (error) => toast(errorText(error)),
-      },
-    )
-  }
   return (
     <div className="flex min-w-0 flex-[1_1_320px] flex-wrap items-center gap-2">
-      <Input
+      <GroupNameField
         ref={inputRef}
         aria-label={t('groupNameLabel', { name })}
-        autoFocus
-        maxLength={60}
         className="h-10 min-w-0 flex-[1_1_200px] bg-n-0"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
         onFocus={(e) => e.currentTarget.select()}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            save()
-          }
-          if (e.key === 'Escape') {
-            // the menu or a dialog around it doesn't hear it
-            e.stopPropagation()
-            onDone()
-          }
+        initial={name}
+        size="s"
+        saveLabel={t('renameSave')}
+        savingLabel={t('renaming')}
+        pending={rename.isPending}
+        onCancel={onDone}
+        onSave={(next) => {
+          if (next === name) return onDone()
+          rename.mutate(
+            { groupId, name: writtenIn(names, locale, next) },
+            {
+              onSuccess: (group) => {
+                // the answer is the group as it is now, whether or not the menu's refetch comes back
+                queryClient.setQueryData(
+                  sdk.settings.menu(slug).queryKey,
+                  (menu) => menu && { groups: menu.groups.map((g) => (g.id === group.id ? { ...g, name: group.name } : g)) },
+                )
+                toast(t('groupRenamed', { name: next }))
+                onDone()
+              },
+              onError: (error) => toast(errorText(error)),
+            },
+          )
         }}
       />
-      <Button variant="ghost" size="s" disabled={rename.isPending} onClick={onDone}>
-        {t('cancel')}
-      </Button>
-      <Button variant="secondary" size="s" disabled={!next} loading={rename.isPending} loadingLabel={t('renaming')} onClick={save}>
-        {t('renameSave')}
-      </Button>
     </div>
   )
 }

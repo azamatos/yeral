@@ -11,9 +11,10 @@ import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { Info, Pencil, Plus } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
+import { GROUP_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
 import { choicesWith } from '@/shared/lib'
 import {
@@ -21,10 +22,9 @@ import {
   fixedPrice,
   formFromMenu,
   formFromStarters,
-  GROUP_NAME_MAX,
-  OWN_GROUP,
   pickedCount,
   PRICE_DIGITS,
+  savedOwnGroupId,
   SERVICE_NAME_MAX,
   servicesInput,
   servicesProblem,
@@ -65,6 +65,7 @@ export function useServicesStep(
   const menu = useQuery({ ...sdk.settings.menu(slug), enabled: on || known })
   const save = useMutation(sdk.setup.services(slug))
   const ownName = t('newGroup')
+  const headIds = useId()
   // what's typed; the menu as last saved (null: never saved, so Continue makes it); what the form was made from
   // (the saved menu's rows, or the category's starters) and whether the owner has changed it since
   const [state, setState] = useState<{ form: ServicesForm; saved: string | null; basis: string; edited: boolean } | null>(null)
@@ -115,10 +116,10 @@ export function useServicesStep(
     const sent = JSON.stringify(input)
     if (sent === state.saved) return true
     try {
-      // the rows as saved, by id from now on: saving again keeps them; the own group as the owner named it stays
-      // the one new services go to
+      // the rows as saved, by id from now on: saving again keeps them; the own group, whatever the owner named it,
+      // stays the one new services go to
       const menu = await save.mutateAsync(input)
-      const saved = formFromMenu(menu, locale, form.groups.find((g) => g.key === OWN_GROUP)?.name.trim() || ownName)
+      const saved = formFromMenu(menu, locale, ownName, savedOwnGroupId(form, menu))
       const ids = menu.groups.flatMap((g) => [g.id, ...g.services.map((x) => x.id)]).join(',')
       setState({ form: saved, saved: JSON.stringify(servicesInput(saved, locale)), basis: `menu:${ids}`, edited: false })
       return true
@@ -166,14 +167,19 @@ export function useServicesStep(
             const rows = form.rows.filter((r) => r.group === g.key)
             const all = rows.every((r) => r.on)
             const keys = new Set(rows.map((r) => r.key))
-            const name = g.name.trim() || t('unnamedGroup')
+            const headId = `${headIds}-${g.key}`
             return (
-              <section key={g.key} aria-label={name} className="overflow-hidden rounded-card border border-n-200 bg-n-0">
+              <section key={g.key} aria-labelledby={headId} className="overflow-hidden rounded-card border border-n-200 bg-n-0">
+                {/* the group's heading for screen readers (the field shows it on screen), as on Settings → Services */}
+                <h3 id={headId} className="sr-only">
+                  {g.name.trim() || t('unnamedGroup')}
+                </h3>
                 <div className="flex items-center gap-3 border-b border-n-200 bg-group py-2 pr-4 pl-1.5 max-md:pr-3">
-                  {/* the group's name, written over like a service's: its line shows on hover and focus */}
+                  {/* the group's name, written over like a service's: its line shows on hover and focus; the field's
+                      label is the name it came with, so it doesn't change with each letter typed */}
                   <span className="relative flex min-w-0 flex-1 items-center">
                     <Input
-                      aria-label={t('groupName', { name })}
+                      aria-label={t('groupName', { name: g.original || t('unnamedGroup') })}
                       placeholder={t('groupPlaceholder')}
                       value={g.name}
                       maxLength={GROUP_NAME_MAX}
