@@ -245,3 +245,26 @@ export const RangeOverDisabled: Story = {
     await expect(canvas.getByRole('button', { name: 'Dates 19 Oct – 21 Oct 2026' })).toBeVisible()
   },
 }
+
+/** A toolbar's day as a title (B-Calendar `.dbtn`): «Wednesday, 14 October» with a chevron, outside a field. */
+export const Title: Story = {
+  render: () => {
+    function Toolbar() {
+      const [value, setValue] = useState('2026-10-14')
+      return (
+        <DatePicker look="title" copy={{ ...copy, value: (date) => copy.day(date) }} today={today} value={value} onValueChange={setValue} />
+      )
+    }
+    return <Toolbar />
+  },
+  play: async ({ canvas }) => {
+    const title = canvas.getByRole('button', { name: 'Wednesday, 14 October' })
+    await expect(title).toHaveClass('text-[17px]')
+    await userEvent.click(title)
+    const grid = await body.findByRole('grid', { name: 'October 2026' })
+    await waitFor(() => expect(grid).toBeVisible())
+    await userEvent.click(within(grid).getByRole('button', { name: 'Thursday, 15 October' }))
+    await waitFor(() => expect(body.queryByRole('grid')).toBeNull())
+    await expect(canvas.getByRole('button', { name: 'Thursday, 15 October' })).toBeVisible()
+  },
+}

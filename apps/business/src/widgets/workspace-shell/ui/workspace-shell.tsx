@@ -59,8 +59,12 @@ export function WorkspaceShell() {
       <style>{TOASTS}</style>
       <ShellSidebar onProfile={openProfile} />
       <ShellSidebar collapsed onProfile={openProfile} />
-      {/* under 768 the tab bar is fixed at the bottom: the page keeps clear of it */}
-      <div className="flex min-w-0 flex-1 flex-col pb-(--tab-bar) sm:pb-0" style={{ '--tab-bar': TAB_BAR_HEIGHT } as CSSProperties}>
+      {/* under 768 the tab bar is fixed at the bottom: the page keeps clear of it; a page as tall as the screen (the
+          calendar's, `flush`) gets exactly its height */}
+      <div
+        className="flex min-w-0 flex-1 flex-col pb-(--tab-bar) sm:pb-0 [&:has(>main[data-fill])]:h-dvh"
+        style={{ '--tab-bar': TAB_BAR_HEIGHT } as CSSProperties}
+      >
         <Outlet />
       </div>
       <ShellTabBar onProfile={openProfile} />

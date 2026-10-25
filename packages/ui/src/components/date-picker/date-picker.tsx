@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useId, useState, type ComponentProps } from 'react'
 import { DayButton, DayPicker, type ClassNames, type Matcher } from 'react-day-picker'
 import { cn } from '../../lib/cn'
@@ -56,6 +56,11 @@ type Common = {
   invalid?: boolean
   disabled?: boolean
   className?: string
+  /**
+   * `field` (default): a form's 48 field with the calendar icon. `title`: a toolbar's day as a title, 17/24 600 with a
+   * chevron, 36 high (B-Calendar `.dbtn`).
+   */
+  look?: 'field' | 'title'
 }
 type Single = Common & { mode?: 'single'; value: Ymd | null; onValueChange: (date: Ymd) => void }
 type Range = Common & { mode: 'range'; value: DateRange | null; onValueChange: (range: DateRange) => void }
@@ -115,7 +120,7 @@ const components = { PreviousMonthButton, NextMonthButton, DayButton: TodayAware
  * its value) and the month.
  */
 export function DatePicker(props: DatePickerProps) {
-  const { today, min, max, isDisabled, copy, className } = props
+  const { today, min, max, isDisabled, copy, className, look = 'field' } = props
   const field = useField()
   const control = useControlProps({ id: props.id, disabled: props.disabled, invalid: props.invalid })
   const valueId = useId()
@@ -201,15 +206,23 @@ export function DatePicker(props: DatePickerProps) {
           {...control}
           aria-labelledby={field ? `${field.labelId} ${valueId}` : undefined}
           className={cn(
-            inputClass,
-            'flex h-12 cursor-pointer items-center justify-between gap-2 text-left disabled:cursor-default disabled:bg-n-50 disabled:text-n-500',
+            look === 'title'
+              ? 'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-s border-0 bg-transparent px-2.5 text-[17px] leading-6 font-semibold tracking-[-0.01em] whitespace-nowrap text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none'
+              : cn(
+                  inputClass,
+                  'flex h-12 cursor-pointer items-center justify-between gap-2 text-left disabled:cursor-default disabled:bg-n-50 disabled:text-n-500',
+                ),
             className,
           )}
         >
           <span id={valueId} className={cn('truncate', !shown && 'text-n-500')}>
             {shown ?? copy.placeholder}
           </span>
-          <CalendarDays aria-hidden className="size-5 flex-none text-n-500" />
+          {look === 'title' ? (
+            <ChevronDown aria-hidden className="size-4.5 flex-none text-n-600" />
+          ) : (
+            <CalendarDays aria-hidden className="size-5 flex-none text-n-500" />
+          )}
         </button>
       </PopoverTrigger>
       <PopoverContent
