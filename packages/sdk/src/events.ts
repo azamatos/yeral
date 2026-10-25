@@ -1,7 +1,6 @@
 /**
  * Live updates (systemPatterns.md "Data flow"): while a screen is open, poll `GET /v1/events?after=<cursor>` about every
- * 10 s, when the tab becomes visible again and after the person's own mutations, and invalidate what each event touches;
- * while it runs, queries don't read again on focus (the feed's poll there does it once, for what changed).
+ * 10 s, when the tab becomes visible again and after the person's own mutations, and invalidate what each event touches.
  * The endpoint needs a user, so polling waits until `me` (`sdk.me.get()`) says someone is signed in; hidden tabs and
  * offline devices skip their turn (TanStack's focus and online managers). A push channel can replace this later without
  * changing screens.
@@ -84,12 +83,14 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
       cursor = null
       return
     }
-    if (!focusManager.isFocused() || !onlineManager.isOnline()) return
     try {
+      // the starting point even in a hidden tab: one opened in the background then hears, when it's first looked at,
+      // what changed after its screens loaded (the lists held for minutes, the switcher's, wouldn't read again)
       if (cursor === null) {
         cursor = (await call(client.v1.events.$get({ query: {} }))).cursor
         return
       }
+      if (!focusManager.isFocused() || !onlineManager.isOnline()) return
       const page = await call(client.v1.events.$get({ query: { after: cursor } }))
       cursor = page.cursor
       const stale = new Map<string, readonly unknown[]>()
@@ -124,11 +125,6 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
     return running
   }
 
-  // a return to the tab polls the feed, which refreshes what changed while away: every query reading again on focus
-  // too would read it all twice (the client site, which runs no feed, keeps TanStack's focus refetch)
-  const defaults = queryClient.getDefaultOptions()
-  queryClient.setDefaultOptions({ ...defaults, queries: { ...defaults.queries, refetchOnWindowFocus: false } })
-
   const meHash = hashKey(keys.me())
   let wasSignedIn = signedIn()
   const unsubscribe = [
@@ -156,7 +152,6 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
       stopped = true
       clearInterval(timer)
       for (const off of unsubscribe) off()
-      queryClient.setDefaultOptions(defaults)
     },
   }
 }

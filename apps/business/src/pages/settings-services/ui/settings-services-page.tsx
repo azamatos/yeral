@@ -172,7 +172,7 @@ function GroupNameField({
   initial,
   saveLabel,
   savingLabel,
-  pending,
+  pending = false,
   size,
   onSave,
   onCancel,
@@ -180,8 +180,9 @@ function GroupNameField({
 }: {
   initial: string
   saveLabel: string
-  savingLabel: string
-  pending: boolean
+  /** While `pending`: the save button's spinner label. A rename closes at once, so it has neither. */
+  savingLabel?: string
+  pending?: boolean
   size: 'm' | 's'
   onSave: (name: string) => void
   onCancel: () => void
@@ -292,8 +293,6 @@ function RenameGroup({
         initial={name}
         size="s"
         saveLabel={t('renameSave')}
-        savingLabel={t('renaming')}
-        pending={false}
         onCancel={onDone}
         onSave={(next) => {
           if (next !== name) onSave(next)
@@ -337,6 +336,8 @@ function Group({
   const removeGroup = useMutation(sdk.settings.deleteGroup(slug))
   // here, not in the name box: the box closes at once, and the answer's toast still comes
   const rename = useMutation(sdk.settings.renameGroup(slug))
+  // the name on its way shows meanwhile, whatever a refresh of the menu brings
+  const shown = rename.isPending && rename.variables ? localized(rename.variables.name, locale) : name
   const headId = useId()
   const actions = useRef<HTMLButtonElement>(null)
   const [renaming, setRenaming] = useState(false)
@@ -347,11 +348,11 @@ function Group({
     <div role="group" aria-labelledby={headId} className="overflow-hidden rounded-card border border-n-200 bg-n-0">
       <div className="flex min-h-14 flex-wrap items-center gap-x-2 gap-y-1 border-b border-n-200 bg-group py-2 pr-2 pl-4 @max-[520px]:pl-3">
         <h3 id={headId} className={`m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900 ${renaming ? 'sr-only' : ''}`}>
-          {name}
+          {shown}
         </h3>
         {renaming ? (
           <RenameGroup
-            name={name}
+            name={shown}
             inputRef={renameInput}
             onSave={(next) =>
               rename.mutate(
@@ -391,6 +392,8 @@ function Group({
               {t('addHereMenu')}
             </MenuItem>
             <MenuItem
+              // one rename at a time: answers coming back out of order would show the older name
+              disabled={rename.isPending}
               onSelect={() => {
                 toRename.current = true
                 setRenaming(true)
@@ -490,8 +493,9 @@ function ServiceRow({
       : team.people.length === 1 && team.people[0]
         ? team.people[0].name
         : t('specialists', { n: team.people.length }))
-  // the menu shows the switch where it's going at once, and back where it was if the api refuses
-  const online = service.online
+  // the menu shows the switch where it's going at once, and back where it was if the api refuses; while it saves, where
+  // it's going, whatever a refresh of the menu brings meanwhile
+  const online = update.isPending && update.variables?.online !== undefined ? update.variables.online : service.online
 
   const flip = (on: boolean) => {
     if (update.isPending) return

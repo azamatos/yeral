@@ -102,8 +102,9 @@ export type SearchParams = Omit<Params<typeof searchQuerySchema, 'lang'>, 'curso
 const abortWith = (signal: AbortSignal) => ({ init: { signal } })
 
 /**
- * How long the person, their workspaces and their setup draft stay fresh: they change only through the person's own
- * mutations and the live events, and both refresh them, so a new page or a return to the tab needn't read them again.
+ * How long the person's workspaces and setup draft stay fresh (the business app's, which runs the live events): they
+ * change only through the person's own mutations and the events, and both refresh them, so a new page or a return to
+ * the tab needn't read them again.
  */
 const LONG_STALE = 5 * 60_000
 
@@ -113,6 +114,13 @@ type Workspaces = z.infer<typeof workspaceListSchema>
 /** The menu with one service changed. */
 function withService<S extends { id: string }, M extends { groups: { services: S[] }[] }>(menu: M, id: string, change: (s: S) => S): M {
   return { ...menu, groups: menu.groups.map((g) => ({ ...g, services: g.services.map((s) => (s.id === id ? change(s) : s)) })) }
+}
+
+type GroupName = Menu['groups'][number]['name']
+
+/** The menu with one group's name changed. */
+function withGroupName(menu: Menu, id: string, name: GroupName): Menu {
+  return { ...menu, groups: menu.groups.map((g) => (g.id === id ? { ...g, name } : g)) }
 }
 
 export function createSdk(client: Client, queryClient: QueryClient) {
@@ -134,7 +142,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     },
     onError: (_error: unknown, _vars: V, context: { before: T | undefined } | undefined) => {
       if (context?.before !== undefined) queryClient.setQueryData<T>(queryKey, context.before)
-      return invalidate(queryKey)
+      // not waited for: the screen hears why at once
+      void invalidate(queryKey)
     },
   })
 
@@ -274,8 +283,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
             throw e
           }
         },
-        // changed by the person's own mutations or the events (team changes; a 401 asks again): no reading on every page
-        staleTime: LONG_STALE,
+        staleTime: 60_000,
       }),
     update: () =>
       mutationOptions({
@@ -554,13 +562,17 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         // refresh it: no reading again on every page
         staleTime: LONG_STALE,
       }),
-    /** Remembers the workspace opened last: the cached list says so at once, nothing else in it changes. */
+    /**
+     * Remembers the workspace opened last: the cached list says so at once (a refresh on its way may say the old one; the
+     * shell asks again then), nothing else in it changes. Refused, the list is read again.
+     */
     open: () =>
       mutationOptions({
         mutationFn: (slug: string) => call(v1.me.workspaces[':slug'].open.$post({ param: { slug } })),
         onMutate: (slug) => {
           queryClient.setQueryData<Workspaces>(keys.workspaces(), (list) => list && { ...list, current: slug })
         },
+        onError: () => void invalidate(keys.workspaces()),
       }),
     /** Open and expired invites for the signed-in phone (shown at sign-in). */
     myInvites: () =>
@@ -858,8 +870,10 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         ...instant<Menu, { serviceId: string; online?: boolean }>(keys.menu(slug), (menu, { serviceId, online }) =>
           online === undefined ? menu : withService(menu, serviceId, (s) => ({ ...s, online })),
         ),
-        onSuccess: (saved) => {
-          queryClient.setQueryData<Menu>(keys.menu(slug), (menu) => menu && withService(menu, saved.id, () => saved))
+        onSuccess: (saved, { groupId }) => {
+          // moved to another group, it waits for the menu's refresh to show there
+          if (groupId === undefined)
+            queryClient.setQueryData<Menu>(keys.menu(slug), (menu) => menu && withService(menu, saved.id, () => saved))
           return settingsChanged(slug)
         },
       }),
@@ -884,14 +898,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: ({ groupId, ...json }: { groupId: string } & z.input<typeof groupInputSchema>) =>
           call(w.services.groups[':groupId'].$patch({ param: { slug, groupId }, json })),
-        ...instant<Menu, { groupId: string; name: Menu['groups'][number]['name'] }>(keys.menu(slug), (menu, { groupId, name }) => ({
-          groups: menu.groups.map((g) => (g.id === groupId ? { ...g, name } : g)),
-        })),
+        ...instant<Menu, { groupId: string; name: GroupName }>(keys.menu(slug), (menu, { groupId, name }) =>
+          withGroupName(menu, groupId, name),
+        ),
         onSuccess: (group) => {
-          queryClient.setQueryData<Menu>(
-            keys.menu(slug),
-            (menu) => menu && { groups: menu.groups.map((g) => (g.id === group.id ? { ...g, name: group.name } : g)) },
-          )
+          queryClient.setQueryData<Menu>(keys.menu(slug), (menu) => menu && withGroupName(menu, group.id, group.name))
           return settingsChanged(slug)
         },
       }),

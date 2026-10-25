@@ -169,11 +169,8 @@ function Steps({
     try {
       // the sdk refreshes the draft (`GET /v1/me/setup`) before these resolve, so the next step finds it
       if (!draft) await start.mutateAsync(values)
-      else if (edited) {
-        await updateProfile.mutateAsync(values)
-        // the profile's save refreshes the settings, not the draft's name and category
-        await queryClient.invalidateQueries({ queryKey: sdk.setup.mine().queryKey })
-      }
+      // the profile's save refreshes the draft too (its name and category) before it resolves
+      else if (edited) await updateProfile.mutateAsync(values)
       return true
     } catch (error) {
       // a draft made meanwhile (another tab): the wizard goes on with that one

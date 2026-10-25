@@ -465,24 +465,17 @@ describe('live events', () => {
     try {
       focusManager.setFocused(false)
       f.queryClient.setQueryData(keys.me(), me)
+      // a hidden tab takes its starting point (what changes after its screens load reaches it later), then waits
+      await vi.waitFor(() => expect(polls(f)).toEqual(['']))
       await events.poll()
-      expect(polls(f)).toEqual([])
+      expect(polls(f)).toEqual([''])
       // back on the tab: catch up at once
       focusManager.setFocused(true)
-      await vi.waitFor(() => expect(polls(f)).toEqual(['']))
+      await vi.waitFor(() => expect(polls(f)).toEqual(['', '?after=7']))
     } finally {
       events.stop()
       focusManager.setFocused(undefined)
     }
-  })
-
-  it('while it runs, queries don’t read again on focus: the poll there refreshes what changed', () => {
-    const f = eventsFixture()
-    expect(f.queryClient.getDefaultOptions().queries?.refetchOnWindowFocus).toBeUndefined()
-    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000 })
-    expect(f.queryClient.getDefaultOptions().queries?.refetchOnWindowFocus).toBe(false)
-    events.stop()
-    expect(f.queryClient.getDefaultOptions().queries?.refetchOnWindowFocus).toBeUndefined()
   })
 
   it('signing in starts polling at once; a 401 asks who is signed in again', async () => {
@@ -607,6 +600,17 @@ describe('instant changes (ADR 0011)', () => {
     expect(f.queryClient.getQueryData<CachedMenu>(keys.menu(slug))?.groups[0]?.services).toEqual([saved, menu().groups[0]!.services[1]])
   })
 
+  it('a service moved to another group waits for the menu’s refresh to show there', async () => {
+    const f = held(`/v1/w/${slug}/services/s1`, () => json(200, { id: 's1', name: { en: 'Cut' }, online: true, groupId: 'g2' }))
+    f.queryClient.setQueryData(keys.menu(slug), menu())
+    const done = new MutationObserver(f.queryClient, f.sdk.settings.updateService(slug)).mutate({ serviceId: 's1', groupId: 'g2' })
+    await vi.waitFor(() => expect(f.calls).toHaveLength(1))
+    f.release()
+    await done
+    expect(f.queryClient.getQueryData(keys.menu(slug))).toEqual(menu())
+    expect(f.queryClient.getQueryState(keys.menu(slug))?.isInvalidated).toBe(true)
+  })
+
   it('a refused switch goes back and asks for the menu again', async () => {
     const f = held(`/v1/w/${slug}/services/s1`, refused)
     f.queryClient.setQueryData(keys.menu(slug), menu())
@@ -705,8 +709,17 @@ describe('fewer reads', () => {
     expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual(staleKeys({ type: 'business.updated', business: slug, bookingCode: null }))
   })
 
-  it('the person, their workspaces and their draft stay fresh for minutes: the events and their own changes refresh them', () => {
+  it('the workspaces and the draft stay fresh for minutes (the events and the person’s own changes refresh them); the person a minute', () => {
     const f = fixture(() => json(200, {}))
-    for (const q of [f.sdk.me.get(), f.sdk.team.workspaces(), f.sdk.setup.mine()]) expect(q.staleTime).toBe(5 * 60_000)
+    for (const q of [f.sdk.team.workspaces(), f.sdk.setup.mine()]) expect(q.staleTime).toBe(5 * 60_000)
+    // the client site runs no events feed
+    expect(f.sdk.me.get().staleTime).toBe(60_000)
+  })
+
+  it('a refused open reads the list again', async () => {
+    const f = fixture(() => json(404, { error: { code: 'not_found' } }))
+    f.queryClient.setQueryData(keys.workspaces(), { items: [{ slug: 'a' }, { slug }], current: 'a' })
+    await new MutationObserver(f.queryClient, f.sdk.team.open()).mutate(slug).catch(() => undefined)
+    expect(f.queryClient.getQueryState(keys.workspaces())?.isInvalidated).toBe(true)
   })
 })
