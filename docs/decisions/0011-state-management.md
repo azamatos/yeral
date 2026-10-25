@@ -1,6 +1,6 @@
 # 0011. State management: each kind of state has one owner
 
-- Status: Accepted 2026-10-13
+- Status: Accepted 2026-10-13; amended 2026-10-25 (forms: plain state, no TanStack Form)
 - Decided by: owner (asked for one clear answer) + Claude
 
 ## Context
@@ -17,7 +17,7 @@ be mechanical.
 |---|---|---|
 | Server data | **TanStack Query** through `@yeral/sdk` | salons, availability, bookings, reviews, the session (`me`) |
 | Anything a link should reproduce | **TanStack Router search params**, validated by zod | search filters, booking wizard (`?svc=&staff=&date=&time=&step=`), calendar `date/view/staff`, the open drawer's booking id |
-| A form being filled in | **TanStack Form** (`useAppForm` with field components from `@yeral/ui`) | profile, service editor, booking rules, phone + code |
+| A form being filled in | a **form hook in the owning slice** (amended 2026-10-25): `useState` for the values, started from the query, rules as plain functions in `model/` with unit tests, the save mutation sending only what changed | profile, service editor, booking rules, phone + code |
 | One component or a small subtree | `useState` / `useReducer` (lift up; Context only for compound components) | popover open, hovered slot |
 | Client-only state shared by distant components | **Zustand** store in the owning slice's `model/` | calendar zoom, drag in progress, multi-select, command palette |
 | Preferences that survive reload on this device | Zustand `persist` over safe storage | list/map toggle, last district, calendar density |
@@ -25,7 +25,7 @@ be mechanical.
 | Changes made elsewhere | events feed → `queryClient.invalidateQueries` | the salon confirmed → the client's screen refreshes |
 
 Decision tree, in order: comes from the server? → Query. Should a shared link restore it? → URL. Is it unsaved form
-input? → Form. Used by one subtree? → `useState`. Otherwise → a Zustand store in the slice that owns it.
+input? → the slice's form hook. Used by one subtree? → `useState`. Otherwise → a Zustand store in the slice that owns it.
 
 Rules:
 
@@ -43,9 +43,8 @@ Rules:
   hydration through the router. The thing a global store would otherwise re-implement badly.
 - **Router search params**: shareable, back-button friendly, visible to SSR, survives reload; TanStack Router types and
   validates them with zod.
-- **TanStack Form** over React Hook Form: works cleanly with React Compiler (subscriptions through selectors instead of
-  RHF's mutable `watch`/`formState` pattern), fully typed nested fields, zod validators directly (Standard Schema), same
-  family as Router/Query/Table; `createFormHook` binds our design-system fields so forms stay short.
+- ~~**TanStack Form**~~ (dropped 2026-10-25, see the amendment): chosen at first over React Hook Form for React
+  Compiler and typed nested fields, never installed.
 - **Zustand**: tiny, no provider, selector-based (re-renders only readers), usable outside React (events poller, keyboard
   shortcuts), easy to find (one file in `model/`).
 
@@ -56,3 +55,14 @@ Rules:
 - **MobX / Valtio**: implicit reactivity through proxies; harder to trace and at odds with React Compiler's assumptions.
 - **React Context as a store**: re-renders every consumer on each change; fine for dependencies only.
 - **React Hook Form**: more examples online, but friction with React Compiler and weaker typing of nested fields.
+- **TanStack Form** (the first choice, dropped 2026-10-25): typed nested fields and zod validators, but a layer the forms
+  didn't need; none of the apps' forms used it.
+
+## Amendment 2026-10-25: forms are plain state
+
+The owner, 2026-10-25: "Go with recommendation. The main idea is not overcomplicating things." By then every form in
+both apps (the logins, the setup wizard's steps, the Settings sections, My account) was a hook in its slice holding
+`useState`, started from the query, with its rules as tested functions in `model/` (`useRulesForm`, `useHoursStep`, the
+profile form), and TanStack Form was never installed. The decision now says what the code does: a form is the owning
+slice's hook (values in `useState`, rules in `model/`, a mutation that sends what changed, Discard back to the query's
+data). A library comes in only when a form outgrows that (many dynamic nested fields), through a new amendment.
