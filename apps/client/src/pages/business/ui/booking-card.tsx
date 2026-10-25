@@ -3,11 +3,12 @@ import type { BusinessDetail } from '@yeral/contract/catalog'
 import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
+import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
 import { CalendarX2, CircleCheck, Clock, MapPin, Phone, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { nextFreeText, openLine, todayHours } from '../model/when'
+import { dayHours, openLine } from '../model/when'
 import { selectionTotal } from '../model/selection'
 import type { BookingState } from './business-page'
 import { FavouriteButton } from './favourite'
@@ -29,15 +30,19 @@ function InfoRow({ icon, children, className }: { icon: ReactNode; children: Rea
 function PlaceRows({ detail }: { detail: Detail }) {
   const t = useTranslations('business')
   const fmt = useFmt()
-  const day = today()
-  const hours = todayHours(detail.hours, day, fmt)
-  const open = openLine(detail.open, day, fmt, t)
+  const now = useClock()
+  const hours = dayHours(detail, now, fmt)
+  const open = openLine(detail.open, today(now), fmt, t)
   return (
     <>
       <InfoRow icon={<Clock aria-hidden />}>
         <span>
-          {hours ? t('card.today', { hours }) : t('card.closedToday')} ·{' '}
-          <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>{open.text}</span>
+          {'hours' in hours
+            ? t('card.today', { hours: hours.hours })
+            : hours.reason
+              ? t('card.closedFor', { reason: hours.reason })
+              : t('card.closedToday')}{' '}
+          · <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>{open.text}</span>
         </span>
       </InfoRow>
       <InfoRow icon={<MapPin aria-hidden />}>
@@ -81,6 +86,14 @@ function CallLink({
       </a>
     </Button>
   )
+}
+
+/** «Today 15:30», «Tomorrow 10:00», «Fri, 16 Oct 10:00»: the next free time on the card and the bar. */
+function useNextFree(next: Detail['nextFree']): string | null {
+  const t = useTranslations('business.card')
+  const fmt = useFmt()
+  const now = useClock()
+  return next ? t('at', { day: fmt.relativeShortDate(next.date, today(now)), time: fmt.time(next.start) }) : null
 }
 
 /** How the business answers (`typicalConfirmMinutes`, book Q-113): within its usual time, by hand, or at once. */
@@ -144,11 +157,11 @@ export function BookingCard({
 }) {
   const t = useTranslations('business')
   const fmt = useFmt()
-  const day = today()
+  const next = useNextFree(detail.nextFree)
   const card = 'sticky top-6 rounded-card border border-n-200 bg-n-0 p-6'
   if (state === 'phone-only')
     return (
-      <div className={cn(card, 'max-lg:static')}>
+      <div className={cn(card, 'max-md:static')}>
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-3.5">
             <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-pill bg-group text-n-900">
@@ -159,12 +172,12 @@ export function BookingCard({
               <p className="m-0 text-body text-pretty text-n-600">{t('restricted.lead')}</p>
             </div>
           </div>
-          <div className="flex flex-col gap-3 max-lg:hidden">
+          <div className="flex flex-col gap-3 max-md:hidden">
             <span className="text-[22px] leading-7 font-bold tracking-[-0.01em] tabular-nums">{fmt.phone(detail.phone)}</span>
             <CallLink phone={detail.phone} className="w-full" />
           </div>
-          <div className="h-px bg-n-200 max-lg:hidden" />
-          <div className="flex flex-col gap-4 max-lg:hidden">
+          <div className="h-px bg-n-200 max-md:hidden" />
+          <div className="flex flex-col gap-4 max-md:hidden">
             <PlaceRows detail={detail} />
           </div>
         </div>
@@ -192,7 +205,6 @@ export function BookingCard({
     )
   const disabled = state === 'preview'
   if (picked.length === 0) {
-    const next = nextFreeText(detail.nextFree, day, fmt)
     return (
       <div className={card}>
         <div className="flex flex-col gap-5">
@@ -296,7 +308,8 @@ export function BookingCard({
 export function BookingBar({ detail, state, picked }: { detail: Detail; state: BookingState; picked: readonly Service[] }) {
   const t = useTranslations('business')
   const fmt = useFmt()
-  const bar = 'sticky bottom-0 z-10 flex items-center justify-between gap-4 border-t border-n-200 bg-n-0 px-6 py-3 lg:hidden max-sm:px-4'
+  const next = useNextFree(detail.nextFree)
+  const bar = 'sticky bottom-0 z-10 flex items-center justify-between gap-4 border-t border-n-200 bg-n-0 px-6 py-3 md:hidden max-sm:px-4'
   if (state === 'phone-only' || state === 'paused')
     return (
       <div role="region" aria-label={t('card.label')} className={bar}>
@@ -311,7 +324,6 @@ export function BookingBar({ detail, state, picked }: { detail: Detail; state: B
       </div>
     )
   const total = selectionTotal(picked)
-  const next = nextFreeText(detail.nextFree, today(), fmt)
   return (
     <div role="region" aria-label={t('card.label')} className={bar}>
       <div className="flex min-w-0 flex-col">

@@ -15,7 +15,8 @@ export const Route = createFileRoute('/$lang/_site/b/$slug')({
   loader: async ({ context, params }) => {
     const lang = siteLocale(params.lang)
     const detail = await context.queryClient.ensureQueryData(context.sdk.catalog.business(params.slug, lang)).catch((error: unknown) => {
-      if (isApiError(error, 'not_found')) notFound({ throw: true })
+      // an address no page can have (capitals, `_`, too long) is refused before any lookup: no page either
+      if (isApiError(error, 'not_found') || isApiError(error, 'validation_error')) notFound({ throw: true })
       if (isApiError(error, 'in_review')) notFound({ data: NOT_OPEN, throw: true })
       throw error
     })
@@ -27,7 +28,7 @@ export const Route = createFileRoute('/$lang/_site/b/$slug')({
     pageHead(siteLocale(params.lang), {
       path: `/b/${params.slug}`,
       title: loaderData ? () => loaderData.name : undefined,
-      description: loaderData ? () => `${loaderData.name} · ${loaderData.category}` : undefined,
+      description: loaderData ? (t) => t('business.description', { name: loaderData.name, category: loaderData.category }) : undefined,
       // the owner's own page in review is theirs alone
       noindex: loaderData?.preview ?? false,
     }),

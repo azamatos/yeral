@@ -21,5 +21,18 @@
 - Stories: `Client/Pages/Business` (13: picking and the total, chips, hidden and mixed prices, example, preview,
   paused, phone-only, closed, the heart, phone widths) with `GLOW` and `businessApi()` in `shared/storybook` for the
   next client PRs; `Client/Pages/NotFound` › NotOpen.
+- Review (one round, 15 findings, 13 fixed): the card and bar switch at 1024 (`md`; this theme's `lg` is 1280), the
+  drawn 18 and 16 px sizes (no `text-lg`/`text-base` here), an address the api refuses (`validation_error`) is a 404
+  and `/b/` lowers its case, the card's hours through `currentBusinessDate` / `businessDay` with the special days
+  (closed: «Closed today · Holiday»), no heart on the owner's preview (favourites take public pages only), Share
+  catches a refused clipboard, a chip whose group went falls back to All, the not-open words promise no 24 hours
+  (the api answers `in_review` for a rejected page too), the card's «Today» from `useClock()` like the header, the
+  booking route's not-open page and old-address redirect, `{brand}` in the six new messages, the description, the
+  next free time and the photo count as messages, «New address» straight from `movedAt` (the api sends it for the 30
+  days only), the photo count's words for screen readers in a hidden span. Not fixed: the heart reads the person's
+  whole favourites list (`GET /me/favorites`) to know one page; a `favourite` flag on the business page's answer would
+  do it in one request (an api change, follow-up); and Venue's own words for a closed day's line stay as drawn.
+- Departs from the board: «This page hasn't opened yet» says the page opens once approved, not «usually 24 hours».
+- Next: U2's `Price` (#212) can replace the card's price lines in C2.
 - Left for C2 (needs U3): the tabs, specialists, reviews, about (hours, map, rules), nearby places, the photo viewer
   («All photos»); the search header with its query bar (slice 5); JSON-LD (slice 5's search-engine pages).

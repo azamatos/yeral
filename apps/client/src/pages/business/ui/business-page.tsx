@@ -14,6 +14,7 @@ import { Pill } from '@yeral/ui/pill'
 import { Rating } from '@yeral/ui/rating'
 import { toast } from '@yeral/ui/toast'
 import { Clock, MapPin, Share2 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
@@ -35,9 +36,6 @@ export function bookingState(detail: Pick<BusinessDetail, 'preview' | 'onlineEna
   if (!detail.onlineEnabled) return 'paused'
   return detail.bookOnline ? 'online' : 'phone-only'
 }
-
-/** The 30 days a moved business shows «New address» for (book Q-215). */
-const MOVED_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
 /**
  * `/{lang}/b/{slug}` — the business page (Venue, book C-06, C-08–C-11, C-15): the header with the photos, the services
@@ -79,7 +77,7 @@ export function BusinessPage() {
           </div>
           <aside
             aria-label={t('card.label')}
-            className={cn('min-w-0 flex-[1_1_340px]', state === 'phone-only' ? 'max-lg:order-first max-lg:basis-full' : 'max-lg:hidden')}
+            className={cn('min-w-0 flex-[1_1_340px]', state === 'phone-only' ? 'max-md:order-first max-md:basis-full' : 'max-md:hidden')}
           >
             <BookingCard
               detail={detail}
@@ -99,17 +97,18 @@ export function BusinessPage() {
 /** The owner's own page while Ýeral checks it, or after it said no or hid it (Venue `ownerPreview`, Q-274). */
 function PreviewBanner({ preview }: { preview: NonNullable<BusinessDetail['preview']> }) {
   const t = useTranslations('business.preview')
-  const b = (chunks: React.ReactNode) => <b>{chunks}</b>
+  const brand = useTranslations('common')('brand')
+  const b = (chunks: ReactNode) => <b>{chunks}</b>
   const text =
     preview.status === 'pending'
       ? t.rich('pending', { b })
       : preview.status === 'rejected'
         ? preview.reason
           ? t.rich('rejected', { b, reason: preview.reason })
-          : t.rich('rejectedNoReason', { b })
+          : t.rich('rejectedNoReason', { b, brand })
         : preview.reason
-          ? t.rich('hidden', { b, reason: preview.reason })
-          : t.rich('hiddenNoReason', { b })
+          ? t.rich('hidden', { b, brand, reason: preview.reason })
+          : t.rich('hiddenNoReason', { b, brand })
   return (
     <Callout layout="banner" tone={preview.status === 'pending' ? 'warning' : 'danger'} icon={<Clock />}>
       {text}
@@ -127,9 +126,9 @@ function Header({ detail }: { detail: BusinessDetail }) {
   const home = useTranslations('notFound')('home')
   const fmt = useFmt()
   const lang = useLocale()
+  const brand = useTranslations('common')('brand')
   const now = useClock()
   const open = openLine(detail.open, today(now), fmt, t)
-  const moved = detail.movedAt !== null && now - detail.movedAt < MOVED_DAYS_MS
   return (
     <div className="flex flex-col gap-5 pt-6 max-sm:gap-4 max-sm:pt-0">
       <Breadcrumbs label={t('crumbs')} className="max-sm:hidden">
@@ -174,19 +173,21 @@ function Header({ detail }: { detail: BusinessDetail }) {
                 {[fmt.addressIn(detail.address, detail.city.name), detail.floor].filter(Boolean).join(', ')}
                 {detail.distanceM !== null && ` · ${t('away', { distance: fmt.distance(detail.distanceM) })}`}
               </span>
-              {moved && <Pill tone="accent">{t('newAddress')}</Pill>}
+              {/* the api sends when it moved only for the 30 days the page says so (book Q-215) */}
+              {detail.movedAt !== null && <Pill tone="accent">{t('newAddress')}</Pill>}
             </div>
             {detail.hideExactAddress && <span className="text-dense">{t('approximate')}</span>}
           </div>
         </div>
         <div className="flex flex-none gap-2">
-          <FavouriteButton slug={detail.slug} />
+          {/* the owner's page in review isn't public: nothing to keep among favourites */}
+          {!detail.preview && <FavouriteButton slug={detail.slug} />}
           <ShareButton name={detail.name} slug={detail.slug} />
         </div>
       </div>
       {detail.example && (
         <Callout tone="neutral" size="s">
-          {detail.confirmMode === 'instant' ? t('exampleInstant') : t('exampleManual')}
+          {detail.confirmMode === 'instant' ? t('exampleInstant', { brand }) : t('exampleManual', { brand })}
         </Callout>
       )}
       <Gallery photos={detail.photos} />
@@ -194,19 +195,25 @@ function Header({ detail }: { detail: BusinessDetail }) {
   )
 }
 
-/** Share (Venue): the phone's share sheet where there is one, else the link copied, with a toast. */
+/**
+ * Share (Venue): the phone's share sheet where there is one, else the link copied, with a toast; a sheet closed by the
+ * person is no error, and anything that fails says so.
+ */
 function ShareButton({ name, slug }: { name: string; slug: string }) {
   const t = useTranslations('business.share')
   const lang = useLocale()
   const share = async () => {
     const url = `${site.urls.client}/${lang}/b/${slug}`
-    if (navigator.share) {
-      // a closed share sheet is no error
-      await navigator.share({ title: name, url }).catch(() => undefined)
-      return
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: name, url })
+        return
+      }
+      await navigator.clipboard.writeText(url)
+      toast(t('copied'))
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) toast(t('failed'))
     }
-    await navigator.clipboard.writeText(url)
-    toast(t('copied'))
   }
   return (
     <Button variant="secondary" iconOnly aria-label={t('label')} onClick={() => void share()}>
@@ -245,11 +252,9 @@ function Gallery({ photos }: { photos: BusinessDetail['photos'] }) {
         ))}
       </div>
       {photos.length > 1 && (
-        <span
-          aria-label={t('photoCount', { n: 1, total: photos.length })}
-          className="absolute right-4 bottom-4 hidden h-7 items-center rounded-pill bg-n-0 px-2.5 text-dense font-semibold text-n-900 max-sm:inline-flex"
-        >
-          1 / {photos.length}
+        <span className="absolute right-4 bottom-4 hidden h-7 items-center rounded-pill bg-n-0 px-2.5 text-dense font-semibold text-n-900 max-sm:inline-flex">
+          <span aria-hidden>{t('photoOf', { n: 1, total: photos.length })}</span>
+          <span className="sr-only">{t('photoCount', { n: 1, total: photos.length })}</span>
         </span>
       )}
     </div>

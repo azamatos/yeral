@@ -127,6 +127,7 @@
   },
   "business": {
     "crumbs": "You are here",
+    "description": "{name} · {category}",
     "reviews": "{count, plural, one {# review} other {# reviews}}",
     "noReviews": "No reviews yet",
     "openUntil": "Open now · until {time}",
@@ -138,14 +139,14 @@
     "newAddress": "New address",
     "approximate": "Approximate area: the exact address comes with a confirmed booking.",
     "example": "Example",
-    "exampleInstant": "This isn't a real business. It's here so you can try Ýeral: bookings are confirmed at once, and nobody waits for you.",
-    "exampleManual": "This isn't a real business. It's here so you can try Ýeral.",
+    "exampleInstant": "This isn't a real business. It's here so you can try {brand}: bookings are confirmed at once, and nobody waits for you.",
+    "exampleManual": "This isn't a real business. It's here so you can try {brand}.",
     "preview": {
       "pending": "<b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link.",
       "rejected": "<b>Your page wasn't approved:</b> {reason}",
-      "rejectedNoReason": "<b>Your page wasn't approved.</b> Fix it in Ýeral Business and send it again.",
-      "hidden": "<b>Ýeral has hidden your page:</b> {reason} Clients can't find or book you.",
-      "hiddenNoReason": "<b>Ýeral has hidden your page.</b> Clients can't find or book you."
+      "rejectedNoReason": "<b>Your page wasn't approved.</b> Fix it in {brand} Business and send it again.",
+      "hidden": "<b>{brand} has hidden your page:</b> {reason} Clients can't find or book you.",
+      "hiddenNoReason": "<b>{brand} has hidden your page.</b> Clients can't find or book you."
     },
     "favourite": {
       "add": "Add to favourites",
@@ -154,9 +155,11 @@
     },
     "share": {
       "label": "Share",
-      "copied": "Link copied"
+      "copied": "Link copied",
+      "failed": "Couldn't share the link. Copy it from the address bar."
     },
     "photoCount": "Photo {n} of {total}",
+    "photoOf": "{n} / {total}",
     "services": {
       "title": "Services",
       "groups": "Service groups",
@@ -174,6 +177,8 @@
       "book": "Book",
       "today": "Today {hours}",
       "closedToday": "Closed today",
+      "closedFor": "Closed today · {reason}",
+      "at": "{day} {time}",
       "confirmsWithin": "Usually confirms within {time}",
       "confirmsByHand": "The business confirms each booking",
       "confirmsAtOnce": "Bookings are confirmed at once",
@@ -197,7 +202,7 @@
     },
     "notOpen": {
       "title": "This page hasn't opened yet",
-      "lead": "The business just joined Ýeral and is being checked. It usually takes 24 hours."
+      "lead": "The business is new on {brand} and its page is being checked. It opens here once it's approved."
     },
     "booking": {
       "title": "Booking",

@@ -14,6 +14,7 @@ export const Route = createFileRoute('/b/$slug')({
     await knowVisitor(context)
     const me = context.queryClient.getQueryData(context.sdk.me.get().queryKey)
     const lang = pickLocale({ saved: me?.lang, accepted: acceptedLanguages(visitorLanguages()) })
-    redirect({ href: `/${lang}/b/${encodeURIComponent(params.slug)}${location.searchStr}`, replace: true, throw: true })
+    // a typed link in capitals still finds its page (addresses are lower case)
+    redirect({ href: `/${lang}/b/${encodeURIComponent(params.slug.toLowerCase())}${location.searchStr}`, replace: true, throw: true })
   },
 })

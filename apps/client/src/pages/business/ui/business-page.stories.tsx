@@ -4,6 +4,7 @@
  * paused page and a client booked by phone only.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { today } from '@yeral/domain/time'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { AYJEMAL, businessApi, GLOW, PageStory } from '@/shared/storybook'
 import { BusinessPage } from './business-page'
@@ -119,11 +120,17 @@ export const PhoneOnly: Story = {
   },
 }
 
-/** Closed now: when it opens next, in grey. */
+/** Closed today for a special day (States 06): its name on the card, when it opens next in grey. */
 export const Closed: Story = {
-  args: { server: businessApi({ business: { ...GLOW, open: { open: false, inDays: 1, at: 540 } } }) },
+  args: {
+    server: businessApi({
+      business: { ...GLOW, open: { open: false, inDays: 1, at: 540 }, specialDays: [{ date: today(), name: 'Holiday', hours: null }] },
+    }),
+  },
   play: async ({ canvas }) => {
-    await expect((await canvas.findAllByText('Closed · opens tomorrow at 09:00'))[0]).toBeVisible()
+    const card = within(await canvas.findByRole('complementary', { name: 'Booking' }))
+    await expect(card.getByText(/Closed today · Holiday/)).toBeVisible()
+    await expect(card.getByText('Closed · opens tomorrow at 09:00')).toBeVisible()
   },
 }
 
@@ -143,7 +150,7 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Booking' }))
     await expect(bar.getByRole('link', { name: 'Book' })).toBeVisible()
-    await expect(canvas.getByLabelText('Photo 1 of 5')).toBeVisible()
+    await expect(canvas.getByText('Photo 1 of 5')).toBeInTheDocument()
   },
 }
 
@@ -165,5 +172,15 @@ export const PhoneOnlyPhone: Story = {
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Booking' }))
     await expect(bar.getByRole('link', { name: 'Call +993 12 45 67 89' })).toBeVisible()
+  },
+}
+
+/** Laptop 1024 (Venue: the aside from 1024): the booking card beside the services, no bar. */
+export const Laptop: Story = {
+  globals: { viewport: { value: 'md' } },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('complementary', { name: 'Booking' }))
+    await expect(card.getByRole('link', { name: 'Book' })).toBeVisible()
+    await expect(canvas.queryByRole('region', { name: 'Booking' })).toBeNull()
   },
 }

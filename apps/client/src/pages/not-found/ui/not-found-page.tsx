@@ -37,7 +37,7 @@ export function NotFoundPage({ notOpen = false }: { notOpen?: boolean }) {
         )}
         <h1 className="m-0 text-h3">{title}</h1>
         <p className={`m-0 text-body text-pretty text-n-600 ${notOpen ? 'max-w-95' : 'max-w-90'}`}>
-          {notOpen ? t('business.notOpen.lead') : t('notFound.lead')}
+          {notOpen ? t('business.notOpen.lead', { brand: t('common.brand') }) : t('notFound.lead')}
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-3">
           <Button asChild variant="primary">
