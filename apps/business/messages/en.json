@@ -1421,6 +1421,8 @@
       "show": "Show",
       "showPrevious": "Show the previous time",
       "showNew": "Show the new time",
+      "fits": "{n, plural, one {{names} is free at the new time} other {{names} are free at the new time}} — you can confirm.",
+      "doesntFit": "{n, plural, one {{names} isn’t free at the new time} other {{names} aren’t free at the new time}} — you can’t confirm.",
       "moveCaption": "If you confirm, the booking moves to the new time and the client is notified. If you decline, it stays at its time.",
       "previousTime": "Previous time",
       "newTime": "New time",

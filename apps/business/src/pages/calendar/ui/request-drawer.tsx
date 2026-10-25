@@ -131,7 +131,13 @@ export function RequestDrawer({
               <Button variant="secondary" disabled={answering} onClick={() => setDeclining(request)}>
                 {t('decline')}
               </Button>
-              <Button variant="primary" onClick={() => answer(request)} loading={answering && confirm.variables === request.code}>
+              <Button
+                variant="primary"
+                // a move that doesn't fit now can't be confirmed (the api refuses it by the same rule)
+                disabled={request.fits === false}
+                onClick={() => answer(request)}
+                loading={answering && confirm.variables === request.code}
+              >
                 {request.kind === 'move' ? t('confirmMove') : t('confirm')}
               </Button>
             </DrawerFooter>
@@ -216,7 +222,8 @@ function RequestBody({
     r.items.map((i) => i.service),
     'plus',
   )
-  const staff = join([...new Set(r.items.flatMap((i) => (i.staff ? [i.staff] : [])))], 'list')
+  const names = [...new Set(r.items.flatMap((i) => (i.staff ? [i.staff] : [])))]
+  const staff = join(names, 'list')
   // whose column a phone shows when Show goes to the day
   const specialist = r.items.find((i) => i.staffId)?.staffId ?? undefined
   const when = (date: string, start: number, end: number) => t('when', { date: fmt.weekdayDate(date), time: fmt.timeRange(start, end) })
@@ -274,7 +281,17 @@ function RequestBody({
               onShow={() => onShow(r.date, specialist)}
             />
           }
-          footer={<span className="text-dense text-n-600">{t('moveCaption')}</span>}
+          footer={
+            <>
+              {/* B-Calendar's fit line: free at the new time or not, by the confirm's own rule */}
+              {r.fits !== null && staff && (
+                <span className={cn('text-dense font-medium', r.fits ? 'text-st-completed-ink' : 'text-st-pending-ink')}>
+                  {t(r.fits ? 'fits' : 'doesntFit', { n: names.length, names: staff })}
+                </span>
+              )}
+              <span className="text-dense text-n-600">{t('moveCaption')}</span>
+            </>
+          }
         />
       )}
       <div className="flex flex-col gap-2">
