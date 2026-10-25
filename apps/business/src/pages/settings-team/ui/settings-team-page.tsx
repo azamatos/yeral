@@ -169,6 +169,11 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
         myPhone={myPhone}
         returnFocus={opener}
         onClose={() => setOpenId(null)}
+        onRemoved={() => {
+          // their row moves to «No longer on the team» without the button that opened the drawer
+          opener.current = addButton.current
+          setOpenId(null)
+        }}
         onLink={(name, url) => setLink({ name, url })}
       />
       <Modal open={link !== null} onOpenChange={(open) => !open && setLink(null)}>

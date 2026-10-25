@@ -15,4 +15,13 @@
 - Decided (Claude, delegated; chapter 9, 25.10.2026, B-50 (how)): the window asks first and lists the bookings after
   the first Remove (the api's 409 is the only list of what's ahead; the board shows it at once and says «has no
   upcoming bookings» when there are none); «To» sits under the cards, as a card is a radio button.
-- Follow-ups: Team PR 3b-2 (Hours with time off in the drawer).
+- Review (one round, 12 findings): with Move every listed booking goes with its own fallback (Keep it unless
+  changed), so one the colleague can't take then (busy, away) isn't cancelled unasked; Move is offered only when all
+  bookings ahead are listed (the api lists 50); «Nobody else does …» names only this person's part of a shared
+  booking; «Moves to Leýli» is said, not only drawn; each row's choice names the client and the time; the focus goes to
+  «Add a team member» after a removal; the footer keeps its full-width buttons where there's no Remove; the
+  window's words come from `affected` where they're the same; the mutation lives in one place.
+- Follow-ups: Team PR 3b-2 (Hours with time off in the drawer); settling the bookings of someone who left (B-15,
+  the board's «Someone left» banner and toast) with this window, which then moves to `features/remove-staff`
+  (COMPONENTS.md); `useJoin` is a general joiner and could live in `@/shared/i18n`; the hours' modal and this one could
+  share their body in `entities/booking`.

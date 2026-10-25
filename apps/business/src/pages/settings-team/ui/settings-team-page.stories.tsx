@@ -121,6 +121,9 @@ const scheduleOf = (id: string) => ({
   daysOff: [],
 })
 
+/** The rows the last removal sent: what happens to each booking the colleague can't take. */
+let removalRows: { code: string; affected: string }[] | null = null
+
 /** Maral's bookings ahead as a removal lists them: one Leýli can take, one nobody else does. */
 const maralAhead = {
   count: 2,
@@ -198,6 +201,7 @@ const fakeApi =
       if (removing) {
         const body = (await request.json()) as { affected?: string; rows?: { code: string; affected: string }[] }
         if (removing[1] === 'maral' && !body.affected) return json({ error: { code: 'bookings_affected', details: maralAhead } }, 409)
+        removalRows = body.rows ?? null
         people = people.map((p) => (p.id === removing[1] ? { ...p, status: 'removed' as const } : p))
         const cancelled = body.affected === 'cancel' ? 2 : (body.rows ?? []).filter((r) => r.affected === 'cancel').length
         const moved = body.affected === 'move' ? 1 : 0
@@ -534,6 +538,8 @@ export const DrawerOwner: Story = {
     await userEvent.click(drawer.getByRole('tab', { name: 'Access level' }))
     await expect(await drawer.findByText(/^Owner — every permission, including the team/)).toBeVisible()
     await expect(drawer.queryByRole('switch')).toBeNull()
+    // the owner can't be removed
+    await expect(drawer.queryByRole('button', { name: 'Remove from the team' })).toBeNull()
   },
 }
 
@@ -546,6 +552,7 @@ export const DrawerAdmin: Story = {
     await expect(drawer.getByText('Only the owner changes names, phone numbers and access levels.')).toBeVisible()
     await expect(drawer.getByLabelText('Name clients see')).toBeDisabled()
     await expect(drawer.queryByRole('button', { name: 'Save' })).toBeNull()
+    await expect(drawer.queryByRole('button', { name: 'Remove from the team' })).toBeNull()
     await userEvent.click(drawer.getByRole('tab', { name: 'Services' }))
     await userEvent.click(await drawer.findByRole('checkbox', { name: /Manicure/ }))
     await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
@@ -569,13 +576,38 @@ export const RemoveWithBookings: Story = {
     await expect(modal.getByRole('combobox', { name: 'To' })).toHaveDisplayValue('Leýli Berdiýewa')
     await expect(modal.getByText('2 bookings')).toBeVisible()
     await expect(modal.getByText('Nobody else does Gel polish')).toBeVisible()
-    await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Mähri G.: what happens' }), 'cancel')
+    await expect(modal.getByText('Moves to Leýli Berdiýewa')).toBeVisible()
+    await userEvent.selectOptions(modal.getByRole('combobox', { name: /^Mähri G\., .*: what happens$/ }), 'cancel')
     await userEvent.click(modal.getByRole('button', { name: 'Remove Maral' }))
     const done = await body.findByText(
       'Maral removed from the team · 1 moved to Leýli Berdiýewa, 1 cancelled with 3 other times offered · the clients are notified',
     )
     await waitFor(() => expect(done).toBeVisible())
+    // every row goes with what happens if Leýli can't take it then: Keep it unless changed
+    await expect(removalRows).toEqual([
+      { code: 'YR-48213', affected: 'keep' },
+      { code: 'YR-48214', affected: 'cancel' },
+    ])
     await expect(body.queryByRole('dialog', { name: 'Maral Ataýewa' })).toBeNull()
+    // the removed person's row has no drawer: the focus goes to «Add a team member»
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Add a team member' })).toHaveFocus())
+  },
+}
+
+/** Keep them: the bookings stay as they are, no new ones for Maral. */
+export const RemoveKeep: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Maral Ataýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Maral Ataýewa' }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Remove from the team' }))
+    const modal = within(await body.findByRole('dialog', { name: 'Remove Maral from the team?' }))
+    await userEvent.click(modal.getByRole('button', { name: 'Remove Maral' }))
+    await userEvent.click(await modal.findByRole('radio', { name: 'Keep them' }))
+    await expect(modal.getByText('They stay in the calendar as they are. No new bookings for Maral.')).toBeVisible()
+    await expect(modal.queryByRole('combobox', { name: 'To' })).toBeNull()
+    await userEvent.click(modal.getByRole('button', { name: 'Remove Maral' }))
+    const done = await body.findByText('Maral removed from the team · 2 kept as they are')
+    await waitFor(() => expect(done).toBeVisible())
   },
 }
 

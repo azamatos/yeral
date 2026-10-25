@@ -60,6 +60,7 @@ export function MemberDrawer({
   myPhone,
   returnFocus,
   onClose,
+  onRemoved,
   onLink,
 }: {
   slug: string
@@ -73,6 +74,8 @@ export function MemberDrawer({
   myPhone: string | null
   returnFocus: RefObject<HTMLElement | null>
   onClose: () => void
+  /** Removed from the team: their row leaves for «No longer on the team», so the focus goes elsewhere. */
+  onRemoved: () => void
   onLink: (name: string, url: string) => void
 }) {
   // nothing closes it while its save runs: the answer, or its error, needs the form (another person's drawer can)
@@ -97,6 +100,7 @@ export function MemberDrawer({
             me={!!myPhone && member.phone === myPhone}
             onBusy={(b) => setSaving(b ? member.id : null)}
             onClose={onClose}
+            onRemoved={onRemoved}
             onLink={onLink}
           />
         </DrawerContent>
@@ -115,6 +119,7 @@ function MemberEditor({
   me,
   onBusy,
   onClose,
+  onRemoved,
   onLink,
 }: {
   slug: string
@@ -126,6 +131,7 @@ function MemberEditor({
   me: boolean
   onBusy: (busy: boolean) => void
   onClose: () => void
+  onRemoved: () => void
   onLink: (name: string, url: string) => void
 }) {
   const t = useTranslations('settings.team.drawer')
@@ -455,8 +461,9 @@ function MemberEditor({
           </TabsContent>
         </DrawerBody>
       </Tabs>
-      <DrawerFooter className="justify-between [&>*]:flex-none">
-        {owner && !ownerRow ? (
+      {/* «Remove from the team» on the left beside the owner's Save (B-Team `.drw-f`); otherwise the footer's own */}
+      <DrawerFooter className={owner && !ownerRow ? 'justify-between [&>*]:flex-none' : undefined}>
+        {owner && !ownerRow && (
           <Button
             variant="danger-ghost"
             aria-haspopup="dialog"
@@ -466,8 +473,6 @@ function MemberEditor({
           >
             {t('remove')}
           </Button>
-        ) : (
-          <span />
         )}
         {canSave ? (
           <Button variant="primary" disabled={!dirty || !valid} loading={saving} loadingLabel={t('saving')} onClick={() => void save()}>
@@ -480,7 +485,7 @@ function MemberEditor({
         )}
       </DrawerFooter>
       {owner && !ownerRow && (
-        <RemoveMember slug={slug} member={m} business={business} open={removing} onOpenChange={setRemoving} onRemoved={onClose} />
+        <RemoveMember slug={slug} member={m} business={business} open={removing} onOpenChange={setRemoving} onRemoved={onRemoved} />
       )}
     </>
   )
