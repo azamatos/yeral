@@ -61,7 +61,7 @@ export function DayGrid({
   /** The business's hours: a request's timer counts only while it's open. Null: the clock's minutes. */
   business: BusinessHours | null
   picked: Picked
-  /** The person whose column a phone shows (their chip); the first without one. */
+  /** The person whose column a phone shows (their chip). */
   phoneStaff?: string
   /** Another day's on its way: this one stays until it comes. */
   busy?: boolean
@@ -84,8 +84,7 @@ export function DayGrid({
   const [focused, setFocused] = useState<string | null>(null)
   const onLink = (how: Link, code: string | null) => (how === 'hover' ? setHovered : setFocused)(code)
 
-  const onPhone = view.columns.find((c) => c.staffId === phoneStaff)?.staffId ?? view.columns[0]?.staffId
-  const phone = (c: CalendarView['columns'][number]) => (c.staffId === onPhone ? ONLY_ON_PHONE : NOT_ON_PHONE)
+  const phone = (c: CalendarView['columns'][number]) => (c.staffId === phoneStaff ? ONLY_ON_PHONE : NOT_ON_PHONE)
 
   const timer: Timer = (until) => {
     if (until === null) return null
@@ -119,7 +118,8 @@ export function DayGrid({
       tabIndex={0}
       className="relative min-h-0 flex-1 overflow-auto focus-visible:shadow-[inset_0_0_0_2px_var(--color-a-400)] focus-visible:outline-none"
     >
-      <div className="min-w-max">
+      {/* as wide as the columns; on a phone the one column fits the screen and its header wraps */}
+      <div className="min-w-max max-sm:min-w-0">
         {/* the names stay on top while the day scrolls */}
         <div className="sticky top-0 z-12 flex border-b border-n-200 bg-n-0">
           <div className={`${GUTTER} sticky left-0 z-8 bg-n-0`} />

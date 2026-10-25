@@ -11,6 +11,6 @@ describe('the calendar’s address', () => {
       staff: 's1',
     })
     expect(calendarSearch({ date: '2026-02-30' })).toEqual({})
-    expect(calendarSearch({ date: 'tomorrow', cancelled: 'yes', booking: '', request: 7 })).toEqual({})
+    expect(calendarSearch({ date: 'tomorrow', cancelled: 'yes', booking: '', request: 7, staff: '' })).toEqual({})
   })
 })
