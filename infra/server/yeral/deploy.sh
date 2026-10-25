@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Builds the api and business images from the source in /srv/yeral/src, saves the database and (re)starts Ýeral. Run on the server
-# as root:
+# Builds the api and business images from the source in /srv/yeral/src, saves the database and (re)starts Ýeral. Run
+# on the server as root:
 #   COMMIT=<git sha> PUBLIC=1 bash /srv/yeral/src/infra/server/yeral/deploy.sh
 # PUBLIC=1 also publishes Ýeral's sites (yeral.caddy) on the shared Caddy (the DNS records point here since 2026-10-22).
 set -euo pipefail
