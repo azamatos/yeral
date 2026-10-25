@@ -16,7 +16,7 @@ import { useErrorText } from '@/shared/i18n'
 import { statusName } from '../model/statuses'
 import type { StatusToggles } from '../model/use-status-toggles'
 import { AddStatusModal } from './add-status-modal'
-import { BOOKING_STATUS_ICON, INTERNAL_STATUS_ICON } from './status-icons'
+import { BOOKING_STATUS_ICON, INTERNAL_STATUS_ICON } from '@/entities/booking'
 
 /**
  * «Booking statuses» in Booking rules (B-Settings `.ps` «r-st», book B-29, F-104): the five system statuses, locked, each

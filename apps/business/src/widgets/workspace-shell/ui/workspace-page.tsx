@@ -12,6 +12,7 @@ import { ShellSwitcher } from './shell-switcher'
  * tablet, 16 on a phone). The tab title is "Calendar · Glow Studio"; `tabTitle` names a part of the page there instead
  * (["Hours", "Settings"] → "Hours · Settings · Glow Studio"). The title takes the focus when the address changes, or
  * when `focusKey` does: a page whose parts take the focus themselves (Settings' sections) gives one that stays.
+ * `flush`: the content edge to edge (the calendar's toolbar and grid draw their own padding and lines).
  */
 export function WorkspacePage({
   title,
@@ -19,6 +20,7 @@ export function WorkspacePage({
   focusKey,
   actions,
   switcherOnPhone = false,
+  flush = false,
   children,
 }: {
   title: string
@@ -26,6 +28,7 @@ export function WorkspacePage({
   focusKey?: string
   actions?: ReactNode
   switcherOnPhone?: boolean
+  flush?: boolean
   children?: ReactNode
 }) {
   const { workspace } = useWorkspace()
@@ -40,7 +43,7 @@ export function WorkspacePage({
         focusKey={focusKey ?? pathname}
         leading={switcherOnPhone ? <ShellSwitcher variant="strip" /> : undefined}
       />
-      <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:p-8">
+      <main className={flush ? 'flex min-w-0 flex-1 flex-col' : 'flex flex-1 flex-col gap-4 p-4 sm:p-6 md:p-8'}>
         <InviteNote />
         {children}
       </main>

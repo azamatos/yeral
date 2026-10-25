@@ -1317,5 +1317,35 @@
         "removed": "{name} removed from the team"
       }
     }
+  },
+  "calendar": {
+    "today": "Today",
+    "prev": "Previous day",
+    "next": "Next day",
+    "pickDate": "Pick a date",
+    "requests": "{n, plural, one {# request} other {# requests}}",
+    "noRequests": "No new requests",
+    "showCancelled": "Show cancelled",
+    "bookings": "<b>{n, number}</b> {n, plural, one {booking} other {bookings}}",
+    "requestsLine": "<b>{n, number}</b> {n, plural, one {request} other {requests}}",
+    "revenue": "Revenue (planned)",
+    "earnings": "Your earnings (planned)",
+    "loading": "Loading the day",
+    "grid": "Calendar, {date}",
+    "nobody": "Nobody takes bookings yet. Add specialists in Settings → Team.",
+    "noApp": "Doesn’t use the app",
+    "columnBookings": "{n, plural, one {# booking} other {# bookings}}",
+    "timer": {
+      "left": "{time} left to answer",
+      "by": "by {time}",
+      "byLabel": "Answer by {time}"
+    },
+    "block": {
+      "unnamed": "Unnamed client",
+      "byPhone": "by phone",
+      "walkIn": "walk-in",
+      "alert": "alert note about the client",
+      "timeLength": "{time} · {length}"
+    }
   }
 }

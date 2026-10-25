@@ -15,7 +15,7 @@ import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { nameTaken } from '../model/statuses'
-import { COLOUR_KEY, INTERNAL_STATUS_ICON } from './status-icons'
+import { COLOUR_KEY, INTERNAL_STATUS_ICON } from '@/entities/booking'
 
 type Icon = (typeof INTERNAL_STATUS_ICONS)[number]
 type Colour = (typeof INTERNAL_STATUS_COLORS)[number]
