@@ -11,7 +11,7 @@ import { DEFAULT_RULES } from '@yeral/domain/rules'
 import { DEMO_SLUG } from '@yeral/domain/setup'
 import { inviteExpiresAt } from '@yeral/domain/team'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
-import { and, eq, getTableName, inArray, is, ne, sql } from 'drizzle-orm'
+import { and, eq, getTableName, inArray, is, isNotNull, ne, notInArray, sql } from 'drizzle-orm'
 import { PgTable } from 'drizzle-orm/pg-core'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import type { Db, Queryable } from '../client'
@@ -499,12 +499,21 @@ export async function seedExamples(db: Db, opts: { now: number; phone: string })
         await seedBusiness(ctx, def)
         added++
       }
-    // the phone they show follows the config's (the market's support line or `EXAMPLE_PHONE`), a change of it included
+    // the phone they show follows the config's (the market's support line or `EXAMPLE_PHONE`), a change of it included;
+    // not an owner's test business made an example (`make-example`, which may sit at a design address): it has a team
     const examples = BUSINESSES.filter((d) => d.type === 'appointment').map((d) => d.slug)
+    const teams = tx.select({ id: t.staff.businessId }).from(t.staff).where(isNotNull(t.staff.userId))
     await tx
       .update(t.businesses)
       .set({ phone: opts.phone })
-      .where(and(eq(t.businesses.demo, true), inArray(t.businesses.slug, examples), ne(t.businesses.phone, opts.phone)))
+      .where(
+        and(
+          eq(t.businesses.demo, true),
+          inArray(t.businesses.slug, examples),
+          ne(t.businesses.phone, opts.phone),
+          notInArray(t.businesses.id, teams),
+        ),
+      )
     return added
   })
 }

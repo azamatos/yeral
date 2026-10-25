@@ -12,14 +12,15 @@
  *
  * `make-example <slug> [--off]` (on the server `node dist/cli.js make-example` in the api's container; the owner's D2):
  * while the sign-in code shows on the screen, one of the owner's test businesses opens to clients marked "Example", still
- * confirming as its rules say; `--off` takes it back to "in review" (`modules/admin/examples.ts`).
+ * confirming as its rules say; `--off` takes the mark away and it back to "in review" (`modules/admin/examples.ts`).
  */
 import { sql } from 'drizzle-orm'
 import pg from 'pg'
 import { adminLoginSchema } from '@yeral/contract/admin'
 import { loadConfig } from '../config'
+import { createDeps } from '../deps'
 import { inviteOrReset } from '../modules/admin/accounts'
-import { ExampleRefused, makeExample } from '../modules/admin/examples'
+import { exampleArgs, ExampleRefused, makeExample } from '../modules/admin/examples'
 import { createLogger } from '../ports/log'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
@@ -59,18 +60,17 @@ async function adminInvite(db: ReturnType<typeof createDb>, [login, ...name]: st
 
 /** Said on the terminal only, for whoever runs it on the server. */
 async function exampleCommand(db: ReturnType<typeof createDb>, flags: string[]) {
-  const [slug, ...rest] = flags.filter((f) => !f.startsWith('--'))
-  // a mistyped flag mustn't open the business
-  if (!slug || rest.length || flags.some((f) => f.startsWith('--') && f !== '--off')) throw new Error('usage: make-example <slug> [--off]')
-  const on = !flags.includes('--off')
   try {
-    const done = await makeExample(db, config.codeOnScreen, slug, on)
+    const { slug, on } = exampleArgs(flags)
+    // the api's own rule for whether the code shows
+    const { done, name } = await makeExample(db, createDeps(config, db), slug, on)
+    const what = `${name} (${slug})`
     console.warn(
       done === 'unchanged'
-        ? `${slug}: already ${on ? 'an example' : 'not an example'}, nothing changed`
+        ? `${what}: already ${on ? 'an example' : 'not an example'}, nothing changed`
         : done === 'opened'
-          ? `${slug}: open to clients, marked "Example" (make-example ${slug} --off takes it back to "in review")`
-          : `${slug}: back to "in review", no longer an example`,
+          ? `${what}: open to clients, marked "Example" (make-example ${slug} --off takes it back to "in review")`
+          : `${what}: no longer an example, in review unless the Ýeral team decided otherwise`,
     )
   } catch (e) {
     if (!(e instanceof ExampleRefused)) throw e
@@ -79,23 +79,19 @@ async function exampleCommand(db: ReturnType<typeof createDb>, flags: string[]) 
   }
 }
 
+/** A one-connection database for a command run by hand. */
+async function withDb(run: (db: ReturnType<typeof createDb>) => Promise<void>) {
+  const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 1 })
+  try {
+    await run(createDb(pool))
+  } finally {
+    await pool.end()
+  }
+}
+
 async function main() {
-  if (command === 'make-example') {
-    const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 1 })
-    try {
-      return await exampleCommand(createDb(pool), flags)
-    } finally {
-      await pool.end()
-    }
-  }
-  if (command === 'admin-invite') {
-    const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 1 })
-    try {
-      return await adminInvite(createDb(pool), flags)
-    } finally {
-      await pool.end()
-    }
-  }
+  if (command === 'make-example') return withDb((db) => exampleCommand(db, flags))
+  if (command === 'admin-invite') return withDb((db) => adminInvite(db, flags))
   const seeds = command === 'seed' || command === 'setup'
   // checked before anything runs: a misconfigured server gets an error, not a half-done setup
   const demo = seeds && seedMode(process.env.YERAL_ENV) === 'demo'

@@ -101,12 +101,16 @@ for backups and accounts for error tracking and uptime checks (owner, 2026-10-22
 - One of the owner's test businesses open to clients (the owner's D2, 25.10.2026; book chapter 9): nothing is verified
   while the code shows on the screen (ADR 0023 amended), so
   `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js make-example <slug>` opens the business at
-  that page address to clients, marked "Example" as the seeded ones are, with its own booking rules (it still confirms
-  by hand if it did), so answering, declining and expiry can be tried live; `--off` takes it back to "in review".
-  Opening is refused unless `SIGN_IN_CODE_ON_SCREEN=true` (`--off` works at any time: take them back before the real
-  SMS sign-in), and both for a business still being set up, closed, the demo workspace, or one with no owner who signs
-  in (the seeded examples); its team's banner and its page follow at once
-  (`business.reviewed`). Locally `pnpm --filter @yeral/api make:example <slug> [--off]`.
+  that page address (its current one) to clients, marked "Example" as the seeded ones are, with its own booking rules
+  (it still confirms by hand if it did), so answering, declining and expiry can be tried live; it prints the
+  business's name to check. `--off` takes the mark away, and an open one back to "in review" (a verdict the Ýeral team
+  gave meanwhile stays). Opening needs the code on the screen (the api's rule: `SIGN_IN_CODE_ON_SCREEN=true` and no
+  SMS gateway) and a business in review: refused for one still being set up, closed, hidden, or verified or sent back
+  by the team; `--off` works at any time (take them back before the real SMS sign-in: nothing else removes the mark).
+  Both refuse the demo workspace and a business with no owner who signs in (the seeded examples, whose phone the
+  examples step keeps up; it leaves a business with a team alone). A change of verification goes in the business's
+  verification history, and its team's banner and page follow at once (`business.reviewed`). Locally
+  `pnpm --filter @yeral/api make:example <slug> [--off]`.
 - The business app's demo workspace (book F-242): `DEMO_WORKSPACE=true` makes the jobs (every minute in the api) create
   it when it's missing and again after every 04:00, Ashgabat time: the design's Glow Studio at `/w/demo`, its numbers in
   the market's unused range (`MARKET.phone.unusedPrefix`), each a team member uses held by a demo account (`users.demo`),

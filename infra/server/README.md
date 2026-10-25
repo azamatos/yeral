@@ -47,7 +47,7 @@ backups by hand when the disk needs it.
 
 While the sign-in code shows on the screen, one of the owner's test businesses opens to clients as an "Example" (still
 confirming by hand) with `ssh yeral-vps 'docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js
-make-example <slug>'`, and goes back to "in review" with `make-example <slug> --off` (operations.md).
+make-example <slug>'`, and loses the mark (back to "in review") with `make-example <slug> --off` (operations.md).
 
 ## DNS records
 
