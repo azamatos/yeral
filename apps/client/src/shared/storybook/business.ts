@@ -1,5 +1,5 @@
 import type { BusinessCard, BusinessDetail } from '@yeral/contract/catalog'
-import { today } from '@yeral/domain/time'
+import { addDays, today } from '@yeral/domain/time'
 import { authApi, fakeFetch, json, refuse, type AuthApiOptions } from './fake-api'
 
 const service = (
@@ -7,6 +7,7 @@ const service = (
   name: string,
   durationMin: number,
   price: BusinessDetail['serviceGroups'][number]['services'][number]['price'],
+  staff: string,
   description: string | null = null,
 ) => ({
   id,
@@ -14,13 +15,14 @@ const service = (
   description,
   durationMin,
   price,
-  staffIds: ['st-ayna'],
+  staffIds: [staff],
 })
 
 /**
  * Glow Studio as the business page reads it (`GET /businesses/glow-studio`, demo-data `v06r3`, written the English
- * way): 12 services in 4 groups (s12 «Bridal hair styling» keeps its price for the place), open, the next free time
- * today at 15:30, confirming by hand. Stories change what they need (`{ ...GLOW, onlineEnabled: false }`).
+ * way): 12 services in 4 groups (s12 «Bridal hair styling» keeps its price for the place), 4 specialists who each do
+ * one group, open, the next free time today at 15:30, confirming by hand. Stories change what they need
+ * (`{ ...GLOW, onlineEnabled: false }`).
  */
 export const GLOW: BusinessDetail = {
   slug: 'glow-studio',
@@ -77,42 +79,66 @@ export const GLOW: BusinessDetail = {
       id: 'hair',
       name: 'Hair',
       services: [
-        service('s1', 'Women’s haircut', 60, { type: 'fixed', amount: 80 }, 'Wash, cut and style'),
-        service('s2', 'Hair styling', 45, { type: 'fixed', amount: 60 }),
-        service('s3', 'Hair colouring', 120, { type: 'from', amount: 250 }, 'The price depends on the hair’s length'),
-        service('s4', 'Children’s haircut', 30, { type: 'fixed', amount: 40 }),
-        service('s12', 'Bridal hair styling', 120, { type: 'hidden', amount: 400 }, 'With a trial styling; the price is agreed'),
+        service('s1', 'Women’s haircut', 60, { type: 'fixed', amount: 80 }, 'st-ayna', 'Wash, cut and style'),
+        service('s2', 'Hair styling', 45, { type: 'fixed', amount: 60 }, 'st-ayna'),
+        service('s3', 'Hair colouring', 120, { type: 'from', amount: 250 }, 'st-ayna', 'The price depends on the hair’s length'),
+        service('s4', 'Children’s haircut', 30, { type: 'fixed', amount: 40 }, 'st-ayna'),
+        service('s12', 'Bridal hair styling', 120, { type: 'hidden', amount: 400 }, 'st-ayna', 'With a trial styling; the price is agreed'),
       ],
     },
     {
       id: 'nails',
       name: 'Nails',
       services: [
-        service('s5', 'Manicure', 60, { type: 'fixed', amount: 70 }),
-        service('s6', 'Gel manicure', 90, { type: 'fixed', amount: 110 }),
-        service('s7', 'Pedicure', 75, { type: 'fixed', amount: 90 }),
+        service('s5', 'Manicure', 60, { type: 'fixed', amount: 70 }, 'st-maral'),
+        service('s6', 'Gel manicure', 90, { type: 'fixed', amount: 110 }, 'st-maral'),
+        service('s7', 'Pedicure', 75, { type: 'fixed', amount: 90 }, 'st-maral'),
       ],
     },
     {
       id: 'face',
       name: 'Facial care',
       services: [
-        service('s8', 'Facial cleansing', 60, { type: 'fixed', amount: 150 }),
-        service('s9', 'Brows and lashes', 30, { type: 'fixed', amount: 50 }),
+        service('s8', 'Facial cleansing', 60, { type: 'fixed', amount: 150 }, 'st-jeren'),
+        service('s9', 'Brows and lashes', 30, { type: 'fixed', amount: 50 }, 'st-jeren'),
       ],
     },
     {
       id: 'massage',
       name: 'Massage',
       services: [
-        service('s10', 'Back massage', 30, { type: 'fixed', amount: 90 }),
-        service('s11', 'Full body massage', 60, { type: 'fixed', amount: 160 }),
+        service('s10', 'Back massage', 30, { type: 'fixed', amount: 90 }, 'st-leyli'),
+        service('s11', 'Full body massage', 60, { type: 'fixed', amount: 160 }, 'st-leyli'),
       ],
     },
   ],
-  specialists: [{ id: 'st-ayna', name: 'Aýna', role: 'Stylist', photo: null, rating: 4.9, serviceIds: ['s1', 's2', 's3', 's4', 's12'] }],
+  specialists: [
+    { id: 'st-ayna', name: 'Aýna', role: 'Stylist', photo: null, rating: 4.9, serviceIds: ['s1', 's2', 's3', 's4', 's12'] },
+    { id: 'st-maral', name: 'Maral', role: 'Nail artist', photo: null, rating: 5, serviceIds: ['s5', 's6', 's7'] },
+    { id: 'st-jeren', name: 'Jeren', role: 'Cosmetologist', photo: null, rating: 4.8, serviceIds: ['s8', 's9'] },
+    { id: 'st-leyli', name: 'Leýli', role: 'Massage therapist', photo: null, rating: 4.9, serviceIds: ['s10', 's11'] },
+  ],
   tables: null,
   similar: [],
+}
+
+/**
+ * The time step's answer (`GET /businesses/{slug}/availability`): 14 days from today; the day after tomorrow is full
+ * and the fifth day closed for a holiday; an open day has eight free times from 10:00 to 18:00 (today from 15:30).
+ * Without a date, the first open day.
+ */
+function freeTimes(date: string | null) {
+  const days = Array.from({ length: 14 }, (_, i) => addDays(today(), i))
+  const state = (d: string) => (d === days[2] ? 'full' : d === days[4] ? 'closed' : 'open')
+  const day = date && days.includes(date) ? date : today()
+  const all = [600, 630, 690, 840, 870, 960, 1050, 1080]
+  const slots = state(day) === 'open' ? all.filter((m) => day !== days[0] || m >= 930) : []
+  return {
+    date: day,
+    slots: slots.map((start) => ({ start, end: start + 60 })),
+    days: days.map((d) => ({ date: d, state: state(d), closedReason: state(d) === 'closed' ? 'Holiday' : null })),
+    nextFree: { date: addDays(today(), 3), start: 600 },
+  }
 }
 
 export interface BusinessApiOptions extends AuthApiOptions {
@@ -122,7 +148,10 @@ export interface BusinessApiOptions extends AuthApiOptions {
   favourites?: string[]
 }
 
-/** The business page's api: the page, the heart (`/me/favorites`) and, for everything else, the sign-in (`authApi`). */
+/**
+ * The business page's and the booking flow's api: the page, its specialists' and days' free times, the heart
+ * (`/me/favorites`) and, for everything else, the sign-in (`authApi`).
+ */
 export const businessApi =
   ({ business = GLOW, favourites = [], ...auth }: BusinessApiOptions = {}) =>
   (): typeof fetch => {
@@ -136,7 +165,18 @@ export const businessApi =
         street: '',
         availability: { type: 'appointment', date: today(), starts: [], more: 0 },
       }) as unknown as BusinessCard
-    const mine = fakeFetch(({ route }) => {
+    const mine = fakeFetch(({ route, query }) => {
+      if (/^GET \/businesses\/[^/]+\/specialists\/availability$/.test(route))
+        return json({
+          any: { date: today(), start: 930 },
+          items: [
+            { staffId: 'st-ayna', next: { date: today(), start: 930 } },
+            { staffId: 'st-maral', next: { date: today(), start: 960 } },
+            { staffId: 'st-jeren', next: { date: addDays(today(), 1), start: 600 } },
+            { staffId: 'st-leyli', next: null },
+          ],
+        })
+      if (/^GET \/businesses\/[^/]+\/availability$/.test(route)) return json(freeTimes(query.get('date')))
       const page = /^GET \/businesses\/([^/]+)$/.exec(route)
       if (page) return typeof business === 'string' ? refuse(404, business) : json(business)
       if (route === 'GET /me/favorites') return json({ items: [...saved].map(card), cursor: null })

@@ -19,7 +19,7 @@ import { Route as LangSiteLoginRouteImport } from './routes/$lang/_site/login'
 import { Route as LangSiteAccountIndexRouteImport } from './routes/$lang/_site/account/index'
 import { Route as LangSiteAccountProfileRouteImport } from './routes/$lang/_site/account/profile'
 import { Route as LangSiteBSlugRouteImport } from './routes/$lang/_site/b/$slug'
-import { Route as LangSiteBSlugBookRouteImport } from './routes/$lang/_site/b/$slug_.book'
+import { Route as LangBSlugBookRouteImport } from './routes/$lang/b.$slug.book'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,10 +70,10 @@ const LangSiteBSlugRoute = LangSiteBSlugRouteImport.update({
   path: '/b/$slug',
   getParentRoute: () => LangSiteRoute,
 } as any)
-const LangSiteBSlugBookRoute = LangSiteBSlugBookRouteImport.update({
-  id: '/b/$slug_/book',
+const LangBSlugBookRoute = LangBSlugBookRouteImport.update({
+  id: '/b/$slug/book',
   path: '/b/$slug/book',
-  getParentRoute: () => LangSiteRoute,
+  getParentRoute: () => LangRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -85,8 +85,8 @@ export interface FileRoutesByFullPath {
   '/$lang/': typeof LangSiteIndexRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/b/$slug': typeof LangSiteBSlugRoute
+  '/$lang/b/$slug/book': typeof LangBSlugBookRoute
   '/$lang/account/': typeof LangSiteAccountIndexRoute
-  '/$lang/b/$slug/book': typeof LangSiteBSlugBookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,8 +95,8 @@ export interface FileRoutesByTo {
   '/$lang/login': typeof LangSiteLoginRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/b/$slug': typeof LangSiteBSlugRoute
+  '/$lang/b/$slug/book': typeof LangBSlugBookRoute
   '/$lang/account': typeof LangSiteAccountIndexRoute
-  '/$lang/b/$slug/book': typeof LangSiteBSlugBookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,8 +109,8 @@ export interface FileRoutesById {
   '/$lang/_site/': typeof LangSiteIndexRoute
   '/$lang/_site/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/_site/b/$slug': typeof LangSiteBSlugRoute
+  '/$lang/b/$slug/book': typeof LangBSlugBookRoute
   '/$lang/_site/account/': typeof LangSiteAccountIndexRoute
-  '/$lang/_site/b/$slug_/book': typeof LangSiteBSlugBookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,8 +123,8 @@ export interface FileRouteTypes {
     | '/$lang/'
     | '/$lang/account/profile'
     | '/$lang/b/$slug'
-    | '/$lang/account/'
     | '/$lang/b/$slug/book'
+    | '/$lang/account/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,8 +133,8 @@ export interface FileRouteTypes {
     | '/$lang/login'
     | '/$lang/account/profile'
     | '/$lang/b/$slug'
-    | '/$lang/account'
     | '/$lang/b/$slug/book'
+    | '/$lang/account'
   id:
     | '__root__'
     | '/'
@@ -146,8 +146,8 @@ export interface FileRouteTypes {
     | '/$lang/_site/'
     | '/$lang/_site/account/profile'
     | '/$lang/_site/b/$slug'
+    | '/$lang/b/$slug/book'
     | '/$lang/_site/account/'
-    | '/$lang/_site/b/$slug_/book'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -228,12 +228,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangSiteBSlugRouteImport
       parentRoute: typeof LangSiteRoute
     }
-    '/$lang/_site/b/$slug_/book': {
-      id: '/$lang/_site/b/$slug_/book'
+    '/$lang/b/$slug/book': {
+      id: '/$lang/b/$slug/book'
       path: '/b/$slug/book'
       fullPath: '/$lang/b/$slug/book'
-      preLoaderRoute: typeof LangSiteBSlugBookRouteImport
-      parentRoute: typeof LangSiteRoute
+      preLoaderRoute: typeof LangBSlugBookRouteImport
+      parentRoute: typeof LangRouteRoute
     }
   }
 }
@@ -256,7 +256,6 @@ interface LangSiteRouteChildren {
   LangSiteLoginRoute: typeof LangSiteLoginRoute
   LangSiteIndexRoute: typeof LangSiteIndexRoute
   LangSiteBSlugRoute: typeof LangSiteBSlugRoute
-  LangSiteBSlugBookRoute: typeof LangSiteBSlugBookRoute
 }
 
 const LangSiteRouteChildren: LangSiteRouteChildren = {
@@ -264,7 +263,6 @@ const LangSiteRouteChildren: LangSiteRouteChildren = {
   LangSiteLoginRoute: LangSiteLoginRoute,
   LangSiteIndexRoute: LangSiteIndexRoute,
   LangSiteBSlugRoute: LangSiteBSlugRoute,
-  LangSiteBSlugBookRoute: LangSiteBSlugBookRoute,
 }
 
 const LangSiteRouteWithChildren = LangSiteRoute._addFileChildren(
@@ -273,10 +271,12 @@ const LangSiteRouteWithChildren = LangSiteRoute._addFileChildren(
 
 interface LangRouteRouteChildren {
   LangSiteRoute: typeof LangSiteRouteWithChildren
+  LangBSlugBookRoute: typeof LangBSlugBookRoute
 }
 
 const LangRouteRouteChildren: LangRouteRouteChildren = {
   LangSiteRoute: LangSiteRouteWithChildren,
+  LangBSlugBookRoute: LangBSlugBookRoute,
 }
 
 const LangRouteRouteWithChildren = LangRouteRoute._addFileChildren(

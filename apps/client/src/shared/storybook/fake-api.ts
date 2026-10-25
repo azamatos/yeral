@@ -34,10 +34,11 @@ export const json = (body: unknown, status = 200) =>
   })
 export const refuse = (status: number, code: string, details?: Record<string, unknown>) => json({ error: { code, details } }, status)
 
-/** A request as a handler sees it: `GET /me`, the parsed body. */
+/** A request as a handler sees it: `GET /me`, the parsed body, the query. */
 export interface FakeRequest {
   route: string
   body: Record<string, unknown>
+  query: URLSearchParams
 }
 
 /** No api in the story: every request fails like a lost connection. */
@@ -50,12 +51,13 @@ export const offline = (): typeof fetch => () => Promise.reject(new TypeError('n
 export function fakeFetch(handle: (request: FakeRequest) => Response | Promise<Response> | undefined): typeof fetch {
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const request = new Request(input, init)
-    const path = new URL(request.url).pathname.replace(/^\/v1/, '')
+    const url = new URL(request.url)
+    const path = url.pathname.replace(/^\/v1/, '')
     const body = (request.method === 'GET' || request.method === 'DELETE' ? {} : await request.json().catch(() => ({}))) as Record<
       string,
       unknown
     >
-    return (await handle({ route: `${request.method} ${path}`, body })) ?? refuse(404, 'not_found')
+    return (await handle({ route: `${request.method} ${path}`, body, query: url.searchParams })) ?? refuse(404, 'not_found')
   }
 }
 
