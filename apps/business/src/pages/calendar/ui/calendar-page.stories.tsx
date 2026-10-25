@@ -7,9 +7,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { CalendarView } from '@yeral/contract/calendar'
+import type { BookingRequest } from '@yeral/contract/requests'
 import type { Workspace } from '@yeral/contract/team'
 import { addDays, localOf, today } from '@yeral/domain/time'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { CalendarPage } from './calendar-page'
@@ -153,33 +154,94 @@ const viewOf = (date: string, cancelled: boolean, only?: string): CalendarView =
   }
 }
 
+/** The waiting requests, most urgent first: Mähri G.'s (18 min) and Ogulgerek M.'s move (25 min). */
+const requestsOf = (canAnswer: boolean): BookingRequest[] => {
+  const asking = dayBookings[1]!
+  return [
+    {
+      code: asking.code,
+      kind: 'new',
+      type: 'appointment',
+      date: DAY,
+      start: asking.start,
+      end: asking.end,
+      holdUntil: asking.holdUntil!,
+      warnAt: null,
+      sentAt: now - 12 * 60_000,
+      items: asking.items,
+      price: { type: 'fixed', amount: 250 },
+      note: 'Could you use the same colour as last time?',
+      from: null,
+      client: { id: null, name: 'Mähri G.', phone: '+99365123456', visits: 3, noShows: 1, alerts: ['Allergic to ammonia dyes'] },
+      canAnswer,
+      answeredBy: 'desk',
+    },
+    {
+      code: move.code,
+      kind: 'move',
+      type: 'appointment',
+      date: DAY,
+      start: move.start,
+      end: move.end,
+      holdUntil: move.holdUntil!,
+      warnAt: null,
+      sentAt: now - 5 * 60_000,
+      items: move.items,
+      price: null,
+      note: null,
+      from: { date: DAY, start: 630, end: 720 },
+      client: { id: null, name: 'Ogulgerek M.', phone: '+99365000000', visits: 0, noShows: 0, alerts: [] },
+      canAnswer,
+      answeredBy: 'desk',
+    },
+  ]
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
 /** The api as the shell and the calendar ask it; `open` false: the business is closed every day (a late request). */
 const fakeApi =
-  (level: Workspace['level'], open = true): (() => typeof fetch) =>
-  () =>
-  // eslint-disable-next-line @typescript-eslint/require-await -- the fetch it stands in for answers a promise
-  async (input: RequestInfo | URL, init?: RequestInit) => {
-    const request = new Request(input, init)
-    const url = new URL(request.url)
-    const route = `${request.method} ${url.pathname.replace(/^\/v1/, '')}`
-    const w = glow(level)
-    if (route === 'GET /me') return json(me)
-    if (route === 'GET /me/workspaces') return json({ items: [w], current: w.slug })
-    if (route === 'GET /me/invites') return json({ items: [] })
-    if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
-    if (route === 'GET /w/glow-studio/calendar')
-      return json(
-        viewOf(url.searchParams.get('date')!, url.searchParams.get('cancelled') === 'true', level === 'specialist' ? id(2) : undefined),
-      )
-    if (route === 'GET /w/glow-studio/settings/hours')
-      return json({
-        hours: Array.from({ length: 7 }, () => (open ? { open: 0, close: 1440, break: null } : null)),
-        specialDays: [],
-      })
-    return json({ error: { code: 'not_found' } }, 404)
+  (level: Workspace['level'], open = true, arrives = false): (() => typeof fetch) =>
+  () => {
+    // the requests confirmed in this story
+    const answered = new Set<string>()
+    // eslint-disable-next-line @typescript-eslint/require-await -- the fetch it stands in for answers a promise
+    return async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init)
+      const url = new URL(request.url)
+      const route = `${request.method} ${url.pathname.replace(/^\/v1/, '')}`
+      const w = glow(level)
+      if (route === 'GET /me') return json(me)
+      if (route === 'GET /me/workspaces') return json({ items: [w], current: w.slug })
+      if (route === 'GET /me/invites') return json({ items: [] })
+      if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
+      if (route === 'GET /w/glow-studio/calendar')
+        return json(
+          viewOf(url.searchParams.get('date')!, url.searchParams.get('cancelled') === 'true', level === 'specialist' ? id(2) : undefined),
+        )
+      if (route === 'GET /w/glow-studio/settings/hours')
+        return json({
+          hours: Array.from({ length: 7 }, () => (open ? { open: 0, close: 1440, break: null } : null)),
+          specialDays: [],
+        })
+      if (route === 'GET /w/glow-studio/requests') {
+        const items = requestsOf(level !== 'specialist')
+        // `arrives`: once one is answered, a new one comes in (the shell's toast)
+        const first = items[0]!
+        const arrived =
+          arrives && answered.size
+            ? [{ ...first, code: 'YR-48300', start: 930, end: 990, client: { ...first.client, name: 'Ejegyz T.' } }]
+            : []
+        return json({ items: [...items, ...arrived].filter((r) => !answered.has(r.code)) })
+      }
+      const confirm = /^POST \/w\/glow-studio\/requests\/([^/]+)\/confirm$/.exec(route)
+      if (confirm) {
+        answered.add(confirm[1]!)
+        return json({ code: confirm[1] })
+      }
+      return json({ error: { code: 'not_found' } }, 404)
+    }
   }
 
 const meta = {
@@ -215,7 +277,7 @@ export const Day: Story = {
     await expect(canvas.getByText(/^Revenue \(planned\)/)).toBeVisible()
     // Aýna's request and Maral's client asking to move: in their columns and the toolbar
     await expect(canvas.getAllByText('1 request', { selector: 'span:not(.sr-only)' })).toHaveLength(2)
-    await expect(canvas.getByText('2 requests', { selector: 'span:not(.sr-only)' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: '2 requests — open the most urgent' })).toBeVisible()
     await waitFor(() => expect(document.title).toBe('Calendar · Glow Studio · Ýeral Business'))
   },
 }
@@ -272,7 +334,6 @@ export const NextDay: Story = {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
     await expect(await canvas.findByRole('button', { name: /Jemal B\..*Confirmed$/ })).toBeVisible()
-    await expect(canvas.getByText('No new requests')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Today' }))
     await expect(await canvas.findByRole('button', { name: /Gözel A\./ })).toBeVisible()
   },
@@ -323,3 +384,78 @@ export const Tablet: Story = { globals: { viewport: { value: 'sm' } } }
 
 /** The phone. */
 export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+
+/** The chip opens the most urgent request: its timer, the client, the details; Confirm, then «Next request». */
+export const ConfirmRequest: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(await canvas.findByRole('button', { name: '2 requests — open the most urgent' }))
+    const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
+    await expect(drawer.getByText('1 / 2')).toBeVisible()
+    await expect(await drawer.findByText(/^\d+ min left to answer$/)).toBeVisible()
+    await expect(
+      drawer.getByText(/^If no one answers, the request is cancelled at \d\d:\d\d and the client is offered 3 other times\.$/),
+    ).toBeVisible()
+    await expect(drawer.getByText('3 visits')).toBeVisible()
+    await expect(drawer.getByText('1 no-show')).toBeVisible()
+    await expect(drawer.getByText('Allergic to ammonia dyes')).toBeVisible()
+    await expect(drawer.getByText('“Could you use the same colour as last time?”')).toBeVisible()
+    await userEvent.click(drawer.getByRole('button', { name: 'Confirm' }))
+    const confirmed = await canvas
+      .findByText('Booking confirmed · the client is notified', {}, { timeout: 3000 })
+      .then((n) => n.closest('[data-sonner-toast]') as HTMLElement)
+    await userEvent.click(within(confirmed).getByRole('button', { name: 'Next request' }))
+    const next = within(await page.findByRole('dialog', { name: 'Time change request' }))
+    await expect(next.getByText('New client')).toBeVisible()
+    await expect(next.getByRole('button', { name: 'Confirm the new time' })).toBeVisible()
+  },
+}
+
+/** A request that comes in while the page is open: the shell's toast, on any page of the workspace. */
+export const RequestArrives: Story = {
+  args: { server: fakeApi('owner', true, true) },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(await canvas.findByRole('button', { name: '2 requests — open the most urgent' }))
+    const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
+    await userEvent.click(await drawer.findByRole('button', { name: 'Confirm' }))
+    // the list read again after the answer brings the new one; the answer's own toast stacks on it
+    const arrived = await canvas.findByText('New request: Ejegyz T. · Aýna · today · 15:30', {}, { timeout: 3000 })
+    await userEvent.hover(arrived.closest('ol')!)
+    await waitFor(() => expect(arrived).toBeVisible())
+    await expect(within(arrived.closest('li')!).getByRole('button', { name: 'Open' })).toBeVisible()
+  },
+}
+
+/** A request's block opens it; the pager steps to the next. */
+export const RequestFromBlock: Story = {
+  play: async ({ canvas }) => {
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    await userEvent.click(grid.getByRole('button', { name: /Mähri G\. Hair colouring/ }))
+    const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Next request' }))
+    await expect(await page.findByRole('dialog', { name: 'Time change request' })).toBeVisible()
+    await expect(within(page.getByRole('dialog')).getByText('2 / 2')).toBeVisible()
+  },
+}
+
+/** Someone who may not answer reads who does. */
+export const RequestViewOnly: Story = {
+  args: { server: fakeApi('specialist'), path: '/w/glow-studio/calendar?request=YR-48201' },
+  play: async () => {
+    const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
+    await expect(await drawer.findByText('The owner and admins answer requests — you can only view them.')).toBeVisible()
+    await expect(drawer.queryByRole('button', { name: 'Confirm' })).toBeNull()
+  },
+}
+
+/** A request answered elsewhere, or run out, while it was open. */
+export const RequestGone: Story = {
+  args: { path: '/w/glow-studio/calendar?request=YR-40000' },
+  play: async () => {
+    const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
+    await expect(await drawer.findByText(/isn’t waiting any more/)).toBeVisible()
+    await userEvent.click(drawer.getByRole('button', { name: 'Next request' }))
+    await expect(await within(page.getByRole('dialog')).findByText('1 / 2')).toBeVisible()
+  },
+}
