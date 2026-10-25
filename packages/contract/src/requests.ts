@@ -52,6 +52,12 @@ export const requestSchema = z
     /** A move: the booking's time now ("Öňki wagt"); it keeps it unless the move is confirmed. */
     from: z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema }).nullable(),
     /**
+     * A move: whether it can be confirmed now ("Maral is free at the new time — you can confirm." or not, then Confirm
+     * is off, B-21): the business is open then and its specialist works and isn't blocked; the confirm refuses by the
+     * same rule (`cannot_move`). Null for a new request.
+     */
+    fits: z.boolean().nullable(),
+    /**
      * "3-nji gelşi" or a new client; no-shows if any (a specialist counts the bookings with them); the notes "shown when
      * they book", newest first; `id` opens the client card (null once the record is gone).
      */

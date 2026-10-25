@@ -6,7 +6,7 @@
 import type { CannotMoveDetails } from '@yeral/contract/errors'
 import type { declineInputSchema, requestSchema } from '@yeral/contract/requests'
 import { findAppointmentSlot } from '@yeral/domain/availability'
-import { withinHours } from '@yeral/domain/hours'
+import { withinHours, type BusinessHours } from '@yeral/domain/hours'
 import { expiryWarningAt, canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
@@ -127,6 +127,21 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
     () => alertNotesOf(db, clientIds),
     () => loadHours(db, business.id),
   ])
+  // a move confirms only where it fits now (B-21's line: "free at the new time" or not)
+  const moves = rows.filter((r) => r.rescheduleOf)
+  const fitting = await all(
+    db,
+    moves.map(
+      (r) => async () =>
+        !(await moveProblem(
+          db,
+          hours,
+          r,
+          items.flatMap((i) => (i.item.bookingId === r.id ? [i.item] : [])),
+        )),
+    ),
+  )
+  const fits = new Map(moves.map((r, i) => [r.id, fitting[i]!]))
   return rows.flatMap((r) => {
     const mine = items.filter((i) => i.item.bookingId === r.id)
     const facts = answerFacts(mine)
@@ -148,6 +163,7 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
         price: teamPriceOf(r),
         note: r.clientNote,
         from: from ? { date: from.date, start: from.start, end: from.end } : null,
+        fits: fits.get(r.id) ?? null,
         client: {
           id: r.clientId,
           name: r.clientName ?? '',
@@ -178,6 +194,27 @@ export async function answerable(db: Queryable, business: Business, actor: Actor
   return b
 }
 
+/**
+ * Why a waiting move can't be confirmed now (B-21): a day the business closed since (a waiting move isn't asked about
+ * when the hours change), or one its specialist no longer works then (a day off, a new shift, blocked time, gone from
+ * the team: B-47, B-50); null when it fits. The confirm refuses by it, and the list says it (`fits`).
+ */
+async function moveProblem(
+  db: Queryable,
+  hours: BusinessHours,
+  row: Pick<BookingRow, 'date' | 'start' | 'end'>,
+  items: Parameters<typeof assertStaffFree>[3],
+): Promise<CannotMoveDetails | null> {
+  if (!withinHours(hours, row.date, { start: row.start, end: row.end })) return { problem: 'outside_hours', staffId: '' }
+  try {
+    await assertStaffFree(db, hours, row.date, items)
+  } catch (e) {
+    if (!(e instanceof OutsideHours)) throw e
+    return { problem: e.why === 'blocked' ? 'blocked' : 'staff_off', staffId: e.staffId ?? '' }
+  }
+  return null
+}
+
 /** "Tassykla": the request is confirmed and the client told; a move moves its booking (B-21). */
 export async function confirmRequest(deps: Deps, business: Business, actor: Actor, code: string): Promise<void> {
   const b = await answerable(deps.db, business, actor, code, deps.now())
@@ -187,22 +224,8 @@ export async function confirmRequest(deps: Deps, business: Business, actor: Acto
     if (b.rescheduleOf) await lockBooking(tx, b.rescheduleOf)
     const row = await lockBooking(tx, b.id)
     guard(requestOpen(stateOf(row), deps.now()))
-    // a move onto a day the business closed since (a waiting move isn't asked about when the hours change), or one
-    // its specialist no longer works then (a day off, a new shift, gone from the team: B-47, B-50)
-    if (row.rescheduleOf && !withinHours(hours, row.date, { start: row.start, end: row.end }))
-      throw new ApiError('cannot_move', { problem: 'outside_hours', staffId: '' } satisfies CannotMoveDetails)
-    if (row.rescheduleOf) {
-      const items = await itemsOf(tx, row.id)
-      try {
-        await assertStaffFree(tx, hours, row.date, items)
-      } catch (e) {
-        if (!(e instanceof OutsideHours)) throw e
-        throw new ApiError('cannot_move', {
-          problem: e.why === 'blocked' ? 'blocked' : 'staff_off',
-          staffId: e.staffId ?? '',
-        } satisfies CannotMoveDetails)
-      }
-    }
+    const problem = row.rescheduleOf ? await moveProblem(tx, hours, row, await itemsOf(tx, row.id)) : null
+    if (problem) throw new ApiError('cannot_move', problem)
     await confirmBooking(tx, deps, row)
   })
 }

@@ -21,6 +21,7 @@ interface Request {
   holdUntil: number
   items: { staffId: string | null; staff: string | null; service: string }[]
   from: { date: string; start: number } | null
+  fits: boolean | null
   client: { name: string; phone: string | null; visits: number; noShows: number }
   canAnswer: boolean
   answeredBy: string
@@ -216,5 +217,32 @@ describe('answering requests (book B-19, B-20, B-21)', () => {
     const again = (await listOf(maysa)).find((r) => r.kind === 'move' && r.from?.start === start)!
     expect((await maysa.req(`${REQUESTS}/${again.code}/confirm`, { method: 'POST' })).status).toBe(204)
     expect((await client.req(`/v1/me/bookings/${code}`)).json).toMatchObject({ status: 'confirmed', start: to })
+  })
+
+  it('a move says whether it fits now (B-21): yes while the day is open and its specialist works; no, and its confirm is refused, once closed', async () => {
+    const { client, code, start } = await request('+99365800007', 12)
+    const maysa = await as(MAYSA)
+    await maysa.req(`${REQUESTS}/${code}/confirm`, { method: 'POST' })
+    const to = (await aynaFree(client)).find((s) => s !== start)!
+    expect((await client.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: to } })).status).toBeLessThan(300)
+    const list = await listOf(maysa)
+    const move = list.find((r) => r.kind === 'move' && r.from?.start === start)!
+    expect(move.fits).toBe(true)
+    // a new request has no fit to say
+    for (const r of list.filter((x) => x.kind === 'new')) expect(r.fits).toBeNull()
+    // the business closes that Friday since: the move doesn't fit, and its confirm says why
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db
+      .update(businesses)
+      .set({ exceptions: [...glow!.exceptions, { name: 'Stocktake', from: FRI, to: FRI, yearly: false, hours: null }] })
+      .where(eq(businesses.id, glow!.id))
+    try {
+      expect((await listOf(maysa)).find((r) => r.code === move.code)?.fits).toBe(false)
+      const refused = await maysa.req(`${REQUESTS}/${move.code}/confirm`, { method: 'POST' })
+      expect(refused.status).toBe(409)
+      expect(refused.json.error).toMatchObject({ code: 'cannot_move', details: { problem: 'outside_hours' } })
+    } finally {
+      await db.update(businesses).set({ exceptions: glow!.exceptions }).where(eq(businesses.id, glow!.id))
+    }
   })
 })

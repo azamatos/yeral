@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, max } from 'drizzle-orm'
 import pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { DEMO_NOW, ORIGIN, testApp } from '../../../test/app'
@@ -6,7 +6,7 @@ import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import { urlFor } from '../../../test/env'
 import type { Db } from '../../db/client'
-import { businesses, users } from '../../db/schema'
+import { businesses, events, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { emit, EVENTS_CHANNEL } from '../../notify'
 import { nullLogger } from '../../ports/log'
@@ -111,21 +111,22 @@ describe('the push channel (GET /v1/events/stream)', () => {
       // a transaction with an id, still running
       await older.query('begin')
       await older.query('select pg_current_xact_id()')
+      // this test's event: the ones before it (an earlier test's, held a while by transactions of other test files)
+      // may show up meanwhile, so only this one is watched
+      const [before] = await db.select({ id: max(events.id) }).from(events)
       await emit(db, { type: 'business.updated', businessId: glow })
-      const waiting = (await b.req(`/v1/events?after=${cursor}`)).json as { items: unknown[]; held: boolean }
-      expect(waiting).toMatchObject({ items: [], held: true })
+      const read = async () => (await b.req(`/v1/events?after=${cursor}`)).json as { items: { id: string }[]; held: boolean }
+      const ours = (items: { id: string }[]) => items.some((e) => Number(e.id) > (before?.id ?? 0))
+      const waiting = await read()
+      expect(ours(waiting.items)).toBe(false)
+      expect(waiting.held).toBe(true)
       await older.query('commit')
-      await vi.waitFor(
-        async () => {
-          const shown = (await b.req(`/v1/events?after=${cursor}`)).json as { items: { type: string }[]; held: boolean }
-          expect(shown.items.map((e) => e.type)).toContain('business.updated')
-        },
-        { timeout: 5_000, interval: 100 },
-      )
+      // shown once every older transaction on the server has ended (other test files' too): waited for, not timed
+      await vi.waitFor(async () => expect(ours((await read()).items)).toBe(true), { timeout: 30_000, interval: 100 })
     } finally {
       await older.end()
     }
-  })
+  }, 40_000)
 
   it('a NOTIFY’s payload that isn’t ours is ignored', () => {
     expect(changeOf('{"b":"x","u":null}')).toEqual({ businessId: 'x', userId: null })
