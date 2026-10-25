@@ -25,7 +25,12 @@
 - The shell's toast (`RequestArrivals`): a request that comes in while any page of the workspace is open says «New
   request: Ejegyz T. · Aýna · today · 15:30» with «Open», which opens it in the calendar's drawer. The ones waiting when
   the page opened stay quiet.
-- The contract exports `BookingRequest`.
+- The contract exports `BookingRequest`. `useJoin` joins a booking's services too («a + b», `plus`).
+- Review round: a move's drawer shows its previous and new time; the pager waits while an answer is on its way and
+  only the answered request's drawer closes; «Next request» in the toast opens the calendar from any page; a time in a
+  sentence reads «09:30», «09:30 tomorrow» or «09:30 on Mon, 27 Oct», the opening included; who answers names every
+  specialist of the request; the chip shows the day's count while the list isn't read; an arrival heard once stays
+  heard.
 - Decided (Claude, delegated; chapter 9, 25.10.2026, B-19 (how)):
   - «answers their own requests», not «her own»: the name is any team member's.
   - The chip's name starts with what it shows: «2 requests — open the most urgent» (axe).

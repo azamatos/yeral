@@ -60,7 +60,21 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
   const goDay = (next: string) => go({ date: next === todayDate ? undefined : next, booking: undefined })
   // the waiting requests, most urgent first: the chip opens the first (B-Calendar `openQueue`)
   const queue = useQuery(sdk.requests.list(slug)).data?.items ?? []
-  const openRequest = (code: string) => go({ request: code, booking: undefined }, true)
+  /**
+   * A request in the drawer, on its day when it has one (the chip, the pager, «Next request»; the toast's from any page
+   * of the workspace, so it goes to the calendar by name); a block's on the day on screen.
+   */
+  const openRequest = ({ code, date: day }: { code: string; date?: string }, replace = true) =>
+    void navigate({
+      to: '/w/$slug/calendar',
+      params: { slug },
+      search: (prev: CalendarSearch) => ({
+        ...(prev.cancelled ? { cancelled: true as const } : {}),
+        ...(day ? (day === today(Date.now()) ? {} : { date: day }) : prev.date ? { date: prev.date } : {}),
+        request: code,
+      }),
+      replace,
+    })
 
   if (view.isError && (!view.data || view.isPlaceholderData)) throw view.error
   // the day the data is for: the one before while the next loads
@@ -103,7 +117,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
           {first ? (
             <button
               type="button"
-              onClick={() => openRequest(first.code)}
+              onClick={() => openRequest(first)}
               className={cn(
                 pillVariants({ tone: 'warning', size: 'l' }),
                 'h-9 cursor-pointer gap-1.5 px-3.5 text-small hover:border-st-pending-dot focus-visible:shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-a-400)] focus-visible:outline-none',
@@ -114,6 +128,11 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
               {/* its name starts with what it shows (B-Calendar: «6 unanswered requests — open the most urgent») */}
               <span className="sr-only">{t('openMostUrgent')}</span>
             </button>
+          ) : requests > 0 ? (
+            // the list not read yet (or not readable): the day's count, as a plain chip
+            <Pill tone="warning" size="l" icon={<Clock aria-hidden />} className="h-9 px-3.5 text-small">
+              {t('requests', { n: requests })}
+            </Pill>
           ) : (
             <Pill tone="neutral" size="l" className="h-9 px-3.5 text-small">
               {t('noRequests')}
@@ -157,7 +176,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
           busy={view.isPlaceholderData}
           onOpen={(pick) =>
             'request' in pick
-              ? openRequest(pick.request)
+              ? openRequest({ code: pick.request })
               : go({ booking: search.booking === pick.booking ? undefined : pick.booking, request: undefined }, true)
           }
         />
@@ -173,6 +192,13 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
           now={now}
           business={business}
           onGo={openRequest}
+          onAnswered={(code) =>
+            void navigate({
+              to: '.',
+              search: (prev: CalendarSearch) => (prev.request === code ? { ...prev, request: undefined } : prev),
+              replace: true,
+            })
+          }
           onClose={() => go({ request: undefined }, true)}
         />
       )}

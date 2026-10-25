@@ -28,7 +28,8 @@ export function RequestArrivals({ slug }: { slug: string }) {
     const items = list.data?.items
     if (!items) return
     const known = seen.current
-    seen.current = new Set(items.map((r) => r.code))
+    // every code heard of stays heard of: one that drops out of the list and comes back isn't new
+    seen.current = new Set([...(known ?? []), ...items.map((r) => r.code)])
     if (!known) return
     for (const r of items) {
       if (known.has(r.code)) continue

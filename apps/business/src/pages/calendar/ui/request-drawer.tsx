@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { BookingRequest as Request } from '@yeral/contract/requests'
 import { openMinutesBetween, openState, type BusinessHours } from '@yeral/domain/hours'
-import { diffDays, localOf, today } from '@yeral/domain/time'
+import { addDays, diffDays, localOf, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
@@ -15,7 +15,7 @@ import { StatusBadge } from '@yeral/ui/status-badge'
 import { toast } from '@yeral/ui/toast'
 import { ArrowLeftRight, Clock, Globe, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { BOOKING_STATUS_ICON } from '@/entities/booking'
+import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 
@@ -33,6 +33,7 @@ export function RequestDrawer({
   now,
   business,
   onGo,
+  onAnswered,
   onClose,
 }: {
   slug: string
@@ -40,8 +41,10 @@ export function RequestDrawer({
   now: number
   /** The business's hours (the owner's and admins'): the timer counts only while it's open. Null: the clock. */
   business: BusinessHours | null
-  /** Open another request (the pager, «Next request»). */
-  onGo: (code: string) => void
+  /** Open another request on its day (the pager, «Next request»; the toast's works from any page). */
+  onGo: (request: Pick<Request, 'code' | 'date'>, replace?: boolean) => void
+  /** This request was answered: the drawer closes if it's still the one open. */
+  onAnswered: (code: string) => void
   onClose: () => void
 }) {
   const t = useTranslations('calendar.request')
@@ -53,15 +56,20 @@ export function RequestDrawer({
   const confirm = useMutation(sdk.requests.confirm(slug))
   const errorText = useErrorText()
   const fmt = useFmt()
+  const join = useJoin()
+  // the pager stays while an answer is on its way: the drawer closes on the request it was for
+  const answering = confirm.isPending
+  const go = (r: Request | undefined) => r && !answering && onGo(r)
 
   const answer = (r: Request) => {
     const rest = queue.filter((o) => o.code !== r.code)
     confirm.mutate(r.code, {
       onSuccess: () => {
-        onClose()
+        onAnswered(r.code)
         const when = t('when', { date: fmt.shortWeekdayDate(r.date), time: fmt.time(r.start) })
+        const next = rest[0]
         toast(r.kind === 'move' ? t('movedTo', { when }) : t('confirmed'), {
-          ...(rest[0] ? { action: { label: t('nextRequest'), onClick: () => onGo(rest[0]!.code) } } : {}),
+          ...(next ? { action: { label: t('nextRequest'), onClick: () => onGo(next, false) } } : {}),
         })
       },
       onError: (error) => {
@@ -81,8 +89,8 @@ export function RequestDrawer({
             request && queue.length > 1
               ? {
                   position: t('position', { n: at + 1, total: queue.length }),
-                  previous: { label: t('previous'), onClick: () => onGo(queue[at - 1]!.code), disabled: at === 0 },
-                  next: { label: t('next'), onClick: () => onGo(queue[at + 1]!.code), disabled: at === queue.length - 1 },
+                  previous: { label: t('previous'), onClick: () => go(queue[at - 1]), disabled: at === 0 || answering },
+                  next: { label: t('next'), onClick: () => go(queue[at + 1]), disabled: at === queue.length - 1 || answering },
                 }
               : undefined
           }
@@ -104,24 +112,20 @@ export function RequestDrawer({
         {request ? (
           request.canAnswer ? (
             <DrawerFooter>
-              <Button variant="primary" onClick={() => answer(request)} loading={confirm.isPending}>
+              <Button variant="primary" onClick={() => answer(request)} loading={answering && confirm.variables === request.code}>
                 {request.kind === 'move' ? t('confirmMove') : t('confirm')}
               </Button>
             </DrawerFooter>
           ) : (
             <DrawerFooter>
-              <p className="m-0 text-dense text-n-600">
-                {request.answeredBy === 'specialist' && request.items[0]?.staff
-                  ? t('viewOnlyOwn', { name: request.items[0].staff })
-                  : t('viewOnlyDesk')}
-              </p>
+              <p className="m-0 text-dense text-n-600">{viewOnly(request)}</p>
             </DrawerFooter>
           )
         ) : (
           !list.isPending &&
           queue[0] && (
             <DrawerFooter>
-              <Button variant="secondary" onClick={() => onGo(queue[0]!.code)}>
+              <Button variant="secondary" onClick={() => go(queue[0])}>
                 {t('nextRequest')}
               </Button>
             </DrawerFooter>
@@ -130,6 +134,14 @@ export function RequestDrawer({
       </DrawerContent>
     </Drawer>
   )
+
+  /** Who answers it, for someone who may not: the owner and admins, or its specialists (B-Calendar `whoAnswers`). */
+  function viewOnly(r: Request) {
+    const names = [...new Set(r.items.flatMap((i) => (i.staff ? [i.staff] : [])))]
+    return r.answeredBy === 'specialist' && names.length
+      ? t('viewOnlyOwn', { n: names.length, names: join(names, 'list') })
+      : t('viewOnlyDesk')
+  }
 }
 
 /** What the drawer shows of one request. */
@@ -137,23 +149,30 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
   const t = useTranslations('calendar.request')
   const s = useTranslations('status')
   const fmt = useFmt()
+  const join = useJoin()
   const move = r.kind === 'move'
   const day = today(now)
+  // a time in a sentence: «09:30», «09:30 tomorrow», «09:30 on Mon, 27 Oct»
+  const at = (date: string, minute: number) => {
+    const days = diffDays(date, day)
+    return t('at', {
+      when: days === 0 ? 'today' : days === 1 ? 'tomorrow' : 'other',
+      time: fmt.time(minute),
+      date: fmt.shortWeekdayDate(date),
+    })
+  }
   const until = localOf(r.holdUntil)
+  const runsOut = at(until.date, until.min)
   // closed now: the timer waits for the opening; it runs out at that time instead of counting down
   const state = business ? openState(business, now) : null
   const closed = state !== null && !state.open
   const left = Math.max(0, Math.ceil(business ? openMinutesBetween(business, now, r.holdUntil) : (r.holdUntil - now) / 60_000))
-  const runsOut =
-    until.date === day ? fmt.time(until.min) : t('when', { date: fmt.relativeShortDate(until.date, day), time: fmt.time(until.min) })
-  const days = diffDays(until.date, day)
-  const by = {
-    when: days === 0 ? 'today' : days === 1 ? 'tomorrow' : 'other',
-    time: fmt.time(until.min),
-    date: fmt.shortWeekdayDate(until.date),
-  }
-  const services = r.items.map((i) => i.service).join(' + ')
-  const staff = [...new Set(r.items.map((i) => i.staff).filter(Boolean))].join(', ')
+  const services = join(
+    r.items.map((i) => i.service),
+    'plus',
+  )
+  const staff = join([...new Set(r.items.flatMap((i) => (i.staff ? [i.staff] : [])))], 'list')
+  const when = (date: string, start: number, end: number) => t('when', { date: fmt.weekdayDate(date), time: fmt.timeRange(start, end) })
   const Pending = BOOKING_STATUS_ICON.pending
   const Confirmed = BOOKING_STATUS_ICON.confirmed
 
@@ -179,10 +198,14 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
           {t('source')}
         </span>
       </div>
-      <Callout tone="warning" icon={<Clock aria-hidden />} title={closed ? t('answerBy', by) : t('left', { time: fmt.duration(left) })}>
+      <Callout
+        tone="warning"
+        icon={<Clock aria-hidden />}
+        title={closed ? t('answerBy', { at: runsOut }) : t('left', { time: fmt.duration(left) })}
+      >
         {closed && state.inDays !== null
-          ? t(move ? 'closedRunsOutMove' : 'closedRunsOut', { open: fmt.time(state.at), time: runsOut })
-          : t(move ? 'runsOutMove' : 'runsOut', { time: runsOut })}
+          ? t(move ? 'closedRunsOutMove' : 'closedRunsOut', { open: at(addDays(day, state.inDays), state.at), at: runsOut })
+          : t(move ? 'runsOutMove' : 'runsOut', { at: runsOut })}
       </Callout>
       <div className="flex flex-col gap-2">
         <div className="flex items-start gap-3">
@@ -216,9 +239,13 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
         items={[
           { key: t('service'), value: services },
           ...(staff ? [{ key: t('specialist'), value: staff }] : []),
-          ...(move
-            ? []
-            : [{ key: t('dateTime'), value: t('when', { date: fmt.weekdayDate(r.date), time: fmt.timeRange(r.start, r.end) }) }]),
+          // a move: the booking's time now and the one asked for (B5 draws them in their own box)
+          ...(move && r.from
+            ? [
+                { key: t('previousTime'), value: when(r.from.date, r.from.start, r.from.end) },
+                { key: t('newTime'), value: when(r.date, r.start, r.end) },
+              ]
+            : [{ key: t('dateTime'), value: when(r.date, r.start, r.end) }]),
           { key: t('duration'), value: fmt.duration(r.end - r.start) },
           ...(r.price ? [{ key: t('price'), value: fmt.price(r.price) }] : []),
           ...(move ? [{ key: t('booking'), value: t('bookingKeeps') }] : []),

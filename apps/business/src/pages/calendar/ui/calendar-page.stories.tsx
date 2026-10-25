@@ -408,6 +408,9 @@ export const ConfirmRequest: Story = {
     const next = within(await page.findByRole('dialog', { name: 'Time change request' }))
     await expect(next.getByText('New client')).toBeVisible()
     await expect(next.getByRole('button', { name: 'Confirm the new time' })).toBeVisible()
+    // the time it moves from and to
+    await expect(next.getByText('Previous time')).toBeVisible()
+    await expect(next.getByText(/ · 16:00–17:30$/)).toBeVisible()
   },
 }
 
