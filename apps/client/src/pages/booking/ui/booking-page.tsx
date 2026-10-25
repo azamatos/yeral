@@ -14,22 +14,14 @@ import { toast } from '@yeral/ui/toast'
 import { ChevronLeft, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import {
-  parseServiceIds,
-  pickedServices,
-  selectionTotal,
-  ServicePicker,
-  serviceIdsParam,
-  SERVICES_MAX,
-  toggleService,
-} from '@/features/pick-services'
+import { parseServiceIds, pickedServices, selectionTotal, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { useErrorText } from '@/shared/i18n'
 import { wrap } from '@/shared/ui'
 import { chosenStaff, currentStep, reachedStep, stepDone, STEPS, type BookingSearch, type Choice, type Step } from '../model/flow'
 import { ConfirmStep, type Alternative } from './confirm-step'
 import { SentView } from './sent-view'
+import { ServicesStep } from './services-step'
 import { StaffStep } from './staff-step'
-import { StepTitle } from './step-title'
 import { Summary } from './summary'
 import { TimeStep } from './time-step'
 
@@ -112,8 +104,9 @@ export function BookingPage() {
       toast(t('services.max', { max: SERVICES_MAX }))
       return
     }
-    // a new service may rule the chosen specialist out and leaves the chosen time behind (Booking `set`)
-    set({ services: serviceIdsParam(next), staff: chosenStaff(detail, next, search.staff), time: undefined })
+    // a new service leaves the chosen time behind (Booking `set`); the chosen specialist stays in the address even when
+    // it rules them out (`chosenStaff` answers «any» meanwhile), so taking it off brings them back
+    set({ services: serviceIdsParam(next), time: undefined })
   }
 
   // the sdk's own callbacks keep the cache (the booking, my lists, the free times); the page's run after them
@@ -253,21 +246,15 @@ export function BookingPage() {
         <div className="flex flex-wrap items-start gap-10 pt-10 pb-24 max-md:pb-10 max-sm:pt-6">
           <main className="min-w-0 flex-[999_1_560px]">
             <div className="flex max-w-180 flex-col">
-              {step === 'services' && (
-                <>
-                  <StepTitle title={t('services.title')} lead={t('services.lead')} />
-                  <div className="mt-5 flex flex-col gap-7">
-                    <ServicePicker groups={detail.serviceGroups} picked={ids} onToggle={pickServices} groupHeading="h2" />
-                  </div>
-                </>
-              )}
+              {step === 'services' && <ServicesStep detail={detail} picked={picked} staff={search.staff} onToggle={pickServices} />}
               {step === 'staff' && (
                 <StaffStep
                   detail={detail}
                   serviceIds={ids}
                   staff={staff}
-                  // the same specialist again keeps the chosen time
-                  onPick={(id) => id !== staff && set({ staff: id, time: undefined })}
+                  // the same specialist again keeps the chosen time; «any» over someone the services rule out (still in
+                  // the address) is the client's choice too, so they don't come back
+                  onPick={(id) => id !== (search.staff ?? 'any') && set(id === staff ? { staff: id } : { staff: id, time: undefined })}
                 />
               )}
               {step === 'time' && (

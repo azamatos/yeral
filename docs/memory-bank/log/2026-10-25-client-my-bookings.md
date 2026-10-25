@@ -26,5 +26,10 @@
   where the time came from («Offered time accepted» / «New request sent»), the expiry's chips «Free times», the
   decline's caption. Left: the tabs' counts (the list has no `total` yet); the status icons repeat the business app's
   and belong in `@yeral/ui`'s `StatusBadge` later.
+- Also (from G's #225 review): «Book» on a specialist's card (`/b/{slug}/book?staff=…`) keeps them in the address
+  until the client picks someone else (or «Any specialist») on the staff step; the services step lists only what they
+  do with «See all services» / «Only {name}'s», and a picked service they don't do says so in a warning (any free
+  specialist takes the booking; taking it off brings them back). `pages/booking/ui/services-step.tsx`,
+  `namedSpecialist`, `notDoneBy`, `servicesOf` in `model/flow.ts` (unit tests); story `Booking/WithSpecialist`.
 - Not here yet: opening a booking (C6, the drawer at `/account/bookings/{code}`), the review and «How was it?» (C8),
   Directions on a row (the list's rows carry no address; the drawer has it).

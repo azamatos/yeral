@@ -288,7 +288,12 @@
     "services": {
       "title": "Choose services",
       "lead": "You can choose several services.",
-      "max": "Up to {max} services in one booking."
+      "max": "Up to {max} services in one booking.",
+      "theirs": "The services {name} does",
+      "allShown": "All the services",
+      "seeAll": "See all services",
+      "onlyTheirs": "Only {name}'s",
+      "notTheirs": "{name} doesn't do {services}, so any free specialist takes this booking. Take {count, plural, one {it} other {them}} off to book with {name}."
     },
     "staff": {
       "title": "Choose a specialist",
