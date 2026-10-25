@@ -63,7 +63,8 @@
     "close": "Close",
     "mine": "My account",
     "sections": "Account sections",
-    "profileAndSettings": "Profile and settings"
+    "profileAndSettings": "Profile and settings",
+    "bookings": "My bookings"
   },
   "profile": {
     "title": "Profile and settings",
@@ -390,5 +391,43 @@
       "barTime": "{count, plural, one {# service} other {# services}} · {total} · {time}",
       "barNone": "No service chosen"
     }
+  },
+  "myBookings": {
+    "title": "My bookings",
+    "label": "Bookings",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "what": "{services} · {staff}",
+    "when": "{date} · {range}",
+    "byClient": "You cancelled",
+    "byBusiness": "The business cancelled",
+    "declined": "The business declined",
+    "bySystem": "No answer in time",
+    "timer": "{minutes} min",
+    "timerLabel": "{minutes} min left to answer",
+    "moveWaiting": "New time requested: {when} · waiting for an answer",
+    "reason": "Reason: {reason}",
+    "reasonWith": "Reason: {reason} · «{text}»",
+    "offered": "Offered times",
+    "expiredLead": "{business} didn't answer in time. Choose one of these free times:",
+    "offerTaken": "Already taken",
+    "offerTakenLabel": "{when}, already taken",
+    "offerPick": "Book {time}",
+    "ask": "{when} · {what}: book this time?",
+    "back": "Back",
+    "book": "Book",
+    "booked": "Booked: {when}",
+    "requested": "New request sent",
+    "tookAnother": "You booked another time: {code}",
+    "undo": "Undo",
+    "undone": "Your booking is back",
+    "bookAgain": "Book again",
+    "more": "Show more",
+    "emptyUpcoming": "No upcoming bookings",
+    "emptyUpcomingLead": "Open a place you like: its free times are a tap away.",
+    "emptyPast": "No past bookings yet",
+    "emptyPastLead": "Your finished and cancelled bookings show here.",
+    "find": "Find a place",
+    "loadFailed": "Couldn't load your bookings."
   }
 }

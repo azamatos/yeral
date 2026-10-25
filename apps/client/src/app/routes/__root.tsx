@@ -1,6 +1,6 @@
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useParams, useRouter } from '@tanstack/react-router'
-import type { Api } from '@yeral/sdk'
+import { startEvents, type Api } from '@yeral/sdk'
 import { brand } from '@yeral/ui/brand'
 import { useEffect, type ReactNode } from 'react'
 import { ErrorPage } from '@/pages/error'
@@ -41,7 +41,13 @@ export const Route = createRootRouteWithContext<Api>()({
 function RootDocument({ children }: { children: ReactNode }) {
   const { lang } = useParams({ strict: false })
   const locale = siteLocale(lang)
-  const { sdk } = useRouter().options.context
+  const { sdk, client, queryClient } = useRouter().options.context
+  // live updates (ADR 0028): in the browser only (effects don't run on the server), and they wait for someone signed in;
+  // the business's answer, an expired request or a move shows in My bookings without a reload
+  useEffect(() => {
+    const events = startEvents(client, queryClient)
+    return () => events.stop()
+  }, [client, queryClient])
   return (
     <html lang={locale}>
       <head>
