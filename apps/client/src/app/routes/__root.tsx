@@ -26,7 +26,8 @@ export const Route = createRootRouteWithContext<Api>()({
     links: [
       { rel: 'stylesheet', href: appCss },
       // the brand's icon (a rebrand replaces the files in @yeral/ui/brand, nothing here)
-      { rel: 'icon', href: brand.icon },
+      { rel: 'icon', href: brand.tabIcon },
+      { rel: 'apple-touch-icon', href: brand.touchIcon },
     ],
   }),
   shellComponent: RootDocument,
