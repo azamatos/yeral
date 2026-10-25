@@ -9,12 +9,17 @@
  * `admin-invite <login> "<name>"` (`pnpm --filter @yeral/api admin:invite`; on the server `node dist/cli.js
  * admin-invite` in the api's container): a Ýeral team account and its setup link, or a new link for a login that exists
  * (ADR 0026).
+ *
+ * `make-example <slug> [--off]` (on the server `node dist/cli.js make-example` in the api's container; the owner's D2):
+ * while the sign-in code shows on the screen, one of the owner's test businesses opens to clients marked "Example", still
+ * confirming as its rules say; `--off` takes it back to "in review" (`modules/admin/examples.ts`).
  */
 import { sql } from 'drizzle-orm'
 import pg from 'pg'
 import { adminLoginSchema } from '@yeral/contract/admin'
 import { loadConfig } from '../config'
 import { inviteOrReset } from '../modules/admin/accounts'
+import { ExampleRefused, makeExample } from '../modules/admin/examples'
 import { createLogger } from '../ports/log'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
@@ -52,7 +57,37 @@ async function adminInvite(db: ReturnType<typeof createDb>, [login, ...name]: st
   console.log(link.url)
 }
 
+/** Said on the terminal only, for whoever runs it on the server. */
+async function exampleCommand(db: ReturnType<typeof createDb>, flags: string[]) {
+  const [slug, ...rest] = flags.filter((f) => !f.startsWith('--'))
+  // a mistyped flag mustn't open the business
+  if (!slug || rest.length || flags.some((f) => f.startsWith('--') && f !== '--off')) throw new Error('usage: make-example <slug> [--off]')
+  const on = !flags.includes('--off')
+  try {
+    const done = await makeExample(db, config.codeOnScreen, slug, on)
+    console.warn(
+      done === 'unchanged'
+        ? `${slug}: already ${on ? 'an example' : 'not an example'}, nothing changed`
+        : done === 'opened'
+          ? `${slug}: open to clients, marked "Example" (make-example ${slug} --off takes it back to "in review")`
+          : `${slug}: back to "in review", no longer an example`,
+    )
+  } catch (e) {
+    if (!(e instanceof ExampleRefused)) throw e
+    console.error(`make-example refused: ${e.message}`)
+    process.exitCode = 1
+  }
+}
+
 async function main() {
+  if (command === 'make-example') {
+    const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 1 })
+    try {
+      return await exampleCommand(createDb(pool), flags)
+    } finally {
+      await pool.end()
+    }
+  }
   if (command === 'admin-invite') {
     const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 1 })
     try {
