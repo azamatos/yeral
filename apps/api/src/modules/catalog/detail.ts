@@ -9,7 +9,7 @@ import { LATE_MINUTES } from '@yeral/domain/rules'
 import { addDays, today } from '@yeral/domain/time'
 import { and, asc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
 import { all, type Queryable } from '../../db/client'
-import { bookings, businesses, categories, serviceGroups, staff, tableAreas } from '../../db/schema'
+import { bookings, businesses, businessOldSlugs, categories, serviceGroups, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusiness, loadBusy, type BusinessRow } from '../availability/context'
@@ -65,6 +65,16 @@ export async function publicBusiness(deps: Deps, slug: string) {
   return row
 }
 
+/** The business an earlier page address belonged to (chapter 9, 25.10.2026), or none. */
+async function movedFrom(deps: Deps, slug: string) {
+  const [found] = await deps.db
+    .select({ business: businesses })
+    .from(businessOldSlugs)
+    .innerJoin(businesses, eq(businesses.id, businessOldSlugs.businessId))
+    .where(eq(businessOldSlugs.slug, slug))
+  return found?.business
+}
+
 /**
  * A business the viewer may see (book F-032): a public one, or one still in review, rejected or hidden for a signed-in
  * member of its own team, with the preview's status and, for its owner, the Ýeral team's reason (Q-274, Q-012). Anyone
@@ -72,7 +82,10 @@ export async function publicBusiness(deps: Deps, slug: string) {
  * business page, its free times and its reviews all ask this, so they answer the same.
  */
 export async function visibleBusiness(deps: Deps, slug: string, viewerId: string | null) {
-  const [row] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
+  const [now] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
+  // an earlier address opens the page as it is now, which names its address: the client site moves there
+  // (chapter 9, 25.10.2026)
+  const row = now ?? (await movedFrom(deps, slug))
   // a closed one is nobody's to see, its team's included (Q-213)
   if (!row || row.closedAt) throw new ApiError('not_found')
   if (publicRow(row)) return { row, preview: null }

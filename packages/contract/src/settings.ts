@@ -18,6 +18,7 @@ import {
   latLngSchema,
   marketLocaleSchema,
   minuteSchema,
+  pageAddressSchema,
   phoneInputSchema,
   phoneSchema,
   photoSchema,
@@ -279,3 +280,30 @@ export const internalStatusUpdateSchema = z
   .strict()
   .meta({ id: 'InternalStatusUpdate' })
 export const internalStatusParamSchema = z.object({ slug: slugSchema, id: idSchema })
+
+/** Why a page address can't be had: `slugProblem`'s reasons, and `taken` (another business has it, or had it). */
+export const PAGE_ADDRESS_PROBLEMS = ['short', 'long', 'chars', 'reserved', 'taken'] as const
+
+/**
+ * The page address check as it's typed (F-115, B-03, B-43; chapter 9, 25.10.2026): `business` is the asker's own
+ * workspace, whose addresses, now and before, are free to it.
+ */
+export const pageAddressCheckQuerySchema = z.object({ slug: z.string().max(64), business: slugSchema.optional() })
+export const pageAddressCheckSchema = z
+  .object({
+    slug: z.string(),
+    /** null: free to take. */
+    problem: z.enum(PAGE_ADDRESS_PROBLEMS).nullable(),
+    /** A free address like it when it's taken or reserved ("glow-studio-2"); null otherwise. */
+    suggestion: slugSchema.nullable(),
+  })
+  .meta({ id: 'PageAddressCheck' })
+export type PageAddressCheck = z.infer<typeof pageAddressCheckSchema>
+
+/**
+ * A new page address. After the setup is finished the old one keeps opening the page (which then names the new one)
+ * and stays the business's own; a draft's isn't kept (nobody has seen it). `taken` on `slug` when another business has
+ * it or had it.
+ */
+export const pageAddressInputSchema = z.object({ slug: pageAddressSchema }).strict().meta({ id: 'PageAddressInput' })
+export const pageAddressResultSchema = z.object({ slug: slugSchema }).meta({ id: 'PageAddress' })

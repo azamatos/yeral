@@ -153,6 +153,12 @@ describe('“Try the business app” (book F-242)', () => {
     expect((await browser(t.app).req('/v1/auth/code', { body: { phone: MAYSA } })).status).toBe(400)
   })
 
+  it('keeps its page address: one visitor doesn’t move everyone’s demo (chapter 9, 25.10.2026)', async () => {
+    const { req } = await tryIt()
+    expect((await req('/v1/w/demo/settings/page-address', { method: 'PUT', body: { slug: 'my-demo' } })).status).toBe(403)
+    expect((await req('/v1/me/workspaces')).json.items.map((w: { slug: string }) => w.slug)).toEqual(['demo'])
+  })
+
   it('so many demo sessions an hour from one address', async () => {
     for (let i = 0; i < DEMO_SESSIONS_PER_HOUR; i++) expect((await tryIt()).res.status).toBe(200)
     expect((await tryIt()).res.status).toBe(429)

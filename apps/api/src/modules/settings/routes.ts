@@ -22,6 +22,10 @@ import {
   internalStatusParamSchema,
   internalStatusSchema,
   internalStatusUpdateSchema,
+  pageAddressCheckQuerySchema,
+  pageAddressCheckSchema,
+  pageAddressInputSchema,
+  pageAddressResultSchema,
 } from '@yeral/contract/settings'
 import { photoUploadSchema } from '@yeral/contract/common'
 import { workspaceParamSchema } from '@yeral/contract/team'
@@ -32,6 +36,7 @@ import { ApiError } from '../../http/errors'
 import type { AppEnv } from '../../http/env'
 import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
 import { sendForReview } from '../admin/businesses'
+import { requireUser } from '../auth/session'
 import { requireMember } from '../team/service'
 import { hoursOf, updateHours } from './hours'
 import { profileOf, rulesOf, updateProfile, updateRules } from './service'
@@ -39,6 +44,7 @@ import { uploadGuard } from '../media/photos'
 import { clientIp } from '../../lib/rate-limit'
 import { searchAddress } from './address-search'
 import { removeLogo, setLogo } from './logo'
+import { checkAddress, setAddress } from './page-address'
 import { addPhoto, galleryOf, orderPhotos, removePhoto } from './photos'
 import { addStatus, deleteStatus, statusesOf, updateStatus } from './statuses'
 
@@ -155,6 +161,24 @@ const addressSearchRoute = createRoute({
   responses: { 200: json(addressSearchSchema), 400: errors[400], 429: errors[429], 503: errors[503], ...denied },
 })
 
+const pageAddressCheckRoute = createRoute({
+  method: 'get',
+  path: '/page-address',
+  tags,
+  summary:
+    'Whether a page address may be had as it is typed (chapter 9, 25.10.2026): its problem, `taken` when another business has or had it, and a free one like it',
+  request: { query: pageAddressCheckQuerySchema },
+  responses: { 200: json(pageAddressCheckSchema), 400: errors[400], 401: errors[401], 404: errors[404] },
+})
+const pageAddressRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/settings/page-address',
+  tags,
+  summary: 'A new page address; after the setup the old one keeps opening the page and stays the business’s own',
+  request: { params: workspaceParamSchema, ...jsonBody(pageAddressInputSchema) },
+  responses: { 200: json(pageAddressResultSchema), 400: errors[400], ...denied },
+})
+
 const setLogoRoute = createRoute({
   method: 'put',
   path: '/w/{slug}/settings/logo',
@@ -219,6 +243,17 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
     const { q, cityId, lang } = c.req.valid('query')
     const ip = clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader)
     return c.json(await searchAddress(c.var.deps, user, ip, q, cityId, lang ?? user.lang), 200)
+  })
+  .openapi(pageAddressCheckRoute, async (c) => {
+    const { slug, business } = c.req.valid('query')
+    requireUser(c)
+    // the asker's own workspace: its addresses, now and before, are free to it
+    const own = business ? (await requireMember(c, business, { draft: true })).business.id : null
+    return c.json(await checkAddress(c.var.deps.db, slug, own), 200)
+  })
+  .openapi(pageAddressRoute, async (c) => {
+    const { business } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await setAddress(c.var.deps, business.id, c.req.valid('json').slug), 200)
   })
   .openapi(setLogoRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)
