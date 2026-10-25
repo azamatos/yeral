@@ -45,7 +45,8 @@ const freeTimesRoute = createRoute({
   method: 'get',
   path: '/w/{slug}/free-times',
   tags,
-  summary: 'Free times as the team books them: the nearest four with their specialist, a day’s starts, the 14-day strip',
+  summary:
+    'Free times as the team books them: the nearest four with their specialist, a day’s starts, the 14-day strip; with `offer=<code>`, the times that request’s decline may offer',
   request: { params: workspaceParamSchema, query: freeTimesQuerySchema },
   responses: { 200: json(freeTimesSchema), 400: errors[400], ...denied },
 })

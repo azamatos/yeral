@@ -1,11 +1,12 @@
 /** The business's own bookings: free times as the team books them, by phone and walk-in, and the undo (book B-23–B-25). */
+import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingItems, bookings, businesses, clients, jobs, rateLimits, services, staff } from '../../db/schema'
+import { bookingItems, bookingRules, bookings, businesses, clients, jobs, rateLimits, services, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 
@@ -101,6 +102,51 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     // days further than the strip: one open, and Glow's stock-taking day, closed
     expect((await freeTimes(maysa, `services=${manicure}&date=2026-11-20`)).slots.length).toBeGreaterThan(0)
     expect((await freeTimes(maysa, `services=${manicure}&date=2026-11-02`)).slots).toEqual([])
+  })
+
+  it('times a decline may offer (offer=<code>) are asked as the decline asks: its own time free, its specialist first, the lead time and window kept, and the decline takes them', async () => {
+    const maysa = await as(MAYSA)
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [rules] = await db.select().from(bookingRules).where(eq(bookingRules.businessId, glow!.id))
+    // a client's request with Maral on Saturday
+    const client = await as('+99365800300', 'Client')
+    const at = await maralFree(maysa, SAT, 5)
+    const sent = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: maralId, date: SAT, start: at },
+    })
+    expect(sent.status).toBe(201)
+    const code = sent.json.code as string
+    // the team's free times count the request's hold; its decline's don't, and name its specialist first
+    expect((await freeTimes(maysa, `services=${manicure}&date=${SAT}`)).slots.map((s) => s.start)).not.toContain(at)
+    const own = (await freeTimes(maysa, `services=${manicure}&date=${SAT}&offer=${code}`)).slots.find((s) => s.start === at)
+    expect(own?.staffIds[0]).toBe(maralId)
+    // a day ahead to book, three days' window: the team's nearest fall inside the lead time, the offered never do
+    await db.update(bookingRules).set({ leadMinutes: 1440, windowDays: 3 }).where(eq(bookingRules.businessId, glow!.id))
+    try {
+      const team = await freeTimes(maysa, `services=${manicure}`)
+      const offer = await freeTimes(maysa, `services=${manicure}&offer=${code}`)
+      const earliest = t.clock.now + 1440 * 60_000
+      expect(epochOf(team.nearest[0]!.date, team.nearest[0]!.start)).toBeLessThan(earliest)
+      expect(offer.nearest.length).toBeGreaterThan(0)
+      for (const n of offer.nearest) expect(epochOf(n.date, n.start)).toBeGreaterThanOrEqual(earliest)
+      // today's starts are all inside the lead time
+      expect(offer.slots).toEqual([])
+      // past the window the days are closed to an offer, while the team still books them
+      const lastOpen = addDays(TODAY, 3)
+      for (const d of offer.days.filter((x) => x.date > lastOpen)) expect(d.state).toBe('closed')
+      expect(team.days.filter((x) => x.date > lastOpen).some((d) => d.state === 'open')).toBe(true)
+      // the decline takes the times it was offered
+      const offers = offer.nearest.slice(0, 3).map((n) => ({ date: n.date, start: n.start, staffId: n.staffId }))
+      const declined = await maysa.req(`/v1/w/glow-studio/requests/${code}/decline`, { body: { reason: 'slot_busy', offers } })
+      expect(declined.status).toBe(204)
+      // a request no longer open: refused as its decline would be
+      expect((await maysa.req(`${FREE}?services=${manicure}&offer=${code}`)).status).toBe(409)
+    } finally {
+      await db
+        .update(bookingRules)
+        .set({ leadMinutes: rules!.leadMinutes, windowDays: rules!.windowDays })
+        .where(eq(bookingRules.businessId, glow!.id))
+    }
   })
 
   it('a specialist sees and books only their own times; services someone doesn’t do are refused', async () => {

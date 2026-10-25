@@ -19,6 +19,7 @@ import {
   hasAppointmentSlot,
   nearestSlots,
   planRefusal,
+  inBookingWindow,
   shiftPlan,
   staffDoingAll,
   type AppointmentContext,
@@ -48,10 +49,19 @@ import {
   type LoadedBusiness,
 } from '../availability/context'
 import { queueBookingSms } from '../bookings/confirm'
-import { appointmentPrice, cancelForBusiness, dropPendingMove, inTransaction, itemRows } from '../bookings/engine'
+import {
+  appointmentPrice,
+  bookedServices,
+  cancelForBusiness,
+  dropPendingMove,
+  inTransaction,
+  itemRows,
+  rebookQuery,
+} from '../bookings/engine'
 import { retimeAddressSms } from '../bookings/address-sms'
 import { extendBookingLinks } from '../bookings/links'
 import { freshCode, guard, isSlotConflict, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
+import { answerable } from '../requests/service'
 import { assertNoWaitingMove, phoneClient, specialistAccounts, teamBooking, type Business } from './repo'
 
 type FreeTimesQuery = z.infer<typeof freeTimesQuerySchema>
@@ -96,12 +106,19 @@ function checkChoice(
 /**
  * Free times for the new-booking drawer and the quick sheet (B-23, B-24): the nearest four, a day's starts with who is
  * free at each, and the 14-day strip, from the business day that holds now (last night's while it runs, book Q-105).
- * A specialist sees their own; the others everyone who does all the services.
+ * A specialist sees their own; the others everyone who does all the services. `offer`: a request's code, for the times
+ * its decline may offer (B-20), asked as the decline checks them.
  */
 export async function freeTimes(deps: Deps, business: Business, actor: Actor, q: FreeTimesQuery): Promise<FreeTimes> {
   const now = deps.now()
   const staffId = q.staff ?? (scopeOf(actor, 'bookings') === 'own' ? actor.staffId : null)
   if (staffId) assertMayBook(actor, staffId)
+  // the request a decline offers times for: refused as the decline would refuse it
+  const request = q.offer ? await answerable(deps.db, business, actor, q.offer, now) : null
+  if (request?.rescheduleOf) throw invalid({ path: ['offer'], code: 'move' })
+  if (request && request.type !== 'appointment') throw invalid({ path: ['offer'], code: 'not_appointment' })
+  const booked = request ? await bookedServices(deps.db, request.id) : null
+  const serviceIds = booked?.serviceIds ?? q.services
   const lb = await loadBusiness(deps.db, business.id)
   const hours = { hours: lb.business.hours, exceptions: lb.business.exceptions }
   const first = currentBusinessDate(hours, now)
@@ -113,9 +130,15 @@ export async function freeTimes(deps: Deps, business: Business, actor: Actor, q:
     inStrip ? [] : loadBusy(deps.db, [business.id], date, date),
   ])
   const ctx = appointmentContext(lb, [...busy, ...dayBusy], now)
-  checkChoice(ctx, q.services, staffId, { services: 'services', staff: 'staff' })
-  const team = staffId ? [staffId] : staffDoingAll(ctx, q.services).map((s) => s.id)
-  const query = (d: string, id: string): AppointmentQuery => ({ date: d, serviceIds: q.services, staffId: id, by: 'staff' })
+  checkChoice(ctx, serviceIds, staffId, { services: 'services', staff: 'staff' })
+  const doing = staffId ? [staffId] : staffDoingAll(ctx, serviceIds).map((s) => s.id)
+  // an offer's own specialist first: at the same start the one booked comes first (Q-159)
+  const own = booked?.staffId
+  const team = own && doing.includes(own) ? [own, ...doing.filter((id) => id !== own)] : doing
+  // as the team books (no lead time, window or online switch), or, for a decline's offers, the question the decline
+  // asks of each (`rebookQuery`: as the client would book, the request's own hold free)
+  const query = (d: string, id: string): AppointmentQuery =>
+    booked && request ? rebookQuery(booked, { date: d, staffId: id }, [request.id]) : { date: d, serviceIds, staffId: id, by: 'staff' }
 
   const cache = new Map<string, FreeTimes['slots']>()
   /** A day's free starts, each with the specialists free at it in the team's order. */
@@ -135,9 +158,11 @@ export async function freeTimes(deps: Deps, business: Business, actor: Actor, q:
   }
 
   // the strip only asks whether a day has a start: each specialist's search stops at the first one
-  const days = dayStrip(hours, first, STRIP_DAYS, (d) =>
+  const strip = dayStrip(hours, first, STRIP_DAYS, (d) =>
     cache.has(d) ? startsOn(d).length > 0 : team.some((id) => hasAppointmentSlot(ctx, query(d, id))),
   )
+  // a decline offers nothing past the booking window: those days are closed to it, not full
+  const days = request ? strip.map((d) => (inBookingWindow(lb.rules, d.date, now) ? d : { ...d, state: 'closed' as const })) : strip
   const nearest: FreeTimes['nearest'] = []
   for (const d of days) {
     if (d.state !== 'open') continue
