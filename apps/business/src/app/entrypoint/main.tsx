@@ -15,11 +15,16 @@ const router = createAppRouter(api)
 // live updates while someone is signed in: requests, the team, counts (systemPatterns "Data flow")
 startEvents(api.client, api.queryClient)
 
-// the tab icon is the brand's (a rebrand replaces the files in @yeral/ui/brand, nothing here)
-const icon = document.createElement('link')
-icon.rel = 'icon'
-icon.href = brand.icon
-document.head.append(icon)
+// the tab and home-screen icons are the brand's (a rebrand replaces the files in @yeral/ui/brand, nothing here)
+for (const [rel, href] of [
+  ['icon', brand.tabIcon],
+  ['apple-touch-icon', brand.touchIcon],
+] as const) {
+  const link = document.createElement('link')
+  link.rel = rel
+  link.href = href
+  document.head.append(link)
+}
 
 const root = document.getElementById('root')
 if (!root) throw new Error('index.html has no #root')
