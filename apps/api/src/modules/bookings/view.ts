@@ -67,7 +67,14 @@ export async function summaries(deps: Deps, rows: BookingRow[], lang: Locale, no
         type: 'appointment',
         items: items
           .filter((i) => i.bookingId === r.id)
-          .map((i) => ({ service: text(i.serviceName, lang), staff: i.staffName, start: i.start, end: i.end })),
+          .map((i) => ({
+            serviceId: i.serviceId,
+            service: text(i.serviceName, lang),
+            staffId: i.staffId,
+            staff: i.staffName,
+            start: i.start,
+            end: i.end,
+          })),
       }
     }
     return {

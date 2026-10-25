@@ -87,7 +87,20 @@ export const bookingStatusSchema = z.enum(BOOKING_STATUSES)
 export const bookingWhatSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('appointment'),
-    items: z.array(z.object({ service: z.string(), staff: z.string().nullable(), start: minuteSchema, end: minuteSchema })).min(1),
+    items: z
+      .array(
+        z.object({
+          /** The service booked, for a move's free times (book C-30); null once the business has deleted it. */
+          serviceId: idSchema.nullable(),
+          service: z.string(),
+          /** Who does it; null when no one is named, or once they've been removed from the team. */
+          staffId: idSchema.nullable(),
+          staff: z.string().nullable(),
+          start: minuteSchema,
+          end: minuteSchema,
+        }),
+      )
+      .min(1),
   }),
   z.object({ type: z.literal('table'), partySize: z.number().int(), area: z.string(), requests: z.array(z.string()) }),
   z.object({ type: z.literal('class'), session: z.string(), trainer: z.string().nullable(), seats: z.number().int() }),

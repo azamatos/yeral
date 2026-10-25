@@ -33,7 +33,10 @@ const LOFT = {
 const row = (code: string, over: Partial<MyBooking>): MyBooking => ({
   code,
   business: GLOW,
-  what: { type: 'appointment', items: [{ service: 'Women’s haircut', staff: 'Aýna', start: 870, end: 930 }] },
+  what: {
+    type: 'appointment',
+    items: [{ serviceId: 's1', service: 'Women’s haircut', staffId: 'st-ayna', staff: 'Aýna', start: 870, end: 930 }],
+  },
   date: addDays(today(), 1),
   start: 870,
   end: 930,
@@ -77,7 +80,10 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
     }),
     row('YR-48241', {
       business: LOFT,
-      what: { type: 'appointment', items: [{ service: 'Men’s haircut', staff: null, start: 660, end: 705 }] },
+      what: {
+        type: 'appointment',
+        items: [{ serviceId: 'loft-cut', service: 'Men’s haircut', staffId: null, staff: null, start: 660, end: 705 }],
+      },
       start: 660,
       end: 705,
       status: 'cancelled',
@@ -96,7 +102,10 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
     row('YR-48190', { reschedule: { date: addDays(today(), 3), start: 600, end: 660, holdUntil: Date.now() + 25 * 60_000 } }),
     row('YR-48205', {
       business: LOFT,
-      what: { type: 'appointment', items: [{ service: 'Beard trim', staff: 'Döwlet', start: 600, end: 630 }] },
+      what: {
+        type: 'appointment',
+        items: [{ serviceId: 'loft-beard', service: 'Beard trim', staffId: 'loft-dowlet', staff: 'Döwlet', start: 600, end: 630 }],
+      },
       start: 600,
       end: 630,
       price: { type: 'fixed', amount: 40 },
@@ -112,7 +121,10 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
     }),
     row('YR-48120', {
       business: LOFT,
-      what: { type: 'appointment', items: [{ service: 'Men’s haircut', staff: 'Döwlet', start: 600, end: 645 }] },
+      what: {
+        type: 'appointment',
+        items: [{ serviceId: 'loft-cut', service: 'Men’s haircut', staffId: 'loft-dowlet', staff: 'Döwlet', start: 600, end: 645 }],
+      },
       date: addDays(today(), -2),
       start: 600,
       end: 645,

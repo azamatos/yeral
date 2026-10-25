@@ -236,8 +236,15 @@ function sentBooking(business: BusinessDetail, body: Record<string, unknown>, co
   const start = Number(body.start)
   let at = start
   const items = services.map((s) => {
-    const staff = business.specialists.find((p) => p.id === (staffId ?? s.staffIds[0]))?.name ?? null
-    const item = { service: s.name, staff, start: at, end: at + s.durationMin }
+    const who = business.specialists.find((p) => p.id === (staffId ?? s.staffIds[0])) ?? null
+    const item = {
+      serviceId: s.id,
+      service: s.name,
+      staffId: who?.id ?? null,
+      staff: who?.name ?? null,
+      start: at,
+      end: at + s.durationMin,
+    }
     at += s.durationMin
     return item
   })
