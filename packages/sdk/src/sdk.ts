@@ -701,7 +701,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     setPageAddress: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof pageAddressInputSchema>) => call(w.settings['page-address'].$put({ param: { slug }, json })),
-        onSuccess: () => invalidate(keys.workspaces(), keys.setup(), keys.pageAddressAll()),
+        onSuccess: (moved) => {
+          // the old address's answers nothing on screen still reads go (what's on screen goes once the app moves)
+          if (moved.slug !== slug)
+            queryClient.removeQueries({ predicate: (q) => inWorkspace(slug)(q.queryKey) && q.getObserversCount() === 0 })
+          return invalidate(keys.workspaces(), keys.setup(), keys.pageAddressAll())
+        },
       }),
     /** The logo (book B-37): square; the app crops and shrinks it first. The switcher and invite cards show it. */
     setLogo: (slug: string) =>

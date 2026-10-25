@@ -57,9 +57,15 @@ describe('the page address a business chooses (chapter 9, 25.10.2026)', () => {
     expect(moved.json).toEqual({ slug: 'ayna-salon' })
     expect((await owner.req('/v1/me/setup')).json.setup.slug).toBe('ayna-salon')
     expect((await check(other, 'ayna-studio')).problem).toBeNull()
-    // the same address again changes nothing; a badly formed one is refused
+    // the same address again changes nothing; a badly formed, short or reserved one is refused
     expect((await owner.req('/v1/w/ayna-salon/settings/page-address', { method: 'PUT', body: { slug: 'ayna-salon' } })).status).toBe(200)
     expect((await owner.req('/v1/w/ayna-salon/settings/page-address', { method: 'PUT', body: { slug: 'Ayna' } })).status).toBe(400)
+    for (const slug of ['ay', 'support', 'yr-1'])
+      expect(
+        (await owner.req('/v1/w/ayna-salon/settings/page-address', { method: 'PUT', body: { slug } })).json.error.details.issues,
+      ).toEqual([{ path: ['slug'], code: 'invalid' }])
+    // a booking code's start offers the address as a name would give it
+    expect(await check(owner, 'yr-beauty')).toEqual({ slug: 'yr-beauty', problem: 'reserved', suggestion: 'yrbeauty' })
   })
 
   it('after the setup the old address opens the page and stays the business’s; taken back, it leaves the list', async () => {
@@ -73,6 +79,10 @@ describe('the page address a business chooses (chapter 9, 25.10.2026)', () => {
     expect(page.status).toBe(200)
     expect(page.json.slug).toBe('glow')
     expect((await anyone.req('/v1/businesses/glow-studio/reviews?lang=en')).status).toBe(200)
+    // a page opened there keeps favourites as at the new address
+    const client = await as('+99365940004', 'Client')
+    expect((await client.req('/v1/me/favorites/glow-studio', { method: 'PUT' })).status).toBe(204)
+    expect((await client.req('/v1/me/favorites?lang=en')).json.items.map((b: { slug: string }) => b.slug)).toEqual(['glow'])
     // the team works at the new address
     expect((await maysa.req('/v1/w/glow-studio/settings/profile')).status).toBe(404)
     expect((await maysa.req('/v1/w/glow/settings/profile')).json.slug).toBe('glow')
@@ -102,5 +112,14 @@ describe('the page address a business chooses (chapter 9, 25.10.2026)', () => {
     // a specialist doesn't change it
     const ayna = await as(AYNA)
     expect((await ayna.req('/v1/w/glow-studio/settings/page-address', { method: 'PUT', body: { slug: 'ayna-glow' } })).status).toBe(403)
+
+    // five moves a day (two made above): the sixth waits, and isn't kept
+    let at = 'glow-studio'
+    for (const slug of ['glow-a', 'glow-b', 'glow-c']) {
+      expect((await maysa.req(`/v1/w/${at}/settings/page-address`, { method: 'PUT', body: { slug } })).status).toBe(200)
+      at = slug
+    }
+    expect((await maysa.req('/v1/w/glow-c/settings/page-address', { method: 'PUT', body: { slug: 'glow-d' } })).status).toBe(429)
+    expect((await check(other, 'glow-d')).problem).toBeNull()
   })
 })

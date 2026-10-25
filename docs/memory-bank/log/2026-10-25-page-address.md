@@ -13,11 +13,14 @@
   rollback past it needs nothing). `modules/settings/page-address.ts`: `GET /v1/page-address?slug=&business=` (signed
   in; `business` = the asker's workspace, whose own addresses are free to it) answers `{ slug, problem, suggestion }`;
   `PUT /v1/w/{slug}/settings/page-address` (settings permission) moves the business, keeping the old address after the
-  setup, `taken` on `slug` (a race on the unique address too), 403 for the demo workspace; `POST /v1/setup` with `slug`
-  uses it (`taken` when another business has it), without it `freeAddress()` makes one from the name (it now also
-  skips old addresses and reserved words). `visibleBusiness()` opens a business by an old address too, so
-  `GET /v1/businesses/{old}` (and its reviews and free times) answers the page with its new `slug`. Events:
-  `business.updated`, so the team's switchers refresh.
+  setup (5 moves a day, `PAGE_ADDRESS_MOVES_PER_DAY`, 429 past it), `invalid` or `taken` on `slug` (a race on the unique
+  address too), its own address no change whatever rules came after it, 403 for the demo workspace; `POST /v1/setup`
+  with `slug` uses it (`taken` when another business has it), without it `freeAddress()` makes one from the name (it
+  now also skips old addresses and reserved words, and never runs out). The check: 300 an hour per account, the
+  business's own address fine, a suggestion for a taken or reserved one. `businessAt()` (catalog/detail.ts) opens a
+  business by an old address for `visibleBusiness()` (the page, its reviews, its free times) and `publicBusiness()`
+  (booking, favourites): `GET /v1/businesses/{old}` answers the page with its new `slug`. The example seed skips an
+  address a business had. Events: `business.updated`, so the team's switchers refresh.
 - SDK: `sdk.settings.pageAddressCheck(params)` (`keys.pageAddress`) and `sdk.settings.setPageAddress(slug)`.
 - Handoff:
   - The business app (next PR): the wizard's business step's editable address (`setup.start` with `slug` only when
@@ -25,5 +28,7 @@
     change the app goes to `/w/{new}/…`.
   - The client site's business page (slice 3): when `GET /v1/businesses/{slug}` answers another `slug`, redirect
     permanently to `/b/{that}`.
-  - Not done: `/v1/w/{old}/…` doesn't open the workspace (another member's open tab gets 404 until the switcher
-    refreshes); no limit on how often an address changes (chapter 9's concern).
+  - Not done: `/v1/w/{old}/…` doesn't open the workspace: events name a business by its address as they're read, so
+    another member's open tab at the old address learns nothing from them; its switcher's refresh (`workspaces`) has
+    the new address, and the business app should move a workspace page whose address is gone to the one it has now
+    (the business PR checks the shell does).

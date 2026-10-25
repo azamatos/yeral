@@ -155,6 +155,8 @@ describe('“Try the business app” (book F-242)', () => {
 
   it('keeps its page address: one visitor doesn’t move everyone’s demo (chapter 9, 25.10.2026)', async () => {
     const { req } = await tryIt()
+    // the visitor is the demo's owner, who may change its settings: the 403 is the demo workspace's own
+    expect((await req('/v1/w/demo/settings/rules')).status).toBe(200)
     expect((await req('/v1/w/demo/settings/page-address', { method: 'PUT', body: { slug: 'my-demo' } })).status).toBe(403)
     expect((await req('/v1/me/workspaces')).json.items.map((w: { slug: string }) => w.slug)).toEqual(['demo'])
   })

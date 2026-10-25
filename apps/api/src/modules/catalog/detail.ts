@@ -55,18 +55,23 @@ async function typicalAnswerOf(db: Queryable, b: BusinessRow, instant: boolean, 
   return typicalAnswerMinutes(waits(answered), waits(lapsed))
 }
 
-/** A verified business by slug, or 404 (unverified businesses aren't public, ADR 0018). */
+/**
+ * A verified business by its page address, now or an earlier one, or 404 (unverified businesses aren't public, ADR
+ * 0018): a page opened at an old address books and keeps favourites as at the new one.
+ */
 export async function publicBusiness(deps: Deps, slug: string) {
-  const [row] = await deps.db
-    .select()
-    .from(businesses)
-    .where(and(eq(businesses.slug, slug), isPublic()))
-  if (!row) throw new ApiError('not_found')
+  const row = await businessAt(deps, slug)
+  if (!row || !publicRow(row)) throw new ApiError('not_found')
   return row
 }
 
-/** The business an earlier page address belonged to (chapter 9, 25.10.2026), or none. */
-async function movedFrom(deps: Deps, slug: string) {
+/**
+ * A business by its page address now, or by an earlier one (chapter 9, 25.10.2026): an old address opens the page as
+ * it is now, which names its address, and the client site moves there. None for an address nobody has had.
+ */
+async function businessAt(deps: Deps, slug: string) {
+  const [now] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
+  if (now) return now
   const [found] = await deps.db
     .select({ business: businesses })
     .from(businessOldSlugs)
@@ -82,10 +87,7 @@ async function movedFrom(deps: Deps, slug: string) {
  * business page, its free times and its reviews all ask this, so they answer the same.
  */
 export async function visibleBusiness(deps: Deps, slug: string, viewerId: string | null) {
-  const [now] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
-  // an earlier address opens the page as it is now, which names its address: the client site moves there
-  // (chapter 9, 25.10.2026)
-  const row = now ?? (await movedFrom(deps, slug))
+  const row = await businessAt(deps, slug)
   // a closed one is nobody's to see, its team's included (Q-213)
   if (!row || row.closedAt) throw new ApiError('not_found')
   if (publicRow(row)) return { row, preview: null }

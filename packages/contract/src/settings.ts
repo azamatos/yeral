@@ -18,7 +18,6 @@ import {
   latLngSchema,
   marketLocaleSchema,
   minuteSchema,
-  pageAddressSchema,
   phoneInputSchema,
   phoneSchema,
   photoSchema,
@@ -301,9 +300,10 @@ export const pageAddressCheckSchema = z
 export type PageAddressCheck = z.infer<typeof pageAddressCheckSchema>
 
 /**
- * A new page address. After the setup is finished the old one keeps opening the page (which then names the new one)
- * and stays the business's own; a draft's isn't kept (nobody has seen it). `taken` on `slug` when another business has
- * it or had it.
+ * A new page address (`pageAddressSchema`'s rules, `invalid` on `slug` otherwise; the business's own address is no
+ * change, whatever rules came after it was made). After the setup is finished the old one keeps opening the page
+ * (which then names the new one) and stays the business's own, up to 5 moves a day (429); a draft's isn't kept
+ * (nobody has seen it). `taken` on `slug` when another business has it or had it.
  */
-export const pageAddressInputSchema = z.object({ slug: pageAddressSchema }).strict().meta({ id: 'PageAddressInput' })
+export const pageAddressInputSchema = z.object({ slug: slugSchema }).strict().meta({ id: 'PageAddressInput' })
 export const pageAddressResultSchema = z.object({ slug: slugSchema }).meta({ id: 'PageAddress' })

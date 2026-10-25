@@ -41,10 +41,10 @@ import { requireMember } from '../team/service'
 import { hoursOf, updateHours } from './hours'
 import { profileOf, rulesOf, updateProfile, updateRules } from './service'
 import { uploadGuard } from '../media/photos'
-import { clientIp } from '../../lib/rate-limit'
+import { clientIp, hit, rateLimited } from '../../lib/rate-limit'
 import { searchAddress } from './address-search'
 import { removeLogo, setLogo } from './logo'
-import { checkAddress, setAddress } from './page-address'
+import { checkAddress, PAGE_ADDRESS_CHECKS_PER_HOUR, setAddress } from './page-address'
 import { addPhoto, galleryOf, orderPhotos, removePhoto } from './photos'
 import { addStatus, deleteStatus, statusesOf, updateStatus } from './statuses'
 
@@ -168,7 +168,7 @@ const pageAddressCheckRoute = createRoute({
   summary:
     'Whether a page address may be had as it is typed (chapter 9, 25.10.2026): its problem, `taken` when another business has or had it, and a free one like it',
   request: { query: pageAddressCheckQuerySchema },
-  responses: { 200: json(pageAddressCheckSchema), 400: errors[400], 401: errors[401], 404: errors[404] },
+  responses: { 200: json(pageAddressCheckSchema), 400: errors[400], 401: errors[401], 404: errors[404], 429: errors[429] },
 })
 const pageAddressRoute = createRoute({
   method: 'put',
@@ -176,7 +176,7 @@ const pageAddressRoute = createRoute({
   tags,
   summary: 'A new page address; after the setup the old one keeps opening the page and stays the business’s own',
   request: { params: workspaceParamSchema, ...jsonBody(pageAddressInputSchema) },
-  responses: { 200: json(pageAddressResultSchema), 400: errors[400], ...denied },
+  responses: { 200: json(pageAddressResultSchema), 400: errors[400], 429: errors[429], ...denied },
 })
 
 const setLogoRoute = createRoute({
@@ -246,9 +246,12 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(pageAddressCheckRoute, async (c) => {
     const { slug, business } = c.req.valid('query')
-    requireUser(c)
+    const user = requireUser(c)
+    // a few dozen an address as it's typed; more is someone listing who has which address
+    const r = await hit(c.var.deps.db, `page-address-check:${user.id}`, PAGE_ADDRESS_CHECKS_PER_HOUR, 3600, c.var.deps.now())
+    if (!r.ok) throw rateLimited(r.retryAfterSec)
     // the asker's own workspace: its addresses, now and before, are free to it
-    const own = business ? (await requireMember(c, business, { draft: true })).business.id : null
+    const own = business ? (await requireMember(c, business, { draft: true })).business : null
     return c.json(await checkAddress(c.var.deps.db, slug, own), 200)
   })
   .openapi(pageAddressRoute, async (c) => {
