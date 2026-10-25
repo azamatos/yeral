@@ -73,16 +73,19 @@ export const Pending: Story = {
   },
 }
 
-/** Opened again after the client's own cancel: who cancelled and why, Undo and Book again. */
-/** A completed visit: «Write a review» first, Book again beside it; the form opens over the drawer. */
+/** A completed visit: «Write a review» first, Book again beside it; sent, the drawer says «5 · You rated». */
 export const Completed: Story = {
   args: { path: '/en/account/bookings/YR-48101?tab=past' },
   play: async () => {
     const d = await drawer()
-    await expect(d.getByRole('link', { name: 'Book again' })).toBeVisible()
-    await userEvent.click(await d.findByRole('button', { name: 'Write a review' }))
-    const form = await body.findByRole('dialog', { name: 'How was it?' })
-    await waitFor(() => expect(form).toBeVisible())
+    await expect(await d.findByRole('link', { name: 'Book again' })).toBeVisible()
+    await userEvent.click(d.getByRole('button', { name: 'Write a review' }))
+    const form = within(await body.findByRole('dialog', { name: 'How was it?' }))
+    await waitFor(() => expect(form.getByRole('radiogroup', { name: 'Rating' })).toBeVisible())
+    await userEvent.click(form.getByRole('radio', { name: '5 stars' }))
+    await userEvent.click(form.getByRole('button', { name: 'Send review' }))
+    await expect(await d.findByRole('img', { name: 'You rated it 5 out of 5' })).toBeVisible()
+    await expect(d.getByRole('button', { name: 'Edit the review' })).toBeVisible()
   },
 }
 
@@ -101,11 +104,12 @@ export const Reviewed: Story = {
   },
   play: async () => {
     const d = await drawer()
-    await expect(await d.findByText('5 · You rated')).toBeVisible()
+    await expect(await d.findByRole('img', { name: 'You rated it 5 out of 5' })).toHaveTextContent('5 · You rated')
     await expect(d.getByRole('button', { name: 'Edit the review' })).toBeVisible()
   },
 }
 
+/** Opened again after the client's own cancel: who cancelled and why, Undo and Book again. */
 export const CancelledByYou: Story = {
   args: {
     path: '/en/account/bookings/YR-48150?tab=past',

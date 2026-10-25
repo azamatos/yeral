@@ -75,13 +75,19 @@ export const Past: Story = {
   },
 }
 
-/** A visit to review: «Write a review» opens the review form over the list. */
+/** A visit to review: «Write a review» opens the form; sent, it thanks and the focus is back on the row. */
 export const WriteAReview: Story = {
   args: { path: '/en/account/bookings?tab=past' },
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: /^Write a review: Glow Studio, / }))
-    const form = await within(document.body).findByRole('dialog', { name: 'How was it?' })
-    await waitFor(() => expect(form).toBeVisible())
+    const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
+    await waitFor(() => expect(form.getByRole('radiogroup', { name: 'Rating' })).toBeVisible())
+    await userEvent.click(form.getByRole('radio', { name: '5 stars' }))
+    await userEvent.click(form.getByRole('button', { name: 'Send review' }))
+    const thanks = await within(document.body).findByText('Thank you! Your review is published.')
+    await waitFor(() => expect(thanks).toBeVisible())
+    const row = canvas.getAllByRole('link', { name: /^Glow Studio, .*: open the booking$/ })
+    await waitFor(() => expect(row.some((r) => r === document.activeElement)).toBe(true))
   },
 }
 

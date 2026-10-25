@@ -13,11 +13,12 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { KeyValueList } from '@yeral/ui/key-value'
+import { Rating } from '@yeral/ui/rating'
 import { Modal, ModalActions, ModalClose, ModalContent, ModalDescription, ModalHeader, ModalTrigger } from '@yeral/ui/modal'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Timeline } from '@yeral/ui/timeline'
 import { toast } from '@yeral/ui/toast'
-import { Building2, CircleAlert, Clock, Info, Pencil, Phone, Star } from 'lucide-react'
+import { Building2, CircleAlert, Clock, Info, Pencil, Phone } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BookingStatusBadge, NOTE_MAX, useUndoFailed, whatParts } from '@/entities/booking'
@@ -28,7 +29,7 @@ import { DirectionsButton, PlaceMap } from '@/shared/ui'
 import { drawerSteps, offersOf } from '../model/drawer'
 import { ByLine, rowLinkId, useCancelledBy } from './booking-row'
 import { CancelBooking } from './cancel-booking'
-import { OfferTimes, useWhen } from './offer-times'
+import { OfferTimes, useVisitLine, useWhen } from './offer-times'
 
 /** A part of the drawer's body (`.dsec`): a caps label above. */
 function Part({ label, labelId, children }: { label: string; labelId?: string; children: ReactNode }) {
@@ -128,6 +129,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
   const errorText = useErrorText()
   const undoFailedText = useUndoFailed()
   const at = useWhen()
+  const visit = useVisitLine()
   const cancelledBy = useCancelledBy()
   const withdraw = useMutation(sdk.bookings.withdrawMove(lang))
   const restore = useMutation(sdk.bookings.restore(lang))
@@ -146,8 +148,9 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
   }, [noteEditing])
 
   const items = b.what.type === 'appointment' ? b.what.items : []
-  const [services = '', ...staff] = whatParts(b.what)
-  const what = [services, ...staff].filter(Boolean).join(' · ')
+  // the details' services and specialists are an appointment's (a table's or a class's come with their flows)
+  const [services = '', ...staff] = b.what.type === 'appointment' ? whatParts(b.what) : []
+  const what = visit(b.what)
   const when = at(b.date, b.start, b.end)
   const stamp = (epoch: number) => {
     const local = localOf(epoch)
@@ -350,10 +353,13 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
           )}
           {passed && <ByLine>{list('offersPassed')}</ByLine>}
           {b.review && (
-            <span className="inline-flex items-center gap-1.5 text-small font-semibold text-n-900">
-              <Star aria-hidden className="size-4 fill-current" strokeWidth={0} />
-              {t('rated', { rating: b.review.rating })}
-            </span>
+            // the board's `.rated`: the star and «5 · You rated», heard as «You rated it 5 out of 5»
+            <Rating
+              role="img"
+              aria-label={t('ratedLabel', { rating: b.review.rating })}
+              value={t('rated', { rating: b.review.rating })}
+              className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
+            />
           )}
           {undoFailed && (
             <span role="alert" className="flex items-start gap-1.5 text-dense text-danger-ink">
@@ -509,7 +515,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
         )}
       </DrawerBody>
       {footer.length > 0 && <DrawerFooter>{footer}</DrawerFooter>}
-      <ReviewModal booking={b} review={b.actions.review ? null : b.review} open={reviewing} onOpenChange={setReviewing} />
+      <ReviewModal booking={b} review={b.review} open={reviewing} onOpenChange={setReviewing} />
       <CancelBooking
         booking={b}
         what={what}

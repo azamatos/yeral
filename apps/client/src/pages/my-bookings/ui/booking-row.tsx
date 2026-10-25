@@ -12,8 +12,7 @@ import { Building2, CalendarDays, CircleAlert, Clock, Hourglass, Phone, UserRoun
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BookingStatusBadge, useUndoFailed, whatParts } from '@/entities/booking'
-import { ReviewModal } from '@/features/write-review'
-import { OfferTimes, useWhen } from './offer-times'
+import { OfferTimes, useVisitLine, useWhen } from './offer-times'
 
 /** A line under the status (`.bby`): a 14 icon and a 13/18 caption. */
 export function ByLine({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
@@ -51,7 +50,16 @@ export function useCancelledBy() {
  * business's cancel show as chips ({@link OfferTimes}); once they've all passed, the row says so with the way to the
  * business's page.
  */
-export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upcoming' | 'past' }) {
+export function BookingRow({
+  booking: b,
+  tab,
+  onReview,
+}: {
+  booking: MyBooking
+  tab: 'upcoming' | 'past'
+  /** «Write a review»: the page's one form opens for it (it outlives the row's button, gone once it's sent). */
+  onReview?: (booking: MyBooking) => void
+}) {
   const t = useTranslations('myBookings')
   const words = useTranslations()
   const fmt = useFmt()
@@ -62,9 +70,8 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
   const cancelledBy = useCancelledBy()
   const restore = useMutation(sdk.bookings.restore(lang))
   const [undoFailed, setUndoFailed] = useState<string | null>(null)
-  const parts = whatParts(b.what)
-  const services = parts[0] ?? ''
-  const [reviewing, setReviewing] = useState(false)
+  const visit = useVisitLine()
+  const services = whatParts(b.what)[0] ?? ''
   const when = at(b.date, b.start, b.end)
   const live = b.offers?.times.some((o) => o.state === 'free') ? b.offers : null
   const passed = b.offers && !live ? b.offers : null
@@ -121,7 +128,7 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
         >
           {b.business.name}
         </Link>
-        {services && <span className="text-small text-n-600">{parts.join(' · ')}</span>}
+        {services && <span className="text-small text-n-600">{visit(b.what)}</span>}
         <span className={cn('inline-flex items-center gap-1.5 text-small', live ? 'text-n-500 line-through' : 'text-n-900')}>
           <CalendarDays aria-hidden className="size-4 flex-none text-n-600" strokeWidth={1.75} />
           {when}
@@ -198,18 +205,15 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
               {t('undo')}
             </Button>
           )}
-          {b.actions.review && (
-            <>
-              <Button
-                size="s"
-                variant="secondary"
-                aria-label={t('writeReviewLabel', { business: b.business.name, when })}
-                onClick={() => setReviewing(true)}
-              >
-                {t('writeReview')}
-              </Button>
-              <ReviewModal booking={b} open={reviewing} onOpenChange={setReviewing} />
-            </>
+          {b.actions.review && onReview && (
+            <Button
+              size="s"
+              variant="secondary"
+              aria-label={t('writeReviewLabel', { business: b.business.name, when })}
+              onClick={() => onReview(b)}
+            >
+              {t('writeReview')}
+            </Button>
           )}
           {b.actions.bookAgain && (
             <Button asChild size="s" variant="secondary">

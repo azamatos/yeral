@@ -548,6 +548,7 @@
     "writeReview": "Write a review",
     "editReview": "Edit the review",
     "rated": "{rating} · You rated",
+    "ratedLabel": "You rated it {rating} out of 5",
     "againText": "Your earlier request ({when}) is replaced by the new one.",
     "continue": "Continue",
     "otherTime": "Choose another time",

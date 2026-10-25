@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { OfferedTime, OfferSource } from '@yeral/contract/bookings'
+import type { BookingSummary, OfferedTime, OfferSource } from '@yeral/contract/bookings'
 import { useFmt } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
@@ -8,6 +8,7 @@ import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@yeral/ui
 import { TimeSlot } from '@yeral/ui/time-slots'
 import { toast } from '@yeral/ui/toast'
 import { useLocale, useTranslations } from 'use-intl'
+import { whatParts } from '@/entities/booking'
 import { useErrorText } from '@/shared/i18n'
 import { calendarAt } from '@/shared/lib'
 
@@ -17,6 +18,18 @@ export function useWhen() {
   const fmt = useFmt()
   return (date: string, start: number, end: number) =>
     t('when', { date: fmt.shortWeekdayDate(calendarAt(date, start).date), range: fmt.timeRange(start, end) })
+}
+
+/**
+ * What a booking was for in one line, by the shared parts (`whatParts`): «Women's haircut, Hair styling · Aýna, Maral»
+ * (`myBookings.what`), or the services alone.
+ */
+export function useVisitLine() {
+  const t = useTranslations('myBookings')
+  return (what: BookingSummary['what']) => {
+    const [services = '', ...staff] = whatParts(what)
+    return staff.length > 0 ? t('what', { services, staff: staff.join(', ') }) : services
+  }
 }
 
 /**

@@ -67,7 +67,8 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
   // this page's business speaks for the booking's only when they're the same (a code from another page's link)
   const own = b.business.slug === detail.slug
   const items = b.what.type === 'appointment' ? b.what.items : []
-  const [services = '', ...staffNames] = whatParts(b.what)
+  // an appointment's (a class's trainer comes with its flow)
+  const [services = '', ...staffNames] = b.what.type === 'appointment' ? whatParts(b.what) : []
   const visit = calendarAt(b.date, b.start)
   const when = tb('summary.when', { date: fmt.weekdayDate(visit.date), range: fmt.timeRange(b.start, b.end) })
   const address = addressLine(b, fmt)
