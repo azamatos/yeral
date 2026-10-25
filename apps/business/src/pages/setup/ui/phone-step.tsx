@@ -10,6 +10,7 @@ import { ContactYeralLink } from '@/features/contact-yeral'
 import { CodeLead, IdentityStep, NameFields, SignInForm, VerifiedNumber } from '@/features/sign-in'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
+import { usePageTitle } from '@/shared/lib'
 import { textLink } from '@/shared/ui'
 import { SetupFrame, StepHeader } from './setup-frame'
 
@@ -22,6 +23,7 @@ import { SetupFrame, StepHeader } from './setup-frame'
  */
 export function PhoneStep() {
   const t = useTranslations()
+  usePageTitle(t('setup.title'))
   const sdk = useSdk()
   const errorText = useErrorText()
   const titleId = useId()

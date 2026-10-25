@@ -6,7 +6,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
-import { useParams } from '@tanstack/react-router'
+import { useParams, useSearch } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
@@ -142,7 +142,13 @@ function Login() {
 }
 function Setup() {
   const { step } = useParams({ strict: false })
-  return <p>Setup: {step}</p>
+  const { another } = useSearch({ strict: false })
+  return (
+    <p>
+      Setup: {step}
+      {another === true && ', another'}
+    </p>
+  )
 }
 
 const layouts = {
@@ -208,13 +214,16 @@ export const Switch: Story = {
   },
 }
 
-/** "Create a business" (B-10): the setup wizard at its business step, already signed in. */
+/**
+ * "Create a business" (B-10): the setup wizard at its business step, already signed in, asked for another business (so
+ * it skips its "You already have a business" choice).
+ */
 export const CreateBusiness: Story = {
   play: async ({ canvas }) => {
     const switcher = (await canvas.findAllByRole('button', { name: /Switch$/ })).find((b) => b.checkVisibility())
     await userEvent.click(switcher!)
     await userEvent.click(await within(document.body).findByRole('menuitem', { name: 'Create a business' }))
-    await expect(await canvas.findByText('Setup: business')).toBeVisible()
+    await expect(await canvas.findByText('Setup: business, another')).toBeVisible()
   },
 }
 

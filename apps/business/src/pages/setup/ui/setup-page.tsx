@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, Navigate, useNavigate, useParams } from '@tanstack/react-router'
+import { Link, Navigate, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { Setup } from '@yeral/contract/setup'
 import { formatPhone } from '@yeral/domain/phone'
@@ -21,6 +21,7 @@ import type { Category } from '@yeral/contract/catalog'
 import { useAddressStep } from './address-step'
 import { BusinessStep } from './business-step'
 import { useDoneStep, type AfterSetup } from './done-step'
+import { HasBusiness } from './has-business'
 import { useHoursStep } from './hours-step'
 import { PhoneStep } from './phone-step'
 import { useRulesStep } from './rules-step'
@@ -31,27 +32,31 @@ import { useTeamStep } from './team-step'
 /**
  * `/setup/{step}` — the setup wizard (B-Onboarding, design §27.2, book B-02–B-06, Q-200). Someone signed in with a
  * name goes through the steps after the phone; the draft the business step makes reopens at its saved step. Signed
- * out (or without a name), the wizard starts at step 1, the phone.
+ * out (or without a name), the wizard starts at step 1, the phone. Someone already in a workspace, with no draft,
+ * first picks between their businesses and another one, unless they came to create another (`?another=true`).
  */
 export function SetupPage() {
-  const t = useTranslations()
   const sdk = useSdk()
   const { step = '' } = useParams({ strict: false })
   const me = useQuery(sdk.me.get())
   // asked with the account, so step 1's demo note is there when the number opens
   useCodeOnScreen()
-  usePageTitle(t('setup.title'))
   // an unknown step opens where the person is in the wizard
   const asked = isWizardStep(step) ? step : 'phone'
   if (me.isPending) return <Waiting />
   // a failed refetch keeps the person on screen; only not knowing who is signed in at all is a failure
   if (me.isError && me.data === undefined) throw me.error
   // signed out, or the new account's name not given yet: step 1 first, wherever the address pointed
-  if (!me.data?.firstName) return step === 'phone' ? <PhoneStep /> : <Navigate to="/setup/$step" params={{ step: 'phone' }} replace />
+  // (`?another=true` kept: after the sign-in the wizard still knows another business was asked for)
+  if (!me.data?.firstName)
+    return step === 'phone' ? <PhoneStep /> : <Navigate to="/setup/$step" params={{ step: 'phone' }} search replace />
   return <Wizard asked={asked} me={me.data} />
 }
 
+/** The wizard loading; the tab says what's coming (the choice and the steps name themselves). */
 function Waiting() {
+  const t = useTranslations()
+  usePageTitle(t('setup.title'))
   return (
     <div className="flex min-h-dvh items-center justify-center">
       <Spinner />
@@ -62,6 +67,8 @@ function Waiting() {
 function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   const sdk = useSdk()
   const locale = useLocale()
+  // the switcher's «Create a business» (and the profile's link) ask for another business: no choice first
+  const { another } = useSearch({ strict: false })
   const setup = useQuery(sdk.setup.mine())
   const workspaces = useQuery(sdk.team.workspaces())
   const categories = useQuery(sdk.catalog.categories(locale))
@@ -76,15 +83,19 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
         replace
       />
     )
-  if (setup.isPending || workspaces.isPending || categories.isPending) return <Waiting />
+  if (setup.isPending || workspaces.isPending) return <Waiting />
   // a failed refetch keeps what's on screen (and what's typed); only a first load that failed is a failure
-  if (!setup.data || !workspaces.data || !categories.data)
-    throw setup.error ?? workspaces.error ?? categories.error ?? new Error('setup data missing')
+  if (!setup.data || !workspaces.data) throw setup.error ?? workspaces.error ?? new Error('setup data missing')
   const draft = setup.data.setup
   // the done step's draft gone (finished in another tab): the app's start finds the workspace, not a new draft
   if (!draft && asked === 'done') return <Navigate to="/" replace />
   const step = stepFor(asked, draft?.step ?? null)
-  if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} replace />
+  if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} search replace />
+  // already in a business and not asking for another one: theirs first, another one if they mean it (owner, 25.10.2026);
+  // it needs no categories, so it doesn't wait for them
+  if (!draft && another !== true && workspaces.data.items.length > 0) return <HasBusiness me={me} workspaces={workspaces.data.items} />
+  if (categories.isPending) return <Waiting />
+  if (!categories.data) throw categories.error ?? new Error('categories missing')
   // appointments only at the first launch: the table and class categories come later (book Q-030)
   const pickable = categories.data.items.filter((c) => c.bookingTypes.includes('appointment'))
   // a category the list no longer offers is picked again
@@ -130,6 +141,7 @@ function Steps({
   const navigate = useNavigate()
   const errorText = useErrorText()
   const stepName = useStepName()
+  usePageTitle(t('setup.title'))
   const [name, setName] = useState(draft?.name ?? '')
   const [categoryId, setCategoryId] = useState(draft?.categoryId ?? null)
   const start = useMutation(sdk.setup.start())
@@ -144,7 +156,8 @@ function Steps({
   const businessValid = length > 0 && length <= BUSINESS_NAME_MAX && !!categoryId
   const edited = step === 'business' && (name.trim() !== (draft?.name ?? '') || categoryId !== (draft?.categoryId ?? null))
 
-  const go = (to: WizardStep) => void navigate({ to: '/setup/$step', params: { step: to } })
+  // `?another=true` goes along until the draft is there to reopen
+  const go = (to: WizardStep) => void navigate({ to: '/setup/$step', params: { step: to }, search: true })
   const failed = (error: unknown) => void toast(errorText(error))
 
   /**

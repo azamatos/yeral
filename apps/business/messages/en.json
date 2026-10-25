@@ -353,6 +353,14 @@
     "questions": "Questions? Contact {brand}: <b>{phone}</b>",
     "back": "Back",
     "cancel": "Cancel",
+    "hasBusiness": {
+      "title": "{count, plural, one {You already have a business} other {You already have # businesses}}",
+      "lead": "{count, plural, one {Open it to carry on where you left off, or create another business. Each address is a business of its own, with its own calendar, team and clients.} other {Open one to carry on where you left off, or create another business. Each address is a business of its own, with its own calendar, team and clients.}}",
+      "list": "Your businesses",
+      "open": "Open",
+      "openLabel": "Open {name}",
+      "create": "Create another business"
+    },
     "continue": "Continue",
     "saving": "Saving",
     "phone": {
