@@ -13,7 +13,7 @@ import type { Locale, Localized } from '@yeral/domain/model'
 import type { Actor } from '@yeral/domain/permissions'
 import { serviceErrors } from '@yeral/domain/services'
 import { slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
-import { and, asc, eq, inArray, isNotNull, ne } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { bookingRules, businesses, categories, cities, services, staff, users } from '../../db/schema'
@@ -36,6 +36,7 @@ type SetupTeam = z.output<typeof setupTeamSchema>
 async function draftOf(db: Queryable, userId: string) {
   const [row] = await db
     .select({
+      id: businesses.id,
       slug: businesses.slug,
       name: businesses.name,
       step: businesses.setupStep,
@@ -63,8 +64,27 @@ async function draftOf(db: Queryable, userId: string) {
  * invites are.
  */
 export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Promise<MySetup> {
-  const draft = await draftOf(deps.db, user.id)
+  const { db } = deps
+  const draft = await draftOf(db, user.id)
   if (!draft) return { setup: null }
+  // the step list's summaries (B-Onboarding `sums`): «5 services», «I work alone» or «2 people», «I confirm · 30 min»
+  const [[menu], [team], [rules]] = await all(db, [
+    () =>
+      db
+        .select({ n: count() })
+        .from(services)
+        .where(and(eq(services.businessId, draft.id), eq(services.archived, false))),
+    () =>
+      db
+        .select({ n: count() })
+        .from(staff)
+        .where(and(eq(staff.businessId, draft.id), ne(staff.level, 'owner'), ne(staff.status, 'removed'))),
+    () =>
+      db
+        .select({ confirm: bookingRules.confirmMode, holdMinutes: bookingRules.holdMinutes })
+        .from(bookingRules)
+        .where(eq(bookingRules.businessId, draft.id)),
+  ])
   return {
     setup: {
       slug: draft.slug,
@@ -74,6 +94,9 @@ export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Pro
       categoryId: draft.categoryId,
       logo: logoOf(deps, draft, user.lang),
       address: draft.street ? { line: draft.address, city: { id: draft.cityId, name: text(draft.city, user.lang) } } : null,
+      services: menu?.n ?? 0,
+      team: team?.n ?? 0,
+      rules: rules ? { confirm: rules.confirm, holdMinutes: rules.holdMinutes } : null,
     },
   }
 }

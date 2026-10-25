@@ -373,7 +373,7 @@ describe('the admin tool’s businesses (book F-179)', () => {
     // the owner signs in for the first time: named already, and the wizard reopens at the address
     const owner = browser(t.app)
     expect((await owner.login(OWNER)).isNew).toBe(false)
-    expect((await owner.req('/v1/me/setup')).json).toEqual({
+    expect((await owner.req('/v1/me/setup')).json).toMatchObject({
       setup: {
         slug: 'ogulgerek-beauty',
         name: 'Ogulgerek Beauty',

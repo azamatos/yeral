@@ -75,6 +75,10 @@ type Draft = {
   categoryId: string
   logo: null
   address: { line: string; city: typeof city } | null
+  /** The step list's counts and rules (`GET /me/setup`). */
+  services: number
+  team: number
+  rules: { confirm: 'manual' | 'instant'; holdMinutes: number } | null
 }
 
 type Day = WeekdayHours | null
@@ -314,6 +318,9 @@ const fakeApi =
           categoryId: category.id,
           logo: null,
           address: null,
+          services: 0,
+          team: 0,
+          rules: { confirm: 'manual', holdMinutes: 30 },
         }
         return json({ slug: setup.slug }, 201)
       }
@@ -443,6 +450,9 @@ export const MoveAddress: Story = {
         step: 'business',
         category: 'Beauty',
         categoryId: 'beauty',
+        services: 0,
+        team: 0,
+        rules: null,
         logo: null,
         address: null,
       },
@@ -517,6 +527,9 @@ export const ReopensWithBusiness: Story = {
         step: 'hours',
         category: 'Nails',
         categoryId: 'nails',
+        services: 0,
+        team: 0,
+        rules: null,
         logo: null,
         address: { line: '247 Bitarap Türkmenistan Avenue', city },
       },
@@ -574,6 +587,9 @@ export const Reopens: Story = {
         step: 'hours',
         category: 'Gözellik',
         categoryId: 'beauty',
+        services: 0,
+        team: 0,
+        rules: null,
         logo: null,
         address: { line: '247 Bitarap Türkmenistan Avenue', city },
       },
@@ -601,6 +617,9 @@ export const ContinueLater: Story = {
         step: 'address',
         category: 'Beauty',
         categoryId: 'beauty',
+        services: 0,
+        team: 0,
+        rules: null,
         logo: null,
         address: null,
       },
@@ -688,6 +707,9 @@ const addressDraft: Draft = {
   step: 'address',
   category: 'Beauty',
   categoryId: 'beauty',
+  services: 0,
+  team: 0,
+  rules: null,
   logo: null,
   address: null,
 }
@@ -752,6 +774,9 @@ const atHours: Draft = {
   step: 'hours',
   category: 'Beauty',
   categoryId: 'beauty',
+  services: 0,
+  team: 0,
+  rules: null,
   logo: null,
   address: { line: '247 Bitarap Türkmenistan Avenue', city },
 }
