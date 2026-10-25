@@ -1,5 +1,5 @@
 import { RadioGroup } from 'radix-ui'
-import { useState, type ComponentProps, type ReactNode } from 'react'
+import { useId, useState, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 /** The board's sharp star: one shape for the stars shown and the stars picked. */
@@ -62,7 +62,8 @@ export function Stars({
  * group (arrow keys move and pick), 32 stars, n-500 outlines until picked, ink filled up to the pick (or up to the one
  * under the pointer, as a preview), and the pick's word beside them («Poor … Excellent», 15/22 600 n-600, said as it
  * changes). The words come from the caller: `label` names the group, `starLabel(n)` each star («4 stars»), `words`
- * the five words. The word under the pointer is only seen; the picked one is said.
+ * the five words, `placeholder` the word before any is picked («Pick the stars», the review modal). The word under the
+ * pointer is only seen; the picked one is said.
  */
 export function RatingInput({
   value,
@@ -70,6 +71,8 @@ export function RatingInput({
   label,
   starLabel,
   words,
+  placeholder = '',
+  required = false,
   className,
 }: {
   value: number | null
@@ -77,14 +80,21 @@ export function RatingInput({
   label: string
   starLabel: (stars: number) => string
   words?: readonly [string, string, string, string, string]
+  placeholder?: string
+  /** A pick is needed (the review modal's Send waits for it): said with the group. */
+  required?: boolean
   className?: string
 }) {
   const [hover, setHover] = useState<number | null>(null)
   const shown = hover ?? value ?? 0
+  const wordId = useId()
   return (
     <div className={cn('flex flex-wrap items-center gap-3', className)}>
       <RadioGroup.Root
         aria-label={label}
+        // the word (the pick's, or the placeholder before one) describes the group
+        aria-describedby={words ? wordId : undefined}
+        required={required}
         orientation="horizontal"
         // the ends stay put: a press past 5 never wraps round to 1
         loop={false}
@@ -125,10 +135,10 @@ export function RatingInput({
         <>
           {/* the preview's word is seen; the pick's word is said */}
           <span aria-hidden className="text-body font-semibold text-n-600">
-            {shown ? words[shown - 1] : ''}
+            {shown ? words[shown - 1] : placeholder}
           </span>
-          <span aria-live="polite" className="sr-only">
-            {value ? words[value - 1] : ''}
+          <span id={wordId} aria-live="polite" className="sr-only">
+            {value ? words[value - 1] : placeholder}
           </span>
         </>
       )}

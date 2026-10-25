@@ -526,5 +526,41 @@
     "confirmCancel": "Yes, cancel",
     "cancelled": "The booking is cancelled",
     "undone": "Your booking is back"
+  },
+  "review": {
+    "title": "How was it?",
+    "close": "Close",
+    "rating": "Rating",
+    "star": "{count, plural, one {# star} other {# stars}}",
+    "pick": "Pick the stars",
+    "words": {
+      "1": "Poor",
+      "2": "Not good",
+      "3": "Okay",
+      "4": "Good",
+      "5": "Excellent"
+    },
+    "tags": "What went well?",
+    "tag": {
+      "on_time": "On time",
+      "clean": "Clean",
+      "skilled": "Skilled specialist",
+      "friendly": "Friendly",
+      "good_value": "Good value"
+    },
+    "text": "Your review",
+    "optional": "(optional)",
+    "placeholder": "A few words about the service and the specialist",
+    "counter": "{count} / {max}",
+    "shownAs": "Your review will show with your first name and the first letter of your surname: {name}",
+    "shownAsAny": "Your review will show with your first name and the first letter of your surname.",
+    "until": "You can change your review until {date}, {time}.",
+    "later": "Later",
+    "cancel": "Cancel",
+    "send": "Send review",
+    "save": "Save changes",
+    "sending": "Sending…",
+    "sent": "Thank you! Your review is published.",
+    "changed": "Your review is changed."
   }
 }
