@@ -63,7 +63,8 @@ const offer = (start: number, state: 'free' | 'taken' | 'past') => ({
 /**
  * My bookings as the api lists them (`GET /me/bookings`, #215's rows): Upcoming has a request waiting for its answer,
  * a declined one with times offered (one already taken), an expired one with free times, a confirmed booking with a
- * move waiting, and a confirmed one at Barber Loft; Past has a completed visit and one the client cancelled (Undo).
+ * move waiting, and a confirmed one at Barber Loft; Past has a completed visit, one the client cancelled (Undo) and a phone booking the business
+ * cancelled whose offered time has passed.
  */
 export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
   upcoming: [
@@ -102,12 +103,28 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
       cancelledBy: 'client',
       actions: { ...ACTIONS, restore: true, bookAgain: true },
     }),
+    row('YR-48120', {
+      business: LOFT,
+      what: { type: 'appointment', items: [{ service: 'Men’s haircut', staff: 'Döwlet', start: 600, end: 645 }] },
+      date: addDays(today(), -2),
+      start: 600,
+      end: 645,
+      source: 'phone',
+      status: 'cancelled',
+      cancelledBy: 'business',
+      businessCancel: { reason: 'staff_away', text: null },
+      offers: { source: 'cancel', times: [{ ...offer(660, 'past'), date: addDays(today(), -1) }] },
+      actions: { ...ACTIONS, bookAgain: true },
+    }),
   ],
 }
 
-/** My bookings' api: the two lists, Undo and taking an offered time, and the sign-in (`authApi`) for everything else. */
+/**
+ * My bookings' api: the two lists, Undo and taking an offered time (`refuse` makes either fail with that code), and the
+ * sign-in (`authApi`) for everything else.
+ */
 export const myBookingsApi =
-  ({ lists = MY_BOOKINGS, signedIn = AYJEMAL }: { lists?: typeof MY_BOOKINGS; signedIn?: Me } = {}) =>
+  ({ lists = MY_BOOKINGS, signedIn = AYJEMAL, refuse: fail }: { lists?: typeof MY_BOOKINGS; signedIn?: Me; refuse?: string } = {}) =>
   (): typeof fetch => {
     const signIn = authApi({ signedIn })()
     const all = [...lists.upcoming, ...lists.past]
@@ -117,6 +134,7 @@ export const myBookingsApi =
       if (act?.[1]) {
         const booking = all.find((b) => b.code === act[1])
         if (!booking) return refuse(404, 'not_found')
+        if (fail) return refuse(409, fail)
         return json({
           ...booking,
           code: act[2] === 'restore' ? booking.code : 'YR-48231',

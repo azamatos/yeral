@@ -14,7 +14,7 @@ export type BookingsTab = 'upcoming' | 'past'
 
 /**
  * `/{lang}/account/bookings` — My bookings (Account-Bookings, book C-23–C-26, C-40): the tabs Upcoming and Past (in
- * the address, `?tab=past`), the bookings 20 at a time with «Show more», and each tab's empty state. Upcoming puts the
+ * the address, `?tab=past`), the bookings 12 at a time with «Show more», and each tab's empty state. Upcoming puts the
  * declined or expired requests that still have a time to take on top, then the rest soonest first; Past is newest
  * first (the api's order). Changes made elsewhere (the business answers, a request runs out) come in through the live
  * updates the site starts in the browser.

@@ -63,7 +63,7 @@ export const MenuKeyboard: Story = {
     const avatar = await canvas.findByRole('button', { name: /Account menu/ })
     avatar.focus()
     await userEvent.keyboard('{Enter}')
-    await expect(await body.findByRole('menuitem', { name: 'Profile' })).toHaveFocus()
+    await expect(await body.findByRole('menuitem', { name: 'My bookings' })).toHaveFocus()
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(avatar).toHaveFocus())
   },
