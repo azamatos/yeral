@@ -15,6 +15,7 @@ import { useTranslations } from 'use-intl'
 import { AffectedBookingsList, useAffectedCount, useJoin, type AffectedBooking } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
+import { leftAhead } from '../model/member'
 
 type Choice = 'move' | 'keep' | 'cancel'
 type RowChoice = 'keep' | 'cancel'
@@ -31,7 +32,7 @@ function useRemove(slug: string) {
  * services are listed; a booking they can't take gets its own Keep it or Cancel and offer 3 other times), Keep them,
  * or Cancel and offer 3 other times, and Remove sends it again with the choice. `mode="left"` («Someone left» →
  * Choose, B-Team `rm` left): «Who takes Aýna’s bookings?» for someone who left by themself, their bookings asked for at
- * once, the same choices, and Save.
+ * once, the same choices, and Save. Moves to `features/remove-staff` (COMPONENTS.md) when a second page uses it.
  */
 export function RemoveMember({
   slug,
@@ -163,7 +164,7 @@ function RemoveBody({
             ? t('leftLead', {
                 name: m.name,
                 business,
-                what: count({ bookings: m.ended?.bookings ?? 0, requests: m.ended?.requests ?? 0 }, 'and'),
+                what: count(leftAhead(m), 'and'),
               })
             : t('lead', { name: m.name, business })}
         </ModalDescription>
@@ -248,8 +249,8 @@ function RemoveBody({
           {a('back')}
         </Button>
         {left ? (
-          // nothing to save until the bookings are listed
-          <Button variant="primary" disabled={!details} loading={remove.isPending} loadingLabel={t('saving')} onClick={() => void send()}>
+          // before the bookings are listed (the first ask failed), Save asks again
+          <Button variant="primary" loading={remove.isPending} loadingLabel={t('saving')} onClick={() => void send()}>
             {t('save')}
           </Button>
         ) : (

@@ -1143,7 +1143,7 @@
       "reactivate": "Reactivate",
       "inviteAgain": "Invite again",
       "inviteAgainAria": "Invite again: {name}",
-      "leftBanner": "{name} left: {what} need a new specialist",
+      "leftBanner": "{name} left: {what} {n, plural, one {needs} other {need}} a new specialist",
       "leftChoose": "Choose",
       "reactivateAria": "Reactivate: {name}",
       "reactivated": "{name} is back on the team",

@@ -22,7 +22,7 @@ import { useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 import { inviteAgainForm, inviteNow } from '../model/invite'
-import { inviteDaysLeft, invitePending } from '../model/member'
+import { inviteDaysLeft, invitePending, leftAhead } from '../model/member'
 import { AddMember } from './add-member'
 import { MemberDrawer } from './member-drawer'
 import { RemoveMember } from './remove-member'
@@ -68,6 +68,7 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
   const [again, setAgain] = useState<TeamMember | null>(null)
   // «Choose» on «Someone left»: whose bookings the remove window settles
   const [settling, setSettling] = useState<TeamMember | null>(null)
+  const againOpener = useRef<HTMLButtonElement | null>(null)
   // the staff drawer: whose, and the row's name to give the focus back to
   const [openId, setOpenId] = useState<string | null>(null)
   const opener = useRef<HTMLElement | null>(null)
@@ -127,7 +128,7 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
       {/* «Someone left» (B-Team, owner only): their bookings and requests ahead wait for a new specialist */}
       {owner &&
         people
-          .filter((m) => m.ended?.by === 'self' && (m.ended.bookings ?? 0) + (m.ended.requests ?? 0) > 0)
+          .filter((m) => leftAhead(m).total > 0)
           .map((m) => (
             <Callout
               key={m.id}
@@ -140,10 +141,7 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
                 </Button>
               }
             >
-              {t('leftBanner', {
-                name: m.name,
-                what: count({ bookings: m.ended?.bookings ?? 0, requests: m.ended?.requests ?? 0 }, 'and'),
-              })}
+              {t('leftBanner', { name: m.name, what: count(leftAhead(m), 'and'), n: leftAhead(m).total })}
             </Callout>
           ))}
       <div className="flex flex-col">
@@ -172,7 +170,9 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
                     services={servicesOf(m.id)}
                     pro={s.id === 'specialists' || (s.id === 'invites' && m.level === 'specialist')}
                     onLink={(url) => setLink({ name: m.fullName ?? m.name, url })}
-                    onInviteAgain={() => {
+                    onInviteAgain={(el) => {
+                      // the focus comes back to the row's link when the window closes
+                      againOpener.current = el
                       setAgain(m)
                       setAdding(true)
                     }}
@@ -198,7 +198,11 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
           mode="left"
           open
           onOpenChange={(open) => !open && setSettling(null)}
-          onRemoved={() => setSettling(null)}
+          onRemoved={() => {
+            // the banner and its Choose go with the choice: the focus goes to «Add a team member»
+            setSettling(null)
+            setTimeout(() => addButton.current?.focus())
+          }}
         />
       )}
       {owner && (
@@ -209,7 +213,7 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
           menu={menu.data}
           open={adding}
           onOpenChange={setAdding}
-          opener={addButton}
+          opener={again ? againOpener : addButton}
           onLink={(name, url) => setLink({ name, url })}
         />
       )}
@@ -279,8 +283,8 @@ function MemberRow({
   onLink: (url: string) => void
   /** Opens their staff drawer (not for someone no longer on the team). */
   onOpen?: (from: HTMLElement) => void
-  /** Someone who left: «Invite again» opens Add a team member with them filled in. */
-  onInviteAgain: () => void
+  /** Someone who left: «Invite again» opens Add a team member with them filled in (the link gets the focus back). */
+  onInviteAgain: (from: HTMLButtonElement) => void
 }) {
   const t = useTranslations('settings.team')
   const levels = useTranslations('levels')
@@ -350,7 +354,14 @@ function MemberRow({
   const link = !owner
     ? null
     : left
-      ? { text: t('inviteAgain'), aria: t('inviteAgainAria', { name }), go: () => Promise.resolve(onInviteAgain()) }
+      ? // not while their bookings wait for a choice: invited, they'd leave «Someone left» with the bookings unsettled
+        leftAhead(m).total > 0
+        ? null
+        : {
+            text: t('inviteAgain'),
+            aria: t('inviteAgainAria', { name }),
+            go: (el: HTMLButtonElement) => Promise.resolve(onInviteAgain(el)),
+          }
       : former
         ? { text: t('reactivate'), aria: t('reactivateAria', { name }), go: reactivateIt }
         : inviteRow || waiting
@@ -431,7 +442,7 @@ function MemberRow({
             type="button"
             aria-label={link.aria}
             aria-busy={busy || undefined}
-            onClick={() => void link.go()}
+            onClick={(e) => void link.go(e.currentTarget)}
             className={`${textLink} relative z-1 -ml-2 min-h-8 px-2 py-1 text-left text-dense`}
           >
             {link.text}

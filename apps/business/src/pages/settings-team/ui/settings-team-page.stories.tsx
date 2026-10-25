@@ -394,9 +394,9 @@ export const SomeoneLeft: Story = {
   play: async ({ canvas }) => {
     const banner = await canvas.findByText('Bahar left: 2 bookings need a new specialist')
     await waitFor(() => expect(banner).toBeVisible())
-    // «Left» with «Invite again», «Removed» with «Reactivate»
-    await expect(canvas.getByRole('button', { name: 'Invite again: Bahar Nurlyýewa' })).toBeVisible()
+    // «Removed» with «Reactivate»; «Left» with «Invite again» only once her bookings are chosen for
     await expect(canvas.getByRole('button', { name: 'Reactivate: Aýna Myradowa' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Invite again: Bahar Nurlyýewa' })).toBeNull()
     await userEvent.click(canvas.getByRole('button', { name: 'Choose' }))
     const dialog = within(await body.findByRole('dialog', { name: 'Who takes Bahar’s bookings?' }))
     await waitFor(() => expect(dialog.getByText('Bahar left Glow Studio. They have 2 bookings.')).toBeVisible())
@@ -406,7 +406,7 @@ export const SomeoneLeft: Story = {
     await waitFor(() => expect(done).toBeVisible())
     await waitFor(() => expect(canvas.queryByText('Bahar left: 2 bookings need a new specialist')).toBeNull())
     // invited again: Add a team member with her filled in
-    await userEvent.click(canvas.getByRole('button', { name: 'Invite again: Bahar Nurlyýewa' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Invite again: Bahar Nurlyýewa' }))
     const add = within(await body.findByRole('dialog', { name: 'Add a team member' }))
     await waitFor(() => expect(add.getByDisplayValue('Bahar')).toBeVisible())
   },
