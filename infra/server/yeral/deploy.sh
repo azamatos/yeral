@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Builds the api image from the source in /srv/yeral/src, saves the database and (re)starts Ýeral. Run on the server
-# as root:
+# Builds the api and business images from the source in /srv/yeral/src, saves the database and (re)starts Ýeral. Run
+# on the server as root:
 #   COMMIT=<git sha> PUBLIC=1 bash /srv/yeral/src/infra/server/yeral/deploy.sh
 # PUBLIC=1 also publishes Ýeral's sites (yeral.caddy) on the shared Caddy (the DNS records point here since 2026-10-22).
 set -euo pipefail
@@ -21,6 +21,9 @@ fi
 
 image="yeral-api:${COMMIT:0:12}"
 docker build -f src/infra/docker/api.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$image" src
+# the business app: production hosts baked in at build time (@yeral/lib/site's default domain)
+business_image="yeral-business:${COMMIT:0:12}"
+docker build -f src/infra/docker/business.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$business_image" src
 
 # the database before the migrations, the way back from a bad one (operations.md, "Rollback"); readable by root only,
 # and a failed dump stops the deploy. Nothing to save on the first deploy, before Postgres runs.
@@ -35,8 +38,9 @@ if docker compose ps --status running --services 2>/dev/null | grep -qx postgres
 fi
 
 # the running image is kept in .env, so plain `docker compose ps|logs` in /srv/yeral work too
-sed -i '/^YERAL_API_IMAGE=/d' .env
+sed -i '/^YERAL_API_IMAGE=/d;/^YERAL_BUSINESS_IMAGE=/d' .env
 echo "YERAL_API_IMAGE=$image" >>.env
+echo "YERAL_BUSINESS_IMAGE=$business_image" >>.env
 docker compose up -d --wait --remove-orphans
 
 if [ "${PUBLIC:-0}" = 1 ]; then
@@ -46,5 +50,8 @@ fi
 
 # the api answers inside its network
 docker compose exec -T api wget -qO- http://127.0.0.1:3004/v1/health
+echo
+# and so does the business app
+docker compose exec -T business wget -qO- http://127.0.0.1/version.json
 echo
 docker image prune -f >/dev/null

@@ -1,6 +1,6 @@
 # Ýeral's sites on the shared Caddy. deploy.sh copies this file to /srv/edge/sites/ once the DNS records exist
-# (DNS only, not proxied), so Caddy can get the certificates. Business and cms hosts join with their apps; until then
-# business. and cms. resolve here and get a certificate error. The records: infra/server/README.md, "DNS records".
+# (DNS only, not proxied), so Caddy can get the certificates. The cms host joins with its app; until then cms.
+# resolves here and gets a certificate error. The records: infra/server/README.md, "DNS records".
 # Only A records for now: Docker's edge network has no IPv6, so a visitor over IPv6 would reach Caddy as the Docker
 # gateway and every such visitor would share one rate-limit bucket (infra/server/README.md, "Still to do").
 # The hosts are written here because Caddy needs them; the apps read theirs from config (@yeral/lib/site).
@@ -35,6 +35,13 @@ api.yeral.app {
 	}
 	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER)
 	reverse_proxy yeral-api:3004
+}
+
+# the business app (since 25.10.2026): its image serves the files (static.Caddyfile, noindex); this door adds TLS and
+# the headers
+business.yeral.app {
+	import yeral_site
+	reverse_proxy yeral-business:80
 }
 
 # Temporary (the owner, 22.10.2026): the old site is retired and the apex shows this page, at every path, until the

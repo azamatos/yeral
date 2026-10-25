@@ -21,8 +21,8 @@ the local Postgres. All hosts come from config (`@yeral/lib/site`), so a new dom
 
 ## Hosting (ADR 0024)
 
-The own server runs the api, its jobs and Postgres, and later the client, business and cms apps, in Docker behind one
-shared Caddy (section "The own server" below). Cloudflare keeps:
+The own server runs the api, its jobs, Postgres and the business app (since 2026-10-25), and later the client and cms
+apps, in Docker behind one shared Caddy (section "The own server" below). Cloudflare keeps:
 
 | What | Where |
 |---|---|
@@ -82,8 +82,9 @@ for backups and accounts for error tracking and uptime checks (owner, 2026-10-22
 - Sign-in codes never reach a log: the SMS log adapter writes "(sign-in code hidden)" for them.
 - SMS: every environment writes them to the log (`ports/sms.ts`) until a gateway comes with the Turkmenistan launch.
 - The first launch's sign-in code on the screen: `SIGN_IN_CODE_ON_SCREEN=true` (off unless set; the api refuses it
-  with a gateway that delivers). With it on, anyone who types a number signs in as it (book Q-036 and its concern), so
-  it's set only when the first launch opens; the server's `compose.yml` keeps it `false` until then.
+  with a gateway that delivers). With it on, anyone who types a number signs in as it (book Q-036 and its concern).
+  The server's `compose.yml` has it on since 2026-10-25 (the owner), ahead of the first launch, so the business app at
+  `business.yeral.app` can be tried live: test data only; the examples and the demo workspace stay off until the launch.
 - The Ýeral team's admin tool (ADR 0026): `ADMIN_SECRET_KEY` in `/srv/yeral/.env` (deploy.sh makes it once with
   `openssl rand -base64 32`; development and the local stack use a fixed key) seals the authenticator secrets; without
   it the admin endpoints answer `admin_unavailable`. Keep it with the backups' secrets: losing it means every account

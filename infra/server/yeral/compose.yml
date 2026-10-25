@@ -1,4 +1,4 @@
-# Ýeral on the owner's server (ADR 0023): Postgres and the api, behind the shared Caddy (../edge).
+# Ýeral on the owner's server (ADR 0023): Postgres, the api and the business app, behind the shared Caddy (../edge).
 # Lives at /srv/yeral with its .env (secrets, never in git: .env.example). Deploy: infra/server/README.md.
 name: yeral
 services:
@@ -42,9 +42,9 @@ services:
       TRUSTED_IP_HEADER: x-forwarded-for
       # the photos people upload (book F-101), on the `media` volume
       MEDIA_DIR: /data/media
-      # the first launch's sign-in code on the screen (book Q-036): anyone who types a number signs in as it, so it
-      # goes on only when the first launch opens (operations.md)
-      SIGN_IN_CODE_ON_SCREEN: 'false'
+      # the first launch's sign-in code on the screen (book Q-036): anyone who types a number signs in as it. On since
+      # 25.10.2026 (the owner), so the business app can be tried live before the launch: test data only (operations.md)
+      SIGN_IN_CODE_ON_SCREEN: 'true'
       # the first launch's example businesses (book Q-004): `setup` adds them, marked "Example" and confirming at once;
       # on with the code on the screen when the first launch opens (operations.md)
       EXAMPLE_BUSINESSES: 'false'
@@ -76,6 +76,15 @@ services:
       edge:
         aliases: [yeral-api]
     mem_limit: 512m
+
+  # the business app's static build (business.Dockerfile, its own Caddy); the shared Caddy adds TLS and proxies to it
+  business:
+    image: ${YERAL_BUSINESS_IMAGE:?set by deploy.sh}
+    restart: unless-stopped
+    networks:
+      edge:
+        aliases: [yeral-business]
+    mem_limit: 128m
 
 networks:
   edge:
