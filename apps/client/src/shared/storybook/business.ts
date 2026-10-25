@@ -1,3 +1,4 @@
+import type { BookingDetail } from '@yeral/contract/bookings'
 import type { BusinessCard, BusinessDetail } from '@yeral/contract/catalog'
 import { addDays, today } from '@yeral/domain/time'
 import { authApi, fakeFetch, json, refuse, type AuthApiOptions } from './fake-api'
@@ -156,6 +157,62 @@ export interface BusinessApiOptions extends AuthApiOptions {
   business?: BusinessDetail | 'not_found' | 'in_review'
   /** The signed-in person's favourites, by slug. */
   favourites?: string[]
+  /** A start someone else takes first: sending it answers `slot_taken` with the nearest free times, once. */
+  taken?: number
+}
+
+/** The booking `POST /bookings` makes (`YR-48213`): pending at a business that confirms by hand, else confirmed. */
+function sentBooking(business: BusinessDetail, body: Record<string, unknown>): BookingDetail {
+  const ids = body.serviceIds as string[]
+  const services = business.serviceGroups.flatMap((g) => g.services).filter((s) => ids.includes(s.id))
+  const staffId = body.staffId as string | null
+  const date = String(body.date)
+  const start = Number(body.start)
+  let at = start
+  const items = services.map((s) => {
+    const staff = business.specialists.find((p) => p.id === (staffId ?? s.staffIds[0]))?.name ?? null
+    const item = { service: s.name, staff, start: at, end: at + s.durationMin }
+    at += s.durationMin
+    return item
+  })
+  const manual = business.confirmMode === 'manual'
+  return {
+    code: 'YR-48213',
+    business: {
+      slug: business.slug,
+      name: business.name,
+      example: business.example,
+      category: business.category.name,
+      photo: business.photos[0] ?? null,
+      phone: business.phone,
+    },
+    what: { type: 'appointment', items },
+    date,
+    start,
+    end: at,
+    status: manual ? 'pending' : 'confirmed',
+    cancelledBy: null,
+    price: { type: 'fixed', amount: services.reduce((sum, s) => sum + s.price.amount, 0) },
+    source: 'web',
+    timeline: [{ event: 'sent', at: Date.now() }],
+    address: business.address,
+    city: business.city,
+    floor: business.floor,
+    entranceNote: business.entranceNote,
+    movedAt: null,
+    geo: business.geo,
+    clientNote: (body.note as string | undefined) ?? null,
+    holdUntil: manual ? Date.now() + 30 * 60_000 : null,
+    cancelDeadline: Date.now() + 86_400_000,
+    askCancelReason: false,
+    cancelReason: null,
+    businessCancel: null,
+    decline: null,
+    cancelOffers: [],
+    expiredAlternatives: [],
+    offerTakenBy: null,
+    bookOnline: true,
+  } as unknown as BookingDetail
 }
 
 /**
@@ -163,10 +220,12 @@ export interface BusinessApiOptions extends AuthApiOptions {
  * (`/me/favorites`) and, for everything else, the sign-in (`authApi`).
  */
 export const businessApi =
-  ({ business = GLOW, favourites = [], ...auth }: BusinessApiOptions = {}) =>
+  ({ business = GLOW, favourites = [], taken, ...auth }: BusinessApiOptions = {}) =>
   (): typeof fetch => {
     const signIn = authApi(auth)()
     const saved = new Set(favourites)
+    const bookings = new Map<string, BookingDetail>()
+    let takenFirst = taken
     const card = (slug: string): BusinessCard =>
       ({
         ...(typeof business === 'object' ? business : GLOW),
@@ -175,7 +234,22 @@ export const businessApi =
         street: '',
         availability: { type: 'appointment', date: today(), starts: [], more: 0 },
       }) as unknown as BusinessCard
-    const mine = fakeFetch(({ route, query }) => {
+    const mine = fakeFetch(({ route, query, body }) => {
+      if (route === 'POST /bookings' && typeof business === 'object') {
+        if (takenFirst !== undefined && Number(body.start) === takenFirst) {
+          takenFirst = undefined
+          const date = String(body.date)
+          return refuse(409, 'slot_taken', { alternatives: [960, 990].map((start) => ({ date, start, end: start + 60 })) })
+        }
+        const booking = sentBooking(business, body)
+        bookings.set(booking.code, booking)
+        return json(booking, 201)
+      }
+      const read = /^GET \/me\/bookings\/([^/]+)$/.exec(route)
+      if (read?.[1]) {
+        const booking = bookings.get(read[1])
+        return booking ? json(booking) : refuse(404, 'not_found')
+      }
       if (/^GET \/businesses\/[^/]+\/specialists\/availability$/.test(route))
         return json({
           any: { date: today(), start: 930 },
@@ -200,6 +274,6 @@ export const businessApi =
     })
     return (input, init) => {
       const path = new URL(new Request(input, init).url).pathname
-      return path.startsWith('/v1/businesses') || path.startsWith('/v1/me/favorites') ? mine(input, init) : signIn(input, init)
+      return /^\/v1\/(businesses|bookings|me\/favorites|me\/bookings)/.test(path) ? mine(input, init) : signIn(input, init)
     }
   }

@@ -163,7 +163,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | a date field's words (`DatePicker`'s `copy`: the month, the weekdays, a day's name, the field's date or range, the placeholder, the month buttons), and a span of dates in running text («2–5 November 2026», without the year for a yearly day) in the business app | `useDatePickerWords()`, `useDateSpan()` | `@/shared/i18n` (apps/business) |
 | locales, shared messages (`common`, `status`, `fmt`, `sms`) | `LOCALES` (translated) `MARKET_LOCALES` (offered) `DEFAULT_LOCALE` (market's main) `isLocale() messages` | `@yeral/i18n` |
 | site URLs, cookie domain and prefix, allowed origins, demo flag | `siteConfig({ env, domain, portBase })`, `siteFromEnv(env, 'VITE_')` | `@yeral/lib/site` |
-| add to calendar *(M3)* | `buildIcs() downloadIcs()` | `@yeral/lib/ics` |
+| add to calendar: one booking as an iCalendar file (UTC, escaped, folded), and saving a file the page made | `buildIcs() ICS_TYPE`; `downloadFile(name, content, type)` | `@yeral/lib/ics`; the client's `shared/lib` |
+| a business day's start as a person reads it (past midnight on the next date) | `calendarAt(date, start)` | the client's `shared/lib` |
 | directions, call *(M3)* | `directionsUrl() telHref()` | `@yeral/lib/links` |
 | local/session storage that never throws *(M3)* | `safeStorage` | `@yeral/lib/storage` |
 | env vars | `parseEnv(schema, source)` (names bad variables, never values) → `shared/config/env.ts` per app, `config.ts` in the api | `@yeral/lib/env` |

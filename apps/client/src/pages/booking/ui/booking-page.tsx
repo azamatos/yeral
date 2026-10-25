@@ -1,14 +1,18 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
+import { slotTakenDetailsSchema } from '@yeral/contract/errors'
 import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
+import { isApiError } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
 import { ActionBar } from '@yeral/ui/action-bar'
+import { Logo } from '@yeral/ui/brand'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { Stepper } from '@yeral/ui/stepper'
 import { toast } from '@yeral/ui/toast'
 import { ChevronLeft, X } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import {
   parseServiceIds,
@@ -19,30 +23,51 @@ import {
   SERVICES_MAX,
   toggleService,
 } from '@/features/pick-services'
+import { useErrorText } from '@/shared/i18n'
 import { wrap } from '@/shared/ui'
 import { chosenStaff, currentStep, reachedStep, stepDone, STEPS, type BookingSearch, type Choice, type Step } from '../model/flow'
+import { ConfirmStep, type Alternative } from './confirm-step'
+import { SentView } from './sent-view'
 import { StaffStep } from './staff-step'
 import { StepTitle } from './step-title'
 import { Summary } from './summary'
 import { TimeStep } from './time-step'
 
+/** The focused header (Booking `.fh`): 72 high, its three parts; 16 at the sides on phones. */
+function FocusedHeader({ start, middle, end }: { start: ReactNode; middle?: ReactNode; end: ReactNode }) {
+  return (
+    <header className="grid h-18 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 border-b border-n-200 bg-n-0 px-6 max-sm:px-4">
+      <div className="flex min-w-0 items-center">{start}</div>
+      {middle ?? <span />}
+      <div className="flex min-w-0 justify-end">{end}</div>
+    </header>
+  )
+}
+
 /**
- * `/{lang}/b/{slug}/book` — the appointment booking flow (Booking, book C-12–C-14): the focused header (Back, the steps,
+ * `/{lang}/b/{slug}/book` — the appointment booking flow (Booking, book C-12–C-22): the focused header (Back, the steps,
  * Close back to the page), one step at a time with the booking's summary beside it from 1024 and the action bar under
- * it. Everything chosen lives in the address (`?services=&staff=&date=&time=&step=`): Continue is a new history entry
- * (the browser's Back walks the steps), a pick and the header's Back replace it. A date already past and a time the day
- * no longer has count as not chosen. The confirmation and the sent page come next (P4 slice 3, C4).
+ * it, then the sent page. Everything chosen lives in the address (`?services=&staff=&date=&time=&step=`, `?sent=`):
+ * Continue is a new history entry (the browser's Back walks the steps), a pick and the header's Back replace it. A date
+ * already past and a time the day no longer has count as not chosen. Sending needs someone signed in with a name (the
+ * site's login opens from the confirmation); a time taken meanwhile offers the nearest free ones.
  */
 export function BookingPage() {
   const { slug = '' } = useParams({ strict: false })
   const lang = useLocale()
   const sdk = useSdk()
   const t = useTranslations('booking')
+  const words = useTranslations()
+  const brand = words('common.brand')
   const fmt = useFmt()
+  const errorText = useErrorText()
   const now = useClock()
   const { data: detail } = useSuspenseQuery(sdk.catalog.business(slug, lang))
+  const me = useQuery(sdk.me.get())
   const search: BookingSearch = useSearch({ strict: false })
   const navigate = useNavigate()
+  const [note, setNote] = useState('')
+  const [taken, setTaken] = useState<Alternative[] | null>(null)
   const picked = pickedServices(detail, parseServiceIds(search.services))
   const ids = picked.map((s) => s.id)
   const staff = chosenStaff(detail, ids, search.staff)
@@ -51,7 +76,7 @@ export function BookingPage() {
   // the chosen day's free times (the time step asks the same): a time it no longer has isn't chosen any more
   const free = useQuery({
     ...sdk.availability.appointment(detail.slug, { lang, services: ids, staff, date: date ?? undefined }),
-    enabled: ids.length > 0 && date !== null && search.time !== undefined,
+    enabled: ids.length > 0 && date !== null && search.time !== undefined && !search.sent,
   })
   const settled = free.data && !free.isPlaceholderData ? free.data : null
   const time =
@@ -59,9 +84,11 @@ export function BookingPage() {
   const choice: Choice = { services: ids, date, time }
   const step = currentStep(search.step, choice)
   const index = STEPS.indexOf(step)
-  const done = stepDone(step, choice)
+  const signedIn = Boolean(me.data?.firstName)
+  const done = stepDone(step, choice) && (step !== 'confirm' || signedIn)
   const total = selectionTotal(picked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
+  const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug }, search: { services: serviceIdsParam(ids) } }
 
   // the step shown goes along with every change, so a link held back to an earlier step stays on it
   const set = (patch: Partial<BookingSearch>, { newEntry = false, top = false } = {}) =>
@@ -82,24 +109,100 @@ export function BookingPage() {
     // a new service may rule the chosen specialist out and leaves the chosen time behind (Booking `set`)
     set({ services: serviceIdsParam(next), staff: chosenStaff(detail, next, search.staff), time: undefined })
   }
+
+  // the sdk's own callbacks keep the cache (the booking, my lists, the free times); the page's run after them
+  const send = useMutation(sdk.bookings.create(lang))
+  const submit = () => {
+    if (!done || date === null || time === null || send.isPending) return
+    send.mutate(
+      {
+        type: 'appointment',
+        business: detail.slug,
+        serviceIds: ids,
+        staffId: staff === 'any' ? null : staff,
+        date,
+        start: time,
+        ...(note.trim() ? { note: note.trim() } : {}),
+      },
+      {
+        onSuccess: (booking) => {
+          setTaken(null)
+          // the sent page in place of the confirmation: the browser's Back doesn't send it again
+          void navigate({ to: '.', search: { sent: booking.code }, replace: true, resetScroll: true })
+        },
+        onError: (error) => {
+          if (isApiError(error, 'slot_taken')) {
+            const details = slotTakenDetailsSchema.safeParse(error.details)
+            setTaken(details.success ? details.data.alternatives : [])
+            return
+          }
+          // paused meanwhile, or this client is booked by phone only: the page says so and how (book Q-154)
+          if (isApiError(error, 'online_blocked') || isApiError(error, 'online_disabled')) {
+            void navigate({ ...pageLink, replace: true })
+            return
+          }
+          toast(errorText(error))
+        },
+      },
+    )
+  }
   const next = () => {
     const to = STEPS[index + 1]
     if (done && to) go(to, true)
   }
-  const hint = step === 'time' ? t('summary.pickTime') : t('summary.pickService')
+
+  if (search.sent)
+    return (
+      <div className="flex min-h-dvh flex-col bg-n-0 text-n-900">
+        <FocusedHeader
+          start={
+            <Link to="/$lang" params={{ lang }} aria-label={words('site.home', { brand })} className="flex">
+              <Logo alt={brand} height={28} />
+            </Link>
+          }
+          end={
+            <Button asChild variant="ghost" iconOnly aria-label={t('close')}>
+              <Link to="/$lang/b/$slug" params={{ lang, slug: detail.slug }}>
+                <X aria-hidden className="size-[22px]" />
+              </Link>
+            </Button>
+          }
+        />
+        <main className="mx-auto w-full max-w-160 px-6 pt-14 pb-24 max-sm:px-4 max-sm:pt-10 max-sm:pb-16">
+          <SentView code={search.sent} detail={detail} />
+        </main>
+      </div>
+    )
+
+  const hint = step === 'time' ? t('summary.pickTime') : step === 'confirm' ? t('confirm.needNumber') : t('summary.pickService')
   const cta =
-    step === 'confirm' ? null : (
+    step === 'confirm' ? (
+      <Button size="l" variant="primary" className="w-full" disabled={!done} loading={send.isPending} onClick={submit}>
+        {t('confirm.send')}
+      </Button>
+    ) : (
       <Button size="l" variant="primary" className="w-full" disabled={!done} onClick={next}>
         {t('summary.continue')}
       </Button>
     )
-  const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug }, search: { services: serviceIdsParam(ids) } }
+  const summary = (withCta: boolean) => (
+    <Summary
+      detail={detail}
+      picked={picked}
+      total={total}
+      staffName={index > 0 && picked.length > 0 ? staffName : null}
+      date={step !== 'services' ? date : null}
+      time={step !== 'services' ? time : null}
+      cta={withCta ? cta : null}
+      hint={withCta && !done ? hint : null}
+    />
+  )
 
   return (
     <div className="flex min-h-dvh flex-col bg-n-0 text-n-900">
-      <header className="grid h-18 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 border-b border-n-200 bg-n-0 px-6 max-sm:px-4">
-        <div className="flex min-w-0 items-center">
-          {index === 0 ? (
+      <FocusedHeader
+        start={
+          index === 0 ? (
             <Button asChild variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5">
               <Link {...pageLink}>
                 <ChevronLeft aria-hidden />
@@ -111,24 +214,26 @@ export function BookingPage() {
               <ChevronLeft aria-hidden />
               {t('back')}
             </Button>
-          )}
-        </div>
-        <Stepper
-          aria-label={t('stepsLabel')}
-          steps={STEPS.map((s) => t(`steps.${s}`))}
-          current={index}
-          reached={reachedStep(choice)}
-          onStepClick={(i) => go(STEPS[i] ?? 'services', false)}
-          className="self-stretch"
-        />
-        <div className="flex min-w-0 justify-end">
+          )
+        }
+        middle={
+          <Stepper
+            aria-label={t('stepsLabel')}
+            steps={STEPS.map((s) => t(`steps.${s}`))}
+            current={index}
+            reached={reachedStep(choice)}
+            onStepClick={(i) => go(STEPS[i] ?? 'services', false)}
+            className="self-stretch"
+          />
+        }
+        end={
           <Button asChild variant="ghost" iconOnly aria-label={t('close')}>
             <Link {...pageLink}>
               <X aria-hidden className="size-[22px]" />
             </Link>
           </Button>
-        </div>
-      </header>
+        }
+      />
       <div className={`${wrap} flex-1`}>
         <div className="flex flex-wrap items-start gap-10 pt-10 pb-24 max-md:pb-10 max-sm:pt-6">
           <main className="min-w-0 flex-[999_1_560px]">
@@ -163,35 +268,40 @@ export function BookingPage() {
                   onTime={(start, day) => set({ date: day, time: start })}
                 />
               )}
-              {step === 'confirm' && <StepTitle title={t('confirm.title')} lead={t('confirm.lead')} />}
+              {step === 'confirm' && (
+                <ConfirmStep
+                  detail={detail}
+                  summary={summary(false)}
+                  note={note}
+                  onNote={setNote}
+                  taken={taken}
+                  onAlternative={(a) => {
+                    setTaken(null)
+                    set({ date: a.date, time: a.start })
+                  }}
+                  onOtherTime={() => {
+                    setTaken(null)
+                    go('time', false)
+                  }}
+                />
+              )}
             </div>
           </main>
           <aside aria-label={t('summaryLabel')} className="sticky top-6 min-w-0 flex-[1_1_340px] max-md:hidden">
-            <Summary
-              detail={detail}
-              picked={picked}
-              total={total}
-              staffName={index > 0 && picked.length > 0 ? staffName : null}
-              date={step !== 'services' ? date : null}
-              time={step !== 'services' ? time : null}
-              cta={cta}
-              hint={done ? null : hint}
-            />
+            {summary(true)}
           </aside>
         </div>
       </div>
-      {cta && (
-        <ActionBar className="md:hidden" aria-label={t('summaryLabel')} role="region" action={cta}>
-          <span className="truncate text-body font-semibold">
-            {picked.length === 0
-              ? t('summary.barNone')
-              : time !== null
-                ? t('summary.barTime', { count: picked.length, total: fmt.price(total.price), time: fmt.time(time) })
-                : t('summary.bar', { count: picked.length, total: fmt.price(total.price) })}
-          </span>
-          <span className="truncate text-dense text-n-600">{done ? t('summary.payAtPlace') : hint}</span>
-        </ActionBar>
-      )}
+      <ActionBar className="md:hidden" aria-label={t('summaryLabel')} role="region" action={cta}>
+        <span className="truncate text-body font-semibold">
+          {picked.length === 0
+            ? t('summary.barNone')
+            : time !== null
+              ? t('summary.barTime', { count: picked.length, total: fmt.price(total.price), time: fmt.time(time) })
+              : t('summary.bar', { count: picked.length, total: fmt.price(total.price) })}
+        </span>
+        <span className="truncate text-dense text-n-600">{done ? t('summary.payAtPlace') : hint}</span>
+      </ActionBar>
     </div>
   )
 }
