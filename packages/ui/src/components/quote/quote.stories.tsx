@@ -50,6 +50,28 @@ export const WithMeta: Story = {
   ),
 }
 
+/** A business's reply: the caps label and who answered and when, both in the caption. */
+export const Reply: Story = {
+  args: {
+    label: 'Your reply',
+    meta: (
+      <>
+        <span className="font-semibold text-n-900">Glow Studio</span>
+        <span className="text-n-600">yesterday</span>
+      </>
+    ),
+    children: 'Thank you, Gülälek! We’ll be glad to see you again.',
+  },
+  render: (args) => (
+    <div className="w-96">
+      <Quote {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('figcaption')).toHaveTextContent('Your replyGlow Studioyesterday')
+  },
+}
+
 /** Russian-length words. */
 export const Russian: Story = {
   args: { label: 'Заметка клиента', children: '«У меня длинные волосы — уберите только 5 см с кончиков, пожалуйста»' },

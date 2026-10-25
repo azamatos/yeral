@@ -5,7 +5,7 @@ export type KeyValueItem = {
   key: ReactNode
   /** Never blank: «—» or a quiet word («not given») when there's nothing, with `muted`. */
   value: ReactNode
-  /** The value as a quiet word (n-600, regular). */
+  /** The value as a quiet word: n-600 (regular in a compact row). */
   muted?: boolean
 }
 
@@ -41,7 +41,8 @@ export function KeyValueList({
             className={cn(
               'm-0 min-w-0',
               facts ? 'truncate font-semibold tabular-nums' : 'font-medium',
-              item.muted ? 'font-normal text-n-600' : 'text-n-900',
+              // a quiet value: n-600, at the row's weight (a compact row's «not given» regular, as drawn)
+              item.muted ? cn('text-n-600', variant === 'compact' && 'font-normal') : 'text-n-900',
             )}
           >
             {item.value}

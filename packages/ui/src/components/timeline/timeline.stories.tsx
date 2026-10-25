@@ -12,8 +12,8 @@ const meta = {
   args: {
     'aria-label': 'Booking status',
     items: [
-      { tone: 'accent', title: 'Sent', caption: '14 Oct · 14:40' },
-      { tone: 'current', title: 'Waiting for confirmation', caption: 'The business answers by 15:10' },
+      { tone: 'accent', title: 'Sent', caption: '14 Oct · 14:40', state: '— done' },
+      { tone: 'current', title: 'Waiting for confirmation', caption: 'The business answers by 15:10', state: '— now' },
       { tone: 'todo', title: 'Appointment', caption: '15 Oct · 14:30' },
     ],
   },
@@ -21,12 +21,17 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** A request waiting: sent (done), waiting now (the warning ring), the visit ahead (the grey ring). */
+/**
+ * A request waiting: sent (done), waiting now (the warning ring with its dot, `aria-current="step"`), the visit ahead
+ * (the grey ring); each step's state in words for screen readers.
+ */
 export const StatusMarkers: Story = {
   play: async ({ canvasElement }) => {
     const list = within(canvasElement).getByRole('list', { name: 'Booking status' })
-    await expect(within(list).getAllByRole('listitem')).toHaveLength(3)
-    await expect(list).toHaveTextContent('Waiting for confirmationThe business answers by 15:10')
+    const steps = within(list).getAllByRole('listitem')
+    await expect(steps).toHaveLength(3)
+    await expect(steps[1]).toHaveAttribute('aria-current', 'step')
+    await expect(steps[1]).toHaveTextContent('Waiting for confirmation — nowThe business answers by 15:10')
   },
 }
 
@@ -48,7 +53,7 @@ export const Numbered: Story = {
     'aria-label': 'What happens next',
     variant: 'numbered',
     items: [
-      { done: true, title: 'Sent', caption: 'Today · 14:40' },
+      { done: true, title: 'Sent', caption: 'Today · 14:40', state: '— done' },
       { title: 'The business confirms', caption: 'The business answers by 15:10. You’ll see it in My bookings.' },
       { title: 'Your visit', caption: 'Thursday, 15 October · 14:30' },
     ],
@@ -58,6 +63,12 @@ export const Numbered: Story = {
       <Timeline {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    // the first step not done is the one happening now
+    const steps = within(canvasElement).getAllByRole('listitem')
+    await expect(steps[1]).toHaveAttribute('aria-current', 'step')
+    await expect(steps[0]).not.toHaveAttribute('aria-current')
+  },
 }
 
 /** Russian-length words. */

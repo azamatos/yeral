@@ -51,7 +51,7 @@ export function ChangeSummary({
       {...props}
       className={cn(
         'grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 rounded-card border border-n-200 bg-n-0 px-6 py-5',
-        'max-sm:grid-cols-1 max-sm:gap-2 max-sm:p-4',
+        'max-sm:grid-cols-1 max-sm:gap-2.5 max-sm:px-5 max-sm:py-4',
         className,
       )}
     >
@@ -59,7 +59,7 @@ export function ChangeSummary({
         <span className="text-label text-n-500 uppercase">{labels.from}</span>
         <span className={cn('text-body-l leading-6 font-semibold', moved ? 'text-n-500 line-through' : 'text-n-600')}>{from}</span>
       </span>
-      <ArrowRight aria-hidden className="size-6 text-n-500 max-sm:rotate-90" />
+      <ArrowRight aria-hidden className="size-6 text-n-500 max-sm:rotate-90 max-sm:justify-self-start" />
       <span className="flex min-w-0 flex-col gap-1.5">
         <span className="text-label text-n-500 uppercase">{labels.to}</span>
         <span className="text-body-l leading-6 font-bold text-n-900">{to}</span>
