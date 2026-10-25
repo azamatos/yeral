@@ -1,7 +1,8 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import type { Workspace } from '@yeral/contract/team'
 import { MARKET_LOCALES } from '@yeral/i18n'
+import { keys } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { SettingsSection, SettingsSectionTitle } from '@yeral/ui/settings-layout'
@@ -10,7 +11,7 @@ import { CircleAlert, CircleCheck, Clock, EyeOff, Headset, Pencil } from 'lucide
 import { useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { ContactYeral, useContactYeral } from '@/features/contact-yeral'
-import { PageAddressField, savable, usePageAddressCheck } from '@/features/page-address'
+import { PageAddressField, savable, takenOnSave, usePageAddressCheck } from '@/features/page-address'
 import { useSdk } from '@/shared/api'
 import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
@@ -60,7 +61,9 @@ export function SettingsLinkPage() {
  */
 function ChangeLink({ slug }: { slug: string }) {
   const t = useTranslations('settings.link')
+  const ta = useTranslations('pageAddress')
   const sdk = useSdk()
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
   const errorText = useErrorText()
   const move = useMutation(sdk.settings.setPageAddress(slug))
@@ -84,7 +87,13 @@ function ChangeLink({ slug }: { slug: string }) {
           toast(t('changed', { url: pageLink(moved.slug).display }))
           void navigate({ to: '/w/$slug/settings/link', params: { slug: moved.slug }, replace: true })
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => {
+          // taken meanwhile: said so, and its check asks again (it offers a free one like it)
+          if (takenOnSave(error)) {
+            toast(ta('taken'))
+            void queryClient.invalidateQueries({ queryKey: keys.pageAddressAll() })
+          } else toast(errorText(error))
+        },
       },
     )
   }

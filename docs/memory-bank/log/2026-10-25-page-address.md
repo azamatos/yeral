@@ -22,17 +22,19 @@
   (booking, favourites): `GET /v1/businesses/{old}` answers the page with its new `slug`. The example seed skips an
   address a business had. Events: `business.updated`, so the team's switchers refresh.
 - SDK: `sdk.settings.pageAddressCheck(params)` (`keys.pageAddress`) and `sdk.settings.setPageAddress(slug)`.
-- Business app (feat/page-address-app): `features/page-address`: `usePageAddressCheck(slug, { business, own })` (the
-  rules at once, then the api after a 300 ms pause; a reserved one asked too, for its suggestion; `unknown` when the
-  check failed, the save asks again), `PageAddressField` (InputGroup with the `yeral.app/b/` prefix box, lower case
-  and hyphens as typed, «This address is free.» or the problem with «Use …»), `savable()`, `typedAddress()`. The
-  wizard's business step: a «Page address» field under the name (it replaces the drawn «Your page: …» line), showing
-  the address the name gives as the api makes it (a taken one's free one like it) until the owner writes their own;
-  Continue waits for a good one («Pick a page address that's free.»); a new draft gets `slug` only when written; a
-  draft's change moves it last (`setPageAddress`), and «Continue later» saves the step first, since the move changes
-  the draft's address. Settings → Link and QR: «Change link» under the link (not for the demo workspace): the field,
-  the note that old links and printed QR codes keep working, Cancel / Save link (Enter, Escape); after the move the
-  page opens at `/w/{new}/settings/link` with «Your page's link is now …».
+- Business app (feat/page-address-app): `features/page-address`: `usePageAddressCheck(slug, { business, own })`
+  (`model/check.ts`: the rules at once, then the api after a 300 ms pause, a reserved one asked too for its suggestion;
+  `unknown` when the check failed, the save asks again), `savable()`, `takenOnSave()` (a save another business beat:
+  the toast says it and the checks ask again), `PageAddressField` (InputGroup with `pageLink('').display` as the
+  prefix box, lower case and hyphens letter for letter as typed, the caret kept; «This address is free.» or the
+  problem with «Use …»). The wizard's business step: a «Page address» field under the name (it replaces the drawn
+  «Your page: …» line), the address the name gives as the api makes it (a taken or reserved one's free one like it)
+  until the owner writes their own; Continue waits for a good one («Pick a page address that's free.»); a new draft
+  gets `slug` only when written; a draft's good edits are saved on leaving, the address last (one still being checked
+  too); `sdk.setup.step()` now takes the draft's address with the step, read from the refreshed draft, so a step saved
+  after a move goes to the new address. Settings → Link and QR: «Change link» under the link (not for the demo
+  workspace): the field, the note that old links and printed QR codes keep working, Cancel / Save link (Enter,
+  Escape); after the move the page opens at `/w/{new}/settings/link` with «Your page's link is now …».
 - Shell: a teammate's open tab at the old address goes to the new one at the same section once their workspaces
   refresh (the `business.updated` event), through `placeFor` (unit test), with no "closed" toast.
 - Handoff:

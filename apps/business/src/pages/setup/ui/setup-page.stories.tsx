@@ -318,6 +318,8 @@ const fakeApi =
       }
       const step = /^PUT \/w\/([^/]+)\/setup$/.exec(route)
       if (step && setup) {
+        // as the api: a draft's old address opens nothing
+        if (step[1] !== setup.slug) return json({ error: { code: 'not_found' } }, 404)
         setup.step = String(body.step)
         return new Response(null, { status: 204 })
       }
@@ -428,8 +430,8 @@ export const OwnAddress: Story = {
 }
 
 /**
- * Back at the business step of a draft: its address as it is; written over, Continue moves the draft to it (the
- * wizard's pages go with it).
+ * A draft left at the business step («Continue later»): its address as it is; written over, Continue moves the draft
+ * to it and saves the step there (the wizard's pages go with it).
  */
 export const MoveAddress: Story = {
   args: {
@@ -437,7 +439,7 @@ export const MoveAddress: Story = {
       draft: {
         slug: 'glow-studio',
         name: 'Glow Studio',
-        step: 'address',
+        step: 'business',
         category: 'Beauty',
         categoryId: 'beauty',
         logo: null,

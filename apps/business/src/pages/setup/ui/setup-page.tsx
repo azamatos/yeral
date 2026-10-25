@@ -5,14 +5,14 @@ import type { Setup } from '@yeral/contract/setup'
 import { formatPhone } from '@yeral/domain/phone'
 import { slugFrom, type SetupStep } from '@yeral/domain/setup'
 import { useCodeOnScreen } from '@yeral/features/auth-by-phone'
-import { isApiError } from '@yeral/sdk'
+import { isApiError, keys } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Spinner } from '@yeral/ui/spinner'
 import { toast } from '@yeral/ui/toast'
 import { WizardFooter } from '@yeral/ui/wizard-footer'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { savable, usePageAddressCheck, type PageAddressState } from '@/features/page-address'
+import { savable, takenOnSave, usePageAddressCheck, type PageAddressState } from '@/features/page-address'
 import { useSdk } from '@/shared/api'
 import { BUSINESS_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
@@ -148,33 +148,40 @@ function Steps({
   // the page address the owner wrote; null while it follows the name (or is the draft's)
   const [typedSlug, setTypedSlug] = useState<string | null>(null)
   const start = useMutation(sdk.setup.start())
-  const saveStep = useMutation(sdk.setup.step(draft?.slug ?? ''))
+  const saveStep = useMutation(sdk.setup.step())
   const updateProfile = useMutation(sdk.settings.updateProfile(draft?.slug ?? ''))
   const moveAddress = useMutation(sdk.settings.setPageAddress(draft?.slug ?? ''))
+  // the draft's address as it is now: a move refreshes the draft before it resolves, so a step saved after this step's
+  // save goes there (the wizard redraws at it after)
+  const draftAt = () => queryClient.getQueryData(sdk.setup.mine().queryKey)?.setup?.slug ?? draft?.slug ?? ''
 
   const reached: SetupStep = draft?.step ?? 'business'
   const phone = formatPhone(me.phone)
   const ownerName = me.name ?? me.firstName ?? ''
   // spaces around the name don't count: the api trims it before its limit
   const length = name.trim().length
-  // the address a new business gets from its name, as the api makes it (a free one like it when that's taken), or the
-  // draft's; checked as it's typed once the owner writes their own
-  const fromName = draft?.slug ?? (length ? slugFrom(name.trim()) : '')
-  const madeUp = usePageAddressCheck(step === 'business' && !draft && typedSlug === null ? fromName : '')
-  const written = usePageAddressCheck(typedSlug ?? '', { business: draft?.slug, own: draft?.slug })
-  const shownAddress = typedSlug ?? (madeUp.status === 'problem' && madeUp.suggestion ? madeUp.suggestion : fromName)
-  const addressState: PageAddressState =
-    typedSlug !== null
-      ? written
-      : draft
-        ? { status: 'own' }
-        : madeUp.status === 'problem'
-          ? // a taken name's free one like it; a short one stays as the name gives it
-            { status: madeUp.suggestion ? 'free' : 'idle' }
-          : madeUp
+  // the page address: the one the owner wrote, else the draft's, else the one the name gives (checked, since the api
+  // makes a taken one's free one like it)
+  const fromName = length ? slugFrom(name.trim()) : ''
+  const checked = usePageAddressCheck(step === 'business' ? (typedSlug ?? (draft ? '' : fromName)) : '', {
+    business: draft?.slug,
+    own: draft?.slug,
+  })
+  const madeUp = typedSlug === null && !draft
+  const shownAddress = typedSlug ?? draft?.slug ?? (checked.status === 'problem' && checked.suggestion ? checked.suggestion : fromName)
+  const addressState: PageAddressState = !madeUp
+    ? typedSlug === null
+      ? { status: 'own' }
+      : checked
+    : checked.status !== 'problem'
+      ? checked
+      : // a taken or reserved name gets its free one like it; a short one stays as the name gives it; otherwise the
+        // check couldn't say, and the api makes it at the save
+        { status: checked.suggestion ? 'free' : checked.problem === 'short' ? 'idle' : 'unknown' }
   const newAddress = typedSlug !== null && typedSlug !== draft?.slug ? typedSlug : undefined
-  const addressValid = typedSlug === null || savable(written)
-  const businessValid = length > 0 && length <= BUSINESS_NAME_MAX && !!categoryId && addressValid
+  const addressValid = typedSlug === null || savable(checked)
+  const profileValid = length > 0 && length <= BUSINESS_NAME_MAX && !!categoryId
+  const businessValid = profileValid && addressValid
   const profileEdited = name.trim() !== (draft?.name ?? '') || categoryId !== (draft?.categoryId ?? null)
   const edited = step === 'business' && (profileEdited || !!newAddress)
 
@@ -184,8 +191,9 @@ function Steps({
 
   /**
    * The business step's name, category and page address into the draft: a new draft (saved at the address step, with
-   * the address the owner wrote, else the api makes one from the name), or the edits to the one there, the address
-   * last (the wizard's pages move to it). `false` when it failed (the person heard why).
+   * the address the owner wrote, else the api makes one from the name), or the edits to the one there that are good,
+   * the address last (the wizard's pages move to it; one still being checked goes too, the api checks it). `false`
+   * when it failed (the person heard why: an address taken meanwhile says so, and its check asks again).
    */
   const saveBusiness = async (): Promise<boolean> => {
     const values = { name: name.trim(), categoryId: categoryId! }
@@ -194,14 +202,17 @@ function Steps({
       if (!draft) await start.mutateAsync({ ...values, ...(newAddress && { slug: newAddress }) })
       else {
         // the profile's save refreshes the draft too (its name and category) before it resolves
-        if (profileEdited) await updateProfile.mutateAsync(values)
-        if (newAddress) await moveAddress.mutateAsync({ slug: newAddress })
+        if (profileEdited && profileValid) await updateProfile.mutateAsync(values)
+        if (newAddress && (addressValid || checked.status === 'checking')) await moveAddress.mutateAsync({ slug: newAddress })
       }
       return true
     } catch (error) {
       // a draft made meanwhile (another tab): the wizard goes on with that one
       if (isApiError(error, 'setup_in_progress')) await queryClient.invalidateQueries({ queryKey: sdk.setup.mine().queryKey })
-      failed(error)
+      if (takenOnSave(error)) {
+        toast(t('pageAddress.taken'))
+        await queryClient.invalidateQueries({ queryKey: keys.pageAddressAll() })
+      } else failed(error)
       return false
     }
   }
@@ -248,8 +259,8 @@ function Steps({
             hint,
             busy: start.isPending || updateProfile.isPending || moveAddress.isPending,
             ready: true,
-            // a new draft from a valid business step; edits to the one there
-            save: () => (businessValid && (!draft || edited) ? saveBusiness() : Promise.resolve(true)),
+            // a new draft from a valid business step; the edits to the one there that are good
+            save: () => ((draft ? edited : businessValid) ? saveBusiness() : Promise.resolve(true)),
             // a new draft starts at the address step, as Continue would leave it
             reopens: !draft && businessValid ? 'address' : undefined,
           },
@@ -272,7 +283,7 @@ function Steps({
   const onContinue = async () => {
     if (busy || !next || !(await action.save())) return
     try {
-      if (draft && stepIndex(draft.step) < stepIndex(next)) await saveStep.mutateAsync(next)
+      if (draft && stepIndex(draft.step) < stepIndex(next)) await saveStep.mutateAsync({ slug: draftAt(), step: next })
       go(next)
     } catch (error) {
       failed(error)
@@ -288,9 +299,8 @@ function Steps({
   const later = async () => {
     if (busy) return
     try {
-      // the step first: the business step's save may move the draft to another address
-      if (draft) await saveStep.mutateAsync(step)
       if (!(await action.save())) return
+      if (draft) await saveStep.mutateAsync({ slug: draftAt(), step })
       // reopening lands where it was left
       toast(t('setup.laterSaved', { phone, step: stepName(action.reopens ?? step, more) }))
     } catch (error) {

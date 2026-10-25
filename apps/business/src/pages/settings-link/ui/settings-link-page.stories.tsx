@@ -57,6 +57,8 @@ const fakeApi =
   () => {
     let current = workspace
     moves.length = 0
+    // glow-race: free when checked, taken by another business at the save
+    let raced = false
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const url = new URL(request.url)
@@ -67,11 +69,15 @@ const fakeApi =
       if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
       if (route === 'GET /page-address') {
         const slug = url.searchParams.get('slug') ?? ''
-        const problem = slug === 'glow-taken' ? 'taken' : slug === 'support' ? 'reserved' : null
+        const problem = slug === 'glow-taken' || (slug === 'glow-race' && raced) ? 'taken' : slug === 'support' ? 'reserved' : null
         return json({ slug, problem, suggestion: problem ? `${slug}-2` : null })
       }
       if (route === `PUT /w/${current.slug}/settings/page-address`) {
         const { slug } = (await request.json()) as { slug: string }
+        if (slug === 'glow-race') {
+          raced = true
+          return json({ error: { code: 'validation_error', details: { issues: [{ path: ['slug'], code: 'taken' }] } } }, 400)
+        }
         moves.push(`${current.slug} → ${slug}`)
         current = { ...current, slug }
         return json({ slug })
@@ -205,6 +211,23 @@ export const ChangeLink: Story = {
     await waitFor(() =>
       expect(canvas.getByRole<HTMLInputElement>('textbox', { name: 'Your page link' }).value).toMatch(/\/b\/glow-taken-2$/),
     )
+  },
+}
+
+/** Another business takes the address between the check and Save: said so, and the check offers a free one. */
+export const TakenMeanwhile: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Change link' }))
+    const field = canvas.getByRole('textbox', { name: 'New link' })
+    await userEvent.clear(field)
+    await userEvent.type(field, 'glow-race')
+    await expect(await canvas.findByText('This address is free.')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save link' }))
+    // the toast says it, and the field's check, asked again, offers a free one
+    await expect(await canvas.findByRole('button', { name: 'Use glow-race-2' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Save link' })).toBeDisabled()
+    await expect(within(document.body).getAllByText('Another business has this address.').length).toBeGreaterThanOrEqual(2)
+    await expect(moves).toEqual([])
   },
 }
 

@@ -779,7 +779,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
           // the old address's answers nothing on screen still reads go (what's on screen goes once the app moves)
           if (moved.slug !== slug)
             queryClient.removeQueries({ predicate: (q) => inWorkspace(slug)(q.queryKey) && q.getObserversCount() === 0 })
-          return invalidate(keys.workspaces(), keys.setup(), keys.pageAddressAll())
+          return invalidate(keys.workspaces(), keys.setup())
         },
       }),
     /** The logo (book B-37): square; the app crops and shrinks it first. The switcher and invite cards show it. */
@@ -1190,9 +1190,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         onSuccess: () => invalidate(keys.setup()),
       }),
     /** The step the wizard is on. */
-    step: (slug: string) =>
+    /** The wizard's step to reopen at, at the draft's address as it is now (the business step may have just moved it). */
+    step: () =>
       mutationOptions({
-        mutationFn: (step: z.input<typeof setupStepInputSchema>['step']) => call(w.setup.$put({ param: { slug }, json: { step } })),
+        mutationFn: ({ slug, step }: { slug: string; step: z.input<typeof setupStepInputSchema>['step'] }) =>
+          call(w.setup.$put({ param: { slug }, json: { step } })),
         onSuccess: () => invalidate(keys.setup()),
       }),
     /** Step 5: the draft's whole menu in one go (the picked starters and the owner's own), replacing the step's last save. */
