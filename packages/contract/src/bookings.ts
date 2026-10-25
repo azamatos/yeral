@@ -153,6 +153,13 @@ export const waitingMoveSchema = z.object({
   holdUntil: epochSchema.nullable(),
 })
 
+/**
+ * The business's cancel (cancelled by the business): the reason as a code the app words (`businessCancelReasons.*`),
+ * with the business's words for "Other reason" (B-27) or the special day's name it closed for (`closed`, B-40) in
+ * `text`. "The client called to cancel" is the client's own cancel: not here.
+ */
+export const businessCancelSchema = z.object({ reason: z.enum(BUSINESS_SIDE_CANCEL_REASONS), text: z.string().nullable() })
+
 /** Where an offered time comes from: a decline, an expired request, or the business's cancel (B-39, B-40). */
 export const OFFER_SOURCES = ['decline', 'expired', 'cancel'] as const
 export type OfferSource = (typeof OFFER_SOURCES)[number]
@@ -185,12 +192,7 @@ export const bookingDetailSchema = bookingSummarySchema
     askCancelReason: z.boolean(),
     /** The client's own words when they cancelled; null for any other cancel. */
     cancelReason: z.string().nullable(),
-    /**
-     * The business's cancel (cancelled by the business): the reason as a code the app words
-     * (`businessCancelReasons.*`), with the business's words for "Other reason" (B-27) or the special day's name it
-     * closed for (`closed`, B-40) in `text`. "The client called to cancel" is the client's own cancel: not here.
-     */
-    businessCancel: z.object({ reason: z.enum(BUSINESS_SIDE_CANCEL_REASONS), text: z.string().nullable() }).nullable(),
+    businessCancel: businessCancelSchema.nullable(),
     decline: z
       .object({
         reason: z.enum(DECLINE_REASONS),
@@ -289,14 +291,15 @@ export type BookingLink = z.infer<typeof bookingLinkSchema>
 
 /**
  * `upcoming`: waiting and confirmed bookings, soonest first, under the declined or expired requests that still have an
- * offered time to take (status `cancelled`; their detail holds the times), soonest offer first. A request that just ran
+ * offered time to take (status `cancelled`; their `offers` hold the times), soonest offer first. A request that just ran
  * out keeps its place until the background pass records it (a minute or so). `past`: the rest, newest first (book C-40).
  */
 export const myBookingsQuerySchema = langQuerySchema.extend(cursorQuerySchema.shape).extend({ tab: z.enum(['upcoming', 'past']) })
 /**
  * A row of My bookings (book C-24–C-31, C-40): the summary with what its card shows and offers, as the detail says it:
- * the actions, the answer time of a request, a waiting move, a decline's reason, and the times offered after a decline,
- * an expiry or the business's cancel that can still be taken (`offers`; taken with `accept-alternative`).
+ * the actions, the answer time of a request, a waiting move, the business's decline or cancel, the times offered after
+ * a decline, an expiry or the business's cancel (each with its state: free, taken or past), the booking an offered
+ * time became, and whether the client may book there online.
  */
 export const myBookingSchema = bookingSummarySchema
   .extend({
@@ -304,8 +307,19 @@ export const myBookingSchema = bookingSummarySchema
     holdUntil: epochSchema.nullable(),
     reschedule: waitingMoveSchema.nullable(),
     decline: z.object({ reason: z.enum(DECLINE_REASONS), text: z.string().nullable() }).nullable(),
-    /** The offered times as the detail lists them (free, taken, past); null when there are none to show. */
+    businessCancel: businessCancelSchema.nullable(),
+    /**
+     * The offered times as the detail lists them, each free, taken or past (a free one is taken with
+     * `accept-alternative`, `source` and its index); null when there are none to show.
+     */
     offers: z.object({ source: z.enum(OFFER_SOURCES), times: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES) }).nullable(),
+    /** The booking an offered time became ("Teklip edilen wagt kabul edildi → YR-48231"); the other offers are gone. */
+    offerTakenBy: bookingCodeSchema.nullable(),
+    /**
+     * False while the business has paused online booking or this client may book it only by phone (book Q-154): no
+     * free times after an expiry and no move; the "Jaň et" card shows.
+     */
+    bookOnline: z.boolean(),
     actions: bookingActionsSchema,
   })
   .meta({ id: 'MyBooking' })

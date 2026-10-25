@@ -88,7 +88,9 @@ export async function withOffersAhead(
     db,
     picked.map(({ r, offers }) => async () => {
       const lb = businesses.get(r.businessId)
-      if (!lb || takenFrom.has(r.id) || offers.list.every((o) => offerPast(o, lb.rules.leadMinutes, now))) return false
+      // none from a business that has closed (book Q-213), as the row's offers show none
+      if (!lb || lb.business.closedAt || takenFrom.has(r.id) || offers.list.every((o) => offerPast(o, lb.rules.leadMinutes, now)))
+        return false
       return offers.source !== 'expired' || (await bookOnline(lb, r))
     }),
   )

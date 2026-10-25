@@ -181,7 +181,7 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
     const page = picked.slice(offset, offset + limit)
     return c.json(
       {
-        items: await mineOf(c.var.deps, page, lang),
+        items: await mineOf(c.var.deps, page, lang, { now, accountPhone: user.phone }),
         total: picked.length,
         cursor: offset + limit < picked.length ? String(offset + limit) : null,
       },
