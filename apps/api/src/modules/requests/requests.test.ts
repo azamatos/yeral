@@ -21,6 +21,7 @@ interface Request {
   holdUntil: number
   items: { staffId: string | null; staff: string | null; service: string }[]
   from: { date: string; start: number } | null
+  fits: boolean | null
   client: { name: string; phone: string | null; visits: number; noShows: number }
   canAnswer: boolean
   answeredBy: string
@@ -216,5 +217,68 @@ describe('answering requests (book B-19, B-20, B-21)', () => {
     const again = (await listOf(maysa)).find((r) => r.kind === 'move' && r.from?.start === start)!
     expect((await maysa.req(`${REQUESTS}/${again.code}/confirm`, { method: 'POST' })).status).toBe(204)
     expect((await client.req(`/v1/me/bookings/${code}`)).json).toMatchObject({ status: 'confirmed', start: to })
+  })
+
+  it('a move says whether it fits now (B-21): yes while the day is open and its specialist works; no, and its confirm is refused, once the day closes or she takes it off', async () => {
+    // a day of its own (the tests above fill Friday), with room for Aýna: the request at the first start, the move at the last
+    const client = await as('+99365800007', 'Client')
+    const freeOn = async (date: string) =>
+      (
+        (await client.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=${aynaId}&date=${date}`)).json.slots as {
+          start: number
+        }[]
+      ).map((x) => x.start)
+    let day = ''
+    let starts: number[] = []
+    for (const d of ['2026-10-21', '2026-10-22', '2026-10-27', '2026-10-28']) {
+      starts = await freeOn(d)
+      if (starts.length >= 4) {
+        day = d
+        break
+      }
+    }
+    expect(day).not.toBe('')
+    const made = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: aynaId, date: day, start: starts[0] },
+    })
+    expect(made.status).toBe(201)
+    const code = made.json.code as string
+    const maysa = await as(MAYSA)
+    // a new request has no fit to say
+    expect((await listOf(maysa)).find((r) => r.code === code)?.fits).toBeNull()
+    expect((await maysa.req(`${REQUESTS}/${code}/confirm`, { method: 'POST' })).status).toBe(204)
+    const to = starts.at(-1)!
+    expect((await client.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: day, start: to } })).status).toBeLessThan(300)
+    const move = (await listOf(maysa)).find((r) => r.kind === 'move' && r.from?.date === day && r.from.start === starts[0])!
+    expect(move.fits).toBe(true)
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [ayna] = await db.select().from(staff).where(eq(staff.id, aynaId))
+    try {
+      // Aýna takes the day off: it doesn't fit, and the confirm says why
+      await db
+        .update(staff)
+        .set({ daysOff: [...ayna!.daysOff, { name: 'Off', from: day, to: day, yearly: false }] })
+        .where(eq(staff.id, aynaId))
+      expect((await listOf(maysa)).find((r) => r.code === move.code)?.fits).toBe(false)
+      const off = await maysa.req(`${REQUESTS}/${move.code}/confirm`, { method: 'POST' })
+      expect(off.json.error).toMatchObject({ code: 'cannot_move', details: { problem: 'staff_off', staffId: aynaId } })
+      await db.update(staff).set({ daysOff: ayna!.daysOff }).where(eq(staff.id, aynaId))
+      expect((await listOf(maysa)).find((r) => r.code === move.code)?.fits).toBe(true)
+      // the business closes that day: the same
+      await db
+        .update(businesses)
+        .set({ exceptions: [...glow!.exceptions, { name: 'Stocktake', from: day, to: day, yearly: false, hours: null }] })
+        .where(eq(businesses.id, glow!.id))
+      expect((await listOf(maysa)).find((r) => r.code === move.code)?.fits).toBe(false)
+      const closed = await maysa.req(`${REQUESTS}/${move.code}/confirm`, { method: 'POST' })
+      expect(closed.status).toBe(409)
+      expect(closed.json.error).toMatchObject({ code: 'cannot_move', details: { problem: 'outside_hours' } })
+    } finally {
+      await db.update(staff).set({ daysOff: ayna!.daysOff }).where(eq(staff.id, aynaId))
+      await db.update(businesses).set({ exceptions: glow!.exceptions }).where(eq(businesses.id, glow!.id))
+      // nothing of it is left for a later test: the move declined, the booking cancelled
+      await maysa.req(`${REQUESTS}/${move.code}/decline`, { body: { reason: 'no_staff' } })
+      await client.req(`/v1/me/bookings/${code}/cancel`, { body: {} })
+    }
   })
 })

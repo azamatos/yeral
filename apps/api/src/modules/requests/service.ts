@@ -6,7 +6,7 @@
 import type { CannotMoveDetails } from '@yeral/contract/errors'
 import type { declineInputSchema, requestSchema } from '@yeral/contract/requests'
 import { findAppointmentSlot } from '@yeral/domain/availability'
-import { withinHours } from '@yeral/domain/hours'
+import { withinHours, type BusinessHours } from '@yeral/domain/hours'
 import { expiryWarningAt, canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
@@ -127,44 +127,66 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
     () => alertNotesOf(db, clientIds),
     () => loadHours(db, business.id),
   ])
-  return rows.flatMap((r) => {
-    const mine = items.filter((i) => i.item.bookingId === r.id)
+  const byBooking = new Map<string, RequestItem[]>()
+  for (const i of items) byBooking.set(i.item.bookingId, [...(byBooking.get(i.item.bookingId) ?? []), i])
+  // the ones the viewer may see (a specialist's: those with them)
+  const visible = rows.flatMap((r) => {
+    const mine = byBooking.get(r.id) ?? []
     const facts = answerFacts(mine)
-    if (!canOn(actor, 'calendar', facts.staffIds)) return []
+    return canOn(actor, 'calendar', facts.staffIds) ? [{ r, mine, facts }] : []
+  })
+  // a move confirms only where it fits now (B-21's line: "free at the new time" or not)
+  const fits = await all(
+    db,
+    visible.map(
+      ({ r, mine }) =>
+        async () =>
+          r.rescheduleOf
+            ? !(await moveProblem(
+                db,
+                hours,
+                r,
+                mine.map((i) => i.item),
+              ))
+            : null,
+    ),
+  )
+  return visible.map(({ r, mine, facts }, i) => {
     const from = originals.find((o) => o.id === r.rescheduleOf)
     const seen = history.find((h) => h.client.id === r.clientId)
-    return [
-      {
-        code: r.code,
-        kind: r.rescheduleOf ? ('move' as const) : ('new' as const),
-        type: r.type,
-        date: r.date,
-        start: r.start,
-        end: r.end,
-        holdUntil: r.holdUntil!.getTime(),
-        warnAt: expiryWarningAt(r.createdAt.getTime(), r.holdUntil!.getTime(), hours),
-        sentAt: r.createdAt.getTime(),
-        items: mine.map(({ item }) => teamItemOf(item, lang)),
-        price: teamPriceOf(r),
-        note: r.clientNote,
-        from: from ? { date: from.date, start: from.start, end: from.end } : null,
-        client: {
-          id: r.clientId,
-          name: r.clientName ?? '',
-          phone: r.clientPhone,
-          visits: seen?.visits ?? 0,
-          noShows: seen?.noShows ?? 0,
-          alerts: (r.clientId && alerts.get(r.clientId)) || [],
-        },
-        canAnswer: canAnswerRequest(actor, answerers, facts),
-        answeredBy: answeredBy(answerers, facts.forPhoneOnlyStaff),
+    return {
+      code: r.code,
+      kind: r.rescheduleOf ? ('move' as const) : ('new' as const),
+      type: r.type,
+      date: r.date,
+      start: r.start,
+      end: r.end,
+      holdUntil: r.holdUntil!.getTime(),
+      warnAt: expiryWarningAt(r.createdAt.getTime(), r.holdUntil!.getTime(), hours),
+      sentAt: r.createdAt.getTime(),
+      items: mine.map(({ item }) => teamItemOf(item, lang)),
+      price: teamPriceOf(r),
+      note: r.clientNote,
+      from: from ? { date: from.date, start: from.start, end: from.end } : null,
+      fits: fits[i] ?? null,
+      client: {
+        id: r.clientId,
+        name: r.clientName ?? '',
+        phone: r.clientPhone,
+        visits: seen?.visits ?? 0,
+        noShows: seen?.noShows ?? 0,
+        alerts: (r.clientId && alerts.get(r.clientId)) || [],
       },
-    ]
+      canAnswer: canAnswerRequest(actor, answerers, facts),
+      answeredBy: answeredBy(answerers, facts.forPhoneOnlyStaff),
+    }
   })
 }
 
-/** The waiting request with this code at this business that the actor may answer; 404 for one they can't see. */
-/** A request this person may answer now (its code, in this business), else the refusal the answer would get. */
+/**
+ * The waiting request with this code at this business that the actor may answer now; 404 for one they can't see, else
+ * the refusal the answer would get.
+ */
 export async function answerable(db: Queryable, business: Business, actor: Actor, code: string, now: number): Promise<BookingRow> {
   const [b] = await db
     .select()
@@ -178,6 +200,27 @@ export async function answerable(db: Queryable, business: Business, actor: Actor
   return b
 }
 
+/**
+ * Why a waiting move can't be confirmed now (B-21): a day the business closed since (a waiting move isn't asked about
+ * when the hours change), or one its specialist no longer works then (a day off, a new shift, blocked time, gone from
+ * the team: B-47, B-50); null when it fits. The confirm refuses by it, and the list says it (`fits`).
+ */
+async function moveProblem(
+  db: Queryable,
+  hours: BusinessHours,
+  row: Pick<BookingRow, 'date' | 'start' | 'end'>,
+  items: Parameters<typeof assertStaffFree>[3],
+): Promise<CannotMoveDetails | null> {
+  if (!withinHours(hours, row.date, { start: row.start, end: row.end })) return { problem: 'outside_hours', staffId: '' }
+  try {
+    await assertStaffFree(db, hours, row.date, items)
+  } catch (e) {
+    if (!(e instanceof OutsideHours)) throw e
+    return { problem: e.why === 'blocked' ? 'blocked' : 'staff_off', staffId: e.staffId ?? '' }
+  }
+  return null
+}
+
 /** "Tassykla": the request is confirmed and the client told; a move moves its booking (B-21). */
 export async function confirmRequest(deps: Deps, business: Business, actor: Actor, code: string): Promise<void> {
   const b = await answerable(deps.db, business, actor, code, deps.now())
@@ -187,22 +230,8 @@ export async function confirmRequest(deps: Deps, business: Business, actor: Acto
     if (b.rescheduleOf) await lockBooking(tx, b.rescheduleOf)
     const row = await lockBooking(tx, b.id)
     guard(requestOpen(stateOf(row), deps.now()))
-    // a move onto a day the business closed since (a waiting move isn't asked about when the hours change), or one
-    // its specialist no longer works then (a day off, a new shift, gone from the team: B-47, B-50)
-    if (row.rescheduleOf && !withinHours(hours, row.date, { start: row.start, end: row.end }))
-      throw new ApiError('cannot_move', { problem: 'outside_hours', staffId: '' } satisfies CannotMoveDetails)
-    if (row.rescheduleOf) {
-      const items = await itemsOf(tx, row.id)
-      try {
-        await assertStaffFree(tx, hours, row.date, items)
-      } catch (e) {
-        if (!(e instanceof OutsideHours)) throw e
-        throw new ApiError('cannot_move', {
-          problem: e.why === 'blocked' ? 'blocked' : 'staff_off',
-          staffId: e.staffId ?? '',
-        } satisfies CannotMoveDetails)
-      }
-    }
+    const problem = row.rescheduleOf ? await moveProblem(tx, hours, row, await itemsOf(tx, row.id)) : null
+    if (problem) throw new ApiError('cannot_move', problem)
     await confirmBooking(tx, deps, row)
   })
 }
