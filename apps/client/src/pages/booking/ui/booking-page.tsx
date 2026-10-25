@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { slotTakenDetailsSchema } from '@yeral/contract/errors'
 import { today } from '@yeral/domain/time'
@@ -67,25 +67,31 @@ export function BookingPage() {
   const search: BookingSearch = useSearch({ strict: false })
   const navigate = useNavigate()
   const [note, setNote] = useState('')
-  const [taken, setTaken] = useState<Alternative[] | null>(null)
+  const queryClient = useQueryClient()
+  // a time someone else took just before this send, with the nearest free ones (`slot_taken`)
+  const [conflict, setConflict] = useState<{ date: string; time: number; alternatives: Alternative[] } | null>(null)
   const picked = pickedServices(detail, parseServiceIds(search.services))
   const ids = picked.map((s) => s.id)
   const staff = chosenStaff(detail, ids, search.staff)
   // an old link's day already gone counts as none: the time step opens on today
   const date = search.date && search.date >= today(now) ? search.date : null
   // the chosen day's free times (the time step asks the same): a time it no longer has isn't chosen any more
-  const free = useQuery({
-    ...sdk.availability.appointment(detail.slug, { lang, services: ids, staff, date: date ?? undefined }),
-    enabled: ids.length > 0 && date !== null && search.time !== undefined && !search.sent,
-  })
+  const freeTimes = sdk.availability.appointment(detail.slug, { lang, services: ids, staff, date: date ?? undefined })
+  const free = useQuery({ ...freeTimes, enabled: ids.length > 0 && date !== null && search.time !== undefined && !search.sent })
   const settled = free.data && !free.isPlaceholderData ? free.data : null
   const time =
     date !== null && search.time !== undefined && (!settled || settled.slots.some((s) => s.start === search.time)) ? search.time : null
   const choice: Choice = { services: ids, date, time }
-  const step = currentStep(search.step, choice)
+  const send = useMutation(sdk.bookings.create(lang))
+  // while it sends and once it's sent the confirmation stays put: the sdk refreshes the free times (the booked one goes)
+  // before the page moves on to the sent page, and nothing can be sent twice
+  const locked = send.isPending || send.isSuccess
+  const step = locked ? 'confirm' : currentStep(search.step, choice)
   const index = STEPS.indexOf(step)
   const signedIn = Boolean(me.data?.firstName)
-  const done = stepDone(step, choice) && (step !== 'confirm' || signedIn)
+  // the alert speaks for the time it was about: one chosen since (an offered one, another step) leaves it behind
+  const taken = conflict && conflict.date === date && conflict.time === search.time ? conflict : null
+  const done = !locked && !taken && stepDone(step, choice) && (step !== 'confirm' || signedIn)
   const total = selectionTotal(picked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
   const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug }, search: { services: serviceIdsParam(ids) } }
@@ -111,9 +117,8 @@ export function BookingPage() {
   }
 
   // the sdk's own callbacks keep the cache (the booking, my lists, the free times); the page's run after them
-  const send = useMutation(sdk.bookings.create(lang))
   const submit = () => {
-    if (!done || date === null || time === null || send.isPending) return
+    if (!done || date === null || time === null) return
     send.mutate(
       {
         type: 'appointment',
@@ -126,14 +131,17 @@ export function BookingPage() {
       },
       {
         onSuccess: (booking) => {
-          setTaken(null)
+          setConflict(null)
           // the sent page in place of the confirmation: the browser's Back doesn't send it again
           void navigate({ to: '.', search: { sent: booking.code }, replace: true, resetScroll: true })
         },
         onError: (error) => {
           if (isApiError(error, 'slot_taken')) {
             const details = slotTakenDetailsSchema.safeParse(error.details)
-            setTaken(details.success ? details.data.alternatives : [])
+            setConflict({ date, time, alternatives: details.success ? details.data.alternatives : [] })
+            // the day's free times are old now: the time step asks again when it opens (not this page, which would leave
+            // the confirmation for a time no longer there)
+            void queryClient.invalidateQueries({ queryKey: freeTimes.queryKey, refetchType: 'none' })
             return
           }
           // paused meanwhile, or this client is booked by phone only: the page says so and how (book Q-154)
@@ -174,7 +182,14 @@ export function BookingPage() {
       </div>
     )
 
-  const hint = step === 'time' ? t('summary.pickTime') : step === 'confirm' ? t('confirm.needNumber') : t('summary.pickService')
+  const hint =
+    step === 'time'
+      ? t('summary.pickTime')
+      : step === 'confirm'
+        ? taken
+          ? t('confirm.pickNew')
+          : t('confirm.needNumber')
+        : t('summary.pickService')
   const cta =
     step === 'confirm' ? (
       <Button size="l" variant="primary" className="w-full" disabled={!done} loading={send.isPending} onClick={submit}>
@@ -271,18 +286,13 @@ export function BookingPage() {
               {step === 'confirm' && (
                 <ConfirmStep
                   detail={detail}
+                  person={me.data?.firstName ? me.data : null}
                   summary={summary(false)}
                   note={note}
                   onNote={setNote}
-                  taken={taken}
-                  onAlternative={(a) => {
-                    setTaken(null)
-                    set({ date: a.date, time: a.start })
-                  }}
-                  onOtherTime={() => {
-                    setTaken(null)
-                    go('time', false)
-                  }}
+                  taken={taken?.alternatives ?? null}
+                  onAlternative={(a) => set({ date: a.date, time: a.start })}
+                  onOtherTime={() => go('time', false)}
                 />
               )}
             </div>

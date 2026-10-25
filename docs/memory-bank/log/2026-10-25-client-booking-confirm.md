@@ -20,4 +20,17 @@
 - Departs from the board: the sign-in for a booking opens the site's login over the page instead of fields drawn inline
   (the same steps and checks, one place to keep them); «Change» beside the signed-in number and the terms line under
   Send (slice 7, Q-033) aren't there yet.
-- Stories: `Client/Pages/Booking` (14: signed out, send and the sent page, instant, taken, phone).
+- Stories: `Client/Pages/Booking` (15: signed out, send and the sent page, instant, taken, phone, an unreadable sent
+  page).
+- Review (one round, 15 findings, 13 fixed): the sent page says when it can't read the booking (signed out, another
+  person's) and points to My bookings; the taken alert belongs to its date and time (any other time leaves it) and
+  Send stays off during it («First choose a new time.»), the day's free times marked old for the time step, the chips
+  named «Choose 16:00»; while sending and once sent the page stays on the confirmation (the sdk refreshes the free
+  times before the page moves on, so nothing sends twice and the time step doesn't flash); the sent page keeps its
+  route on a reload whatever the business did after (the loader's redirect skips `?sent=`) and has its own title; a
+  booking no longer waiting or confirmed says only its status; this page's business speaks for the lead and the rules
+  only when it's the booking's; the address with its city; the `.ics` PRODID, file name and the service lines from the
+  words; the file's address revoked on the next turn (Safari); «(optional)»; the login modal kept once opened and the
+  focus back on «Your details»; `me.name` and `fmt.phone`; the fake's codes count up. Left: `NOTE_MAX` repeats the
+  contract's private `noteSchema` limit (exporting it is a contract change); the fake booking is cast, not checked
+  against `bookingDetailSchema`.

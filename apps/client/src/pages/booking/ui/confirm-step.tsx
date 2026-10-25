@@ -1,8 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import type { Me } from '@yeral/contract/account'
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { formatPhone } from '@yeral/domain/phone'
 import { useFmt } from '@yeral/i18n'
-import { useSdk } from '@yeral/sdk/react'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
 import { Field } from '@yeral/ui/field'
@@ -10,24 +8,28 @@ import { Textarea } from '@yeral/ui/input'
 import { textLink } from '@yeral/ui/text-link'
 import { TimeSlot } from '@yeral/ui/time-slots'
 import { CircleCheck, Clock, History, Wallet } from 'lucide-react'
-import { lazy, Suspense, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { StepTitle } from './step-title'
 
 // the login comes over the page only when someone needs it: its steps stay out of the flow's first download
 const LoginModal = lazy(() => import('@/features/log-in').then((m) => ({ default: m.LoginModal })))
 
-/** The note's limit (the api's `noteSchema`). */
+/** The note's limit: the api's (`noteSchema` in `@yeral/contract/bookings`, which keeps it to itself). */
 export const NOTE_MAX = 500
 
 /** A time the api offered when the chosen one was just taken (`slot_taken`). */
 export type Alternative = { date: string; start: number; end: number }
 
 /** A part of the step (Booking `.csec`): a line above, 28 apart, its own heading. */
-function Part({ title, children }: { title?: string; children: ReactNode }) {
+function Part({ title, titleRef, children }: { title?: string; titleRef?: React.Ref<HTMLHeadingElement>; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-4 border-t border-n-200 py-7">
-      {title && <h2 className="m-0 text-[20px] leading-[26px] font-semibold tracking-[-0.015em]">{title}</h2>}
+      {title && (
+        <h2 ref={titleRef} tabIndex={-1} className="m-0 text-[20px] leading-[26px] font-semibold tracking-[-0.015em] focus:outline-none">
+          {title}
+        </h2>
+      )}
       {children}
     </section>
   )
@@ -35,12 +37,14 @@ function Part({ title, children }: { title?: string; children: ReactNode }) {
 
 /**
  * Step 4 (Booking `step=confirm`, book C-18, C-20, C-21): the time just taken with the nearest free ones (Booking
- * `slotTaken`), the summary under 1024 (`summary`), who's booking (signed in with a name: their name and confirmed
- * number; otherwise «Confirm your number», the site's login over the page: number, code, "Is this you?", the name), the
- * note for the business, and the business's rules. Sending is the summary's and the bar's «Send booking».
+ * `slotTaken`), the summary under 1024 (`summary`), who's booking (`person`, signed in with a name: their name and
+ * confirmed number; otherwise «Confirm your number», the site's login over the page: number, code, "Is this you?",
+ * the name), the note for the business, and the business's rules. Sending is the summary's and the bar's «Send
+ * booking».
  */
 export function ConfirmStep({
   detail,
+  person,
   summary,
   note,
   onNote,
@@ -49,6 +53,7 @@ export function ConfirmStep({
   onOtherTime,
 }: {
   detail: BusinessDetail
+  person: Me | null
   summary: ReactNode
   note: string
   onNote: (note: string) => void
@@ -59,10 +64,9 @@ export function ConfirmStep({
 }) {
   const t = useTranslations('booking.confirm')
   const fmt = useFmt()
-  const sdk = useSdk()
-  const me = useQuery(sdk.me.get())
-  const [login, setLogin] = useState(false)
-  const person = me.data?.firstName ? me.data : null
+  // kept once opened, so it closes as it opens and gives the focus back (to the details: its trigger is gone by then)
+  const [login, setLogin] = useState<boolean | null>(null)
+  const details = useRef<HTMLHeadingElement>(null)
   const rules = detail.rules
   return (
     <div className="flex flex-col">
@@ -75,7 +79,7 @@ export function ConfirmStep({
           <span className="text-body font-semibold">{taken.length > 0 ? t('taken') : t('takenNone')}</span>
           <div className="flex flex-wrap items-center gap-2">
             {taken.map((a) => (
-              <TimeSlot key={`${a.date}-${a.start}`} onClick={() => onAlternative(a)}>
+              <TimeSlot key={`${a.date}-${a.start}`} aria-label={t('pick', { time: fmt.time(a.start) })} onClick={() => onAlternative(a)}>
                 {fmt.time(a.start)}
               </TimeSlot>
             ))}
@@ -87,14 +91,14 @@ export function ConfirmStep({
       )}
       <div className="mt-6 md:hidden">{summary}</div>
       <div className="mt-6">
-        <Part title={t('details')}>
+        <Part title={t('details')} titleRef={details}>
           {person ? (
             <div className="flex items-center gap-3.5">
-              <Avatar name={[person.firstName, person.surname].filter(Boolean).join(' ')} size={44} decorative />
+              <Avatar name={person.name ?? ''} size={44} decorative />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-body font-semibold">{[person.firstName, person.surname].filter(Boolean).join(' ')}</span>
+                <span className="text-body font-semibold">{person.name}</span>
                 <span className="inline-flex items-center gap-1.5 text-dense text-n-600 tabular-nums">
-                  {formatPhone(person.phone)}
+                  {fmt.phone(person.phone)}
                   <CircleCheck role="img" aria-label={t('verified')} className="size-3.5 text-st-completed-dot" strokeWidth={2} />
                 </span>
               </div>
@@ -148,9 +152,17 @@ export function ConfirmStep({
           {rules.note && <p className="m-0 rounded-m bg-group px-3.5 py-3 text-small text-n-600">{rules.note}</p>}
         </Part>
       </div>
-      {login && (
+      {login !== null && (
         <Suspense fallback={null}>
-          <LoginModal open={login} onOpenChange={setLogin} onSignedIn={() => setLogin(false)} />
+          <LoginModal
+            open={login}
+            onOpenChange={setLogin}
+            onSignedIn={() => setLogin(false)}
+            onCloseAutoFocus={(e) => {
+              e.preventDefault()
+              details.current?.focus()
+            }}
+          />
         </Suspense>
       )}
     </div>

@@ -6,6 +6,8 @@
 export interface IcsEvent {
   /** Unique and stable for the booking, so adding it twice updates one event: `YR-48213@yeral.app`. */
   uid: string
+  /** Who made the file (the brand, from the site's words): the calendar's PRODID. */
+  product: string
   start: number
   end: number
   title: string
@@ -45,7 +47,7 @@ export function buildIcs(event: IcsEvent): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Yeral//Booking//EN',
+    `PRODID:-//${text(event.product)}//Booking//EN`,
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
     `UID:${text(event.uid)}`,

@@ -3,6 +3,7 @@ import { buildIcs } from './ics'
 
 const event = {
   uid: 'YR-48213@yeral.app',
+  product: 'Ýeral',
   start: Date.UTC(2026, 9, 25, 9, 30),
   end: Date.UTC(2026, 9, 25, 10, 30),
   title: 'Women’s haircut, Glow Studio',
@@ -18,6 +19,7 @@ describe('an event for the calendar', () => {
     expect(ics).toContain('DTEND:20261025T103000Z\r\n')
     expect(ics).toContain('DTSTAMP:20261024T120000Z\r\n')
     expect(ics).toContain('UID:YR-48213@yeral.app\r\n')
+    expect(ics).toContain('PRODID:-//Ýeral//Booking//EN\r\n')
     expect(ics.endsWith('END:VCALENDAR\r\n')).toBe(true)
   })
 
@@ -35,6 +37,6 @@ describe('an event for the calendar', () => {
   })
 
   it('leaves out what it has no words for', () => {
-    expect(buildIcs({ uid: 'a', start: 0, end: 1, title: 't' })).not.toContain('LOCATION')
+    expect(buildIcs({ uid: 'a', product: 'p', start: 0, end: 1, title: 't' })).not.toContain('LOCATION')
   })
 })

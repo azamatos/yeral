@@ -7,5 +7,6 @@ export function downloadFile(filename: string, content: string, type: string): v
   document.body.append(link)
   link.click()
   link.remove()
-  URL.revokeObjectURL(url)
+  // some browsers (Safari) read the file after the click returns: the address goes on the next turn
+  setTimeout(() => URL.revokeObjectURL(url), 0)
 }

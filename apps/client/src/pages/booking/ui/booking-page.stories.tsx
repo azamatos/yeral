@@ -190,7 +190,11 @@ export const SlotTaken: Story = {
     await userEvent.click(await summary.findByRole('button', { name: 'Send booking' }))
     const alert = within(await canvas.findByRole('alert'))
     await expect(alert.getByText('This time was just taken. Free times nearby:')).toBeVisible()
-    await userEvent.click(alert.getByRole('button', { name: '16:00' }))
+    // the taken time can't be sent again: a new one first
+    await expect(summary.getByRole('button', { name: 'Send booking' })).toBeDisabled()
+    await expect(summary.getByText('First choose a new time.')).toBeVisible()
+    await userEvent.click(alert.getByRole('button', { name: 'Choose 16:00' }))
+    await expect(canvas.queryByRole('alert')).toBeNull()
     await expect(await summary.findByText(/· 16:00–17:00$/)).toBeVisible()
     await userEvent.click(summary.getByRole('button', { name: 'Send booking' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Booking sent' })).toBeVisible()
@@ -204,5 +208,14 @@ export const ConfirmPhone: Story = {
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
     await expect(await bar.findByRole('button', { name: 'Send booking' })).toBeEnabled()
+  },
+}
+
+/** The sent page for a booking it can't read (signed out since, another person's): it says so and opens My bookings. */
+export const SentUnreadable: Story = {
+  args: { path: '/en/b/glow-studio/book?sent=YR-99999', server: businessApi({ signedIn: AYJEMAL }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText(/This booking can't be shown here/)).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Go to my bookings' })).toBeVisible()
   },
 }

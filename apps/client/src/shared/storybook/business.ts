@@ -161,8 +161,8 @@ export interface BusinessApiOptions extends AuthApiOptions {
   taken?: number
 }
 
-/** The booking `POST /bookings` makes (`YR-48213`): pending at a business that confirms by hand, else confirmed. */
-function sentBooking(business: BusinessDetail, body: Record<string, unknown>): BookingDetail {
+/** The booking `POST /bookings` makes (`YR-48213`, then `YR-48214` …): pending at a business that confirms by hand, else confirmed. */
+function sentBooking(business: BusinessDetail, body: Record<string, unknown>, code: string): BookingDetail {
   const ids = body.serviceIds as string[]
   const services = business.serviceGroups.flatMap((g) => g.services).filter((s) => ids.includes(s.id))
   const staffId = body.staffId as string | null
@@ -177,7 +177,7 @@ function sentBooking(business: BusinessDetail, body: Record<string, unknown>): B
   })
   const manual = business.confirmMode === 'manual'
   return {
-    code: 'YR-48213',
+    code,
     business: {
       slug: business.slug,
       name: business.name,
@@ -241,7 +241,7 @@ export const businessApi =
           const date = String(body.date)
           return refuse(409, 'slot_taken', { alternatives: [960, 990].map((start) => ({ date, start, end: start + 60 })) })
         }
-        const booking = sentBooking(business, body)
+        const booking = sentBooking(business, body, `YR-${48213 + bookings.size}`)
         bookings.set(booking.code, booking)
         return json(booking, 201)
       }
