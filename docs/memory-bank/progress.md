@@ -273,6 +273,26 @@
   (#199); a tab icon without the light frame `0c78de0` (#200); ADR 0011 amended, forms are plain state, AGENTS.md rule
   10a `94c2767` (#196). Deployed at 592cfd2, 10:45 UTC (a backup first). Then: «Add a team member» `c35d70a` (#198);
   the page address a business chooses, its api with migration 0043 `50d532e` (#201).
+- **2026-10-25 (afternoon and evening) · Slice 2 finished, slice 3's booking loop built** (four agents, each PR
+  reviewed with `code-review`, one round, on green CI; details in `log/2026-10-25-*.md`, the plan in
+  `log/2026-10-25-slice-3-plan.md`). Slice 2: the staff drawer's api `08145e0` (#203), profile, services and access
+  `32a78fb` (#206), removing someone `30fdec3` (#210), hours and time off `1ca15cf` (#213); the page address's screens
+  `775545a` (#205); one-tap changes at once and fewer reads `8e002ca` (#202); the date picker on react-day-picker
+  `4d2826e` (#207); «Left» vs «Removed» `1b4650c` (#234, migration 0044) and `c80979c` (#236); Business profile's
+  address in the Settings layout `f837277` (#229); the step list's counts `cdda2f6` (#239) and `6731636` (#241); the
+  Russian-length switch in Storybook `aedecb2` (#238) and its fixes `82d29dd` (#242). Infra: the client site on
+  `yeral.app` and the example businesses on `8ebb8bc` (#208), deployed 13:46 UTC with the owner's go. Slice 3, shared:
+  Pill, TimerPill, StatusDot, ExampleBadge `d0cd476` (#209); Price, KeyValueList, Timeline, ChangeSummary, Quote
+  `c7e477d` (#212); ActionBar, TimeSlots multi-pick, Stepper `9c369c6` (#214); BackLink, PageHeader,
+  RatingDistribution, RatingInput, the drawer's pager `9a581d5` (#217); the push channel (server-sent events nudged by a
+  Postgres NOTIFY, ADR 0028) `57370fc` (#211); My bookings' rows `9a401c5` (#215); free times to offer `d00566a`
+  (#219); a move's `fits` `5d1448c` (#227); specialists' next free time `ac7e915` (#220); booking items' ids `3b19f25`
+  (#240). The client: the business page `b02680e` (#216) and its sections `27a112f` (#225); the booking steps `7d101d0`
+  (#221); confirm and sent `dbcbad0` (#224); My bookings `ecf7204` (#232); the booking drawer `741ac6c` (#237); move
+  mode `e9f4a0e` (#244); the review form `fb67465` (#235) and its wiring `4b6b35a` (#245); a typecheck break between
+  #235 and #240 fixed `0c603bb` (#243). The business: the calendar's day `2dfefc5` (#218), its layers `1586148`
+  (#222), the request drawer `548b666` (#223), declining with offered times `7240a90` (#226), a move request
+  `8c41857` (#228) and its fit line `c62a5cc` (#231), the phone day `cb750d6` (#230).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
