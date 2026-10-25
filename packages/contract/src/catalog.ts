@@ -281,10 +281,12 @@ export const specialistSchema = z
     role: z.string().nullable(),
     photo: photoSchema.nullable(),
     rating: z.number().min(0).max(5).nullable(),
+    /** The services they do, in the page's order. */
     serviceIds: z.array(idSchema),
     /**
      * "Indiki boş: Şu gün 15:30" on the page's specialists (book C-06): their next free time for the first of their
-     * services; null when nothing is free in the window or the page takes no online appointments.
+     * services (`serviceIds[0]`), as the booking's specialist step offers it; null when nothing is free in the window,
+     * online booking is paused or the page takes no appointments. The owner's preview shows it as clients will see it.
      */
     nextFree: nextFreeSchema,
   })

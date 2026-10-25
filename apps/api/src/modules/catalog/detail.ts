@@ -1,6 +1,6 @@
 /** The business page (client spec §4.3): header, services, specialists, hours, rules, reviews summary, similar places. */
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { MAX_ONLINE_PARTY, nextFreeSlot } from '@yeral/domain/availability'
+import { MAX_ONLINE_PARTY } from '@yeral/domain/availability'
 import { distanceM, type LatLng } from '@yeral/domain/geo'
 import { findException, openMinutesBetween } from '@yeral/domain/hours'
 import { newAddressSince, TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
@@ -12,7 +12,7 @@ import { all, type Queryable } from '../../db/client'
 import { bookings, businesses, businessOldSlugs, categories, serviceGroups, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
-import { appointmentContext, loadBusiness, loadBusy, type BusinessRow } from '../availability/context'
+import { appointmentContext, loadBusiness, loadBusy, nextFreeFor, type BusinessRow } from '../availability/context'
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, isPublic, openOf, photoOf, priceFromOf, publicPrice, publicRow, takesOpenTypes, text } from './map'
@@ -137,23 +137,22 @@ export async function businessDetail(
   const specialists = lb.staff.filter(
     (s) => s.bookable && s.status === 'active' && s.serviceIds.some((id) => online.some((o) => o.id === id)),
   )
+  // the services in the page's order (each group's sort starts again at 0, so by the group first)
+  const menu = groups.flatMap((g) => online.filter((s) => s.groupId === g.id))
+  const doneBy = (s: (typeof specialists)[number]) => menu.filter((m) => s.serviceIds.includes(m.id)).map((m) => m.id)
   const type = b.bookingTypes[0] ?? 'appointment'
 
-  // the card's next free time with anyone, and each specialist's own, for the first service (theirs) on the page
+  // the card's next free time with anyone, and each specialist's own, for the first service on the page (theirs)
   let nextFree: BusinessDetail['nextFree'] = null
   const staffNext = new Map<string, BusinessDetail['nextFree']>()
-  const first = online[0]
+  const first = menu[0]
   if (type === 'appointment' && first && lb.rules.onlineEnabled) {
     const busy = await loadBusy(db, [b.id], day, addDays(day, lb.rules.windowDays))
     const ctx = appointmentContext(lb, busy, now)
-    const freeFor = (serviceId: string, staffId: string | null): BusinessDetail['nextFree'] => {
-      const found = nextFreeSlot(ctx, { serviceIds: [serviceId], staffId, by: 'client' }, day, lb.rules.windowDays)
-      return found ? { date: found.date, start: found.slot.start } : null
-    }
-    nextFree = freeFor(first.id, null)
+    nextFree = nextFreeFor(ctx, [first.id], null)
     for (const s of specialists) {
-      const theirs = s.serviceIds.find((id) => online.some((o) => o.id === id))
-      if (theirs) staffNext.set(s.id, freeFor(theirs, s.id))
+      const [theirs] = doneBy(s)
+      if (theirs) staffNext.set(s.id, nextFreeFor(ctx, [theirs], s.id))
     }
   }
 
@@ -244,7 +243,7 @@ export async function businessDetail(
       role: s.specialization ? text(s.specialization, lang) : null,
       photo: s.photo ? photoOf(deps, s.photo, lang, s.name) : null,
       rating: s.rating,
-      serviceIds: s.serviceIds.filter((id) => online.some((o) => o.id === id)),
+      serviceIds: doneBy(s),
       nextFree: staffNext.get(s.id) ?? null,
     })),
     tables:

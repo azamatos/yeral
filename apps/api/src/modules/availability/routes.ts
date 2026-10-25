@@ -34,7 +34,16 @@ import { requireUser } from '../auth/session'
 import { myBooking, stateOf } from '../bookings/repo'
 import { visibleBusiness } from '../catalog/detail'
 import { text } from '../catalog/map'
-import { appointmentContext, checkQuery, dayStrip, loadBusiness, loadBusy, loadTableContext, type LoadedBusiness } from './context'
+import {
+  appointmentContext,
+  checkQuery,
+  dayStrip,
+  loadBusiness,
+  loadBusy,
+  loadTableContext,
+  nextFreeFor,
+  type LoadedBusiness,
+} from './context'
 import { loadSessions } from './sessions'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -134,12 +143,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     ])
     const ctx = appointmentContext(lb, busy, now)
     checkQuery(ctx, services, null)
-    const next = (staffId: string | null) => {
-      const found = lb.rules.onlineEnabled
-        ? nextFreeSlot(ctx, { serviceIds: services, staffId, by: 'client', excludeBookingIds: moving }, first)
-        : null
-      return found ? { date: found.date, start: found.slot.start } : null
-    }
+    const next = (staffId: string | null) => (lb.rules.onlineEnabled ? nextFreeFor(ctx, services, staffId, moving) : null)
     return c.json({ any: next(null), items: staffDoingAll(ctx, services).map((s) => ({ staffId: s.id, next: next(s.id) })) }, 200)
   })
   .openapi(tablesRoute, async (c) => {

@@ -109,11 +109,17 @@ describe('catalogue', () => {
     expect(d.photos[0].url).toBe('http://media.test/demo/adam-winger-FkAZqQJTbXM-unsplash.jpg')
     expect(d.distanceM).toBeGreaterThan(2900)
     expect(d.nextFree).not.toBeNull()
-    // each specialist's own next free time, for the first of their services, as the booking's specialist step has it
+    // each specialist's own next free time, for the first of their services on the page, as the specialist step has it
+    const listed = d.serviceGroups.flatMap((g: { services: { id: string; staffIds: string[] }[] }) => g.services)
     const maral = d.specialists.find((s: { name: string }) => s.name === 'Maral')
-    const step = await b.req(`/v1/businesses/glow-studio/specialists/availability?services=${maral.serviceIds[0]}`)
+    const theirs = listed.find((s: { staffIds: string[] }) => s.staffIds.includes(maral.id)).id
+    expect(maral.serviceIds[0]).toBe(theirs)
+    const step = await b.req(`/v1/businesses/glow-studio/specialists/availability?services=${theirs}`)
     expect(maral.nextFree).not.toBeNull()
     expect(maral.nextFree).toEqual(step.json.items.find((i: { staffId: string }) => i.staffId === maral.id).next)
+    // the card's, for the first service on the page with anyone
+    const any = await b.req(`/v1/businesses/glow-studio/specialists/availability?services=${listed[0].id}`)
+    expect(d.nextFree).toEqual(any.json.any)
   })
 
   it('someone invited isn’t on the client site until they accept (book chapter 3)', async () => {
@@ -399,6 +405,10 @@ describe('catalogue', () => {
       await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glow!.id))
       expect(await look(browser(t.app))).toBe(false)
       expect(await look(other)).toBe(false)
+      // nor are its or its specialists' next free times shown
+      const paused = (await browser(t.app).req('/v1/businesses/glow-studio')).json
+      expect(paused.nextFree).toBeNull()
+      expect(paused.specialists.map((s: { nextFree: unknown }) => s.nextFree)).toEqual(paused.specialists.map(() => null))
     } finally {
       await db
         .update(bookingRules)
