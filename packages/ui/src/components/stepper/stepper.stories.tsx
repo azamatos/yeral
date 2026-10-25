@@ -39,6 +39,16 @@ export const Reached: Story = {
   },
 }
 
+/** A reached step gone stale (a new service drops the chosen time): `canOpen` keeps it closed. */
+export const ReachedStale: Story = {
+  args: { current: 0, reached: 3, canOpen: (i: number) => i <= 1 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: /Hünärmen/ })).toBeEnabled()
+    await expect(canvas.getByRole('button', { name: /Wagt/ })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: /Tassyklama/ })).toBeDisabled()
+  },
+}
+
 /** The move mode's header: three steps under «Change the time» (the title and the code Pill are the page's). */
 export const FlowHeaderMoveMode: Story = {
   args: { steps: ['Specialist', 'Time', 'Confirm'], current: 1, 'aria-label': 'Change the time' },

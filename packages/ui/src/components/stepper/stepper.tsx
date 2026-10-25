@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 export type StepperProps = {
@@ -23,7 +23,10 @@ export type StepperProps = {
    * `compact` a modal's steps (B-Team invite: 24 markers, 20 px separators, no underline, wrapping on phones).
    */
   size?: 'm' | 'compact'
-  /** vertical: which steps open on click (default: every step up to `reached`); the others are disabled. */
+  /**
+   * Which steps open on click (default: every step up to `reached`); the others are disabled. The booking header keeps
+   * a reached step closed once a change makes it stale (a new service drops the chosen time).
+   */
   canOpen?: (index: number) => boolean
   /** vertical: the done check's accessible name («Done»). */
   doneLabel?: string
@@ -38,8 +41,9 @@ export type StepperProps = {
  */
 export function Stepper({ orientation = 'horizontal', ...props }: StepperProps) {
   if (orientation === 'vertical') return <VerticalSteps {...props} />
-  const { steps, current, onStepClick, 'aria-label': ariaLabel, className, reached = current, size = 'm' } = props
+  const { steps, current, onStepClick, 'aria-label': ariaLabel, className, reached = current, size = 'm', canOpen } = props
   const top = Math.max(reached, current)
+  const opens = canOpen ?? ((i: number) => i <= top)
   const compact = size === 'compact'
   const list = (
     <ol className={cn('m-0 list-none p-0', compact ? 'flex flex-wrap items-center gap-2.5' : 'hidden items-stretch gap-3 sm:flex')}>
@@ -47,42 +51,41 @@ export function Stepper({ orientation = 'horizontal', ...props }: StepperProps) 
         const done = i < current
         const cur = i === current
         // reached before and gone back from: it opens again, as the steps before
-        const ahead = i > current && i <= top
+        const ahead = i > current && opens(i)
         return (
-          <Fragment key={i}>
-            {i > 0 && <li aria-hidden className={cn('h-px flex-none self-center bg-n-300', compact ? 'w-5' : 'w-4')} />}
-            <li className={cn('flex', compact ? 'items-center' : 'items-stretch')}>
-              <button
-                type="button"
-                disabled={!done && !ahead}
-                aria-current={cur ? 'step' : undefined}
-                onClick={() => onStepClick?.(i)}
+          // each separator in its step's item, so a wrapped line never ends on one
+          <li key={i} className={cn('flex gap-2.5', compact ? 'items-center' : 'items-stretch gap-3')}>
+            {i > 0 && <span aria-hidden className={cn('h-px flex-none self-center bg-n-300', compact ? 'w-5' : 'w-4')} />}
+            <button
+              type="button"
+              disabled={cur || !opens(i)}
+              aria-current={cur ? 'step' : undefined}
+              onClick={() => onStepClick?.(i)}
+              className={cn(
+                'group inline-flex items-center gap-2 border-0 bg-transparent text-small font-medium whitespace-nowrap text-n-500',
+                'focus-visible:shadow-focus-inset focus-visible:outline-none disabled:cursor-default',
+                compact
+                  ? 'min-h-8 rounded-input pr-1.5 pl-0.5 leading-4.5 focus-visible:shadow-focus'
+                  : 'border-b-2 border-transparent px-0.5 focus-visible:rounded-input',
+                ((done && opens(i)) || ahead) && 'cursor-pointer text-n-900',
+                cur && 'font-semibold text-n-900',
+                cur && !compact && 'border-a-500',
+              )}
+            >
+              <span
                 className={cn(
-                  'group inline-flex items-center gap-2 border-0 bg-transparent text-small font-medium whitespace-nowrap text-n-500',
-                  'focus-visible:shadow-focus-inset focus-visible:outline-none disabled:cursor-default',
-                  compact
-                    ? 'min-h-8 rounded-sm pr-1.5 pl-0.5 leading-4.5 focus-visible:shadow-focus'
-                    : 'border-b-2 border-transparent px-0.5 focus-visible:rounded-input',
-                  (done || ahead) && 'cursor-pointer text-n-900',
-                  cur && 'font-semibold text-n-900',
-                  cur && !compact && 'border-a-500',
+                  'inline-flex flex-none items-center justify-center rounded-pill border border-n-300 text-micro font-bold text-n-500',
+                  compact ? 'size-6' : 'size-5.5',
+                  cur && 'border-n-900 bg-n-900 text-white',
+                  done && 'border-a-line bg-a-50 text-a-600',
+                  ahead && 'bg-n-0 text-n-900',
                 )}
               >
-                <span
-                  className={cn(
-                    'inline-flex flex-none items-center justify-center rounded-pill border border-n-300 font-bold text-n-500',
-                    compact ? 'size-6 text-micro' : 'size-5.5 text-micro',
-                    cur && 'border-n-900 bg-n-900 text-white',
-                    done && 'border-a-line bg-a-50 text-a-600',
-                    ahead && 'bg-n-0 text-n-900',
-                  )}
-                >
-                  {done ? <Check className="size-3.5" strokeWidth={2.5} /> : i + 1}
-                </span>
-                <span className={cn((done || ahead) && 'group-hover:underline')}>{label}</span>
-              </button>
-            </li>
-          </Fragment>
+                {done ? <Check className={compact ? 'size-3' : 'size-3.5'} strokeWidth={compact ? 3 : 2.5} /> : i + 1}
+              </span>
+              <span className={cn((done || ahead) && 'group-hover:underline')}>{label}</span>
+            </button>
+          </li>
         )
       })}
     </ol>

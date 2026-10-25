@@ -79,16 +79,46 @@ export const MultiSelect: Story = {
     await expect(status).toHaveTextContent('2 / 3 times selected')
     await userEvent.click(canvas.getByRole('button', { name: '17:30' }))
     await expect(status).toHaveTextContent('3 / 3 times selected')
-    // full: an unpicked chip says it can't be picked now, and picks nothing
+    // full: a tap on another chip picks nothing
     const more = canvas.getByRole('button', { name: '19:00' })
-    await expect(more).toHaveAttribute('aria-disabled', 'true')
     await userEvent.click(more)
     await expect(more).toHaveAttribute('aria-pressed', 'false')
     await expect(status).toHaveTextContent('3 / 3 times selected')
     // one unpicked frees a place
     await userEvent.click(canvas.getByRole('button', { name: '16:00' }))
     await expect(status).toHaveTextContent('2 / 3 times selected')
-    await expect(more).not.toHaveAttribute('aria-disabled')
+    await userEvent.click(more)
+    await expect(more).toHaveAttribute('aria-pressed', 'true')
+  },
+}
+
+/** A picked time taken since (a refetch): it shows struck, counts no more, and frees its place. */
+export const PickedThenTaken: Story = {
+  render: () => (
+    <TimeSlots
+      groups={[
+        {
+          label: 'Offer other times',
+          slots: ['16:00', '16:45', '17:30'].map((t) => ({
+            value: t,
+            label: t,
+            disabled: t === '17:30',
+            ariaLabel: t === '17:30' ? '17:30, already taken' : undefined,
+          })),
+        },
+      ]}
+      size="s"
+      selectionMode="multiple"
+      max={3}
+      values={['16:00', '17:30']}
+      onValuesChange={() => {}}
+      counter={(n, max) => `${n} / ${max} times selected`}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole('status')).toHaveTextContent('1 / 3 times selected')
+    await expect(canvas.getByRole('button', { name: '17:30, already taken' })).not.toHaveAttribute('aria-pressed', 'true')
   },
 }
 
