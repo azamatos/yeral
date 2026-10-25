@@ -11,11 +11,13 @@
   page looked for a page scrolling sideways, text spilling out of its box and text cut by an `overflow` without an
   ellipsis):
   - the booking's time step scrolled sideways on phones, as written too: the date strip's hidden day words (sr-only,
-    absolute) sat outside its scroller → `DateStrip`'s days are `relative`;
+    absolute) sat outside its scroller → the strip's scroller is `relative` (#242);
   - the setup wizard's phone header pushed «Continue later» past the edge → the words alone (no icon), up to half the
-    row, wrapping, as B-Onboarding `.mb` draws it;
-  - the photo grid's «Cover photo» chip and «Make cover» were cut inside a tile → they wrap inside it;
+    row, wrapping and shrinking, 32 high, as B-Onboarding `.mb` draws it (#242);
+  - the photo grid's «Cover photo» chip and «Make cover» were cut inside a tile → they wrap inside it (#242);
   - nothing else in those stories (the business page, My bookings, Settings, the calendar's day: none).
+- Checked again with #242 and the tiered lengths (#238's review), the review form's stories added: 233 stories at
+  390, nothing overflows.
 - Left: the wizard's phone header has no room for «2 / 8 · Business» beside the lockup with its «Business» pill (as
-  written too; the board's lockup is narrower); 1440 wasn't scanned (more room); the first pass used a flat 30 % for
-  every message (the tiers came with the review), the fixes were checked again after.
+  written too; the board's lockup is narrower); 1440 wasn't scanned (more room); on phones the date strip doesn't
+  scroll the picked day into view (older; a follow-up).
