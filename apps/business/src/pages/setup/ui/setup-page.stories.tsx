@@ -1008,7 +1008,7 @@ export const TeamFocus: Story = {
   },
 }
 
-const rulesDraft: Draft = { ...addressDraft, step: 'rules', address: { line: '247 Bitarap Türkmenistan Avenue', city } }
+const rulesDraft: Draft = { ...addressDraft, step: 'rules', address: { line: '247 Bitarap Türkmenistan Avenue', city }, services: 3 }
 
 /**
  * The booking rules step of a draft with nobody but its owner: «I confirm» with a 30-minute hold, no «Who
@@ -1035,6 +1035,7 @@ export const Rules: Story = {
     // the step list sums the steps done up from the setup: the team and the rules too
     await expect(await canvas.findByText('Instant confirmation')).toBeVisible()
     await expect(canvas.getByText('I work alone')).toBeVisible()
+    await expect(canvas.getByText('3 services')).toBeVisible()
   },
 }
 

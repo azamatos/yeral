@@ -12,6 +12,7 @@ import { toast } from '@yeral/ui/toast'
 import { WizardFooter } from '@yeral/ui/wizard-footer'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { useRuleLabels } from '@/features/edit-booking-rules'
 import { savable, takenOnSave, usePageAddressCheck, type PageAddressState } from '@/features/page-address'
 import { useSdk } from '@/shared/api'
 import { BUSINESS_NAME_MAX } from '@/shared/config'
@@ -19,7 +20,6 @@ import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
 import type { Category } from '@yeral/contract/catalog'
-import { useFmt } from '@yeral/i18n'
 import { useAddressStep } from './address-step'
 import { BusinessStep } from './business-step'
 import { useDoneStep, type AfterSetup } from './done-step'
@@ -138,7 +138,7 @@ function Steps({
   onFinished: (slug: string, after: AfterSetup) => void
 }) {
   const t = useTranslations()
-  const fmt = useFmt()
+  const ruleLabels = useRuleLabels()
   const sdk = useSdk()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -350,12 +350,13 @@ function Steps({
     address: draft?.address && `${draft.address.line}, ${draft.address.city.name}`,
     hours: hours.summary,
     // the counts and the confirm rule as the setup says them (the step list shows them for the steps done)
-    services: draft && t('setup.services.summary', { count: draft.services }),
+    // a menu emptied since (in Settings) has no line, as a step not saved yet
+    services: !!draft?.services && t('setup.services.summary', { count: draft.services }),
     team: draft && (draft.team ? t('setup.team.summary', { n: draft.team }) : t('setup.team.solo')),
     rules:
       draft &&
       (draft.rules.confirmMode === 'manual'
-        ? t('setup.rules.summaryManual', { hold: fmt.duration(draft.rules.holdMinutes) })
+        ? t('setup.rules.summaryManual', { hold: ruleLabels.hold(draft.rules.holdMinutes) })
         : t('setup.rules.instant')),
   }
   return (
