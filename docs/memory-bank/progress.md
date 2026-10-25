@@ -255,7 +255,24 @@
   same time),
   booking rules `3acada4` (#166), done with the link, the QR and the finish `d806340` (#169), services `72c4d04`
   (#170), phone for someone signed out (`features/sign-in`, shared with the login) `bf282fb` (#172), team `d11ec52`
-  (#173). Not deployed. Gaps left: in Next steps (activeContext).
+  (#173). Deployed 2026-10-25 (below). Gaps left: in Next steps (activeContext).
+- **2026-10-24/25 (night) · Settings built** (an unattended run of 2 + 2 hours, three agents, each PR reviewed with
+  `code-review`, one round, on green CI; details in `log/2026-10-24-*.md`): the night's docs `14e2b0f` (#174); the
+  frame and Link and QR `a219a92` (#177), Permissions read-only `f160fa5` (#179); booking rules: the shared form
+  `edd925b` (#176, `NumberStepper`), the page `8917c10` (#178), the booking statuses `a5d5e1a` (#182, `SwatchPicker`,
+  `IconPicker`); hours: the affected-bookings details `b688d41` (#175, api), the page with the keep-or-cancel step
+  `3370760` (#180), special days `45164be` (#183), «Fri, 16 Oct» `3dea92e` (#191); Business profile: details and logo
+  `a840f2a` (#184), photos `40028aa` (#187, `PhotoManager`), the address `2946fbb` (#190, `features/edit-address`);
+  services: the list `d0e8466` (#186, `AvatarStack`), the drawer, delete and groups `797e7de` (#189,
+  `ChipRadioGroup`); Team's list `3d796e1` (#188); follow-ups `7884f7c` (#181); a flaky client story `6c9d0a0` (#185).
+- **2026-10-25 · The business app live, the owner's test fixed** (an all-day run): the business app at
+  `business.yeral.app` with the code on the screen `07952fd` (#192), deployed 08:42 UTC; that deploy skipped its
+  backup, fixed `a0a0433` (#193, `log/2026-10-25-business-live.md`). The owner's test: the disabled button, the toast,
+  selects' figures `a00e9dc` (#194); «You already have a business» `3dc74cb` (#195); services groups as cards, named in
+  the wizard and renamed in Settings `1c8a8e9` (#197); the done step's link and QR as Settings shows them `592cfd2`
+  (#199); a tab icon without the light frame `0c78de0` (#200); ADR 0011 amended, forms are plain state, AGENTS.md rule
+  10a `94c2767` (#196). Deployed at 592cfd2, 10:45 UTC (a backup first). Then: «Add a team member» `c35d70a` (#198);
+  the page address a business chooses, its api with migration 0043 `50d532e` (#201).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
