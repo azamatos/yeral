@@ -3,7 +3,7 @@
  * (client spec §4.4–4.8, §6; ADR 0017).
  */
 import { MAX_SEATS_PER_BOOKING } from '@yeral/domain/availability'
-import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { MAX_ALTERNATIVES, REVIEW_TAG_LENGTH_MAX, REVIEW_TAGS_MAX, REVIEW_TEXT_MAX } from '@yeral/domain/lifecycle'
 import { BOOKING_SOURCES, BOOKING_STATUSES, BUSINESS_SIDE_CANCEL_REASONS, CANCELLED_BY, DECLINE_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
@@ -357,8 +357,9 @@ export const acceptAlternativeSchema = z.object({
 export const reviewInputSchema = z
   .object({
     rating: z.number().int().min(1).max(5),
-    tags: z.array(z.string().max(40)).max(6).default([]),
-    text: z.string().trim().max(500).optional(),
+    /** The form's quick tags go as keys (`REVIEW_TAGS`); any short string is taken. */
+    tags: z.array(z.string().max(REVIEW_TAG_LENGTH_MAX)).max(REVIEW_TAGS_MAX).default([]),
+    text: z.string().trim().max(REVIEW_TEXT_MAX).optional(),
   })
   .meta({ id: 'ReviewInput' })
 

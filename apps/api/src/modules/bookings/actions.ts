@@ -10,7 +10,7 @@ import {
   initialStatus,
   keptCancelReason,
   offerPast,
-  REVIEW_EDIT_DAYS,
+  reviewEditableUntil,
 } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { reviewName, splitName } from '@yeral/domain/names'
@@ -269,7 +269,7 @@ export async function editReview(deps: Deps, b: BookingRow, input: { rating: num
     // read and changed under its lock: two edits at once, or an edit and the account's deletion, count once each
     const [existing] = await tx.select().from(reviews).where(eq(reviews.bookingId, b.id)).for('update')
     if (!existing) throw new ApiError('not_found')
-    if (now - existing.createdAt.getTime() >= REVIEW_EDIT_DAYS * 86_400_000) throw new ApiError('review_locked')
+    if (now >= reviewEditableUntil(existing.createdAt.getTime())) throw new ApiError('review_locked')
     await tx
       .update(reviews)
       .set({

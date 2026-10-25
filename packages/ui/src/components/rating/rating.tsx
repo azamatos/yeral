@@ -1,5 +1,5 @@
 import { RadioGroup } from 'radix-ui'
-import { useState, type ComponentProps, type ReactNode } from 'react'
+import { useId, useState, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 /** The board's sharp star: one shape for the stars shown and the stars picked. */
@@ -72,6 +72,7 @@ export function RatingInput({
   starLabel,
   words,
   placeholder = '',
+  required = false,
   className,
 }: {
   value: number | null
@@ -80,14 +81,20 @@ export function RatingInput({
   starLabel: (stars: number) => string
   words?: readonly [string, string, string, string, string]
   placeholder?: string
+  /** A pick is needed (the review modal's Send waits for it): said with the group. */
+  required?: boolean
   className?: string
 }) {
   const [hover, setHover] = useState<number | null>(null)
   const shown = hover ?? value ?? 0
+  const wordId = useId()
   return (
     <div className={cn('flex flex-wrap items-center gap-3', className)}>
       <RadioGroup.Root
         aria-label={label}
+        // the word (the pick's, or the placeholder before one) describes the group
+        aria-describedby={words ? wordId : undefined}
+        required={required}
         orientation="horizontal"
         // the ends stay put: a press past 5 never wraps round to 1
         loop={false}
@@ -130,8 +137,8 @@ export function RatingInput({
           <span aria-hidden className="text-body font-semibold text-n-600">
             {shown ? words[shown - 1] : placeholder}
           </span>
-          <span aria-live="polite" className="sr-only">
-            {value ? words[value - 1] : ''}
+          <span id={wordId} aria-live="polite" className="sr-only">
+            {value ? words[value - 1] : placeholder}
           </span>
         </>
       )}

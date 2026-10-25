@@ -1,7 +1,7 @@
 /**
  * The review modal (Account-Bookings `view=review`, book C-34, C-35): a new review from «Write a review» or the
- * «How was it?» card's stars, a written one changed within its 7 days, the words over 500, the api's refusal, the phone's
- * bottom sheet. Over a fake api that answers like the real one (the booking with its review, or the error).
+ * «How was it?» card's stars, a written one changed within its 7 days, the words cut at 500, the api's refusal, the
+ * phone's bottom sheet. Over a fake api that answers like the real one (the booking with its review, or the error).
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BookingDetail } from '@yeral/contract/bookings'
@@ -96,7 +96,8 @@ export const New: Story = {
     const modal = await open(canvas)
     await expect(modal.getByText('Ak Diş')).toBeVisible()
     await expect(modal.getByText(/^Check-up · Dr Döwlet · /)).toBeVisible()
-    await expect(modal.getByText('Pick the stars')).toBeVisible()
+    await expect(modal.getAllByText('Pick the stars')[0]).toBeVisible()
+    await expect(modal.getByRole('radiogroup', { name: 'Rating' })).toHaveAttribute('aria-required', 'true')
     const send = modal.getByRole('button', { name: 'Send review' })
     await expect(send).toBeDisabled()
     await expect(await modal.findByText(/: Aýjemal G\.$/)).toBeVisible()
@@ -105,7 +106,7 @@ export const New: Story = {
     await userEvent.click(modal.getByRole('button', { name: 'Skilled specialist' }))
     await expect(modal.getByRole('button', { name: 'On time' })).toHaveAttribute('aria-pressed', 'true')
     await userEvent.type(modal.getByRole('textbox', { name: /Your review/ }), ' Very gentle and quick. ')
-    await expect(modal.getByText('22 / 500')).toBeVisible()
+    await expect(modal.getByText('24 / 500')).toBeVisible()
     await userEvent.click(send)
     const thanks = await body.findByText('Thank you! Your review is published.')
     await waitFor(() => expect(thanks).toBeVisible())
@@ -141,7 +142,9 @@ export const Edit: Story = {
     await expect(modal.getByRole('radio', { name: '4 stars' })).toBeChecked()
     await expect(modal.getByRole('button', { name: 'Clean' })).toHaveAttribute('aria-pressed', 'true')
     await expect(modal.getByRole('textbox', { name: /Your review/ })).toHaveValue('Clean and calm.')
-    await expect(modal.getByText(/^You can change your review until /)).toBeVisible()
+    await expect(modal.getByText(/^You can change your review until \w{3}, \d+ \w{3}, \d{2}:\d{2}\.$/)).toBeVisible()
+    // a written review keeps the name it was signed with: no line about it
+    await expect(modal.queryByText(/will show with your first name/)).toBeNull()
     const save = modal.getByRole('button', { name: 'Save changes' })
     await expect(save).toBeDisabled()
     await userEvent.click(modal.getByRole('radio', { name: '5 stars' }))
@@ -152,17 +155,17 @@ export const Edit: Story = {
   },
 }
 
-/** Words over 500 (the api's limit): the counter and the field say so, Send waits. */
-export const TooLong: Story = {
+/** The words stop at 500 (the board cuts them there), the counter at its limit. */
+export const Limit: Story = {
   args: { routes: { '/$lang': opener({ rating: 5 }) } },
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     const words = modal.getByRole('textbox', { name: /Your review/ })
     await userEvent.click(words)
-    await userEvent.paste('a'.repeat(501))
-    await expect(modal.getByText('Too long: up to 500 characters.')).toBeVisible()
-    await expect(words).toHaveAttribute('aria-invalid', 'true')
-    await expect(modal.getByRole('button', { name: 'Send review' })).toBeDisabled()
+    await userEvent.paste('a'.repeat(510))
+    await expect(words).toHaveValue('a'.repeat(500))
+    await expect(modal.getByText('500 / 500')).toBeVisible()
+    await expect(modal.getByRole('button', { name: 'Send review' })).toBeEnabled()
   },
 }
 

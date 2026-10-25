@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { changed, editableUntil, initialForm, reviewBody, toggleTag, tooLong, type WrittenReview } from './review-form'
+import { changed, initialForm, reviewBody, toggleTag, tooLong, type WrittenReview } from './review-form'
 
 const written: WrittenReview = { rating: 4, tags: ['clean', 'Old words'], text: 'Good haircut.', createdAt: Date.UTC(2026, 9, 20) }
 
@@ -17,6 +17,12 @@ describe('the review form', () => {
     expect(toggleTag(['Old words'], 'clean')).toEqual(['clean', 'Old words'])
   })
 
+  it('holds 6 tags at most: a written review’s others count too', () => {
+    const six = ['on_time', 'clean', 'skilled', 'friendly', 'A', 'B']
+    expect(toggleTag(six, 'good_value')).toEqual(six)
+    expect(toggleTag(six, 'clean')).toEqual(['on_time', 'skilled', 'friendly', 'A', 'B'])
+  })
+
   it('sends the stars, the tags and the words trimmed, none when empty; nothing without stars or over 500', () => {
     expect(reviewBody({ rating: null, tags: [], text: '' })).toBeNull()
     expect(reviewBody({ rating: 5, tags: ['clean'], text: '  ' })).toEqual({ rating: 5, tags: ['clean'] })
@@ -32,9 +38,5 @@ describe('the review form', () => {
     expect(changed({ ...initialForm(written), tags: ['Old words', 'clean'] }, written)).toBe(false)
     expect(changed({ ...initialForm(written), rating: 5 }, written)).toBe(true)
     expect(changed({ ...initialForm(written), tags: ['clean'] }, written)).toBe(true)
-  })
-
-  it('can be changed for 7 days', () => {
-    expect(editableUntil(written)).toBe(Date.UTC(2026, 9, 27))
   })
 })

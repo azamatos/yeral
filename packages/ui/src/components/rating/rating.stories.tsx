@@ -58,7 +58,8 @@ export const Input: Story = {
     const group = canvas.getByRole('radiogroup', { name: 'Rating' })
     await expect(within(group).getAllByRole('radio')).toHaveLength(5)
     // before a pick, the placeholder word
-    await expect(canvas.getByText('Pick the stars')).toBeVisible()
+    await expect(canvas.getAllByText('Pick the stars')[0]).toBeVisible()
+    await expect(group).toHaveAccessibleDescription('Pick the stars')
     await userEvent.click(canvas.getByRole('radio', { name: '4 stars' }))
     await expect(canvas.getByRole('radio', { name: '4 stars' })).toBeChecked()
     await expect(canvasElement.querySelector('[aria-live]')).toHaveTextContent('Very good')

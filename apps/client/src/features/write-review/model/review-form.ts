@@ -1,5 +1,5 @@
 import type { BookingDetail } from '@yeral/contract/bookings'
-import { REVIEW_EDIT_DAYS, REVIEW_TAGS, REVIEW_TEXT_MAX, type ReviewTag } from '@yeral/domain/lifecycle'
+import { REVIEW_TAGS, REVIEW_TAGS_MAX, REVIEW_TEXT_MAX, type ReviewTag } from '@yeral/domain/lifecycle'
 
 /** A review as the booking carries it: the stars, the tags, the words and when it was written. */
 export type WrittenReview = NonNullable<BookingDetail['review']>
@@ -20,9 +20,13 @@ export function initialForm(written: WrittenReview | null, rating: number | null
   return { rating, tags: [], text: '' }
 }
 
-/** A quick tag on or off; the quick ones keep the form's order, any other kept where it was. */
+/**
+ * A quick tag on or off; the quick ones keep the form's order, any other kept where it was. A review holds
+ * `REVIEW_TAGS_MAX` at most (a written one may carry others): one more past it isn't added.
+ */
 export function toggleTag(tags: readonly string[], tag: ReviewTag): string[] {
   if (tags.includes(tag)) return tags.filter((t) => t !== tag)
+  if (tags.length >= REVIEW_TAGS_MAX) return [...tags]
   const others = tags.filter((t) => !(REVIEW_TAGS as readonly string[]).includes(t))
   return [...REVIEW_TAGS.filter((t) => t === tag || tags.includes(t)), ...others]
 }
@@ -42,6 +46,3 @@ export function changed(form: ReviewForm, written: WrittenReview): boolean {
   const same = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((t) => b.includes(t))
   return form.rating !== written.rating || !same(form.tags, written.tags) || form.text.trim() !== (written.text ?? '')
 }
-
-/** Until when a written review can still be changed (book C-35: 7 days). */
-export const editableUntil = (written: WrittenReview) => written.createdAt + REVIEW_EDIT_DAYS * 86_400_000
