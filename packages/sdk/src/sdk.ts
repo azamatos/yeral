@@ -73,6 +73,7 @@ import type {
 } from '@yeral/contract/settings'
 import type {
   inviteInputSchema,
+  memberServicesSchema,
   phoneOnlyInputSchema,
   removeMemberSchema,
   staffScheduleUpdateSchema,
@@ -579,6 +580,13 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: ({ staffId, ...json }: { staffId: string } & z.input<typeof updateMemberSchema>) =>
           call(w.team[':staffId'].$patch({ param: { slug, staffId }, json })),
         onSuccess: () => teamChanged(slug),
+      }),
+    /** «Services» in the staff drawer (owner or administrator): everything the person does, in one go. */
+    setServices: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ staffId, ...json }: { staffId: string } & z.input<typeof memberServicesSchema>) =>
+          call(w.team[':staffId'].services.$put({ param: { slug, staffId }, json })),
+        onSuccess: () => staffChanged(slug),
       }),
     /** The picture clients see beside a team member (owner). */
     setPhoto: (slug: string) =>

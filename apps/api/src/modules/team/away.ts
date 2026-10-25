@@ -329,7 +329,7 @@ const skipStale = (e: unknown) => {
 /**
  * Save a specialist's schedule (B-47). Bookings ahead the change leaves outside their day, on the dates it changes:
  * without a choice it's 409 `bookings_affected` listing them and nothing is saved; `move` saves and moves each to a
- * free colleague (else 3 other times), `keep` saves and leaves them. A personal day off that has ended is dropped when
+ * free colleague (else 3 other times), `keep` saves and leaves them, `cancel` saves and cancels each with 3 other times. A personal day off that has ended is dropped when
  * it was saved before, and refused when it's new. The list names the services in `lang`, the reader's.
  */
 export async function updateSchedule(
@@ -391,7 +391,7 @@ export async function updateSchedule(
           await loadBusiness(tx, business.id),
           staffId,
           affected,
-          change.affected === 'move' ? { kind: 'move' } : { kind: 'keep' },
+          change.affected === 'move' ? { kind: 'move' } : change.affected === 'cancel' ? { kind: 'cancel' } : { kind: 'keep' },
         )
       : { moved: 0, kept: 0, cancelled: 0 }
     return { ...viewOf(next), ...result }

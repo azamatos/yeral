@@ -341,6 +341,88 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect(open).toBeUndefined()
   })
 
+  it('the staff drawer’s profile: names and specialization; the phone only without the app; the owner’s own names', async () => {
+    const maysa = await as(MAYSA)
+    const added = (await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99365333031', name: 'Bägül' } })).json
+    const named = await maysa.req(`/v1/w/glow-studio/team/${added.id}`, {
+      method: 'PATCH',
+      body: { name: 'Bägül M.', fullName: 'Bägül Myradowa', specialization: { en: 'Colourist' } },
+    })
+    expect(named.status).toBe(200)
+    expect(named.json).toMatchObject({ name: 'Bägül M.', fullName: 'Bägül Myradowa', specialization: 'Colourist' })
+    expect((await maysa.req(`/v1/w/glow-studio/team/${added.id}`, { method: 'PATCH', body: { fullName: null } })).json.fullName).toBeNull()
+    // with the app the number is how they sign in: not the owner's to change
+    const ayna = await rowOf(AYNA)
+    const theirs = await maysa.req(`/v1/w/glow-studio/team/${ayna!.id}`, { method: 'PATCH', body: { phone: '+99365333030' } })
+    expect(theirs.json.error.details.issues).toEqual([expect.objectContaining({ path: ['phone'], code: 'signs_in' })])
+    // without it the owner keeps the number up to date, a landline too, not one already on the team
+    const moved = await maysa.req(`/v1/w/glow-studio/team/${added.id}`, { method: 'PATCH', body: { phone: '+99312345670' } })
+    expect(moved.json.phone).toBe('+99312345670')
+    const taken = await maysa.req(`/v1/w/glow-studio/team/${added.id}`, { method: 'PATCH', body: { phone: MARAL } })
+    expect(taken.json.error.code).toBe('already_on_team')
+    // an administrator always uses the app
+    expect((await maysa.req(`/v1/w/glow-studio/team/${added.id}`, { method: 'PATCH', body: { level: 'admin' } })).status).toBe(400)
+    // the owner's own row takes its names, nothing about access
+    const own = await rowOf(MAYSA)
+    const ownName = await maysa.req(`/v1/w/glow-studio/team/${own!.id}`, { method: 'PATCH', body: { name: 'Maýsa' } })
+    expect(ownName.status).toBe(200)
+    expect((await maysa.req(`/v1/w/glow-studio/team/${own!.id}`, { method: 'PATCH', body: { hasApp: false } })).status).toBe(403)
+    // only the owner
+    const selbi = await as(SELBI)
+    expect((await selbi.req(`/v1/w/glow-studio/team/${added.id}`, { method: 'PATCH', body: { name: 'B.' } })).status).toBe(403)
+  })
+
+  it('turning the app off: an open invite is cancelled, the person stays on the team without it', async () => {
+    const maysa = await as(MAYSA)
+    const sent = (
+      await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365333032', name: 'Gözel', level: 'specialist' } })
+    ).json
+    const off = await maysa.req(`/v1/w/glow-studio/team/${sent.member.id}`, { method: 'PATCH', body: { hasApp: false } })
+    expect(off.json).toMatchObject({ hasApp: false, status: 'active', invite: { state: 'cancelled' } })
+    const gozel = await as('+99365333032', 'Gözel')
+    expect((await gozel.req('/v1/me/invites')).json.items).toEqual([])
+    // someone who had joined loses the workspace, and stays bookable without the app
+    await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365333033', name: 'Jemal', level: 'specialist' } })
+    const jemal = await as('+99365333033', 'Jemal')
+    const [card] = (await jemal.req('/v1/me/invites')).json.items
+    await jemal.req(`/v1/me/invites/${card.id}/accept`, { method: 'POST' })
+    expect((await jemal.req('/v1/me/workspaces')).json.items.map((w: { slug: string }) => w.slug)).toContain('glow-studio')
+    const row = await rowOf('+99365333033')
+    await maysa.req(`/v1/w/glow-studio/team/${row!.id}`, { method: 'PATCH', body: { hasApp: false } })
+    expect(await rowOf('+99365333033')).toMatchObject({ hasApp: false, status: 'active' })
+    expect((await jemal.req('/v1/me/workspaces')).json.items.map((w: { slug: string }) => w.slug)).not.toContain('glow-studio')
+    // an administrator can't stop using it
+    const selbi = await rowOf(SELBI)
+    const admin = await maysa.req(`/v1/w/glow-studio/team/${selbi!.id}`, { method: 'PATCH', body: { hasApp: false } })
+    expect(admin.json.error.details.issues).toEqual([expect.objectContaining({ path: ['hasApp'] })])
+  })
+
+  it('the services someone does: set in one go by the owner or an administrator', async () => {
+    const maysa = await as(MAYSA)
+    const selbi = await as(SELBI)
+    const menu = (await maysa.req('/v1/w/glow-studio/services')).json
+    const [first, second] = menu.groups.flatMap((g: { services: { id: string }[] }) => g.services.map((s) => s.id))
+    const added = (await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99365333034', name: 'Leýla' } })).json
+    expect(added.bookable).toBe(false)
+    const set = await selbi.req(`/v1/w/glow-studio/team/${added.id}/services`, { method: 'PUT', body: { serviceIds: [first, second] } })
+    expect(set.status).toBe(200)
+    expect(set.json.bookable).toBe(true)
+    const after = (await maysa.req('/v1/w/glow-studio/services')).json
+    const doing = after.groups
+      .flatMap((g: { services: { id: string; staffIds: string[] }[] }) => g.services)
+      .filter((s: { staffIds: string[] }) => s.staffIds.includes(added.id))
+    expect(doing.map((s: { id: string }) => s.id).sort()).toEqual([first, second].sort())
+    const none = await maysa.req(`/v1/w/glow-studio/team/${added.id}/services`, { method: 'PUT', body: { serviceIds: [] } })
+    expect(none.json.bookable).toBe(false)
+    const unknown = await maysa.req(`/v1/w/glow-studio/team/${added.id}/services`, {
+      method: 'PUT',
+      body: { serviceIds: ['00000000-0000-0000-0000-000000000000'] },
+    })
+    expect(unknown.status).toBe(400)
+    const maral = await as(MARAL)
+    expect((await maral.req(`/v1/w/glow-studio/team/${added.id}/services`, { method: 'PUT', body: { serviceIds: [] } })).status).toBe(403)
+  })
+
   it('an empty change is refused, not a server error', async () => {
     const maysa = await as(MAYSA)
     const row = await rowOf(AYNA)

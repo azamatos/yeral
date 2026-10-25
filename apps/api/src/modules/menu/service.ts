@@ -30,7 +30,7 @@ const invalidFields = (fields: string[]) => invalid(...fields.map((f) => ({ path
  * Menu changes one at a time per business: places at the end of a group, and a group's existence, hold until the
  * change commits. `no key update` leaves bookings (which only check the business exists) free to go on.
  */
-async function lockMenu(db: Queryable, businessId: string): Promise<void> {
+export async function lockMenu(db: Queryable, businessId: string): Promise<void> {
   await db.select({ id: businesses.id }).from(businesses).where(eq(businesses.id, businessId)).for('no key update')
 }
 
