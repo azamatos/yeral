@@ -14,10 +14,12 @@ import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { toast } from '@yeral/ui/toast'
 import { ArrowLeftRight, Clock, Globe, TriangleAlert } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
+import { DeclineModal } from './decline-modal'
 
 /**
  * The request drawer (B-Calendar `.drw` «Request», DS-Business BookingDrawer `mode="request"`, book B-19): the request
@@ -60,17 +62,24 @@ export function RequestDrawer({
   // the pager stays while an answer is on its way: the drawer closes on the request it was for
   const answering = confirm.isPending
   const go = (r: Request | undefined) => r && !answering && onGo(r)
+  // the decline modal over the drawer, for the request it opened on
+  const [declining, setDeclining] = useState<Request | null>(null)
+  // here, not in the modal: its answer still lands when the request has left the list (the sdk reads it again first)
+  const decline = useMutation(sdk.requests.decline(slug))
+  // the modal stays while its decline is on its way; a request gone meanwhile (answered elsewhere, run out) closes it
+  const declineOpen = !!declining && (decline.isPending || queue.some((o) => o.code === declining.code))
+  /** Answered: the drawer closes on it, and the toast offers the next one while more wait. */
+  const answered = (r: Request, words: string) => {
+    onAnswered(r.code)
+    const next = queue.find((o) => o.code !== r.code)
+    toast(words, next ? { action: { label: t('nextRequest'), onClick: () => onGo(next, false) } } : {})
+  }
 
   const answer = (r: Request) => {
-    const rest = queue.filter((o) => o.code !== r.code)
     confirm.mutate(r.code, {
       onSuccess: () => {
-        onAnswered(r.code)
         const when = t('when', { date: fmt.shortWeekdayDate(r.date), time: fmt.time(r.start) })
-        const next = rest[0]
-        toast(r.kind === 'move' ? t('movedTo', { when }) : t('confirmed'), {
-          ...(next ? { action: { label: t('nextRequest'), onClick: () => onGo(next, false) } } : {}),
-        })
+        answered(r, r.kind === 'move' ? t('movedTo', { when }) : t('confirmed'))
       },
       onError: (error) => {
         toast(errorText(error))
@@ -112,6 +121,9 @@ export function RequestDrawer({
         {request ? (
           request.canAnswer ? (
             <DrawerFooter>
+              <Button variant="secondary" disabled={answering} onClick={() => setDeclining(request)}>
+                {t('decline')}
+              </Button>
               <Button variant="primary" onClick={() => answer(request)} loading={answering && confirm.variables === request.code}>
                 {request.kind === 'move' ? t('confirmMove') : t('confirm')}
               </Button>
@@ -132,6 +144,22 @@ export function RequestDrawer({
           )
         )}
       </DrawerContent>
+      {declining && declineOpen && (
+        <DeclineModal
+          slug={slug}
+          request={declining}
+          now={now}
+          business={business}
+          pending={decline.isPending}
+          send={(input, done) => decline.mutate({ code: declining.code, ...input }, done)}
+          onOpenChange={(open) => !open && !decline.isPending && setDeclining(null)}
+          onDeclined={(words) => {
+            setDeclining(null)
+            answered(declining, words)
+          }}
+          onRefused={() => void list.refetch()}
+        />
+      )}
     </Drawer>
   )
 
