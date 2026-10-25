@@ -61,4 +61,9 @@ export const eventListSchema = z.object({
   items: z.array(eventSchema),
   /** Pass as `after` next time. */
   cursor: eventCursorSchema,
+  /**
+   * An event of mine has committed but waits for an older transaction still running somewhere (events show in commit
+   * order): ask again shortly.
+   */
+  held: z.boolean(),
 })

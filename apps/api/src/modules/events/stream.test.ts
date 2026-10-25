@@ -57,10 +57,16 @@ describe('the push channel (GET /v1/events/stream)', () => {
   })
 
   it('a change nudges the open streams of its user and of the business’s team, and no one else’s', async () => {
-    const live = createLive(db)
+    const live = createLive(db, { batchMs: 5 })
     const [owner, specialist, client] = [await userOf(MAYSA), await userOf(AYNA), crypto.randomUUID()]
     const nudged: string[] = []
-    const closers = [owner, specialist, client].map((id) => live.open(id, () => nudged.push(id)))
+    const closers = [owner, specialist, client].map((id) =>
+      live.open(
+        id,
+        () => nudged.push(id),
+        () => undefined,
+      ),
+    )
     await live.changed({ businessId: glow, userId: null })
     expect(nudged.sort()).toEqual([owner, specialist].sort())
     nudged.length = 0
@@ -73,6 +79,52 @@ describe('the push channel (GET /v1/events/stream)', () => {
     live.nudgeAll()
     expect(nudged.sort()).toEqual([owner, specialist].sort())
     for (const close of closers) close()
+  })
+
+  it('NOTIFYs close together are asked about once; an account past its streams ends its oldest', async () => {
+    const live = createLive(db, { batchMs: 5 })
+    const owner = await userOf(MAYSA)
+    const nudged: number[] = []
+    const ended: number[] = []
+    const closers = Array.from({ length: 11 }, (_, i) =>
+      live.open(
+        owner,
+        () => nudged.push(i),
+        () => ended.push(i),
+      ),
+    )
+    expect(ended).toEqual([0])
+    await Promise.all([live.changed({ businessId: glow, userId: null }), live.changed({ businessId: glow, userId: owner })])
+    // each stream once
+    expect(nudged.sort((a, b) => a - b)).toEqual(Array.from({ length: 11 }, (_, i) => i))
+    for (const close of closers) close()
+  })
+
+  it('a committed event behind an older transaction still running is held, and says so, until that one ends', async () => {
+    const t = testApp(db)
+    const b = browser(t.app)
+    await b.login(MAYSA)
+    const { cursor } = (await b.req('/v1/events')).json as { cursor: string }
+    const older = new pg.Client({ connectionString: urlFor(name) })
+    await older.connect()
+    try {
+      // a transaction with an id, still running
+      await older.query('begin')
+      await older.query('select pg_current_xact_id()')
+      await emit(db, { type: 'business.updated', businessId: glow })
+      const waiting = (await b.req(`/v1/events?after=${cursor}`)).json as { items: unknown[]; held: boolean }
+      expect(waiting).toMatchObject({ items: [], held: true })
+      await older.query('commit')
+      await vi.waitFor(
+        async () => {
+          const shown = (await b.req(`/v1/events?after=${cursor}`)).json as { items: { type: string }[]; held: boolean }
+          expect(shown.items.map((e) => e.type)).toContain('business.updated')
+        },
+        { timeout: 5_000, interval: 100 },
+      )
+    } finally {
+      await older.end()
+    }
   })
 
   it('a NOTIFY’s payload that isn’t ours is ignored', () => {
@@ -107,17 +159,23 @@ describe('the push channel (GET /v1/events/stream)', () => {
       const decoder = new TextDecoder()
       const until = async (text: string) => {
         let read = ''
-        while (!read.includes(text)) read += decoder.decode((await reader.read()).value)
+        while (!read.includes(text)) {
+          const { done, value } = await reader.read()
+          if (done) throw new Error(`the stream ended before «${text}»: ${read}`)
+          read += decoder.decode(value)
+        }
         return read
       }
       // the team's event, through the database's NOTIFY and the api's LISTEN (which connects meanwhile: sent again)
+      const sent: Promise<void>[] = []
       let ticker: ReturnType<typeof setInterval> | undefined
       try {
         expect(await until('\n\n')).toMatch(/^event: ready\n/)
-        ticker = setInterval(() => void emit(db, { type: 'business.updated', businessId: glow }), 200)
+        ticker = setInterval(() => sent.push(emit(db, { type: 'business.updated', businessId: glow })), 200)
         expect(await until('event: changed')).toMatch(/event: changed\n/)
       } finally {
         clearInterval(ticker)
+        await Promise.all(sent)
         await reader.cancel()
       }
     })

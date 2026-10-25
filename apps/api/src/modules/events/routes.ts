@@ -10,9 +10,9 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { eventListSchema, eventsQuerySchema, type EventType } from '@yeral/contract/events'
 import { scopeOf } from '@yeral/domain/permissions'
-import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, inArray, or, sql } from 'drizzle-orm'
 import { streamSSE } from 'hono/streaming'
-import { bookingItems, businesses, events } from '../../db/schema'
+import { bookingItems, businesses, events, sessions } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { requireUser } from '../auth/session'
@@ -21,6 +21,8 @@ import { teamsOf } from '../team/members'
 const PAGE = 100
 
 const settled = sql`${events.txid} < pg_snapshot_xmin(pg_current_snapshot())`
+/** Committed, but waiting for an older transaction still running somewhere: shown once that one ends. */
+const held = sql`${events.txid} >= pg_snapshot_xmin(pg_current_snapshot())`
 const cursorOf = (e: { txid: string; id: number }) => `${e.txid}.${e.id}`
 const MAX_XID8 = 2n ** 64n - 1n
 const MAX_ID = 2n ** 63n - 1n
@@ -52,23 +54,30 @@ const streamRoute = createRoute({
 export const eventRoutes = new OpenAPIHono<AppEnv>()
   .openapi(streamRoute, (c) => {
     const user = requireUser(c)
-    const { live } = c.var.deps
+    const { db, live, now } = c.var.deps
+    const sessionId = c.var.auth!.sessionId
     const res = streamSSE(c, async (stream) => {
       let stop = () => {}
       const stopped = new Promise<void>((resolve) => (stop = resolve))
-      const close = live.open(user.id, () => void stream.writeSSE({ event: 'changed', data: '' }))
-      stream.onAbort(() => {
-        close()
-        stop()
-      })
+      // the stream ends when the browser goes, the session ends, or the account opens too many
+      const close = live.open(user.id, () => void stream.writeSSE({ event: 'changed', data: '' }), stop)
+      stream.onAbort(stop)
       // a browser comes back 5 s after a drop
       await stream.writeSSE({ event: 'ready', data: '', retry: 5_000 })
-      while (!stream.aborted) {
-        let timer: ReturnType<typeof setTimeout> | undefined
-        await Promise.race([stopped, new Promise((resolve) => (timer = setTimeout(resolve, STREAM_PING_MS)))])
-        clearTimeout(timer)
-        if (!stream.aborted) await stream.write(': ping\n\n')
-      }
+      // a comment line keeps the connection open; the session is checked each time, and the stream ends with it
+      const ping = setInterval(() => {
+        void (async () => {
+          const [alive] = await db
+            .select({ id: sessions.id })
+            .from(sessions)
+            .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date(now()))))
+          if (alive) await stream.write(': ping\n\n')
+          else stop()
+        })().catch(stop)
+      }, STREAM_PING_MS)
+      await stopped
+      clearInterval(ping)
+      close()
     })
     // nothing in the way may hold it back or compress it (Caddy's `encode` leaves a no-transform answer alone); on the
     // context too, whose own headers (streamSSE's `no-cache`) are copied over the answer when it's set again
@@ -96,7 +105,8 @@ export const eventRoutes = new OpenAPIHono<AppEnv>()
     }
     const [, txid, id] = /^(\d{1,20})\.(\d{1,19})$/.exec(after ?? '') ?? []
     // no cursor yet, one from before this format, or out of range: start from now
-    if (!txid || !id || BigInt(txid) > MAX_XID8 || BigInt(id) > MAX_ID) return c.json({ items: [], cursor: await latest() }, 200)
+    if (!txid || !id || BigInt(txid) > MAX_XID8 || BigInt(id) > MAX_ID)
+      return c.json({ items: [], cursor: await latest(), held: false }, 200)
     // a team member sees what their level sees: the whole calendar, or a specialist's own bookings (ADR 0025)
     const teams = await teamsOf(db, user.id)
     const whole = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'all').map((t) => t.businessId)
@@ -132,5 +142,16 @@ export const eventRoutes = new OpenAPIHono<AppEnv>()
       business: slug,
     }))
     const last = rows.at(-1)?.e
-    return c.json({ items, cursor: last ? cursorOf(last) : (after as string) }, 200)
+    const [fromTxid, fromId] = last ? [last.txid, last.id] : [txid, id]
+    // a full page has more behind it; else, is an event of mine held back (the screen asks again shortly)
+    const waiting =
+      rows.length === PAGE ||
+      (
+        await db
+          .select({ id: events.id })
+          .from(events)
+          .where(and(sql`(${events.txid}, ${events.id}) > (${fromTxid}::xid8, ${fromId}::bigint)`, mine, held))
+          .limit(1)
+      ).length > 0
+    return c.json({ items, cursor: last ? cursorOf(last) : (after as string), held: waiting }, 200)
   })

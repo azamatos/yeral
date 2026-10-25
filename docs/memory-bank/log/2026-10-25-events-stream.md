@@ -1,4 +1,4 @@
-# The push channel: server-sent events on a Postgres NOTIFY (slice 3 U5, feat/events-stream)
+# The push channel: server-sent events on a Postgres NOTIFY (slice 3 U5, #211, feat/events-stream; ADR 0028)
 
 - Changed (api): `emit` (`notify.ts`, the one place events are written) adds `pg_notify('yeral_events', {b, u})` with
   the event's business and user; Postgres sends it at commit (nothing on a rollback). `modules/events/live.ts`:
@@ -24,3 +24,18 @@
   the browser only); on HTTP/1.1 (local dev without Caddy) a browser keeps at most 6 connections to the api, so many
   open tabs could queue requests (through Caddy it's HTTP/2); the person's own change still refreshes twice (an event
   could name its session to be skipped).
+
+## After the review (one round, 12 findings)
+
+- Fixed: a stream follows the account signed in now (a sign-in over another account, the demo, opens one for the new
+  account); `GET /v1/events` says `held` when an event of the person's is held back behind an older transaction (or a
+  full page has more), and the sdk reads again in 1, 2, 4 … 30 s, in place of a fixed second look; the LISTEN has
+  keep-alive, a connect and query timeout and a check every 30 s, nudges every stream whenever it's (back) up, and a
+  stop during a connect ends it; the stream checks its session at each 25 s ping and ends with it (an `setInterval`, no
+  growing promise chain); an account keeps at most 10 streams (`STREAMS_PER_USER`, the oldest ends); NOTIFYs within
+  50 ms are asked about in one query, only for accounts with a stream open; a refused stream asks who is signed in and
+  opens again after 10 s, doubling to 5 minutes; a hidden tab closes its stream (and opens it on coming back); the
+  stream test fails on a stream that ends and waits for its emits; ADR 0028.
+- Kept: the NOTIFY in `emit` rather than a trigger (one writer, ADR 0028's alternatives).
+- Corrected: the local Docker stack's Caddy is HTTP/1.1 (`auto_https off`), so there many open tabs can reach the
+  browser's 6 connections per host (each visible tab holds one); production is HTTP/2.
