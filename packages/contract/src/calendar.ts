@@ -39,6 +39,11 @@ export const freeTimesQuerySchema = z.object({
   staff: idSchema.optional(),
   /** The day whose starts to list ("Başga sene we wagt"); today by default. */
   date: ymdSchema.optional(),
+  /**
+   * Times to offer a client when declining (B-20): searched as the client would book them, as the decline checks them,
+   * so none falls inside the lead time, past the booking window or on a service not booked online.
+   */
+  offer: boolQuery.optional(),
 })
 
 export const freeTimesSchema = z

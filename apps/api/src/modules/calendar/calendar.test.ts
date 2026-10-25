@@ -1,11 +1,12 @@
 /** The business's own bookings: free times as the team books them, by phone and walk-in, and the undo (book B-23–B-25). */
+import { epochOf } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingItems, bookings, businesses, clients, jobs, rateLimits, services, staff } from '../../db/schema'
+import { bookingItems, bookingRules, bookings, businesses, clients, jobs, rateLimits, services, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 
@@ -101,6 +102,31 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     // days further than the strip: one open, and Glow's stock-taking day, closed
     expect((await freeTimes(maysa, `services=${manicure}&date=2026-11-20`)).slots.length).toBeGreaterThan(0)
     expect((await freeTimes(maysa, `services=${manicure}&date=2026-11-02`)).slots).toEqual([])
+  })
+
+  it('times to offer a client (offer=true) are searched as the client books: never inside the lead time, nor a service off online', async () => {
+    const maysa = await as(MAYSA)
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [rules] = await db.select().from(bookingRules).where(eq(bookingRules.businessId, glow!.id))
+    // a day ahead: the team's nearest times fall inside it, whatever today holds
+    await db.update(bookingRules).set({ leadMinutes: 1440 }).where(eq(bookingRules.businessId, glow!.id))
+    try {
+      const team = await freeTimes(maysa, `services=${manicure}`)
+      const offer = await freeTimes(maysa, `services=${manicure}&offer=true`)
+      const earliest = t.clock.now + 1440 * 60_000
+      // the team books inside the lead time; an offer never starts there
+      expect(epochOf(team.nearest[0]!.date, team.nearest[0]!.start)).toBeLessThan(earliest)
+      expect(offer.nearest).toHaveLength(4)
+      for (const n of offer.nearest) expect(epochOf(n.date, n.start)).toBeGreaterThanOrEqual(earliest)
+      for (const s of offer.slots) expect(epochOf(TODAY, s.start)).toBeGreaterThanOrEqual(earliest)
+      // a service not booked online: the team still books it, nothing to offer
+      await db.update(services).set({ online: false }).where(eq(services.id, manicure))
+      expect((await freeTimes(maysa, `services=${manicure}&date=${SAT}`)).slots.length).toBeGreaterThan(0)
+      expect((await freeTimes(maysa, `services=${manicure}&date=${SAT}&offer=true`)).slots).toEqual([])
+    } finally {
+      await db.update(services).set({ online: true }).where(eq(services.id, manicure))
+      await db.update(bookingRules).set({ leadMinutes: rules!.leadMinutes }).where(eq(bookingRules.businessId, glow!.id))
+    }
   })
 
   it('a specialist sees and books only their own times; services someone doesn’t do are refused', async () => {

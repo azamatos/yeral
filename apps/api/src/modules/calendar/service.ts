@@ -96,7 +96,8 @@ function checkChoice(
 /**
  * Free times for the new-booking drawer and the quick sheet (B-23, B-24): the nearest four, a day's starts with who is
  * free at each, and the 14-day strip, from the business day that holds now (last night's while it runs, book Q-105).
- * A specialist sees their own; the others everyone who does all the services.
+ * A specialist sees their own; the others everyone who does all the services. `offer`: the times a decline may offer
+ * (B-20), searched as the client would book them, as the decline checks its offers.
  */
 export async function freeTimes(deps: Deps, business: Business, actor: Actor, q: FreeTimesQuery): Promise<FreeTimes> {
   const now = deps.now()
@@ -115,7 +116,13 @@ export async function freeTimes(deps: Deps, business: Business, actor: Actor, q:
   const ctx = appointmentContext(lb, [...busy, ...dayBusy], now)
   checkChoice(ctx, q.services, staffId, { services: 'services', staff: 'staff' })
   const team = staffId ? [staffId] : staffDoingAll(ctx, q.services).map((s) => s.id)
-  const query = (d: string, id: string): AppointmentQuery => ({ date: d, serviceIds: q.services, staffId: id, by: 'staff' })
+  // as the team books (no lead time, window or online switch), or, to offer a client, as they would book it
+  const query = (d: string, id: string): AppointmentQuery => ({
+    date: d,
+    serviceIds: q.services,
+    staffId: id,
+    by: q.offer ? 'client' : 'staff',
+  })
 
   const cache = new Map<string, FreeTimes['slots']>()
   /** A day's free starts, each with the specialists free at it in the team's order. */
