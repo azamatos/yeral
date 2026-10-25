@@ -263,6 +263,13 @@
     "save": "Save",
     "saving": "Saving"
   },
+  "datePicker": {
+    "placeholder": "Pick a date",
+    "prev": "Previous month",
+    "next": "Next month",
+    "withYear": "{date} {year}",
+    "range": "{from} – {to}"
+  },
   "specialDays": {
     "title": "Special days",
     "caption": "Holidays and unusual days — days you’re closed or open at other times.",
@@ -289,8 +296,7 @@
     "oneDay": "One day",
     "severalDays": "Several days",
     "date": "Date",
-    "from": "From",
-    "to": "To",
+    "days": "Dates",
     "dates": {
       "past": "You can’t pick a day in the past.",
       "order": "The end can’t be before the start.",

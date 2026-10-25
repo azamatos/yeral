@@ -33,7 +33,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | lucide-react | 1.56 | icons, stroke 1.75 (design system) | — |
 | sonner | 2 | toasts | our hand-rolled toast |
 | TanStack Table / Virtual | 9 / 3 | data tables and long lists in business and cms | AG Grid (heavy) |
-| react-day-picker | 10 | date pickers in business and cms (*planned*: the special days' dates first, instead of the browser's date inputs); a library before our own (AGENTS.md rule 10a) | our own calendar grid |
+| react-day-picker | 10 | `DatePicker` in `@yeral/ui` (a date or a range in a popover from a field, styled to DS-Components → «Pickers»; the special days' dates since 2026-10-25); a library before our own (AGENTS.md rule 10a) | our own calendar grid (`Calendar` in `@yeral/ui` stays for the booking's month until it moves over) |
 | dnd-kit (`@dnd-kit/core`) | 6.3 | calendar drag and drop; re-check `@dnd-kit/react` (0.x) at the business milestone | pragmatic-drag-and-drop |
 | Recharts | 3 | analytics charts | visx (lower level), ECharts (heavy) |
 | MapLibre GL | 6 | maps, restyled to the design; OpenFreeMap tiles now (owner's decision 2026-10-14), self-hosted tiles on the own server | Google, Yandex (keys, billing, third-party scripts) |
@@ -159,6 +159,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | phones by the market's rules (`+993`) | `isPhone() isMobile() isUnusedNumber() toE164() formatPhone() formatNational() maskPhone() E164 COUNTRY_PREFIX` (the unused range, `MARKET.phone.unusedPrefix`, is no mobile: the demo's numbers); a person's language: `marketLocaleSchema`, texts per language: `localizedSchema(max)` (`@yeral/contract/common`) | `@yeral/domain/phone` |
 | ids, booking codes | `newId() bookingCode()` | `@yeral/domain/id` |
 | money, prices, durations, distances, dates on screen | `useFmt()` in components, `createFmt(locale)` elsewhere (`money price rating duration distance time timeRange dayMonth shortDate shortWeekdayDate weekdayDate monthYear relativeDay relativeShortDate addressIn phone`) | `@yeral/i18n` |
+| a date field's words (`DatePicker`'s `copy`: the month, the weekdays, a day's name, the field's date or range, the placeholder, the month buttons) in the business app | `useDatePickerWords()` | `@/shared/i18n` (apps/business) |
 | locales, shared messages (`common`, `status`, `fmt`, `sms`) | `LOCALES` (translated) `MARKET_LOCALES` (offered) `DEFAULT_LOCALE` (market's main) `isLocale() messages` | `@yeral/i18n` |
 | site URLs, cookie domain and prefix, allowed origins, demo flag | `siteConfig({ env, domain, portBase })`, `siteFromEnv(env, 'VITE_')` | `@yeral/lib/site` |
 | add to calendar *(M3)* | `buildIcs() downloadIcs()` | `@yeral/lib/ics` |

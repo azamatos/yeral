@@ -7,6 +7,7 @@ import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { Checkbox, Radio } from '@yeral/ui/checkbox'
+import { DatePicker } from '@yeral/ui/date-picker'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@yeral/ui/menu'
@@ -19,7 +20,7 @@ import { Calendar, CircleAlert, Ellipsis, Pencil, Plus, Trash2 } from 'lucide-re
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { useDayName, useErrorText } from '@/shared/i18n'
+import { useDatePickerWords, useDayName, useErrorText } from '@/shared/i18n'
 import {
   dateProblem,
   dayOf,
@@ -40,7 +41,7 @@ function useDates() {
   const t = useTranslations('specialDays')
   const fmt = useFmt()
   const year = (d: string) => String(parseYmd(d).getUTCFullYear())
-  return (d: SpecialDay) => {
+  return (d: Pick<SpecialDay, 'from' | 'to' | 'yearly'>) => {
     const one = (date: string) => (d.yearly ? fmt.dayMonth(date) : t('withYear', { date: fmt.dayMonth(date), year: year(date) }))
     if (d.from === d.to) return one(d.from)
     if (d.from.slice(0, 7) === d.to.slice(0, 7)) return t('sameMonth', { from: parseYmd(d.from).getUTCDate(), to: one(d.to) })
@@ -222,6 +223,8 @@ function SpecialDayModal({
   const count = useAffectedCount()
   const join = useJoin()
   const errorText = useErrorText()
+  const pickerWords = useDatePickerWords()
+  const datesOf = useDates()
   const ids = useId()
   // the business day it opened on: a day ending today isn't past yet
   const [todayDate] = useState(() => today(Date.now()))
@@ -306,18 +309,27 @@ function SpecialDayModal({
           />
         </div>
       </fieldset>
+      {/* the month (rule 10a: react-day-picker): one day, or a first and a last day; a one-off can't be in the past */}
       {draft.multi ? (
-        <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <Field label={t('from')}>
-            <Input type="date" value={draft.start} onChange={(e) => set({ start: e.target.value })} />
-          </Field>
-          <Field label={t('to')} error={dates && t(`dates.${dates}`)}>
-            <Input type="date" value={draft.end} onChange={(e) => set({ end: e.target.value })} />
-          </Field>
-        </div>
+        <Field label={t('days')} error={dates && t(`dates.${dates}`)} className="max-w-80">
+          <DatePicker
+            mode="range"
+            copy={{ ...pickerWords, range: ({ from, to }) => datesOf({ from, to, yearly: draft.yearly }) }}
+            today={todayDate}
+            min={draft.yearly ? undefined : todayDate}
+            value={draft.start && draft.end ? { from: draft.start, to: draft.end } : null}
+            onValueChange={({ from, to }) => set({ start: from, end: to })}
+          />
+        </Field>
       ) : (
         <Field label={t('date')} error={dates && t(`dates.${dates}`)} className="max-w-60">
-          <Input type="date" value={draft.date} onChange={(e) => set({ date: e.target.value })} />
+          <DatePicker
+            copy={{ ...pickerWords, value: (date) => datesOf({ from: date, to: date, yearly: draft.yearly }) }}
+            today={todayDate}
+            min={draft.yearly ? undefined : todayDate}
+            value={draft.date || null}
+            onValueChange={(date) => set({ date })}
+          />
         </Field>
       )}
       <Checkbox
