@@ -19,7 +19,7 @@ before any code used them were edited in place (marked "revised").
 | [0011](0011-state-management.md) | State management: each kind of state has one owner | Accepted 2026-10-13; amended 2026-10-25 (forms: plain state) |
 | [0012](0012-design-system-and-storybook.md) | Design system in `@yeral/ui`, documented and tested in Storybook | Accepted 2026-10-13 (revised 2026-10-14) |
 | [0013](0013-testing-strategy.md) | Testing strategy | Accepted 2026-10-13 |
-| [0014](0014-parallel-agents.md) | Working with several agents in parallel | Accepted 2026-10-13 |
+| [0014](0014-parallel-agents.md) | Working with several agents in parallel | Accepted 2026-10-13; amended 2026-10-26 (weekly token budget) |
 | [0015](0015-marketplace-on-the-apex.md) | The marketplace lives on yeral.app; no separate landing | Accepted 2026-10-14 |
 | [0016](0016-languages-tk-ru-en.md) | Turkmen first, then Russian and English; every client URL carries its language | Accepted 2026-10-14 (Turkmen first superseded by 0022) |
 | [0017](0017-booking-model.md) | One booking engine for any business that sells time | Accepted 2026-10-14 (revised) |

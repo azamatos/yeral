@@ -293,6 +293,8 @@
   #235 and #240 fixed `0c603bb` (#243). The business: the calendar's day `2dfefc5` (#218), its layers `1586148`
   (#222), the request drawer `548b666` (#223), declining with offered times `7240a90` (#226), a move request
   `8c41857` (#228) and its fit line `c62a5cc` (#231), the phone day `cb750d6` (#230).
+  `make-example` (D2) `9c83869` (#233). Deployed 2026-10-26 11:20 UTC at `74fae7d` with the owner's go (migration
+  0044, a backup first); then Ýeral paused for the week (owner).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
