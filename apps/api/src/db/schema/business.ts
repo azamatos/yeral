@@ -150,7 +150,10 @@ export const businesses = pgTable(
     /** Table businesses: how long a party keeps a table, and the special-request chips. */
     tableSittingMinutes: integer().notNull().default(120),
     tableRequests: text().array().notNull().default([]),
-    /** Demo businesses answer requests by themselves outside production. */
+    /**
+     * Marked "Example" (book Q-004): the seeded examples, with no team, answer requests by themselves outside
+     * production; an owner's test business made one by `make-example` (chapter 9, 25.10.2026) answers its own.
+     */
     demo: boolean().notNull().default(false),
     /**
      * The shared demo workspace anyone tries without signing in (book F-242): never public, sends no SMS, joins no

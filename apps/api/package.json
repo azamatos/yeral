@@ -18,7 +18,8 @@
     "db:migrate": "tsx --env-file-if-exists=.env.local src/db/cli.ts migrate",
     "db:seed": "tsx --env-file-if-exists=.env.local src/db/cli.ts seed",
     "db:setup": "tsx --env-file-if-exists=.env.local src/db/cli.ts setup",
-    "admin:invite": "tsx --env-file-if-exists=.env.local src/db/cli.ts admin-invite"
+    "admin:invite": "tsx --env-file-if-exists=.env.local src/db/cli.ts admin-invite",
+    "make:example": "tsx --env-file-if-exists=.env.local src/db/cli.ts make-example"
   },
   "dependencies": {
     "@hono/node-server": "catalog:",

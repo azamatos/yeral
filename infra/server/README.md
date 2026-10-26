@@ -45,6 +45,10 @@ the client site and the business app, and checks the api's `/v1/health` and both
 the DNS records point at the server (2026-10-22); without it a change to `yeral.caddy` doesn't ship. Delete old
 backups by hand when the disk needs it.
 
+While the sign-in code shows on the screen, one of the owner's test businesses opens to clients as an "Example" (still
+confirming by hand) with `ssh yeral-vps 'docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js
+make-example <slug>'`, and loses the mark (back to "in review") with `make-example <slug> --off` (operations.md).
+
 ## DNS records
 
 The zone `yeral.app` is on Cloudflare (ADR 0024; the plan: book chapter 9, 22.10.2026). The owner edits it in the dashboard:
