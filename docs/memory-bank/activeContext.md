@@ -1,16 +1,22 @@
 # Active context
 
-_Last updated: 2026-10-25_
+_Last updated: 2026-10-26_
 
 ## Current focus
+
+**2026-10-26: paused for the week; everything merged is live.** The owner stopped work on Ýeral for this week
+(Owner's direction): #233 (`make-example`) and the day's fold (#246) merged, and main at 74fae7d deployed 11:20 UTC
+with the owner's go (migration 0044, a backup first): slice 3's booking loop is on `yeral.app` and `business.yeral.app`.
+No open PRs. When work resumes: slice 3's leftovers and its end-to-end click test (Next steps 1a), within the weekly
+token budget (AGENTS.md → "Token budget").
 
 **2026-10-25 (evening): slice 2 finished, slice 3's booking loop built.** The owner gave the whole day; four agents
 merged #202–#245 (progress.md): slice 2's last pieces (Team's drawer and «Left»/«Removed», the page address, faster
 updates, the date picker, the Russian-length check), the client site on `yeral.app` with the example businesses
 (owner's go, deployed 13:46 UTC at 8ebb8bc), and slice 3: the shared pieces, the push channel (ADR 0028), the client's
 business page, booking, My bookings, the booking drawer, move mode and the review form, and the business's calendar
-day with its layers, the request drawer, declining with offered times and move requests. Not deployed yet: everything
-after #208 (migration 0044 among it). Left in slice 3 (log notes): the «How was it?» card, move mode's rules and
+day with its layers, the request drawer, declining with offered times and move requests (deployed 26.10 at 74fae7d,
+migration 0044 among it). Left in slice 3 (log notes): the «How was it?» card, move mode's rules and
 «Add to calendar», three api follow-ups (log/2026-10-25-client-review-wiring.md, -move-mode.md, -booking-item-ids.md),
 the end-to-end click test locally and live; `make-example` (#233) to let the owner's test business be booked.
 
@@ -145,6 +151,11 @@ components in Storybook, then the apps.
   Asked about slice 3: the client site takes `yeral.app` now (noindex until the launch), the example businesses go on,
   and one of the owner's test businesses can be opened to clients with a server command (the book's chapter 9,
   25.10.2026; the plan: `log/2026-10-25-slice-3-plan.md`).
+- 2026-10-26: the day's agents took the weekly limit to 52 % (four agents resumed all day re-read ~500k tokens of
+  context at every step). "U can use as many agents u want, but when its context full, drop it, and start a new one …
+  limit yourself on a week plan. We can not spend more tokens that we have for a weekly limit." (ADR 0014 amended,
+  AGENTS.md → "Token budget".) "For this week we stop working on yeral. push all the changes and deploy them": merged,
+  deployed at 74fae7d.
 
 ## Decisions
 
@@ -212,6 +223,9 @@ amended: the demo workspace's sessions in a cookie of their own (#145). The book
 no TanStack Form; a well-known library before our own component (AGENTS.md rule 10a). The business app live with the
 code on the screen (no ADR; the book's chapter 9, 25.10.2026).
 
+2026-10-26: [0014](../decisions/0014-parallel-agents.md) amended: a weekly token budget; an agent whose context is
+full is dropped and a fresh one starts (AGENTS.md → "Token budget").
+
 2026-10-23: [0027](../decisions/0027-geocoder-port.md) the address search behind a geocoder port (Photon over
 OpenStreetMap, #153); e-mail (no ADR; the book's chapter 9, 23.10.2026): `hello@yeral.app` received through Cloudflare
 Email Routing, nothing sent, DMARC reject (the owner; the details Claude's, delegated).
@@ -252,10 +266,10 @@ Where the old questions went (2026-10-17):
    but for the «How was it?» card (its stars open the review form with `rating`; then the write-review steiger
    override goes), move mode's booking rules on the confirm step and «Add to calendar» after an instant move; api:
    availability reading a moved booking's own services, refusing a move whose service is gone for good, `MyBooking`
-   carrying the review, a list `total` for tab counts; the review form's error hook. Then `make-example` (#233), a
-   deploy with the owner's go, and the slice's end-to-end check (book → confirm → decline with offers → expiry →
+   carrying the review, a list `total` for tab counts; the review form's error hook. Then the slice's end-to-end check (book → confirm → decline with offers → expiry →
    cancel and Undo → move → review) locally and live with skill `qa-flows`. Flaky: the business calendar story
-   «Confirm Request» failed once (#245).
+   «Confirm Request» failed once (#245). `make-example <slug>` (#233, deployed) opens one of the owner's test
+   businesses to clients once the owner names it.
 2. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md`, a database backup first; the
    business app ships with the api since 25.10). The first launch (approved in advance, 22.10) goes when slices 2–7
    are built and checked: `EXAMPLE_BUSINESSES` and `DEMO_WORKSPACE` on (the code on the screen is on already), the
@@ -263,7 +277,7 @@ Where the old questions went (2026-10-17):
 3. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
    the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
    with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
-   workspace. The server runs main at 592cfd2 (25.10). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
+   workspace. The server runs main at 74fae7d (26.10). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
@@ -278,15 +292,15 @@ projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts for error t
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`; a production deploy needs the owner's go each
 time: the permission check refuses one Claude starts on its own); deploy by hand with `infra/server/README.md` →
-"Deploying Ýeral by hand". Since 2026-10-25 13:46 UTC it runs main at 8ebb8bc (images `yeral-api`, `yeral-business` and
-`yeral-client` at `8ebb8bc1355789a2`; before it 592cfd2 from 10:45, 07952fd from 08:42, 5c07be4 from 22.10):
-migrations 0000–0043 applied, the 6 cities and the category catalogue with its starter services, the 11 example
+"Deploying Ýeral by hand". Since 2026-10-26 11:20 UTC it runs main at 74fae7d (images `yeral-api`, `yeral-business` and
+`yeral-client` at `74fae7d0837a75bb`; before it 8ebb8bc from 25.10 13:46, 592cfd2 from 10:45, 07952fd from 08:42,
+5c07be4 from 22.10): migrations 0000–0044 applied, the 6 cities and the category catalogue with its starter services, the 11 example
 businesses, the owner's test businesses; `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no admin account yet;
 `SIGN_IN_CODE_ON_SCREEN` and `EXAMPLE_BUSINESSES` on (owner, 25.10), `DEMO_WORKSPACE` off (on when the first launch
 opens). Public: the edge Caddy serves `yeral.caddy` (`/srv/edge/sites/`): `api.yeral.app`, `business.yeral.app`, the
 client site on `yeral.app` (`noindex` until the launch), `www` → the apex, with Let's Encrypt certificates; `cms.`
-resolves to the server and fails TLS until its app joins. Kept: the database before each 25.10 deploy
-(`/srv/yeral/backup-2026-10-25-before-{592cfd2,8ebb8bc}.sql.gz`), right after the 08:42 one
+resolves to the server and fails TLS until its app joins. Kept: the database before each deploy since 25.10
+(`/srv/yeral/backup-2026-10-25-before-{592cfd2,8ebb8bc}.sql.gz`, `backup-2026-10-26-before-74fae7d.sql.gz`), right after the 08:42 one
 (`backup-2026-10-25-after-07952fd.sql.gz`; the one before it was skipped) and before the 22.10 one
 (`backup-2026-10-23-before-5c07be4.sql.gz`; every backup there is mode 600), the site files before 25.10's changes
 (`/srv/edge/sites-yeral.caddy.before-{07952fd,latest,client}`) and the edge config

@@ -72,6 +72,14 @@ and milestones: `docs/memory-bank/progress.md`.
 - Never ask for tokens or passwords in chat. The owner signs in with `gh auth login` / `npx wrangler login`, or stores
   secrets with `gh secret set NAME`.
 
+## Token budget (owner, 2026-10-26; ADR 0014 amended)
+
+- The budget is the week, not the night: a run never spends more than the weekly limit allows. Before a run, weigh it
+  against what's left of the week and the days left, and stop when its share is spent.
+- Use as many agents as the work needs, but when an agent's context is full, drop it and start a fresh one from its PR
+  and log note; never resume a full one. Every step re-reads the whole context: on 2026-10-25 four agents resumed all
+  day took 85 % of the day's tokens, and the week's limit went to 52 %.
+
 ## Parallel work (ADR 0014)
 
 - Take a task from GitHub Issues; claim it with the label `agent:<name>`; stay inside the scope it lists.

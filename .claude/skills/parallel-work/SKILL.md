@@ -38,3 +38,7 @@ Decision: ADR 0014. Needs M0 (issues board, `PORT_BASE`, `db:setup`); before tha
 ## Lead session
 
 Folds `log/` notes into `activeContext.md` / `progress.md` (skill `memory-bank`), keeps the board ordered, sequences hot-spot PRs.
+
+Tokens (`AGENTS.md` → "Token budget"): size the run against what's left of the week's limit. Start as many agents as
+the work needs, but drop one whose context is full (or whose PR merged) and start a fresh one from its PR and log note;
+never resume a full agent with its whole context.
