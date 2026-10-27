@@ -204,9 +204,10 @@ that reads a file outside every package lists it as an input with `$TURBO_ROOT$`
 ## Repository
 
 - Public by the owner's choice until the product is ready, then private. Never commit secrets.
-- Branch protection on `main` (since 2026-10-13): required checks «Format, lint, types, tests, build» and «PR title is a
-  Conventional Commit», branch up to date before merge, linear history, no force pushes. Admins may override; nobody
-  pushes to `main` directly any more.
+- Branch protection on `main` was set on 2026-10-13: required checks «Format, lint, types, tests, build» and «PR title
+  is a Conventional Commit», branch up to date before merge, linear history, no force pushes. On 2026-10-27 none was
+  found (no classic protection, no ruleset), so nothing enforces it: agents still merge only through a PR with green
+  CI, rebased on `main`, until the owner turns it back on (Waiting on the owner).
 - Issues and a GitHub Project board hold the tasks (ADR 0014).
 
 ## Parallel agents (ADR 0014, skill `parallel-work`)

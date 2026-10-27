@@ -1,8 +1,15 @@
 # Active context
 
-_Last updated: 2026-10-26_
+_Last updated: 2026-10-27_
 
 ## Current focus
+
+**2026-10-27: still paused; the repo is ready to show.** For the owner's portfolio the public repo now says Ýeral is
+in development: a README for visitors (the status, the live sites, what works, how it's built) and the repo's About
+(description, homepage, topics), #248. A two-week review (a private page for the owner) found no end-to-end test yet
+(Next steps 1a); `main` without branch protection, so two PRs merged on a stale base broke it once (#240 after #235,
+fixed in #243; Waiting on the owner); no HSTS or CSP on the sites; backups only on the server's own disk until P6; and
+long files plus this file's history weighing on every session (Next steps 4).
 
 **2026-10-26: paused for the week; everything merged is live.** The owner stopped work on Ýeral for this week
 (Owner's direction): #233 (`make-example`) and the day's fold (#246) merged, and main at 74fae7d deployed 11:20 UTC
@@ -156,6 +163,9 @@ components in Storybook, then the apps.
   limit yourself on a week plan. We can not spend more tokens that we have for a weekly limit." (ADR 0014 amended,
   AGENTS.md → "Token budget".) "For this week we stop working on yeral. push all the changes and deploy them": merged,
   deployed at 74fae7d.
+- 2026-10-27: "Lets make it public repo and some words about still in development, i need this for my portfolio":
+  the repo was public already (21.10); a README for visitors and the About box (#248). Ýeral may be shown in the
+  owner's portfolio, always as in development.
 
 ## Decisions
 
@@ -281,7 +291,15 @@ Where the old questions went (2026-10-17):
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
-**Waiting on the owner:** turning on Email Routing for `hello@yeral.app` and adding the `_dmarc` record
+4. **From the 27.10 review:** HSTS and a Content Security Policy in `yeral.caddy`'s `(yeral_site)` (it sends
+   nosniff, a referrer policy and X-Frame-Options only); split the longest files as they're next touched; trim this
+   file: fold the history older than a week into `progress.md` (about 5k tokens less in every session).
+
+**Waiting on the owner:** branch protection on `main` (none on 27.10: no classic protection and no ruleset; operations.md
+→ "Repository" has what it held): a repository setting, so the owner's OK first. Whether Ýeral's support phone and
+Telegram move from `packages/domain/src/market.ts` into the server's config, out of the public repo (asked 27.10).
+Whether the README's credit line (Claude Code agents write much of the code) stays as it is (asked 27.10).
+Turning on Email Routing for `hello@yeral.app` and adding the `_dmarc` record
 (`infra/server/README.md`, "DNS records"; Cloudflare's dashboard now names the path Compute → Email Service → Email
 Routing); Claude checks the records afterwards, in another session (owner, 24.10). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
 runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
