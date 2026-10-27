@@ -207,7 +207,7 @@ that reads a file outside every package lists it as an input with `$TURBO_ROOT$`
 - Branch protection on `main` was set on 2026-10-13: required checks «Format, lint, types, tests, build» and «PR title
   is a Conventional Commit», branch up to date before merge, linear history, no force pushes. On 2026-10-27 none was
   found (no classic protection, no ruleset), so nothing enforces it: agents still merge only through a PR with green
-  CI, rebased on `main`, until the owner turns it back on (Waiting on the owner).
+  CI, rebased on `main`. The owner keeps it off while the demo app is built and turns it on when it's done (27.10).
 - Issues and a GitHub Project board hold the tasks (ADR 0014).
 
 ## Parallel agents (ADR 0014, skill `parallel-work`)

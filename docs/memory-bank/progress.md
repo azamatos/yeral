@@ -299,7 +299,8 @@
   amended, AGENTS.md → "Token budget") `e7941e5` (#247); a two-week review of the project (a private page for the
   owner; its findings in activeContext.md); a README for visitors with the in-development status, the live sites and
   how it's built, and the repo's About (description, homepage, topics), for the owner's portfolio `bd6659c` (#248).
-  Gap found: `main` has no branch protection any more (operations.md → "Repository").
+  Found: `main` has no branch protection any more; it stays off until the demo app is done (owner; operations.md →
+  "Repository"). E-mail for `hello@yeral.app` set up by the owner (its DNS records checked 27.10).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

@@ -8,7 +8,7 @@ _Last updated: 2026-10-27_
 in development: a README for visitors (the status, the live sites, what works, how it's built) and the repo's About
 (description, homepage, topics), #248. A two-week review (a private page for the owner) found no end-to-end test yet
 (Next steps 1a); `main` without branch protection, so two PRs merged on a stale base broke it once (#240 after #235,
-fixed in #243; Waiting on the owner); no HSTS or CSP on the sites; backups only on the server's own disk until P6; and
+fixed in #243; it stays off until the demo app is done, owner 27.10); no HSTS or CSP on the sites; backups only on the server's own disk until P6; and
 long files plus this file's history weighing on every session (Next steps 4).
 
 **2026-10-26: paused for the week; everything merged is live.** The owner stopped work on Ýeral for this week
@@ -165,7 +165,9 @@ components in Storybook, then the apps.
   deployed at 74fae7d.
 - 2026-10-27: "Lets make it public repo and some words about still in development, i need this for my portfolio":
   the repo was public already (21.10); a README for visitors and the About box (#248). Ýeral may be shown in the
-  owner's portfolio, always as in development.
+  owner's portfolio, always as in development. Asked: "no need for branch protection, we are still developing, we
+  will turn it on when we finish with demo app"; the support phone and Telegram leave the repo for the server's config,
+  with Ýeral's own e-mail beside them (Next steps 4); the README's credit line stays.
 
 ## Decisions
 
@@ -293,15 +295,15 @@ Where the old questions went (2026-10-17):
 
 4. **From the 27.10 review:** HSTS and a Content Security Policy in `yeral.caddy`'s `(yeral_site)` (it sends
    nosniff, a referrer policy and X-Frame-Options only); split the longest files as they're next touched; trim this
-   file: fold the history older than a week into `progress.md` (about 5k tokens less in every session).
+   file: fold the history older than a week into `progress.md` (about 5k tokens less in every session). Ýeral's
+   support line (`MARKET.support` in `packages/domain/src/market.ts`: the owner's phone and Telegram) moves out of the
+   repo into the server's config, and `hello@yeral.app` joins it as a third way to reach Ýeral (owner, 27.10; the old
+   values stay in the git history).
 
-**Waiting on the owner:** branch protection on `main` (none on 27.10: no classic protection and no ruleset; operations.md
-→ "Repository" has what it held): a repository setting, so the owner's OK first. Whether Ýeral's support phone and
-Telegram move from `packages/domain/src/market.ts` into the server's config, out of the public repo (asked 27.10).
-Whether the README's credit line (Claude Code agents write much of the code) stays as it is (asked 27.10).
-Turning on Email Routing for `hello@yeral.app` and adding the `_dmarc` record
-(`infra/server/README.md`, "DNS records"; Cloudflare's dashboard now names the path Compute → Email Service → Email
-Routing); Claude checks the records afterwards, in another session (owner, 24.10). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
+**Waiting on the owner:** a test mail to `hello@yeral.app` from another account, to see it arrive in the owner's
+inbox: the records are in place (checked 27.10: Cloudflare's three MX, SPF, DKIM and the `_dmarc` reject record;
+`infra/server/README.md`, "DNS records"). Branch protection on `main` comes back when the demo app is done (owner,
+27.10). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
 runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
 of a-z 0-9 . -) and the owner opens the setup link (24 hours, `cms.<domain>/setup/<token>`), picks the password, adds
 the authenticator app and keeps the 10 recovery codes. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an
