@@ -298,7 +298,8 @@ Where the old questions went (2026-10-17):
 **Waiting on the owner:** branch protection on `main` (none on 27.10: no classic protection and no ruleset; operations.md
 → "Repository" has what it held): a repository setting, so the owner's OK first. Whether Ýeral's support phone and
 Telegram move from `packages/domain/src/market.ts` into the server's config, out of the public repo (asked 27.10).
-Whether the README's credit line (Claude Code agents write much of the code) stays as it is (asked 27.10). Turning on Email Routing for `hello@yeral.app` and adding the `_dmarc` record
+Whether the README's credit line (Claude Code agents write much of the code) stays as it is (asked 27.10).
+Turning on Email Routing for `hello@yeral.app` and adding the `_dmarc` record
 (`infra/server/README.md`, "DNS records"; Cloudflare's dashboard now names the path Compute → Email Service → Email
 Routing); Claude checks the records afterwards, in another session (owner, 24.10). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
 runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
