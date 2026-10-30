@@ -140,10 +140,26 @@ image (`infra/docker/client.Dockerfile`) bakes its hosts in the same way and run
 `dist/node.mjs`: hashed files cached for a year and a missing one a 404, every page rendered by TanStack Start). The
 renderer asks the api inside the stack (`API_INTERNAL_URL=http://api:3004`, read at run time; unset = the public api
 address) and passes the visitor's cookie on. The server's stack
-takes the apps when they have something to serve (P2 step 7). CI's «Docker stack» job does the same, asks for health through Caddy, and validates
-the server's Caddy config (`infra/server/edge/Caddyfile` with `yeral.caddy`).
+takes the apps when they have something to serve (P2 step 7). CI's «Docker stack and end-to-end flows» job does the same, asks for health through Caddy, validates
+the server's Caddy config (`infra/server/edge/Caddyfile` with `yeral.caddy`) and runs the Playwright flows against the
+stack (below). The stack shows the sign-in code on the screen (`SIGN_IN_CODE_ON_SCREEN`), as the server does.
 `pnpm docker:down` stops it (`-v` drops the data). The demo keeps the day of the first `docker:up`; start it over with
 `docker compose -f infra/docker/compose.yml run --rm migrate node dist/cli.js seed`.
+
+### End-to-end flows (since 2026-10-31)
+
+`pnpm e2e` runs the Playwright flows in `e2e/` (workspace package `@yeral/e2e`, Chromium only; ADR 0013, skill
+`testing`) against apps already up: nothing is started or seeded by the tests. By default they go to the stack's
+hosts (`http://yeral.localhost`, `http://business.yeral.localhost`; Chromium resolves `*.localhost` by itself);
+`E2E_CLIENT_URL` and `E2E_BUSINESS_URL` point them at dev servers (`http://localhost:3401` and `:3402` for
+`PORT_BASE=3400`), whose api must show the code on the screen (`SIGN_IN_CODE_ON_SCREEN=true` in its environment).
+The flows use the demo seed's Glow Studio (`glow-studio`, confirms by hand) and its owner's number; each test signs a
+fresh random client number up, so nothing is reset between runs, and the bookings they make stay in the database.
+The owner signs in once per run (`tests/owner.setup.ts`, the session in `e2e/.auth/`, ignored): the api gives a number
+5 codes an hour, so more than 5 runs an hour against one database need `delete from rate_limits` or a reseed. On a
+failure the HTML report and the trace are in `e2e/playwright-report` and `e2e/test-results`
+(`pnpm --filter @yeral/e2e exec playwright show-report`); CI uploads them as the `playwright-report` artifact.
+First time on a machine: `pnpm --filter @yeral/e2e exec playwright install chromium`.
 
 ## The own server (since 2026-10-19)
 
@@ -167,7 +183,7 @@ stacks → restore the database and photos → switch the DNS records → point 
 
 | Workflow | Trigger | Does |
 |---|---|---|
-| `ci.yml` | pull request, push to `main` | pnpm install (cached) → format check → one `turbo run lint lint:fsd typecheck test build --affected` step (on `main` without `--affected`): the Storybook stories run as Vitest browser tests in Chromium, the api tests against a Postgres 18 service · a Docker job builds and starts the api stack (`infra/docker/compose.yml`) and checks its health through Caddy · the PR title is checked as a Conventional Commit |
+| `ci.yml` | pull request, push to `main` | pnpm install (cached) → format check → one `turbo run lint lint:fsd typecheck test build --affected` step (on `main` without `--affected`): the Storybook stories run as Vitest browser tests in Chromium, the api tests against a Postgres 18 service · a Docker job builds and starts the stack (`infra/docker/compose.yml`), checks its health through Caddy and runs the Playwright flows (`pnpm e2e`, Chromium cached by version; the report and traces uploaded on failure) · the PR title is checked as a Conventional Commit |
 | `deploy.yml` | called by `ci.yml` for Storybook; by hand (Actions → Deploy) | build → `wrangler deploy` for Storybook; the api and the new apps over SSH to the own server from P2 step 7 (by hand until then: `infra/server/README.md`) → smoke check: `/version.json` shows the commit, key pages answer 200 |
 | `ci.yml` → `deploy-storybook` | push to `main` after checks | builds Storybook and deploys it to storybook.yeral.app (no release needed: internal docs) |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |

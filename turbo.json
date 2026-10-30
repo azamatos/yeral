@@ -28,6 +28,10 @@
       "passThroughEnv": ["TEST_DATABASE_URL"],
       "dependsOn": ["^transit"]
     },
+    "e2e": {
+      "cache": false,
+      "passThroughEnv": ["E2E_*", "CI"]
+    },
     "deploy": {
       "cache": false
     }

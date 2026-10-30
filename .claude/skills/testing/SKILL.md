@@ -5,8 +5,8 @@ description: Choose and write the right test in Yeral — Vitest unit tests for 
 
 # Testing
 
-Strategy: ADR 0013. Today: Vitest unit tests for the booking rules in `packages/domain/src/*.test.ts`, Storybook story
-tests in `apps/storybook`; API and Playwright tests arrive with M2–M3.
+Strategy: ADR 0013. Today: Vitest unit tests in `packages/*` and the api, Storybook story tests in `apps/storybook`,
+API tests in `apps/api` against Postgres, and the Playwright flows in `e2e/` (the booking loop; since 2026-10-31).
 
 ## Which test
 
@@ -16,7 +16,7 @@ tests in `apps/storybook`; API and Playwright tests arrive with M2–M3.
 | a helper in `lib`, `sdk`, `i18n` | Vitest unit test | next to the file | `pnpm test --filter=@yeral/<pkg>` |
 | a component in `@yeral/ui` or an entity/feature UI | stories with `play` functions (they run as tests) | `<name>.stories.tsx` | `pnpm test:stories` (Chromium; first time: `pnpm --filter @yeral/storybook exec playwright install chromium`) |
 | an endpoint | API test with `app.request()` on the test database | `apps/api/src/modules/<area>/*.test.ts` | `pnpm test --filter=@yeral/api` |
-| a user flow across screens or apps | Playwright spec | `apps/<app>/e2e/*.spec.ts`, cross-app in `e2e/` at the root | `pnpm e2e` |
+| a user flow across screens or apps (a client does, the business answers, the client sees it) | Playwright spec | `e2e/tests/<flow>.spec.ts` (`@yeral/e2e`; helpers in `e2e/src`) | `pnpm e2e` against running apps (operations.md, "End-to-end flows"); CI runs it on the Docker stack |
 | a bug | the smallest test above that fails without the fix | — | — |
 
 ## How
@@ -29,8 +29,15 @@ tests in `apps/storybook`; API and Playwright tests arrive with M2–M3.
 - **API data**: stories and component tests mock the API with MSW handlers built from `@yeral/contract` fixtures; never hit a real API.
 - **API tests**: each test runs in a transaction rolled back at the end (or a fresh schema); seed with factories, not the full demo seed;
   cover success, validation error (400), unauthorised (401/403), not found, conflict (409 `slot_taken`).
-- **Playwright**: use roles and labels (`getByRole`), not CSS; one browser context per person (client, salon) to test
-  mirror screens; wait for UI states, never `waitForTimeout`; demo login code `1234`.
+- **Playwright**: a flow the slice's "Done when" names, across apps or with the push channel in it; a single screen's
+  behaviour is a story. Roles and accessible names (`getByRole`) from the apps' `en.json`, not CSS or test ids; a
+  control without a name is an a11y bug: name it in the app. One browser context per person (client, salon) to test
+  mirror screens; wait for UI states (`expect`), never `waitForTimeout`. Sign in with the code the screen shows
+  (`signInWithCode` in `e2e/src/sign-in.ts`); a fresh random client number per test (`freshPhone`), the seed's
+  Glow Studio and its owner, who signs in once per run (`tests/owner.setup.ts`, a `storageState`). The client site
+  is rendered on the server: the first click on a page retries until React has taken over (`expect(...).toPass()`).
+  Open a request on the calendar from its address (`?date=&request=`) rather than its block, which may sit under a
+  neighbour's. Nothing is reset: a test leaves only what the next run doesn't depend on.
 - Tests must pass in parallel and in any order. No snapshots of whole pages.
 
 ## When CI fails

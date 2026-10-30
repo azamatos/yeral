@@ -35,6 +35,8 @@ services:
       MEDIA_DIR: /data/media
       # client IPs for rate limits come from Caddy (Caddyfile)
       TRUSTED_IP_HEADER: x-forwarded-for
+      # the sign-in code on the screen, as on the server (book Q-036): the end-to-end flows (e2e/) read it there
+      SIGN_IN_CODE_ON_SCREEN: 'true'
     depends_on:
       postgres:
         condition: service_healthy

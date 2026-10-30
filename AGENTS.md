@@ -102,10 +102,11 @@ Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` nar
 | `pnpm build` · `pnpm lint` · `pnpm typecheck` · `pnpm test` | one task across the workspace |
 | `pnpm format` | Prettier on everything except `docs/design` and Markdown |
 | `pnpm test:stories` | every Storybook story as a Chromium test (render, interactions, axe) |
+| `pnpm e2e` | the Playwright flows in `e2e/` against running apps: CI's Docker stack, or your dev servers with `E2E_CLIENT_URL` and `E2E_BUSINESS_URL` (skill `testing`) |
 | `pnpm gen package` · `pnpm gen ui-component` | scaffold an internal package / a design-system component with stories |
 | `pnpm book show\|refs <ID>` · `pnpm book toc <doc>` · `pnpm book open` | look the docs up by ID (`Q-107`, `F-012`, `B-05`, `ADR 0021`); outline a doc; questions still open or with a concern |
 | `pnpm db:up` · `pnpm db:setup` | Postgres 18 in Docker; create, migrate and seed the database in `apps/api/.env.local` (API tests need it too) |
 | `pnpm db:generate` | a new SQL migration from the Drizzle schema (`apps/api/src/db/schema`) |
 | `pnpm docker:up` · `pnpm docker:down` | the production-like stack: Postgres + api + Caddy on `*.yeral.localhost` |
 
-Planned with later milestones: `pnpm e2e`, `pnpm gen slice|endpoint`.
+Planned with later milestones: `pnpm gen slice|endpoint`.
