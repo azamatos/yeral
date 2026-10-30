@@ -229,13 +229,16 @@ export const myBookingsApi =
   (): typeof fetch => {
     const signIn = authApi({ signedIn })()
     const all = [...lists.upcoming, ...lists.past]
+    /** What an action changed on a booking, by code: the row and the drawer say it alike, as the api does. */
+    const changed = new Map<string, Partial<MyBooking>>()
+    const rowOf = (b: MyBooking): MyBooking => ({ ...b, ...changed.get(b.code) })
     const find = (code: string) => {
       const b = all.find((r) => r.code === code)
-      return b ? detailOf(b, details[code]) : null
+      return b ? detailOf(rowOf(b), details[code]) : null
     }
     const mine = fakeFetch(({ route, query, body }) => {
       if (route === 'GET /me/bookings') {
-        const items = query.get('tab') === 'past' ? lists.past : lists.upcoming
+        const items = (query.get('tab') === 'past' ? lists.past : lists.upcoming).map(rowOf)
         return json({ items, total: items.length, cursor: null })
       }
       const one = /^GET \/me\/bookings\/([^/]+)$/.exec(route)
@@ -265,11 +268,12 @@ export const myBookingsApi =
           case 'review': {
             // written or changed: the stars, tags and words, then open to change for 7 days
             const { rating, tags = [], text = null } = body as { rating: number; tags?: string[]; text?: string | null }
-            return json({
-              ...booking,
+            const review = {
               review: { rating, tags, text, createdAt: Date.now() },
               actions: { ...booking.actions, review: false, editReview: true },
-            })
+            }
+            changed.set(booking.code, review)
+            return json({ ...booking, ...review })
           }
           case 'reschedule': {
             // asked of a business that confirms by hand: the new time waits, the old one stays; at once, it moves

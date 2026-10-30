@@ -89,16 +89,22 @@ export const Completed: Story = {
   },
 }
 
-/** Reviewed: «5 · You rated», and «Edit the review» while it may change. */
+/** Reviewed: «5 · You rated», and «Edit the review» while it may change. The row carries the review, as the api's rows do. */
 export const Reviewed: Story = {
   args: {
     path: '/en/account/bookings/YR-48101?tab=past',
     server: myBookingsApi({
-      details: {
-        'YR-48101': {
-          review: { rating: 5, tags: [], text: 'Lovely', createdAt: Date.now() - 86_400_000 },
-          actions: { ...MY_BOOKINGS.past[0]!.actions, review: false, editReview: true },
-        },
+      lists: {
+        ...MY_BOOKINGS,
+        past: MY_BOOKINGS.past.map((b) =>
+          b.code === 'YR-48101'
+            ? {
+                ...b,
+                review: { rating: 5, tags: [], text: 'Lovely', createdAt: Date.now() - 86_400_000 },
+                actions: { ...b.actions, review: false, editReview: true },
+              }
+            : b,
+        ),
       },
     }),
   },

@@ -63,12 +63,16 @@ describe('client bookings', () => {
     expect(past.json.items.map((x: { code: string }) => x.code).filter((c: string) => demo.includes(c))).toEqual(demo)
     expect(past.json.total).toBe(past.json.items.length)
     expect(past.json.total).toBeGreaterThan(2)
-    const firstPage = await b.req('/v1/me/bookings?tab=past&limit=2')
-    expect(firstPage.json).toMatchObject({ total: past.json.total, cursor: '2' })
-    expect(firstPage.json.items).toHaveLength(2)
-    const lastPage = await b.req(`/v1/me/bookings?tab=past&limit=50&cursor=2`)
-    expect(lastPage.json).toMatchObject({ total: past.json.total, cursor: null })
-    expect(lastPage.json.items).toHaveLength(past.json.total - 2)
+    // two a page: every page repeats the tab's total, and the pages together are the tab
+    const paged: string[] = []
+    for (let cursor: string | null = ''; cursor !== null;) {
+      const page = await b.req(`/v1/me/bookings?tab=past&limit=2${cursor && `&cursor=${cursor}`}`)
+      expect(page.json.total).toBe(past.json.total)
+      expect(page.json.items.length).toBeLessThanOrEqual(2)
+      paged.push(...page.json.items.map((x: { code: string }) => x.code))
+      cursor = page.json.cursor
+    }
+    expect(paged).toEqual(past.json.items.map((x: { code: string }) => x.code))
     const ojak = await b.req('/v1/me/bookings/YR-44650')
     expect(ojak.json).toMatchObject({
       status: 'cancelled',
@@ -292,7 +296,7 @@ describe('client bookings', () => {
     const done = await b.req(`/v1/me/bookings/${json.code}`)
     expect(done.json).toMatchObject({ status: 'completed', review: null, actions: { review: true, bookAgain: true } })
     const rowOf = async (code: string) =>
-      ((await b.req('/v1/me/bookings?tab=past')).json.items as { code: string; review: unknown }[]).find((x) => x.code === code)!
+      ((await b.req('/v1/me/bookings?tab=past&limit=50')).json.items as { code: string; review: unknown }[]).find((x) => x.code === code)!
     // the row says the visit still lacks its review (the "How was it?" card asks about such visits)
     expect(await rowOf(json.code)).toMatchObject({ status: 'completed', review: null, actions: { review: true } })
     const [before] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))

@@ -349,8 +349,8 @@ export const myBookingSchema = bookingSummarySchema
   .meta({ id: 'MyBooking' })
 export type MyBooking = z.infer<typeof myBookingSchema>
 /** `total`: how many bookings the tab holds in all (its count), whatever the page; `cursor` is null on the last page. */
-export const bookingListSchema = listOf(myBookingSchema).extend({ total: z.number().int() })
-export type BookingList = z.infer<typeof bookingListSchema>
+export const myBookingListSchema = listOf(myBookingSchema).extend({ total: z.number().int() }).meta({ id: 'MyBookingList' })
+export type MyBookingList = z.infer<typeof myBookingListSchema>
 export const bookingCodeParamSchema = z.object({ code: bookingCodeSchema })
 
 // ── Act ──
