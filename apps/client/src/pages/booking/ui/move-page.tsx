@@ -151,8 +151,9 @@ export function MovePage() {
   })
   const gating = first.isPending && search.staff === undefined
   const refusal = moveRefusal(first.error, staff) ?? moveRefusal(send.error, staff)
-  // the specialist asked for is gone: the page's catalogue says so, or the api's 404 when the page is behind it
-  const staffGone = b !== undefined && ((asked !== 'any' && staff === 'any') || refusal === 'staff_gone')
+  // the specialist asked for is gone: the page's catalogue says so (with every service still known: a service gone for
+  // good is the api's `not_bookable`, not theirs), or the api's 404 when the page is behind it
+  const staffGone = b !== undefined && ((asked !== 'any' && staff === 'any' && ids.length === items.length) || refusal === 'staff_gone')
   const askedName = detail.specialists.find((s) => s.id === asked)?.name ?? items.find((i) => i.staffId === asked)?.staff ?? null
   useEffect(() => {
     if (!staffGone) return
