@@ -56,6 +56,7 @@ const row = (code: string, over: Partial<MyBooking>): MyBooking => ({
   offerTakenBy: null,
   bookOnline: true,
   actions: { ...ACTIONS, cancel: true, reschedule: true },
+  review: null,
   ...over,
 })
 
@@ -200,7 +201,7 @@ export function detailOf(b: MyBooking, over: Partial<BookingDetail> = {}): Booki
     moveRefused: null,
     reschedule: b.reschedule,
     actions: b.actions,
-    review: null,
+    review: b.review,
     ...over,
   }
 }
@@ -233,7 +234,10 @@ export const myBookingsApi =
       return b ? detailOf(b, details[code]) : null
     }
     const mine = fakeFetch(({ route, query, body }) => {
-      if (route === 'GET /me/bookings') return json({ items: query.get('tab') === 'past' ? lists.past : lists.upcoming, cursor: null })
+      if (route === 'GET /me/bookings') {
+        const items = query.get('tab') === 'past' ? lists.past : lists.upcoming
+        return json({ items, total: items.length, cursor: null })
+      }
       const one = /^GET \/me\/bookings\/([^/]+)$/.exec(route)
       if (one?.[1]) {
         const booking = find(one[1])

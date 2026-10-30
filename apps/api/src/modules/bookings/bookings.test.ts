@@ -55,10 +55,20 @@ describe('client bookings', () => {
       ['YR-47990', 'confirmed'],
       ['YR-47702', 'confirmed'],
     ])
+    // each tab counts its own bookings (`total`), whatever the page: the tabs' counts
+    expect(upcoming.json).toMatchObject({ total: 3, cursor: null })
     const past = await b.req('/v1/me/bookings?tab=past&limit=50')
     const demo = ['YR-46511', 'YR-45320', 'YR-44987', 'YR-44650', 'YR-43108']
     // newest first; her Glow Studio visits from the client list sit in between
     expect(past.json.items.map((x: { code: string }) => x.code).filter((c: string) => demo.includes(c))).toEqual(demo)
+    expect(past.json.total).toBe(past.json.items.length)
+    expect(past.json.total).toBeGreaterThan(2)
+    const firstPage = await b.req('/v1/me/bookings?tab=past&limit=2')
+    expect(firstPage.json).toMatchObject({ total: past.json.total, cursor: '2' })
+    expect(firstPage.json.items).toHaveLength(2)
+    const lastPage = await b.req(`/v1/me/bookings?tab=past&limit=50&cursor=2`)
+    expect(lastPage.json).toMatchObject({ total: past.json.total, cursor: null })
+    expect(lastPage.json.items).toHaveLength(past.json.total - 2)
     const ojak = await b.req('/v1/me/bookings/YR-44650')
     expect(ojak.json).toMatchObject({
       status: 'cancelled',
@@ -280,10 +290,17 @@ describe('client bookings', () => {
     t.clock.now = epochOf(THU, json.end) + MIN
     await runDueJobs(t.deps)
     const done = await b.req(`/v1/me/bookings/${json.code}`)
-    expect(done.json).toMatchObject({ status: 'completed', actions: { review: true, bookAgain: true } })
+    expect(done.json).toMatchObject({ status: 'completed', review: null, actions: { review: true, bookAgain: true } })
+    const rowOf = async (code: string) =>
+      ((await b.req('/v1/me/bookings?tab=past')).json.items as { code: string; review: unknown }[]).find((x) => x.code === code)!
+    // the row says the visit still lacks its review (the "How was it?" card asks about such visits)
+    expect(await rowOf(json.code)).toMatchObject({ status: 'completed', review: null, actions: { review: true } })
     const [before] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
     const reviewed = await b.req(`/v1/me/bookings/${json.code}/review`, { body: { rating: 4, text: 'Gowy' } })
     expect(reviewed.json).toMatchObject({ review: { rating: 4, text: 'Gowy' }, actions: { review: false, editReview: true } })
+    // the row carries the review as the detail does («★ 4 · You rated»)
+    expect((await rowOf(json.code)).review).toEqual(reviewed.json.review)
+    expect(reviewed.json.review).toEqual({ rating: 4, tags: [], text: 'Gowy', createdAt: expect.any(Number) })
     const [after] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
     expect(after!.reviewsCount).toBe(before!.reviewsCount + 1)
     expect((await b.req(`/v1/me/bookings/${json.code}/review`, { body: { rating: 5 } })).json.error.code).toBe('review_exists')

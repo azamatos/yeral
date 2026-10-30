@@ -177,6 +177,15 @@ export const businessCancelSchema = z.object({ reason: z.enum(BUSINESS_SIDE_CANC
 export const OFFER_SOURCES = ['decline', 'expired', 'cancel'] as const
 export type OfferSource = (typeof OFFER_SOURCES)[number]
 
+/**
+ * The client's review of a completed visit, as the drawer and the row show it («★ 5 · You rated»); `actions.editReview`
+ * says whether it may still change (7 days). Null until the visit is reviewed.
+ */
+export const bookingReviewSchema = z
+  .object({ rating: z.number().int(), tags: z.array(z.string()), text: z.string().nullable(), createdAt: epochSchema })
+  .meta({ id: 'BookingReview' })
+export type BookingReview = z.infer<typeof bookingReviewSchema>
+
 export const bookingDetailSchema = bookingSummarySchema
   .extend({
     /** Status timeline: sent → confirmed … */
@@ -250,9 +259,7 @@ export const bookingDetailSchema = bookingSummarySchema
     /** A pending move of this booking: the original stays confirmed until the business answers. */
     reschedule: waitingMoveSchema.nullable(),
     actions: bookingActionsSchema,
-    review: z
-      .object({ rating: z.number().int(), tags: z.array(z.string()), text: z.string().nullable(), createdAt: epochSchema })
-      .nullable(),
+    review: bookingReviewSchema.nullable(),
   })
   .meta({ id: 'BookingDetail' })
 export type BookingDetail = z.infer<typeof bookingDetailSchema>
@@ -336,10 +343,14 @@ export const myBookingSchema = bookingSummarySchema
      */
     bookOnline: z.boolean(),
     actions: bookingActionsSchema,
+    /** The client's review, as the detail carries it: the row's «★ 5 · You rated», and which completed visits still lack one (F-243). */
+    review: bookingReviewSchema.nullable(),
   })
   .meta({ id: 'MyBooking' })
 export type MyBooking = z.infer<typeof myBookingSchema>
-export const bookingListSchema = listOf(myBookingSchema)
+/** `total`: how many bookings the tab holds in all (its count), whatever the page; `cursor` is null on the last page. */
+export const bookingListSchema = listOf(myBookingSchema).extend({ total: z.number().int() })
+export type BookingList = z.infer<typeof bookingListSchema>
 export const bookingCodeParamSchema = z.object({ code: bookingCodeSchema })
 
 // ── Act ──
