@@ -1,6 +1,8 @@
 packages:
   - apps/*
   - packages/*
+  # the end-to-end flows across the apps (ADR 0013; skill `testing`)
+  - e2e
 
 # One version of each shared dependency for the whole monorepo: packages reference them as "catalog:".
 catalog:
@@ -28,6 +30,7 @@ catalog:
   maplibre-gl: ^6.15.0
   pg: ^8.23.1
   playwright: ^1.64.0
+  '@playwright/test': ^1.64.0
   prettier: ^3.9.10
   prettier-plugin-tailwindcss: ^0.8.1
   radix-ui: ^1.8.1

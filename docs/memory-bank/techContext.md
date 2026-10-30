@@ -63,7 +63,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | Vitest | 5 | unit tests; browser mode (`@vitest/browser-playwright`) for component tests and screenshots |
 | Storybook + addon-vitest, addon-a11y | 10.6 | design-system docs; stories run as tests (interactions, a11y, screenshots) |
 | MSW + msw-storybook-addon | 3.0 | contract-shaped API mocks in stories and component tests |
-| Playwright | 1.64 | end-to-end flows across apps (several origins in one test) |
+| Playwright (`@playwright/test`) | 1.64 | end-to-end flows across apps in `e2e/` (`@yeral/e2e`; one browser context per person, several origins in one test), Chromium only, against the Docker stack in CI (operations.md) |
 | lefthook | 2 | git hooks: format + lint staged files, commit message check |
 | commitlint | 21 | Conventional Commits |
 | Renovate | — | grouped dependency PRs |
@@ -216,7 +216,7 @@ pnpm dev --filter=@yeral/storybook   # Storybook on :3005 (PORT_BASE + 5)
 pnpm dev --filter=@yeral/business --filter=@yeral/api   # the business app on :3002 (PORT_BASE + 2) with the api on :3004
 pnpm dev --filter=@yeral/client --filter=@yeral/api     # the client site on :3001 (PORT_BASE + 1) with the api
 pnpm --filter @yeral/client build && pnpm --filter @yeral/client start   # the built site on Node (PORT, default 3000)
-pnpm e2e                        # (M3) Playwright against the local stack
+E2E_CLIENT_URL=http://localhost:3001 E2E_BUSINESS_URL=http://localhost:3002 pnpm e2e   # the Playwright flows against your dev servers (api with SIGN_IN_CODE_ON_SCREEN=true); without the variables, against the Docker stack
 pnpm docker:up                  # production-like stack (Caddy + images) on *.yeral.localhost
 ```
 
