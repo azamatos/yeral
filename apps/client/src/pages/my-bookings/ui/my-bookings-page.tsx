@@ -35,13 +35,17 @@ export function MyBookingsPage() {
   const list = useInfiniteQuery(sdk.bookings.list(tab, lang))
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
   // one review form for the rows: a sent review refreshes the list, and the row's button goes, not the form; the focus
-  // comes back to the row's link (the card's form too: its stars go with the card, the reviewed row stays)
+  // comes back to the row's link
   const [reviewing, setReviewing] = useState<MyBooking | null>(null)
   const backTo = useRef<HTMLElement | null>(null)
   const review = (b: MyBooking) => {
     backTo.current = document.getElementById(rowLinkId(b.code))
     setReviewing(b)
   }
+  // the card's form: sent, its stars go with the card, so the focus goes to the reviewed row when it's on the screen
+  // (Past), else to the title; closed without sending, the modal's own fallback takes the star pressed
+  const title = useRef<HTMLHeadingElement | null>(null)
+  const cardBackTo = useRef<HTMLElement | null>(null)
   const panel = (
     <>
       {list.isError && !list.data ? (
@@ -109,12 +113,14 @@ export function MyBookingsPage() {
   )
   return (
     <>
-      <h1 className="m-0 text-h2 max-sm:text-[26px] max-sm:leading-8">{t('title')}</h1>
+      <h1 ref={title} tabIndex={-1} className="m-0 text-h2 outline-none max-sm:text-[26px] max-sm:leading-8">
+        {t('title')}
+      </h1>
       <HowWasItCard
         className="mt-5"
-        returnFocus={backTo}
+        returnFocus={cardBackTo}
         onDone={(b) => {
-          backTo.current = document.getElementById(rowLinkId(b.code))
+          cardBackTo.current = document.getElementById(rowLinkId(b.code)) ?? title.current
         }}
       />
       <Tabs

@@ -13,7 +13,6 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { KeyValueList } from '@yeral/ui/key-value'
-import { Rating } from '@yeral/ui/rating'
 import { Modal, ModalActions, ModalClose, ModalContent, ModalDescription, ModalHeader, ModalTrigger } from '@yeral/ui/modal'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Timeline } from '@yeral/ui/timeline'
@@ -27,7 +26,7 @@ import { useErrorText } from '@/shared/i18n'
 import { addressLine } from '@/shared/lib'
 import { DirectionsButton, PlaceMap } from '@/shared/ui'
 import { drawerSteps, offersOf } from '../model/drawer'
-import { ByLine, rowLinkId, useCancelledBy } from './booking-row'
+import { ByLine, rowLinkId, useCancelledBy, YouRated } from './booking-row'
 import { CancelBooking } from './cancel-booking'
 import { OfferTimes, useVisitLine, useWhen } from './offer-times'
 
@@ -352,15 +351,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
             </Link>
           )}
           {passed && <ByLine>{list('offersPassed')}</ByLine>}
-          {b.review && (
-            // the board's `.rated`: the star and «5 · You rated», heard as «You rated it 5 out of 5» (the row's words)
-            <Rating
-              role="img"
-              aria-label={list('ratedLabel', { rating: b.review.rating })}
-              value={list('rated', { rating: b.review.rating })}
-              className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
-            />
-          )}
+          {b.review && <YouRated rating={b.review.rating} />}
           {undoFailed && (
             <span role="alert" className="flex items-start gap-1.5 text-dense text-danger-ink">
               <CircleAlert aria-hidden className="mt-0.5 size-3.5 flex-none" strokeWidth={2} />

@@ -17,9 +17,8 @@ import { RatingInput } from '@yeral/ui/rating'
 import { toast } from '@yeral/ui/toast'
 import { useId, useRef, useState, type RefObject } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { whatParts } from '@/entities/booking'
+import { visitLine } from '@/entities/booking'
 import { useErrorText } from '@/shared/i18n'
-import { calendarAt } from '@/shared/lib'
 import { changed, initialForm, refused, reviewBody, toggleTag, type WrittenReview } from '../model/review-form'
 
 /** The booking the review is about, as My bookings' rows and the booking drawer have it. */
@@ -81,7 +80,7 @@ export function ReviewModal({ open, onOpenChange, returnFocus, onDone, ...form }
         onError: (error) => {
           if (!refused(error)) return
           // the booking moved on meanwhile: what it is now decides what the row, the drawer and the card offer
-          for (const queryKey of [sdk.bookings.detail(form.booking.code, lang).queryKey, keys.bookingLists(), keys.howWasItAll()])
+          for (const queryKey of [keys.booking(form.booking.code, lang), keys.bookingLists(), keys.howWasItAll()])
             void queryClient.invalidateQueries({ queryKey })
           toast(errorText(error))
           onOpenChange(false)
@@ -138,7 +137,7 @@ function ReviewForm({
   const tagsId = useId()
   const body = reviewBody(form)
   const ready = body !== null && (!written || changed(form, written))
-  const visit = [...whatParts(b.what), fmt.shortWeekdayDate(calendarAt(b.date, b.start).date)].filter(Boolean).join(' · ')
+  const visit = visitLine(b, fmt)
   const name = me.data?.firstName ? reviewName({ first: me.data.firstName, surname: me.data.surname }) : null
   const until = written && localOf(reviewEditableUntil(written.createdAt))
 

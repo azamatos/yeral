@@ -111,15 +111,10 @@ export const HowWasIt: Story = {
     const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
     await expect(form.getByRole('radio', { name: '5 stars' })).toBeChecked()
     await expect(form.getByRole('button', { name: 'Send review' })).toBeEnabled()
+    // the story before may have thanked moments ago (a toast lives 4–6 s): this send adds one more
+    const thanked = within(document.body).queryAllByText('Thank you! Your review is published.').length
     await userEvent.click(form.getByRole('button', { name: 'Send review' }))
-    // the story before may have thanked moments ago (a toast lives 4–6 s): one of them is this story's, seen
-    await waitFor(() =>
-      expect(
-        within(document.body)
-          .getAllByText('Thank you! Your review is published.')
-          .some((el) => el.checkVisibility()),
-      ).toBe(true),
-    )
+    await waitFor(() => expect(within(document.body).getAllByText('Thank you! Your review is published.')).toHaveLength(thanked + 1))
     await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
     const edit = await canvas.findByRole('button', { name: /^Edit the review: Glow Studio, / })
     await expect(edit).toBeVisible()

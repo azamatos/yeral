@@ -276,9 +276,10 @@ export const CardSent: Story = {
     const card = within(await canvas.findByRole('region', { name: 'How was it?' }))
     await userEvent.click(card.getByRole('radio', { name: '5 stars' }))
     const modal = within(await body.findByRole('dialog', { name: 'How was it?' }))
+    // the story before may have thanked moments ago (a toast lives 4–6 s): this send adds one more
+    const thanked = body.queryAllByText('Thank you! Your review is published.').length
     await userEvent.click(modal.getByRole('button', { name: 'Send review' }))
-    // the story before may have thanked moments ago (a toast lives 4–6 s): one of them is this story's, seen
-    await waitFor(() => expect(body.getAllByText('Thank you! Your review is published.').some((el) => el.checkVisibility())).toBe(true))
+    await waitFor(() => expect(body.getAllByText('Thank you! Your review is published.')).toHaveLength(thanked + 1))
     await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
     await expect(sent).toEqual([{ method: 'POST', body: { rating: 5, tags: [] } }])
   },

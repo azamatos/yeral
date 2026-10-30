@@ -43,11 +43,12 @@ export function reviewBody(form: ReviewForm): { rating: number; tags: string[]; 
 }
 
 /**
- * Whether the api refused the review (a 4xx: the visit isn't completed or was reviewed already, the 30 days or the 7
- * days passed, the booking is gone): the booking moved on, so the form closes and the booking is read again. Anything
- * else (the network, the api down) lets the form say so and try again with what was written.
+ * Whether the api refused the review because the booking moved on (403: the visit isn't completed, its 30 days or the
+ * review's 7 days passed; 404: the booking is gone; 409: reviewed already): the form closes and the booking is read
+ * again. Anything else (the network, the api down, a session that ended, a wait asked for) lets the form say so and
+ * try again with what was written.
  */
-export const refused = (error: unknown): boolean => isApiError(error) && error.status >= 400 && error.status < 500
+export const refused = (error: unknown): boolean => isApiError(error) && [403, 404, 409].includes(error.status)
 
 /** Whether a change of a written review changes anything (its Save waits until it does). */
 export function changed(form: ReviewForm, written: WrittenReview): boolean {

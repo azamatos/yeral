@@ -44,5 +44,12 @@ Closes the client leftovers of `log/2026-10-25-client-review-wiring.md` on the a
   `CardSent`, `CardLongWords` (390 with «Text: Russian length»: the card and the page don't overflow). A whole-page
   long-words story isn't possible yet: axe flags the untouched rows' «Call» links (`label-content-name-mismatch`,
   the stretched visible text isn't in the stretched label) — a follow-up for the rows, not the card.
+- Review (`code-review`, one round, 8 findings, 7 fixed): the form keeps the visit the stars were pressed for (the
+  card may move on meanwhile, or go); the card's focus return has its own ref, falling back to the page title when the
+  reviewed row isn't on the screen (Upcoming); `refused` matches 403/404/409 only (a 401 or 429 keeps the words);
+  `YouRated` shared by the row and the drawer; `visitLine()` in `entities/booking` for the form and the card; the
+  stories count the toasts. Not taken: moving the refusal's invalidation into the sdk's `bookingAction` (the brief
+  asked for the drawer's and move mode's component-level pattern; a follow-up for all booking actions together).
 - Not here: the home page's copy of the card (slice 5); the tabs' counts from `total` (the list carries it now; the
-  tabs don't show it yet); the rows' Call label under stretched words (above).
+  tabs don't show it yet); the rows' Call label under stretched words (above); one `onError` re-read in the sdk for
+  every refused booking action (above).

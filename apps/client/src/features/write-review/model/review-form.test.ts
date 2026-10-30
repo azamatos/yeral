@@ -45,6 +45,8 @@ describe('the review form', () => {
     expect(refused(new ApiError(409, 'review_exists'))).toBe(true)
     expect(refused(new ApiError(403, 'review_window_passed'))).toBe(true)
     expect(refused(new ApiError(404, 'not_found'))).toBe(true)
+    expect(refused(new ApiError(401, 'unauthorized'))).toBe(false)
+    expect(refused(new ApiError(429, 'rate_limited'))).toBe(false)
     expect(refused(new ApiError(500, 'internal'))).toBe(false)
     expect(refused(new ApiError(0, 'network'))).toBe(false)
     expect(refused(new TypeError('offline'))).toBe(false)

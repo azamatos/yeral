@@ -25,6 +25,19 @@ export function ByLine({ icon, children }: { icon?: ReactNode; children: ReactNo
   )
 }
 
+/** The drawer's `.rated` (Account-Bookings): the star and «5 · You rated», heard as «You rated it 5 out of 5». */
+export function YouRated({ rating }: { rating: number }) {
+  const t = useTranslations('myBookings')
+  return (
+    <Rating
+      role="img"
+      aria-label={t('ratedLabel', { rating })}
+      value={t('rated', { rating })}
+      className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
+    />
+  )
+}
+
 /** The row's link, where the focus goes back to when its booking's drawer closes. */
 export const rowLinkId = (code: string) => `booking-${code}`
 
@@ -157,15 +170,7 @@ export function BookingRow({
             {reason.text ? t('reasonWith', { reason: reason.reason, text: reason.text }) : t('reason', { reason: reason.reason })}
           </span>
         )}
-        {b.review && (
-          // the drawer's `.rated`: the star and «5 · You rated», heard as «You rated it 5 out of 5»
-          <Rating
-            role="img"
-            aria-label={t('ratedLabel', { rating: b.review.rating })}
-            value={t('rated', { rating: b.review.rating })}
-            className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
-          />
-        )}
+        {b.review && <YouRated rating={b.review.rating} />}
         {took && b.offerTakenBy && (
           // the booking the offered time became, on Upcoming (Account-Bookings `openNew`)
           <Link
