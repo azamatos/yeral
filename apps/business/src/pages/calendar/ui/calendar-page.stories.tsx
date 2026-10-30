@@ -9,7 +9,7 @@ import type { Me } from '@yeral/contract/account'
 import type { CalendarView } from '@yeral/contract/calendar'
 import type { BookingRequest } from '@yeral/contract/requests'
 import type { Workspace } from '@yeral/contract/team'
-import { addDays, localOf, today } from '@yeral/domain/time'
+import { addDays, hm, localOf, today } from '@yeral/domain/time'
 import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
@@ -46,6 +46,14 @@ const glow = (level: Workspace['level']): Workspace => ({
 
 const now = Date.now()
 const DAY = today(now)
+/**
+ * When a hold runs out, as the drawer says it (`calendar.request.at`): «00:13», or «00:13 tomorrow» once the hold
+ * (minutes from the real clock) crosses midnight in the market's zone — the story runs at any time of day.
+ */
+const runsOutAt = (holdUntil: number) => {
+  const until = localOf(holdUntil)
+  return until.date === today(Date.now()) ? hm(until.min) : `${hm(until.min)} tomorrow`
+}
 const TOMORROW = addDays(DAY, 1)
 const HOLIDAY = addDays(DAY, 2)
 const id = (n: number) => `00000000-0000-4000-8000-00000000000${n}`
@@ -442,7 +450,10 @@ export const ConfirmRequest: Story = {
     await expect(drawer.getByText('1 / 2')).toBeVisible()
     await expect(await drawer.findByText(/^\d+ min left to answer$/)).toBeVisible()
     await expect(
-      drawer.getByText(/^If no one answers, the request is cancelled at \d\d:\d\d and the client is offered 3 other times\.$/),
+      // the waiting request's hold (18 min from the story's start) may cross midnight: the sentence says so then
+      drawer.getByText(
+        `If no one answers, the request is cancelled at ${runsOutAt(dayBookings[1]!.holdUntil!)} and the client is offered 3 other times.`,
+      ),
     ).toBeVisible()
     await expect(drawer.getByText('3 visits')).toBeVisible()
     await expect(drawer.getByText('1 no-show')).toBeVisible()
