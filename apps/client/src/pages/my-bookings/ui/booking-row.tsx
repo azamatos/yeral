@@ -7,6 +7,7 @@ import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
 import { Price } from '@yeral/ui/price'
+import { Rating } from '@yeral/ui/rating'
 import { toast } from '@yeral/ui/toast'
 import { Building2, CalendarDays, CircleAlert, Clock, Hourglass, Phone, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
@@ -46,9 +47,10 @@ export function useCancelledBy() {
  * phone; the time struck through while offered times stand in for it), the status with what it means now (waiting
  * for the business, who cancelled, a no-show, a waiting move), the reason of a decline or the business's cancel, the
  * price, and what can be done now: Call while it's ahead (and for a client booked by phone only), Undo after the
- * client's own cancel (its failure said in the row), Write a review after a visit (`features/write-review`), Book again. Times offered after a decline, an expiry or the
- * business's cancel show as chips ({@link OfferTimes}); once they've all passed, the row says so with the way to the
- * business's page.
+ * client's own cancel (its failure said in the row), Write a review after a visit (`features/write-review`), «★ 5 · You
+ * rated» once reviewed with Edit the review while it may change (7 days, as the drawer), Book again. Times offered
+ * after a decline, an expiry or the business's cancel show as chips ({@link OfferTimes}); once they've all passed, the
+ * row says so with the way to the business's page.
  */
 export function BookingRow({
   booking: b,
@@ -57,7 +59,10 @@ export function BookingRow({
 }: {
   booking: MyBooking
   tab: 'upcoming' | 'past'
-  /** «Write a review»: the page's one form opens for it (it outlives the row's button, gone once it's sent). */
+  /**
+   * «Write a review» or «Edit the review»: the page's one form opens for it (it outlives the row's button, gone once
+   * it's sent); the row's `review` says which.
+   */
   onReview?: (booking: MyBooking) => void
 }) {
   const t = useTranslations('myBookings')
@@ -152,6 +157,15 @@ export function BookingRow({
             {reason.text ? t('reasonWith', { reason: reason.reason, text: reason.text }) : t('reason', { reason: reason.reason })}
           </span>
         )}
+        {b.review && (
+          // the drawer's `.rated`: the star and «5 · You rated», heard as «You rated it 5 out of 5»
+          <Rating
+            role="img"
+            aria-label={t('ratedLabel', { rating: b.review.rating })}
+            value={t('rated', { rating: b.review.rating })}
+            className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
+          />
+        )}
         {took && b.offerTakenBy && (
           // the booking the offered time became, on Upcoming (Account-Bookings `openNew`)
           <Link
@@ -213,6 +227,17 @@ export function BookingRow({
               onClick={() => onReview(b)}
             >
               {t('writeReview')}
+            </Button>
+          )}
+          {b.actions.editReview && b.review && onReview && (
+            // the review to change while it may be (book C-35, 7 days), as the drawer offers it
+            <Button
+              size="s"
+              variant="ghost"
+              aria-label={t('editReviewLabel', { business: b.business.name, when })}
+              onClick={() => onReview(b)}
+            >
+              {t('editReview')}
             </Button>
           )}
           {b.actions.bookAgain && (

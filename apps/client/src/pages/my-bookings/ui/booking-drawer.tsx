@@ -297,7 +297,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
   if (b.actions.review || (b.actions.editReview && b.review))
     footer.push(
       <Button key="review" variant={b.actions.review ? 'primary' : 'secondary'} onClick={() => setReviewing(true)}>
-        {b.actions.review ? t('writeReview') : t('editReview')}
+        {b.actions.review ? t('writeReview') : list('editReview')}
       </Button>,
     )
 
@@ -353,11 +353,11 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
           )}
           {passed && <ByLine>{list('offersPassed')}</ByLine>}
           {b.review && (
-            // the board's `.rated`: the star and «5 · You rated», heard as «You rated it 5 out of 5»
+            // the board's `.rated`: the star and «5 · You rated», heard as «You rated it 5 out of 5» (the row's words)
             <Rating
               role="img"
-              aria-label={t('ratedLabel', { rating: b.review.rating })}
-              value={t('rated', { rating: b.review.rating })}
+              aria-label={list('ratedLabel', { rating: b.review.rating })}
+              value={list('rated', { rating: b.review.rating })}
               className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
             />
           )}

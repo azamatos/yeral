@@ -1,9 +1,10 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { BookingDetail, BookingSummary } from '@yeral/contract/bookings'
 import { REVIEW_TAGS, REVIEW_TEXT_MAX, reviewEditableUntil } from '@yeral/domain/lifecycle'
 import { reviewName } from '@yeral/domain/names'
 import { localOf } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
+import { keys } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
@@ -19,7 +20,7 @@ import { useLocale, useTranslations } from 'use-intl'
 import { whatParts } from '@/entities/booking'
 import { useErrorText } from '@/shared/i18n'
 import { calendarAt } from '@/shared/lib'
-import { changed, initialForm, reviewBody, toggleTag, type WrittenReview } from '../model/review-form'
+import { changed, initialForm, refused, reviewBody, toggleTag, type WrittenReview } from '../model/review-form'
 
 /** The booking the review is about, as My bookings' rows and the booking drawer have it. */
 export type ReviewedBooking = Pick<BookingSummary, 'code' | 'business' | 'what' | 'date' | 'start'>
@@ -49,13 +50,18 @@ export interface ReviewModalProps {
  * the visit, «How was it?» with the stars (required, their word beside them), «What went well?» chips, the words (up
  * to 500, optional) and the name a new one shows under, «Later» and «Send review». Opened on a written review, it
  * changes it («Save changes», until its 7 days are up). Sent, it thanks with a toast and closes (it can't be closed
- * while it sends); the sdk updates the booking, the lists and the business's reviews. The caller opens it (Write a
+ * while it sends); the sdk updates the booking, the lists and the business's reviews. Refused by the api (the visit
+ * reviewed or changed meanwhile, its days over), it closes with the reason in a toast and the booking, the lists and
+ * the «How was it?» card are read again, so the screen says what the booking is now (as move mode and the drawer do);
+ * a failure that may pass (the network) stays in the modal with what was written. The caller opens it (Write a
  * review, the card's stars, Edit) and keeps `open`.
  */
 export function ReviewModal({ open, onOpenChange, returnFocus, onDone, ...form }: ReviewModalProps) {
   const t = useTranslations('review')
   const lang = useLocale()
   const sdk = useSdk()
+  const queryClient = useQueryClient()
+  const errorText = useErrorText()
   // here, not in the form: a send finishes (its toast, `onDone`) whatever the form does meanwhile
   const write = useMutation(sdk.bookings.review(lang))
   const edit = useMutation(sdk.bookings.editReview(lang))
@@ -71,6 +77,14 @@ export function ReviewModal({ open, onOpenChange, returnFocus, onDone, ...form }
           toast(written ? t('changed') : t('sent'))
           onOpenChange(false)
           onDone?.(detail)
+        },
+        onError: (error) => {
+          if (!refused(error)) return
+          // the booking moved on meanwhile: what it is now decides what the row, the drawer and the card offer
+          for (const queryKey of [sdk.bookings.detail(form.booking.code, lang).queryKey, keys.bookingLists(), keys.howWasItAll()])
+            void queryClient.invalidateQueries({ queryKey })
+          toast(errorText(error))
+          onOpenChange(false)
         },
       },
     )

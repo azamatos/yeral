@@ -1,16 +1,19 @@
 /**
  * The review modal (Account-Bookings `view=review`, book C-34, C-35): a new review from «Write a review» or the
- * «How was it?» card's stars, a written one changed within its 7 days, the words cut at 500, the api's refusal, the
- * phone's bottom sheet. Over a fake api that answers like the real one (the booking with its review, or the error).
+ * «How was it?» card's stars, a written one changed within its 7 days, the words cut at 500, the api's refusal and its
+ * failure, the phone's bottom sheet; the «How was it?» card alone (F-243), as the home page will mount it, and with
+ * words a third longer at 390. Over a fake api that answers like the real one (the booking with its review, or the
+ * error; the card's visit until it's reviewed or closed).
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import type { BookingDetail } from '@yeral/contract/bookings'
+import type { BookingDetail, BookingSummary } from '@yeral/contract/bookings'
 import { addDays, today } from '@yeral/domain/time'
 import { Button } from '@yeral/ui/button'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { authApi, AYJEMAL, fakeFetch, json, PageStory, person, refuse, type AuthApiOptions } from '@/shared/storybook'
 import type { WrittenReview } from '../model/review-form'
+import { HowWasItCard } from './how-was-it-card'
 import { ReviewModal, type ReviewedBooking } from './review-modal'
 
 const DAY = 86_400_000
@@ -34,23 +37,47 @@ const VISIT: ReviewedBooking = {
   start: 600,
 }
 
-/** What the stories' api was sent: each review, as the body went. */
-const sent: { method: string; body: Record<string, unknown> }[] = []
+/** The same visit as the «How was it?» card has it (`GET /me/how-was-it`'s `visit`). */
+const SUMMARY: BookingSummary = {
+  ...VISIT,
+  end: 630,
+  status: 'completed',
+  cancelledBy: null,
+  price: { type: 'fixed', amount: 150 },
+  source: 'web',
+}
 
-/** The api: the person (`authApi`) and the booking's review, answered as `refusal` when one is given. */
+/** What the stories' api was sent: each review, as the body went; the visits whose card was closed. */
+const sent: { method: string; body: Record<string, unknown> }[] = []
+const closed: string[] = []
+
+/**
+ * The api: the person (`authApi`), the booking's review, answered as `refusal` (a 409, or `status`) when one is given,
+ * and the «How was it?» card's visit (none once it's reviewed or closed).
+ */
 const reviewApi =
-  ({ refusal, ...auth }: AuthApiOptions & { refusal?: string } = {}) =>
+  ({ refusal, status = 409, ...auth }: AuthApiOptions & { refusal?: string; status?: number } = {}) =>
   (): typeof fetch => {
     sent.length = 0
+    closed.length = 0
     const signIn = authApi({ signedIn: AYJEMAL, ...auth })()
     const mine = fakeFetch(({ route, body }) => {
+      if (route === 'GET /me/how-was-it') return json({ visit: sent.length > 0 || closed.length > 0 ? null : SUMMARY })
+      const closing = /^POST \/me\/bookings\/([^/]+)\/how-was-it\/close$/.exec(route)
+      if (closing?.[1]) {
+        closed.push(closing[1])
+        return json(null, 204)
+      }
       const review = /^(POST|PATCH) \/me\/bookings\/([^/]+)\/review$/.exec(route)
       if (!review) return undefined
-      if (refusal) return refuse(409, refusal)
+      if (refusal) return refuse(status, refusal)
       sent.push({ method: review[1]!, body })
       return json({ ...VISIT, status: 'completed', review: { ...body, text: body.text ?? null, createdAt: Date.now() } })
     })
-    return (input, init) => (new Request(input, init).url.includes('/review') ? mine(input, init) : signIn(input, init))
+    return (input, init) => {
+      const url = new Request(input, init).url
+      return url.includes('/review') || url.includes('/how-was-it') ? mine(input, init) : signIn(input, init)
+    }
   }
 
 /** A row's «Write a review» (or «Edit review») that opens the modal, as My bookings will. */
@@ -172,14 +199,30 @@ export const Limit: Story = {
   },
 }
 
-/** The api refuses (30 days after the visit): the modal stays with the reason. */
+/** The api refuses (30 days after the visit): the modal closes with the reason in a toast; the booking is read again. */
 export const Refused: Story = {
   args: { routes: { '/$lang': opener({ rating: 5 }) }, server: reviewApi({ refusal: 'review_window_passed' }) },
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     await userEvent.click(modal.getByRole('button', { name: 'Send review' }))
-    await expect(await modal.findByText('Reviews can be written up to 30 days after the visit.')).toBeVisible()
+    const why = await body.findByText('Reviews can be written up to 30 days after the visit.')
+    await waitFor(() => expect(why).toBeVisible())
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+  },
+}
+
+/** The api fails (down, no connection): the modal stays with the words written and says so; Send tries again. */
+export const Failed: Story = {
+  args: { routes: { '/$lang': opener({ rating: 5 }) }, server: reviewApi({ refusal: 'internal', status: 500 }) },
+  play: async ({ canvas }) => {
+    const modal = await open(canvas)
+    await userEvent.click(modal.getByRole('textbox', { name: /Your review/ }))
+    await userEvent.paste('Lovely.')
+    await userEvent.click(modal.getByRole('button', { name: 'Send review' }))
+    await expect(await modal.findByText('Something went wrong. Please try again.')).toBeVisible()
     await expect(body.getByRole('dialog', { name: 'How was it?' })).toBeVisible()
+    await expect(modal.getByRole('textbox', { name: /Your review/ })).toHaveValue('Lovely.')
+    await expect(modal.getByRole('button', { name: 'Send review' })).toBeEnabled()
   },
 }
 
@@ -198,5 +241,58 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     await expect(modal.getByRole('button', { name: 'Send review' })).toBeVisible()
+  },
+}
+
+/**
+ * The «How was it?» card alone (F-243), as the home page will mount it: the visit the api asks about; a star pressed
+ * opens the form with it picked, «Later» sends nothing and the stars empty again with the focus back on the one
+ * pressed; the cross closes the card for good.
+ */
+export const Card: Story = {
+  args: { routes: { '/$lang': () => <HowWasItCard className="m-6" /> } },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('region', { name: 'How was it?' }))
+    await expect(card.getByText('Ak Diş')).toBeVisible()
+    await expect(card.getByText(/^Check-up · Dr Döwlet · \w{3}, \d+ \w{3}$/)).toBeVisible()
+    await userEvent.click(card.getByRole('radio', { name: '4 stars' }))
+    const modal = within(await body.findByRole('dialog', { name: 'How was it?' }))
+    await expect(modal.getByRole('radio', { name: '4 stars' })).toBeChecked()
+    await userEvent.click(modal.getByRole('button', { name: 'Later' }))
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    await expect(sent).toEqual([])
+    await expect(card.getByRole('radio', { name: '4 stars' })).not.toBeChecked()
+    await waitFor(() => expect(card.getByRole('radio', { name: '4 stars' })).toHaveFocus())
+    await userEvent.click(card.getByRole('button', { name: 'Close' }))
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
+    await expect(closed).toEqual(['YR-46511'])
+  },
+}
+
+/** The card sent from: the review goes with the stars pressed, the card is gone and the focus where the caller says. */
+export const CardSent: Story = {
+  args: { routes: { '/$lang': () => <HowWasItCard className="m-6" /> } },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('region', { name: 'How was it?' }))
+    await userEvent.click(card.getByRole('radio', { name: '5 stars' }))
+    const modal = within(await body.findByRole('dialog', { name: 'How was it?' }))
+    await userEvent.click(modal.getByRole('button', { name: 'Send review' }))
+    // the story before may have thanked moments ago (a toast lives 4–6 s): one of them is this story's, seen
+    await waitFor(() => expect(body.getAllByText('Thank you! Your review is published.').some((el) => el.checkVisibility())).toBe(true))
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
+    await expect(sent).toEqual([{ method: 'POST', body: { rating: 5, tags: [] } }])
+  },
+}
+
+/** The card on a phone with words a third longer (Storybook's «Text: Russian length», #238): nothing overflows 390. */
+export const CardLongWords: Story = {
+  args: { routes: { '/$lang': () => <HowWasItCard className="m-4" /> } },
+  globals: { viewport: { value: 'xs' }, text: 'longer' },
+  play: async ({ canvas }) => {
+    // the words are stretched: the names start as written
+    const region = await canvas.findByRole('region', { name: /^How was it\?/ })
+    await expect(within(region).getByRole('radio', { name: /^5 stars/ })).toBeVisible()
+    await expect(region.scrollWidth).toBeLessThanOrEqual(region.clientWidth)
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
   },
 }
