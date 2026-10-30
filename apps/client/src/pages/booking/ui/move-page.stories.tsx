@@ -1,8 +1,10 @@
 /**
  * Move mode (Booking `mode=move`, book C-30): a confirmed haircut with Aýna tomorrow at 14:30 changes its time — the
- * services locked, Aýna «Current», the own time marked and out of the choice, the previous and the new time, «Ask for
- * the new time» and its sent page; a business that changes it at once; a time taken meanwhile; a booking that can't
- * move; the phone.
+ * services locked, Aýna «Current», the own time marked and out of the choice, the previous and the new time with the
+ * business's rules, «Ask for the new time» and its sent page; a business that changes it at once, with «Add to
+ * calendar»; a time taken meanwhile; a booking that can't move (a declined request; a service gone from the menu);
+ * the booking's specialist no longer doing its services; the phone. The free times come from the booking's own
+ * services (`moveApi` refuses a read asking neither `services` nor `move`).
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { addDays, today } from '@yeral/domain/time'
@@ -45,7 +47,11 @@ export const Specialist: Story = {
   },
 }
 
-/** The new time: 14:30 is the booking's own, marked; 16:00 asked for, the request sent, the old time kept. */
+/**
+ * The new time: 14:30 is the booking's own, marked; 16:00 asked for, the confirmation with the business's rules (the
+ * free change window and lateness, no «Pay at the place»: the move changes nothing about it), the request sent, the
+ * old time kept and nothing to add to a calendar yet.
+ */
 export const AskForTheNewTime: Story = {
   args: { path: `/en/b/glow-studio/book?move=YR-48190&step=time&date=${tomorrow}` },
   play: async ({ canvas }) => {
@@ -56,14 +62,22 @@ export const AskForTheNewTime: Story = {
     await userEvent.click(summary.getByRole('button', { name: 'Continue' }))
     await expect(await canvas.findByRole('heading', { level: 2, name: 'Confirm the new time' })).toBeVisible()
     await expect(canvas.getByText('Previous time')).toBeVisible()
+    await expect(canvas.getByRole('heading', { level: 2, name: 'Booking rules' })).toBeVisible()
+    await expect(canvas.getByText('You can cancel or change the booking for free up to 2 h before.')).toBeVisible()
+    await expect(canvas.getByText("If you're more than 15 min late, the booking may be cancelled.")).toBeVisible()
+    await expect(canvas.queryByText('Pay at the place.')).toBeNull()
     await userEvent.click(summary.getByRole('button', { name: 'Request the new time' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Move request sent' })).toBeVisible()
     await expect(canvas.getByText(/^New time requested: .* · waiting for an answer$/)).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Go to my bookings' })).toHaveAttribute('href', '/en/account/bookings/YR-48190')
+    await expect(canvas.queryByRole('button', { name: 'Add to calendar' })).toBeNull()
   },
 }
 
-/** A business that confirms at once: «Change the time», then «Time changed» with the previous time struck through. */
+/**
+ * A business that confirms at once: «Change the time», then «Time changed» with the previous time struck through and
+ * «Add to calendar» with the new time.
+ */
 export const ChangeAtOnce: Story = {
   args: {
     path: `/en/b/glow-studio/book?move=YR-48190&step=confirm&date=${tomorrow}&time=960`,
@@ -79,6 +93,54 @@ export const ChangeAtOnce: Story = {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Time changed' })).toBeVisible()
     await expect(canvas.getByText('Previous time')).toBeVisible()
     await expect(canvas.queryByText(/waiting for an answer/)).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Add to calendar' }))
+    await expect(await canvas.findByText('The calendar file (.ics) is downloaded.')).toBeVisible()
+  },
+}
+
+/** A service of the booking left the menu meanwhile: the first free-times read says it can't move online, before the time step. */
+export const CantMoveOnline: Story = {
+  args: { server: moveApi({ details: { 'YR-48190': { reschedule: null } }, business: { moveRead: 'not_bookable' } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText("This booking can't be moved online.")).toBeVisible()
+    await expect(canvas.getByText(/A service of this booking is no longer booked online/)).toBeVisible()
+    await expect(canvas.queryByRole('radiogroup', { name: 'Specialist' })).toBeNull()
+    await expect(canvas.getByRole('link', { name: 'Go to my bookings' })).toHaveAttribute('href', '/en/account/bookings')
+  },
+}
+
+/** Aýna no longer does the haircut, as the business's page says: the move asks for any specialist and says so. */
+export const SpecialistLeft: Story = {
+  args: {
+    server: moveApi({
+      details: { 'YR-48190': { reschedule: null } },
+      business: {
+        business: { ...GLOW, specialists: GLOW.specialists.map((s) => (s.id === 'st-ayna' ? { ...s, serviceIds: ['s2'] } : s)) },
+      },
+    }),
+  },
+  play: async ({ canvas }) => {
+    const group = within(await canvas.findByRole('radiogroup', { name: 'Specialist' }))
+    await expect(group.getByRole('radio', { name: /Any specialist/ })).toHaveAttribute('aria-checked', 'true')
+    await expect(group.getByRole('radio', { name: /Aýna/ })).toBeDisabled()
+    const toast = await within(document.body).findByText('Aýna no longer does these services. The new time is with any specialist.')
+    await waitFor(() => expect(toast).toBeVisible())
+  },
+}
+
+/** The page is behind the business: the api won't swap Aýna either (404 naming her), with the same outcome. */
+export const SpecialistGone: Story = {
+  args: { server: moveApi({ details: { 'YR-48190': { reschedule: null } }, business: { moveRead: { staffGone: 'st-ayna' } } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('radiogroup', { name: 'Specialist' })).toBeVisible()
+    // the address changes to anyone (the step renders again: ask for the group afresh)
+    const group = () => within(canvas.getByRole('radiogroup', { name: 'Specialist' }))
+    await waitFor(() => expect(group().getByRole('radio', { name: /Any specialist/ })).toHaveAttribute('aria-checked', 'true'))
+    await expect(group().getByText('Current')).toBeVisible()
+    // the toast is SpecialistLeft's check: the toaster keeps a story's toasts alive into the next one
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 2, name: 'Choose the new time' })).toBeVisible()
+    await expect(within(canvas.getByRole('complementary', { name: 'Your booking' })).getByText('Any specialist')).toBeVisible()
   },
 }
 

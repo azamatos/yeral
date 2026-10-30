@@ -313,7 +313,9 @@
       "myBookings": "Go to my bookings",
       "cant": "This booking can't be moved online.",
       "cantLead": "Only a confirmed appointment can move, until its free change time ends. Call the business, or cancel and book again.",
+      "cantServiceLead": "A service of this booking is no longer booked online. Call the business, or cancel and book again.",
       "taken": "This time was just taken. Pick another one.",
+      "staffGone": "{name} no longer does these services. The new time is with any specialist.",
       "logIn": "Log in to change the time",
       "logInLead": "The booking is in your account: log in with your phone number.",
       "logInAction": "Log in"

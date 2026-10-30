@@ -225,6 +225,12 @@ export interface BusinessApiOptions extends AuthApiOptions {
   reviews?: Review[]
   /** A start someone else takes first: sending it answers `slot_taken` with the nearest free times, once. */
   taken?: number
+  /**
+   * What the free-times reads answer in move mode (`move=`, the booking's own services; a read naming `services`
+   * outside it is the api's 400): refused as a booking that can't move online any more (409 `not_bookable`), or the
+   * booking's own specialist no longer doing its services (404 `not_found` naming them, when asked for).
+   */
+  moveRead?: 'not_bookable' | { staffGone: string }
 }
 
 /** The booking `POST /bookings` makes (`YR-48213`, then `YR-48214` …): pending at a business that confirms by hand, else confirmed. */
@@ -295,12 +301,19 @@ function sentBooking(business: BusinessDetail, body: Record<string, unknown>, co
  * (`/me/favorites`) and, for everything else, the sign-in (`authApi`).
  */
 export const businessApi =
-  ({ business = GLOW, favourites = [], reviews = REVIEWS, taken, ...auth }: BusinessApiOptions = {}) =>
+  ({ business = GLOW, favourites = [], reviews = REVIEWS, taken, moveRead, ...auth }: BusinessApiOptions = {}) =>
   (): typeof fetch => {
     const signIn = authApi(auth)()
     const saved = new Set(favourites)
     const bookings = new Map<string, BookingDetail>()
     let takenFirst = taken
+    /** The free-times reads' common rules: `services` or `move`; in move mode what `moveRead` says. */
+    const freeRefusal = (query: URLSearchParams) => {
+      if (!query.has('services') && !query.has('move')) return refuse(400, 'validation_error', { field: 'services' })
+      if (!query.has('move') || !moveRead) return null
+      if (moveRead === 'not_bookable') return refuse(409, 'not_bookable')
+      return query.get('staff') === moveRead.staffGone ? refuse(404, 'not_found', { staffId: moveRead.staffGone }) : null
+    }
     const card = (slug: string): BusinessCard =>
       ({
         ...(typeof business === 'object' ? business : GLOW),
@@ -326,16 +339,19 @@ export const businessApi =
         return booking ? json(booking) : refuse(404, 'not_found')
       }
       if (/^GET \/businesses\/[^/]+\/specialists\/availability$/.test(route))
-        return json({
-          any: { date: today(), start: 930 },
-          items: [
-            { staffId: 'st-ayna', next: { date: today(), start: 930 } },
-            { staffId: 'st-maral', next: { date: today(), start: 960 } },
-            { staffId: 'st-jeren', next: { date: addDays(today(), 1), start: 600 } },
-            { staffId: 'st-leyli', next: null },
-          ],
-        })
-      if (/^GET \/businesses\/[^/]+\/availability$/.test(route)) return json(freeTimes(query.get('date')))
+        return (
+          freeRefusal(query) ??
+          json({
+            any: { date: today(), start: 930 },
+            items: [
+              { staffId: 'st-ayna', next: { date: today(), start: 930 } },
+              { staffId: 'st-maral', next: { date: today(), start: 960 } },
+              { staffId: 'st-jeren', next: { date: addDays(today(), 1), start: 600 } },
+              { staffId: 'st-leyli', next: null },
+            ],
+          })
+        )
+      if (/^GET \/businesses\/[^/]+\/availability$/.test(route)) return freeRefusal(query) ?? json(freeTimes(query.get('date')))
       if (/^GET \/businesses\/[^/]+\/reviews$/.test(route)) return json(reviewPage(reviews, query.get('cursor')))
       const page = /^GET \/businesses\/([^/]+)$/.exec(route)
       if (page) return typeof business === 'string' ? refuse(404, business) : json(business)

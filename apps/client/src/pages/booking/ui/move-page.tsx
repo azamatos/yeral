@@ -16,16 +16,18 @@ import { Price } from '@yeral/ui/price'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Stepper } from '@yeral/ui/stepper'
 import { toast } from '@yeral/ui/toast'
-import { ArrowRight, Check, ChevronLeft, CircleAlert, Clock, Lock, X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { ArrowRight, CalendarPlus, Check, ChevronLeft, CircleAlert, Clock, Lock, X } from 'lucide-react'
+import { useEffect, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { pickedServices, selectionTotal } from '@/features/pick-services'
-import { BookingStatusBadge } from '@/entities/booking'
+import { BookingStatusBadge, whatParts } from '@/entities/booking'
 import { useErrorText } from '@/shared/i18n'
 import { addressLine, calendarAt } from '@/shared/lib'
 import { wrap } from '@/shared/ui'
-import { chosenStaff, currentMoveStep, isOwnTime, MOVE_STEPS, wasOf, type BookingSearch, type MoveStep } from '../model/flow'
+import { chosenStaff, currentMoveStep, isOwnTime, MOVE_STEPS, moveRefusal, wasOf, type BookingSearch, type MoveStep } from '../model/flow'
+import { useAddToCalendar } from './add-to-calendar'
 import { FocusedHeader } from './focused-header'
+import { Rules } from './rules'
 import { StaffStep } from './staff-step'
 import { StepTitle } from './step-title'
 import { Summary } from './summary'
@@ -92,12 +94,14 @@ function Locked({ picked }: { picked: Picked }) {
  * code, the steps Specialist · Time · Confirm (the services as booked, locked, with the way to change them), the one
  * it's with now chosen and marked «Current», the new time among theirs (the booking's own time out of the choice with
  * them), then «Confirm the new time» with the previous and the new time. A business that confirms by hand gets
- * «Request the new time» (the previous time is kept until it answers), one that confirms at once «Change the time».
- * A time taken meanwhile says so and the time step reads its times again; any other refusal reads the booking again
- * (what it is now decides). Sent, the page says which from its address (`?moved=asked|changed`, the times with it), so
- * a reload keeps it whatever happens next. A booking that can't move here (not a confirmed appointment, past its free
- * change time, a service no longer on the business's page) says so with the way back to My bookings; signed out, the
- * way to log in.
+ * «Request the new time» (the previous time is kept until it answers), one that confirms at once «Change the time»;
+ * the business's rules under it. A time taken meanwhile says so and the time step reads its times again; any other
+ * refusal reads the booking again (what it is now decides). Sent, the page says which from its address
+ * (`?moved=asked|changed`, the times with it), so a reload keeps it whatever happens next. The free times come from
+ * the booking's own services (the api's, `2026-10-30-move-own-services.md`): a booking that can't move here (not a
+ * confirmed appointment, past its free change time, or `not_bookable` from the first free-times read: a service of it
+ * gone from the menu) says so with the way back to My bookings, before the time step; the booking's specialist no
+ * longer doing its services (`not_found` naming them) makes it «Any specialist». Signed out, the way to log in.
  */
 export function MovePage() {
   const t = useTranslations('booking')
@@ -122,21 +126,48 @@ export function MovePage() {
   const back = { to: '/$lang/account/bookings/$code' as const, params: { lang, code } }
 
   const items = b?.what.type === 'appointment' ? b.what.items : []
+  // the services as booked, for their names and prices (the api reads the free times from the booking's own items)
   const ids = items.flatMap((i) => (i.serviceId ? [i.serviceId] : []))
-  // every service as booked, still on the business's page (a deleted one is archived: its id stays, the page drops it)
   const picked = pickedServices(detail, ids)
   const total = selectionTotal(picked)
   const people = [...new Set(items.map((i) => i.staffId))]
   const current = people.length === 1 ? (people[0] ?? null) : null
-  // one no longer on the page (removed from the team) leaves anyone
-  const staff = chosenStaff(detail, ids, search.staff ?? current ?? 'any')
+  const asked = search.staff ?? current ?? 'any'
+  // one no longer on the page, or no longer doing the services, leaves anyone (the api never swaps them)
+  const staff = chosenStaff(detail, ids, asked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
   const own = b ? { code, date: b.date, start: b.start, current } : null
   const date = search.date && search.date >= today(now) ? search.date : null
   const locked = send.isPending || send.isSuccess
+  // what the booking says of its move; the api's first free-times read has the last word
+  const movableAsRead =
+    b !== undefined && b.business.slug === detail.slug && b.what.type === 'appointment' && b.status === 'confirmed' && b.actions.reschedule
+  // the first free-times read (the time step's own, without a day) says before the time step whether the booking can
+  // still move online, and whether its specialist still does its services; the page waits for it only while the
+  // address names nobody (its first open): a specialist chosen later keeps the step while their times come
+  const first = useQuery({
+    ...sdk.availability.appointment(detail.slug, { lang, staff, move: code }),
+    enabled: movableAsRead && !search.moved,
+  })
+  const gating = first.isPending && search.staff === undefined
+  const refusal = moveRefusal(first.error, staff) ?? moveRefusal(send.error, staff)
+  // the specialist asked for is gone: the page's catalogue says so (with every service still known: a service gone for
+  // good is the api's `not_bookable`, not theirs), or the api's 404 when the page is behind it
+  const staffGone = b !== undefined && ((asked !== 'any' && staff === 'any' && ids.length === items.length) || refusal === 'staff_gone')
+  const askedName = detail.specialists.find((s) => s.id === asked)?.name ?? items.find((i) => i.staffId === asked)?.staff ?? null
+  useEffect(() => {
+    if (!staffGone) return
+    if (askedName) toast(m('staffGone', { name: askedName }))
+    void navigate({ to: '.', search: (prev: Record<string, unknown>) => ({ ...prev, staff: 'any', time: undefined }), replace: true })
+  }, [staffGone, askedName, navigate, m])
+  // any other refusal of the first read (cancelled meanwhile, its free change time over): what the booking is now decides
+  const stale = first.error !== null && !refusal && isApiError(first.error) && first.error.code !== 'network'
+  useEffect(() => {
+    if (stale) void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey })
+  }, [stale, queryClient, sdk, code, lang])
   // the chosen day's free times, as the time step asks them: a time the day no longer has isn't chosen any more
-  const freeTimes = sdk.availability.appointment(detail.slug, { lang, services: ids, staff, date: date ?? undefined, move: code })
-  const free = useQuery({ ...freeTimes, enabled: ids.length > 0 && date !== null && search.time !== undefined && !search.moved })
+  const freeTimes = sdk.availability.appointment(detail.slug, { lang, staff, date: date ?? undefined, move: code })
+  const free = useQuery({ ...freeTimes, enabled: date !== null && search.time !== undefined && !search.moved })
   const settled = free.data && !free.isPlaceholderData ? free.data : null
   const chosen = search.time
   const time =
@@ -171,21 +202,15 @@ export function MovePage() {
 
   if (search.moved && b) return <MoveSent booking={b} detail={detail} picked={picked} staffName={staffName} />
 
-  const movable =
-    b !== undefined &&
-    b.business.slug === detail.slug &&
-    b.what.type === 'appointment' &&
-    picked.length === items.length &&
-    b.status === 'confirmed' &&
-    b.actions.reschedule
-  if (!b || !movable) {
+  const movable = movableAsRead && refusal !== 'not_bookable'
+  if (!b || !movable || gating) {
     const signedOut = isApiError(booking.error, 'unauthorized')
     const missing = isApiError(booking.error, 'not_found') || isApiError(booking.error, 'validation_error')
     return (
       <div className="flex min-h-dvh flex-col bg-n-0 text-n-900">
         {header(backLink)}
         <main className="mx-auto w-full max-w-160 px-6 pt-14 pb-24 max-sm:px-4 max-sm:pt-10">
-          {booking.isPending ? (
+          {booking.isPending || (movable && gating) ? (
             <div aria-hidden className="flex flex-col gap-3">
               <Skeleton className="h-9 w-64" />
               <Skeleton className="h-24 w-full" />
@@ -230,7 +255,7 @@ export function MovePage() {
                 </Button>
               }
             >
-              {m('cantLead')}
+              {refusal === 'not_bookable' ? m('cantServiceLead') : m('cantLead')}
             </Callout>
           )}
         </main>
@@ -278,7 +303,9 @@ export function MovePage() {
             set({ step: 'time', time: undefined }, { top: true })
             return
           }
-          // cancelled meanwhile, its free change time over, a specialist gone: what the booking is now decides
+          // the specialist no longer doing the services, or a service gone: the page says so from `refusal`
+          if (moveRefusal(error, staff)) return
+          // cancelled meanwhile, its free change time over: what the booking is now decides
           void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey })
           toast(errorText(error))
         },
@@ -384,6 +411,8 @@ export function MovePage() {
                   )}
                   {/* under 1024 the summary isn't beside the steps: the booking's card is here */}
                   <div className="md:hidden">{summary(false)}</div>
+                  {/* the move changes nothing about the payment: its board leaves «Pay at the place» out */}
+                  <Rules rules={detail.rules} pay={false} className="pb-0" />
                 </div>
               )}
             </div>
@@ -406,7 +435,9 @@ export function MovePage() {
 /**
  * The move's sent page (Booking `isSentMove`), from its address: asked of a business that confirms by hand, «Move
  * request sent» with the new time waiting and the previous one kept; changed at once, «Time changed» with the previous
- * one struck through. The booking stays confirmed either way; the card has the business, the times, what and where.
+ * one struck through and «Add to calendar» with the new time (as the board draws it for the instant move only: an
+ * asked time isn't fixed yet). The booking stays confirmed either way; the card has the business, the times, what and
+ * where.
  */
 function MoveSent({
   booking: b,
@@ -427,11 +458,25 @@ function MoveSent({
   const lang = useLocale()
   const at = useWhenLong()
   const search: BookingSearch = useSearch({ strict: false })
+  const calendar = useAddToCalendar()
   const minutes = b.end - b.start
   const was = wasOf(search.was)
   const asked = search.moved === 'asked'
-  const after = search.date && search.time !== undefined ? at(search.date, search.time, search.time + minutes) : at(b.date, b.start, b.end)
+  // the new time as sent; the booking's own when the address lost it
+  const moved = search.date && search.time !== undefined ? { date: search.date, start: search.time } : { date: b.date, start: b.start }
+  const after = at(moved.date, moved.start, moved.start + minutes)
   const before = was ? at(was.date, was.start, was.start + minutes) : null
+  // the time changed at once is fixed: it goes to the calendar as a sent booking does (an asked one isn't yet)
+  const addToCalendar = () =>
+    calendar.add({
+      code: b.code,
+      date: moved.date,
+      start: moved.start,
+      end: moved.start + minutes,
+      services: whatParts(b.what)[0] ?? '',
+      business: detail.name,
+      address: addressLine(detail, fmt),
+    })
   return (
     <div className="flex min-h-dvh flex-col bg-n-0 text-n-900">
       <FocusedHeader
@@ -489,17 +534,30 @@ function MoveSent({
             ]}
           />
         </div>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button asChild variant="primary" size="l">
-            <Link to="/$lang/account/bookings/$code" params={{ lang, code: b.code }}>
-              {m('myBookings')}
-            </Link>
-          </Button>
-          <Button asChild variant="secondary" size="l">
-            <Link to="/$lang" params={{ lang }}>
-              {t('sent.home')}
-            </Link>
-          </Button>
+        <div className="flex flex-col items-center gap-3.5">
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button asChild variant="primary" size="l">
+              <Link to="/$lang/account/bookings/$code" params={{ lang, code: b.code }}>
+                {m('myBookings')}
+              </Link>
+            </Button>
+            {!asked && (
+              <Button variant="secondary" size="l" onClick={addToCalendar}>
+                <CalendarPlus aria-hidden />
+                {calendar.label}
+              </Button>
+            )}
+            <Button asChild variant="ghost" size="l">
+              <Link to="/$lang" params={{ lang }}>
+                {t('sent.home')}
+              </Link>
+            </Button>
+          </div>
+          {calendar.done && (
+            <span role="status" className="text-dense text-n-600">
+              {calendar.doneText}
+            </span>
+          )}
         </div>
       </main>
     </div>
