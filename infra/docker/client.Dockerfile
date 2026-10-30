@@ -26,7 +26,12 @@ ARG GITHUB_SHA=unknown
 ARG YERAL_ENV=production
 # empty = the domain @yeral/lib/site defaults to; a deployment on another domain passes its own
 ARG YERAL_DOMAIN=
-ENV GITHUB_SHA=$GITHUB_SHA VITE_YERAL_ENV=$YERAL_ENV VITE_YERAL_DOMAIN=$YERAL_DOMAIN
+# the ways to reach Ýeral (book F-174), from the server's .env through deploy.sh; empty = not shown
+ARG YERAL_SUPPORT_PHONE=
+ARG YERAL_SUPPORT_TELEGRAM=
+ARG YERAL_SUPPORT_EMAIL=
+ENV GITHUB_SHA=$GITHUB_SHA VITE_YERAL_ENV=$YERAL_ENV VITE_YERAL_DOMAIN=$YERAL_DOMAIN \
+  VITE_YERAL_SUPPORT_PHONE=$YERAL_SUPPORT_PHONE VITE_YERAL_SUPPORT_TELEGRAM=$YERAL_SUPPORT_TELEGRAM VITE_YERAL_SUPPORT_EMAIL=$YERAL_SUPPORT_EMAIL
 RUN pnpm --filter @yeral/client run build
 
 # 3. runtime: the built files and one Node process

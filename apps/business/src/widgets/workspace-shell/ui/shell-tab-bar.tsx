@@ -1,11 +1,11 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import { BottomTab, BottomTabBar, BottomTabButton } from '@yeral/ui/bottom-tab-bar'
 import { MoreSheet, MoreSheetDivider, MoreSheetPerson, MoreSheetRow } from '@yeral/ui/more-sheet'
-import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { ExternalLink, Headset, LogOut, Menu, User } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { ContactYeral, useContactYeral } from '@/features/contact-yeral'
+import { SUPPORT_LINE } from '@/shared/config'
 import { sectionOf, sectionsFor, type Section } from '../model/sections'
 import { useAccount } from '../model/use-account'
 import { useWorkspace } from '../model/use-workspace'
@@ -18,7 +18,7 @@ const TABS: readonly Section[] = ['calendar', 'bookings', 'clients']
 /**
  * The phone's menu under 768 (B-Mobile): Calendar · Bookings (the requests this person may answer) · Clients · More.
  * More opens the sheet above the bar: the workspace (its switcher), Reviews and Settings where the level has them, the
- * person, the client site, Contact Ýeral (its small sheet over More: call or Telegram) and Log out.
+ * person, the client site, Contact Ýeral (its small sheet over More: the ways that are set; none, no row) and Log out.
  */
 export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | null) => void }) {
   const t = useTranslations('shell')
@@ -102,7 +102,13 @@ export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | n
               drill
               icon={<Headset />}
               label={contact.title}
-              caption={words('support.contactCaption', { phone: SUPPORT_LINE.phone })}
+              caption={[
+                SUPPORT_LINE.phone,
+                SUPPORT_LINE.telegram && words('support.way.telegram'),
+                SUPPORT_LINE.email && words('support.way.email'),
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             />
           }
         />

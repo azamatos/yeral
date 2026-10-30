@@ -116,7 +116,7 @@ async function main() {
         console.warn(`seeded ${demo ? 'demo data' : 'the cities and the category catalogue'}: ${JSON.stringify(counts)}`)
       }
       // the first launch's example businesses (book Q-004): added once each, beside the real ones
-      if (!demo && config.exampleBusinesses) {
+      if (!demo && config.exampleBusinesses && config.examplePhone) {
         const added = await seedExamples(db, { now: Date.now(), phone: config.examplePhone })
         console.warn(`example businesses: ${added} added, all showing ${config.examplePhone}`)
       }

@@ -94,8 +94,8 @@ for backups and accounts for error tracking and uptime checks (owner, 2026-10-22
   setup link (24 hours) to hand over in person; locally `pnpm --filter @yeral/api admin:invite <login> "<name>"`.
 - The first launch (book Q-004, Q-030): `EXAMPLE_BUSINESSES=true` makes `setup` (every deploy's migrate step) add the
   design's appointment businesses that aren't there yet, marked "Example" and confirming at once, with no team; their
-  photos come in the api's image (`/app/demo-photos`, `DEMO_MEDIA_DIR`). They show the market's support line
-  (`MARKET.support.phone`, or `EXAMPLE_PHONE` when set), never the design's numbers. `BOOKING_TYPES=appointment` keeps tables and classes out of
+  photos come in the api's image (`/app/demo-photos`, `DEMO_MEDIA_DIR`). They show Ýeral's support phone
+  (`YERAL_SUPPORT_PHONE`, or `EXAMPLE_PHONE` when set; one of the two is needed), never the design's numbers. `BOOKING_TYPES=appointment` keeps tables and classes out of
   lists and search. Both sit in the server's compose; the examples are on since 2026-10-25 (the owner), with the code on the screen, so booking can be tried live. When the pilot
   ends, hide them from the admin tool (a close can't be undone for a business with no owner account).
 - One of the owner's test businesses open to clients (the owner's D2, 25.10.2026; book chapter 9): nothing is verified
@@ -195,8 +195,10 @@ that reads a file outside every package lists it as an input with `$TURBO_ROOT$`
 
 - GitHub secrets, never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (the Storybook Worker's deploys);
   later the SSH deploy key for the own server, the error tracker's DSN and the SMS gateway keys.
-- On the server: `/srv/yeral/.env` (mode 600) holds the database password and `ADMIN_SECRET_KEY`, later (P6) the R2
-  token for backups.
+- On the server: `/srv/yeral/.env` (mode 600) holds the database password, `ADMIN_SECRET_KEY` and the ways to reach
+  Ýeral (`YERAL_SUPPORT_PHONE`, `YERAL_SUPPORT_TELEGRAM`, `YERAL_SUPPORT_EMAIL`: the owner's own phone and Telegram,
+  never in the repo, and `hello@yeral.app`; the api reads them from the compose environment, the sites bake them in at
+  build time through `deploy.sh`'s build args), later (P6) the R2 token for backups.
 - The owner creates tokens in the providers' dashboards and stores them with `gh secret set NAME --env production`
   (the value is typed into the prompt).
 - Local: `.env.local` per app (gitignored); `.env.example` committed and documents every variable.

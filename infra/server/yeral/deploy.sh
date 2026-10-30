@@ -21,11 +21,35 @@ fi
 
 image="yeral-api:${COMMIT:0:12}"
 docker build -f src/infra/docker/api.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$image" src
-# the business app: production hosts baked in at build time (@yeral/lib/site's default domain)
+# the sites: production hosts baked in at build time (@yeral/lib/site's default domain), and the ways to reach Ýeral
+# (YERAL_SUPPORT_PHONE, YERAL_SUPPORT_TELEGRAM, YERAL_SUPPORT_EMAIL in .env, book F-174; one unset = not shown).
+# Checked here first, by @yeral/lib/site's rules: a bad value would leave both sites blank (siteFromEnv throws at page
+# load) and stop the api, after the old containers were replaced; the examples (EXAMPLE_BUSINESSES) need the phone
+support_args=()
+support_phone=
+for name in YERAL_SUPPORT_PHONE YERAL_SUPPORT_TELEGRAM YERAL_SUPPORT_EMAIL; do
+  # the value as compose reads it: the last line that sets it, surrounding quotes and whitespace dropped
+  value=$(grep "^$name=" .env | tail -n1 | cut -d= -f2- | sed -E "s/^[[:space:]]*[\"']?//; s/[\"']?[[:space:]]*$//" || true)
+  case $name in
+  YERAL_SUPPORT_PHONE) pattern='^\+[1-9][0-9]{7,14}$' ;;
+  YERAL_SUPPORT_TELEGRAM) pattern='^[A-Za-z][A-Za-z0-9_]{4,31}$' ;;
+  *) pattern='^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$' ;;
+  esac
+  if [ -n "$value" ] && ! [[ $value =~ $pattern ]]; then
+    echo "$name in .env isn't valid (infra/server/README.md): nothing deployed" >&2
+    exit 1
+  fi
+  [ "$name" = YERAL_SUPPORT_PHONE ] && support_phone=$value
+  support_args+=(--build-arg "$name=$value")
+done
+if [ -z "$support_phone" ]; then
+  echo 'add YERAL_SUPPORT_PHONE (and the Telegram and e-mail) to .env first, infra/server/README.md: nothing deployed' >&2
+  exit 1
+fi
 business_image="yeral-business:${COMMIT:0:12}"
-docker build -f src/infra/docker/business.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$business_image" src
+docker build -f src/infra/docker/business.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" "${support_args[@]}" -t "$business_image" src
 client_image="yeral-client:${COMMIT:0:12}"
-docker build -f src/infra/docker/client.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$client_image" src
+docker build -f src/infra/docker/client.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" "${support_args[@]}" -t "$client_image" src
 
 # the images go into .env before any `docker compose` command reads compose.yml (the backup's dump is one): a variable
 # it asks for and .env lacks would stop it (25.10.2026). Plain `docker compose ps|logs` in /srv/yeral work too.

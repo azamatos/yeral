@@ -15,6 +15,7 @@
   "dependencies": {
     "@yeral/domain": "workspace:*",
     "@yeral/i18n": "workspace:*",
+    "@yeral/lib": "workspace:*",
     "@yeral/sdk": "workspace:*",
     "@yeral/ui": "workspace:*",
     "lucide-react": "catalog:"

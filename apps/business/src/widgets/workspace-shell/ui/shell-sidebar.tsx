@@ -77,7 +77,8 @@ export function ShellSidebar({
             href: account.client.href,
             external: true,
           },
-          { id: 'contact', label: contact.title, icon: <Headset />, links: contact.links },
+          // no way to reach Ýeral set: no row (a submenu with no links would open empty)
+          ...(contact.links.length ? [{ id: 'contact', label: contact.title, icon: <Headset />, links: contact.links }] : []),
           { id: 'logout', label: t('account.logout'), icon: <LogOut />, danger: true, onSelect: account.logout },
         ]}
         className={collapsed ? undefined : 'self-stretch'}

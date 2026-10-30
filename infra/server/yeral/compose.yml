@@ -38,6 +38,11 @@ services:
       DATABASE_URL: postgres://yeral:${POSTGRES_PASSWORD}@postgres:5432/yeral
       YERAL_ENV: production
       YERAL_DOMAIN: yeral.app
+      # the ways to reach Ýeral (book F-174), set in .env by hand (infra/server/README.md): the example businesses'
+      # phone; the sites bake the same three in at build time (deploy.sh). Unset = not shown
+      YERAL_SUPPORT_PHONE: ${YERAL_SUPPORT_PHONE:-}
+      YERAL_SUPPORT_TELEGRAM: ${YERAL_SUPPORT_TELEGRAM:-}
+      YERAL_SUPPORT_EMAIL: ${YERAL_SUPPORT_EMAIL:-}
       PORT: '3004'
       # Caddy sets X-Forwarded-For to the caller's address and drops what the caller sent
       TRUSTED_IP_HEADER: x-forwarded-for
@@ -49,7 +54,7 @@ services:
       # the first launch's example businesses (book Q-004): `setup` adds them, marked "Example" and confirming at once.
       # On since 25.10.2026 (the owner), so slice 3's booking can be tried live while nothing can be verified
       EXAMPLE_BUSINESSES: 'true'
-      # the phone every example shows and "Call" reaches: the market's support line (MARKET.support.phone) unless set
+      # the phone every example shows and "Call" reaches: YERAL_SUPPORT_PHONE unless set (one of the two is needed)
       # EXAMPLE_PHONE: '+993…'
       # the business app's demo workspace (book F-242): the jobs make it and make it again every night at 04:00; on
       # when the first launch opens (operations.md)

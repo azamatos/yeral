@@ -61,7 +61,8 @@ function Submenu({ label, icon, links }: AccountMenuSubmenu) {
  * The person, not a switcher (DS-Patterns 06 · AccountMenu; B-Shell `.me`): avatar 32, name, phone and a ghost 36 "…"
  * button, the only thing that opens the menu (300, above the block). `rail`: the avatar alone in a 44 button. Rows come
  * from the screen; a danger row (Log out) sits after a separator; a row with `links` opens a submenu beside the menu
- * (Contact Ýeral: call or write on Telegram). No Language row while the market has one language.
+ * (Contact Ýeral: call, write on Telegram, write an e-mail; the screen leaves the row out when it has no links). No
+ * Language row while the market has one language.
  */
 export function AccountMenu({
   variant = 'block',

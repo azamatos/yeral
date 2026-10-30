@@ -38,6 +38,24 @@ ssh yeral-vps 'rm -rf /srv/yeral/src && mkdir -p /srv/yeral/src && tar -x -C /sr
 ssh yeral-vps "COMMIT=$(git rev-parse HEAD) PUBLIC=1 bash /srv/yeral/src/infra/server/yeral/deploy.sh"
 ```
 
+**Once, before the first deploy with the support contacts in the config** (30.10.2026, book chapter 9): add the ways
+to reach Ýeral to `/srv/yeral/.env` (mode 600; the real phone and Telegram are the owner's own and never go in the
+repo, so this file names placeholders):
+
+```
+ssh yeral-vps 'cat >> /srv/yeral/.env' <<'EOF'
+YERAL_SUPPORT_PHONE=<the owner's phone, E.164: +993…>
+YERAL_SUPPORT_TELEGRAM=<the owner's Telegram username, without @>
+YERAL_SUPPORT_EMAIL=hello@yeral.app
+EOF
+```
+
+`deploy.sh` reads them from `.env`: the api gets them from the compose environment (the example businesses' phone),
+the client site and the business app bake them in at build time (build args → `VITE_YERAL_SUPPORT_*`), so a change
+needs a deploy. One left empty isn't shown. `deploy.sh` refuses to deploy before anything is built when the phone is
+missing (the examples need it) or a value breaks the rules (the phone E.164 and the market's, the Telegram name
+without `@`, a plain e-mail): a bad one would leave both sites blank.
+
 `deploy.sh` builds the api, client and business images on the server, saves the database first
 (`/srv/yeral/backup-<date>-before-<commit>.sql.gz`, mode 600; a failed dump stops the deploy; the way back from a bad
 migration, operations.md "Rollback"), runs the migrations and the category catalogue (never the demo), starts the api

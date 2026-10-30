@@ -1,3 +1,4 @@
+import './env'
 import tailwindcss from '@tailwindcss/vite'
 import type { StorybookConfig } from '@storybook/react-vite'
 import type { Plugin } from 'vite'
