@@ -37,7 +37,8 @@ export const appointmentAvailabilityQuerySchema = langQuerySchema
     services: idListQuery.optional(),
     /**
      * A specialist id, or `any` for «Islendik hünärmen» (the default). In move mode left out, the booking's own
-     * specialist while one does every service and still does them here; else `any`.
+     * specialist, as the reschedule reads a `staffId` left out (one who no longer does the services: 404 `not_found`
+     * with `staffId`, never a swap; ask for `any` or name another).
      */
     staff: z.union([z.literal('any'), idSchema]).optional(),
     date: ymdSchema.optional(),

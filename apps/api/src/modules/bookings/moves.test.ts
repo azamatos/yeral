@@ -213,14 +213,16 @@ describe('moves', () => {
     expect((await b.req('/v1/businesses/glow-studio/specialists/availability')).status).toBe(400)
   })
 
-  it('move mode: the booking’s own specialist no longer doing its service leaves anyone (never a swap)', async () => {
+  it('move mode: the booking’s own specialist no longer doing its service is not found, as on the reschedule (never a swap)', async () => {
     const { b, code, date } = await confirmed('+99365444222', OWN)
     await db.delete(staffServices).where(and(eq(staffServices.staffId, who['Aýna']!), eq(staffServices.serviceId, haircut)))
     try {
       const url = `/v1/businesses/glow-studio/availability?date=${date}&move=${code}`
-      const own = (await b.req(url)).json
-      expect(own.slots.length).toBeGreaterThan(0) // Maral's
-      expect(own).toEqual((await b.req(`${url}&staff=any`)).json)
+      const own = await b.req(url)
+      expect(own.status).toBe(404)
+      expect(own.json.error).toEqual({ code: 'not_found', details: { staffId: who['Aýna'] } })
+      // anyone: Maral's times
+      expect((await b.req(`${url}&staff=any`)).json.slots.length).toBeGreaterThan(0)
     } finally {
       await db.insert(staffServices).values({ staffId: who['Aýna']!, serviceId: haircut })
     }

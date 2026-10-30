@@ -20,19 +20,16 @@ import {
   nextFreeSlot,
   staffDoingAll,
   tableSlots,
-  type AppointmentContext,
 } from '@yeral/domain/availability'
 import { canClientReschedule, cancelDeadline } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, today } from '@yeral/domain/time'
 import type { Deps } from '../../deps'
-import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
-import { bookings } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
-import { ApiError, invalid } from '../../http/errors'
+import { ApiError } from '../../http/errors'
 import { errors, json } from '../../http/openapi'
 import { requireUser } from '../auth/session'
-import { assertRebookable, bookedServices, type BookedServices } from '../bookings/engine'
+import { assertRebookable, bookedServices, waitingMove, type BookedServices } from '../bookings/engine'
 import { myBooking, stateOf } from '../bookings/repo'
 import { visibleBusiness } from '../catalog/detail'
 import { text } from '../catalog/map'
@@ -71,15 +68,9 @@ async function moving(c: Context<AppEnv>, lb: LoadedBusiness, code: string | und
   if (b.type !== 'appointment') throw new ApiError('not_bookable')
   const refused = canClientReschedule(stateOf(b), lb.rules, deps.now())
   if (refused) throw new ApiError(refused)
-  const [booked, waiting] = await Promise.all([
-    bookedServices(deps.db, b.id),
-    deps.db
-      .select({ id: bookings.id })
-      .from(bookings)
-      .where(and(eq(bookings.rescheduleOf, b.id), eq(bookings.status, 'pending'))),
-  ])
+  const [booked, waiting] = await Promise.all([bookedServices(deps.db, b.id), waitingMove(deps.db, b)])
   assertRebookable(lb, booked, { online: true })
-  return { booked, exclude: [b.id, ...waiting.map((w) => w.id)] }
+  return { booked, exclude: [b.id, ...(waiting ? [waiting.id] : [])] }
 }
 
 interface Moving {
@@ -88,18 +79,15 @@ interface Moving {
 }
 
 /** The services asked for, or in move mode the booking's own (the contract asks for one of the two). */
-function servicesOf(q: { services?: string[] }, mv: Moving | null): string[] {
-  const ids = q.services ?? mv?.booked.serviceIds
-  if (!ids) throw invalid({ path: ['services'], code: 'custom' })
-  return ids
-}
+const servicesOf = (q: { services?: string[] }, mv: Moving | null): string[] => q.services ?? mv!.booked.serviceIds
 
-/** The specialist asked for (`any` = null), or in move mode the booking's own while they still do every service. */
-function staffOf(ctx: AppointmentContext, q: { staff?: string }, serviceIds: string[], mv: Moving | null): string | null {
-  if (q.staff !== undefined) return q.staff === 'any' ? null : q.staff
-  const own = mv?.booked.staffId ?? null
-  return own && staffDoingAll(ctx, serviceIds).some((s) => s.id === own) ? own : null
-}
+/**
+ * The specialist asked for (`any` = null), or in move mode the booking's own, as the reschedule reads a `staffId` left
+ * out (`rebookQuery`): one who no longer does the services is 404 `not_found` (`checkQuery`), never swapped; the
+ * client asks for `any` or names another.
+ */
+const staffOf = (q: { staff?: string }, mv: Moving | null): string | null =>
+  q.staff !== undefined ? (q.staff === 'any' ? null : q.staff) : (mv?.booked.staffId ?? null)
 
 const appointmentRoute = createRoute({
   method: 'get',
@@ -149,7 +137,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const [mv, busy] = await Promise.all([moving(c, lb, q.move), loadBusy(deps.db, [lb.business.id], first, last)])
     const ctx = appointmentContext(lb, busy, now)
     const serviceIds = servicesOf(q, mv)
-    const staffId = staffOf(ctx, q, serviceIds, mv)
+    const staffId = staffOf(q, mv)
     checkQuery(ctx, serviceIds, staffId)
     const query = { serviceIds, staffId, by: 'client' as const, excludeBookingIds: mv?.exclude }
     const online = lb.rules.onlineEnabled

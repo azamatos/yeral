@@ -107,17 +107,26 @@ export function bookedFrom(items: readonly Pick<ItemRow, 'serviceId' | 'staffId'
 }
 
 /**
- * A booking re-booked as it was (a move, an offered time) needs every service it holds, as the business's menu stands:
- * one gone for good (`lost`) or one deleted since (archived: off the menu, book Q-210) refuses it with `not_bookable`,
- * never a booking of fewer services; `online`, one no longer booked online here too (a move is an online booking, an
- * offered time is just taken, as its chip says). The client's «can't move online».
+ * A booking can be re-booked as it was (a move, an offered time) when every service it holds is on the business's
+ * menu as it stands (`services`: the menu's, archived ones off it): one gone for good (`lost`) or one deleted since
+ * (archived, book Q-210) means a booking of fewer services, never made; `online`, one no longer booked online here
+ * counts too (a move is an online booking; an offered time is just taken, as its chip says).
  */
+export function rebookable(
+  services: readonly { id: string; online: boolean }[],
+  booked: BookedServices,
+  opts: { online: boolean },
+): boolean {
+  if (booked.lost) return false
+  return booked.serviceIds.every((id) => {
+    const s = services.find((x) => x.id === id)
+    return !!s && (!opts.online || s.online)
+  })
+}
+
+/** `rebookable`, or 409 `not_bookable`: the client's «can't move online». */
 export function assertRebookable(lb: LoadedBusiness, booked: BookedServices, opts: { online: boolean }): void {
-  if (booked.lost) throw new ApiError('not_bookable')
-  for (const id of booked.serviceIds) {
-    const s = lb.services.find((x) => x.id === id)
-    if (!s || (opts.online && !s.online)) throw new ApiError('not_bookable')
-  }
+  if (!rebookable(lb.services, booked, opts)) throw new ApiError('not_bookable')
 }
 
 /** `bookedServices` for several bookings in one query. */
@@ -147,8 +156,8 @@ export function rebookQuery(
 
 // ── The client's waiting move ──
 
-/** The move waiting for this booking, if any. */
-async function waitingMove(db: Queryable, b: BookingRow): Promise<BookingRow | undefined> {
+/** The move waiting for this booking, if any (one at most: a partial unique index). */
+export async function waitingMove(db: Queryable, b: Pick<BookingRow, 'id'>): Promise<BookingRow | undefined> {
   const [m] = await db
     .select()
     .from(bookings)
