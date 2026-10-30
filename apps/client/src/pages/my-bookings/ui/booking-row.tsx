@@ -206,10 +206,12 @@ export function BookingRow({
         {b.price ? <Price hidden={b.price.type === 'hidden'}>{fmt.price(b.price)}</Price> : <span />}
         <div className="relative flex flex-wrap items-center justify-end gap-1">
           {(ahead || !b.bookOnline || b.actions.callOnly) && (
+            // named from what it shows, the business read but not seen: «Call» stays in the name whatever the language
+            // or the words' length (axe: label-content-name-mismatch)
             <Button asChild size="s" variant="ghost">
-              <a href={telHref(b.business.phone)} aria-label={t('callLabel', { business: b.business.name })}>
+              <a href={telHref(b.business.phone)}>
                 <Phone aria-hidden />
-                {t('call')}
+                {t.rich('callLabel', { business: b.business.name, hidden: (chunks) => <span className="sr-only">{chunks}</span> })}
               </a>
             </Button>
           )}

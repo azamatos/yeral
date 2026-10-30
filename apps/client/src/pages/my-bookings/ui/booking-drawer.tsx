@@ -486,13 +486,15 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
                 {t('directions')}
               </DirectionsButton>
             )}
+            {/* named from what it shows, the business and its number read but not seen (axe: label-content-name-mismatch) */}
             <Button asChild size="s" variant="secondary">
-              <a
-                href={telHref(b.business.phone)}
-                aria-label={t('callLabel', { business: b.business.name, phone: fmt.phone(b.business.phone) })}
-              >
+              <a href={telHref(b.business.phone)}>
                 <Phone aria-hidden />
-                {list('call')}
+                {t.rich('callLabel', {
+                  business: b.business.name,
+                  phone: fmt.phone(b.business.phone),
+                  hidden: (chunks) => <span className="sr-only">{chunks}</span>,
+                })}
               </a>
             </Button>
           </div>
