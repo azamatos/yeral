@@ -9,7 +9,9 @@
 - **2026-10-13 · Architecture agreed** in two rounds with the owner: monorepo, four sites + api + Storybook, TanStack,
   FSD, state ownership, TypeScript backend on Postgres from the start, design system in Storybook, testing strategy,
   Cloudflare now / Docker + nginx later, Changesets, GitHub Actions, parallel agents. ADRs 0001–0014, this memory bank,
-  `AGENTS.md`, project skills.
+  `AGENTS.md`, project skills. The owner's direction (13.10): infrastructure first; Cloudflare now, own server
+  (Docker + nginx, Cloudflare for DNS) later; name and domain in config; the repo public until ready; a design system
+  with Storybook and tests; 2–3 agents in parallel later.
 
 - **2026-10-13 · M0 monorepo foundation** (PR #1, `76a218b`): pnpm 12 workspace with a dependency catalog and
   `allowBuilds`; Turborepo tasks (`build lint lint:fsd typecheck test dev deploy`); `@yeral/config` (tsconfig bases,
@@ -46,6 +48,18 @@
   rules, decline reasons with alternatives, complaints instead of a "came" button, walk-in bookings, per-business roles
   with field-level redaction, a CRM per business, branches and verification. Recorded in ADR 0017 (revised) and ADR 0018;
   client-side gaps logged as open questions 11–12. Its data matches the client demo (Glow Studio, services s1–s11, staff).
+  The owner's direction (14.10): follow the design's site map (the marketplace on yeral.app, no landing app); remove
+  the old mobile designs entirely ("we have a new design and our own logic"); maps = MapLibre + OpenFreeMap. Round 4
+  ("decided 14.10.2026"): manual confirmation is the default, a business may switch on instant confirmation; requests
+  expire after the business's hold time (default 30 min) with 3 alternative times, replacing the morning's "every
+  booking by hand, no instant setting". Decisions of the day: ADR 0015 the marketplace on the apex (supersedes 0003);
+  ADR 0016 TK default + RU + EN, prefixed URLs; ADR 0017 one booking engine, four types, five statuses, always
+  confirmed by hand, revised the same day by the business design (confirm modes, hold time, booking rules, decline with
+  alternatives, complaints, source `web|app|phone|walkin|ai`); ADR 0018 the business workspace model (our own staff,
+  memberships, per-business roles and client records; a branch is its own business; only verified businesses are
+  public); ADR 0019 (in PR #16) own phone-code login and database sessions instead of Better Auth (the design's
+  attempts/lock/resend rules, no placeholder e-mails, endpoints in the contract); ADR 0012 revised to tokens v0.3.1 +
+  self-hosted Onest.
 
 - **2026-10-14 · M2a `@yeral/domain`**: the booking engine as pure TypeScript with subpath exports (`time`, `model`,
   `rules`, `hours`, `availability`, `lifecycle`, `permissions`, `clients`, `pricing`, `geo`, `phone`, `id`), following
@@ -113,7 +127,10 @@
   (`<txid>.<id>`), rate limits trusting caller headers (`TRUSTED_IP_HEADER`), hidden prices leaking on the public page,
   `active` kept by Postgres (generated + trigger), a destructive seed by default and a seed that broke on most weekdays,
   the Worker's error handler without deps, overlapping cron runs (advisory lock), Hyperdrive caching, and the sdk caching
-  a new booking under the old code and polling while signed out. Decisions and open points are in #21 and activeContext.
+  a new booking under the old code and polling while signed out. Decisions and open points are in #21. M0–M2 released
+  as tags (#20). The owner's direction (16.10): review every PR before merging (the agent merges after review and
+  green CI); Ýeral is free for now (no plans, no commission); no staging, only local and production (ADR 0020); don't
+  build the new yeral.app until the design is clarified and exported again (v0.5).
 - **2026-10-16 · Design export v0.4 received** (`docs/design/CHANGELOG.md`): the business workspace complete (analytics,
   reviews, notifications, help, billing, B2B landing, tables, classes), design system v0.4 (`DS-Patterns`,
   `DS-Business` boards, `COMPONENTS.md` component map, token audit), tokens v0.4 mapped into `@yeral/ui` (`text-small`
@@ -127,18 +144,61 @@
   request answered as the owner's decision; new `Booking-Link`; rule change A5: a move never swaps the specialist).
 - **2026-10-17 · Strategy reset** ([ADR 0021](../decisions/0021-product-book-first.md)): all design and code paused; the
   product book (`docs/product/`) is written first, with its page for the owner's answers
-  (https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN).
+  (https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN). The owner (17.10): stop everything and reorganise: first
+  document the whole product (ideas, norms, rules, roles, limits, features, MVP in and out, every flow, with visuals)
+  until no question is left; then the full design and components/Storybook; then code. Claude Code writes the prompts
+  for Claude Design, the owner pastes them, Claude Code reads the canvas to check the result. Where the old open
+  questions (activeContext's numbers before the book) went: 16 and 18 (moving tables/classes; the round-6 logic gaps)
+  → answered by design v0.5 (`docs/design/ROUND6-ANSWERS.md`); 17 (font sizes 28 / 24 / 80; open past midnight) →
+  font sizes keep the code's mapping (v0.5, H), past midnight is feature F-109 in chapter 6; 1 (checkout / POS;
+  table/class setup wizard) → features F-221 and F-116 in chapter 6, Q-030; 2 (CMS design) → Q-010, Q-011, Q-012; 4
+  (average bills; store badges) → Q-103, feature F-004; 5 (native copy review) → Q-101; 6 (SMS provider and sender
+  name) → Q-109, chapter 8 (notifications); 7 (final name and domain) → Q-003; 10 (real business photos and texts) →
+  Q-002.
 - **2026-10-18 · Decision room considered and dropped:** a brief for "Karar" (#28) was written and removed; the repo
   and the book page stay the way decisions are made and recorded. New book question Q-037 (Turkmen law 519-V: personal
-  data also stored in Turkmenistan), Q-032 updated with the 2025 IP-range blocking.
+  data also stored in Turkmenistan), Q-032 updated with the 2025 IP-range blocking. The owner (18.10): a shared
+  decision room (first a claude.ai page "Karar", then an own app) was considered and dropped: the repo stays the record
+  agents read, the book page stays where the owner answers, and Claude syncs the answers; an own decisions app only
+  when a second person decides regularly or syncing becomes a bottleneck. Next: the owner answers every book question;
+  then an exact plan for yeral.app, the business app, the CMS and the backend, including when and what server to buy.
 - **2026-10-18 · Book answers, batch 1:** Q-001–Q-003 and Q-100–Q-109 written into the book; ADR 0022 (English
   first, languages per market); Claude's concerns recorded on Q-003, Q-101, Q-103, Q-104, Q-105, Q-107 (new `concern:`
   line, shown on the page); new questions Q-131–Q-134; features F-238 (add a business for its owner), F-240 (city
-  choice) and F-109 (past midnight) in the MVP, F-239 (menu) later; F-178 CMS moved to MVP.
+  choice) and F-109 (past midnight) in the MVP, F-239 (menu) later; F-178 CMS moved to MVP. The owner's answers
+  (18.10): Ýeral isn't a Turkmen-only platform: it's built in English, and each country it launches in adds its own
+  languages and settings (Turkmenistan first: Turkmen, Russian; ADR 0022 supersedes 0016's Turkmen first). One launch
+  with the client site, the business app and the CMS; the team adds the first businesses in the CMS; Ýeral on
+  yeral.app; no average bill; businesses may be open past midnight and options stay flexible; the city is a choice
+  (Q-001–Q-003, Q-100–Q-109).
+- **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
+  demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
+  the app as an option). Build plan written as book chapter 10. The owner's words: the first launch is an English pilot
+  with Turkmenistan's settings: example businesses marked "Example" beside real ones, a nightly-reset demo of the
+  business app, no SMS (codes on screen); the name is written *Ýeral*, "Yeral" only where the letter can't be used; a
+  specialist may work without the app (an option, not a level).
+- **2026-10-18 · Book answers, batch 2:** 106 more answers written into the book: the owner's for most questions, the
+  recommended option for the rest (owner delegated non-critical questions; marked "Claude (delegated)" in chapter 9).
+  Two launches: first in English on Cloudflare, then Turkmenistan on its own servers; [ADR 0023](../decisions/0023-one-deployment-per-market.md)
+  (one deployment per market). No review-ask SMS (Q-259); "Başga ýerde", internal statuses and the business PWA in the
+  MVP; phone-only staff set to Never by the owner, reopened as Q-216; client karma later (F-241). Four critical
+  questions left: Q-004 (who the first launch is for), Q-005 (name spelling), Q-036 (paying for SMS), Q-216. The page
+  keeps Claude's decisions changeable ("Decided by Claude" filter) and marks the owner's later replies as "Changed".
+  The owner (18.10, batch 2): answers only critical questions; Claude decides the rest with the recommended option and
+  records it ("Claude (delegated)"), saying so where it disagrees (a concern). Two launches: first in English on
+  Cloudflare (investors and early users, from Turkmenistan through a VPN; also a portfolio piece), then Turkmenistan
+  with Turkmen, Russian and its own servers and database, after investment; one deployment per country (ADR 0023). No
+  server to buy for the first launch (changed 19.10: the VPS). Appointments first, tables and classes after the MVP;
+  no review-ask SMS; "Başga ýerde", internal statuses and the business PWA in the MVP; client karma later.
 - **2026-10-19 · Two tracks start:** design pass round 1 (design system in English, #33) with Claude Design, round 2
   (business app part 1) written; the owner's netcup VPS 1000 (EU) set up with a shared Caddy, Postgres and the api
   (#34, `infra/server`); the backend runs alongside the design (ADR 0021 amended); the first launch runs on that
-  server (ADR 0023 revised).
+  server (ADR 0023 revised). The owner (19.10): the backend runs alongside the design, components and the apps wait
+  for it; the netcup VPS 1000 (EU) is for the first launch and other projects, and Claude set it up the same day
+  (hardening, a shared Caddy, Postgres and the api; `infra/server/README.md`); backups to R2 wait. Later the same day:
+  Neon isn't needed, work on the VPS; review the backend plan for gaps, then build the backend alongside the design.
+  [ADR 0024](../decisions/0024-own-server-docker-caddy.md): the own server runs every app (Docker + Caddy, Postgres
+  beside the api); no Neon, no Workers for the api (supersedes 0007 for them).
 - **2026-10-19 · Backend plan reviewed, P2 step 0 done:** chapter 10's P2 checked against all 51 **Code differs**
   items and the built api (#36): steps 0–7, with the missing fixes, photos, the address pin, notifications, team
   accounts with a second factor, deploys, backups and alerts. Step 0: the api's Workers path, Neon and nginx removed;
@@ -179,7 +239,16 @@
   phone-only clients and paused businesses on the business page `b7c7822` (#61). Open: #62 (owner's preview, F-032).
   The reviews found real bugs before merging (deadlocks between deletion and other actions, a way past the waiting
   limit through "Yzyna al", stale per-viewer caches, an unhandled rejection that could stop the api, racing rating
-  updates). Gaps found, not fixed: see activeContext "Follow-ups, not fixed".
+  updates). Gaps found, not fixed: folded into later entries and activeContext's Next steps. The owner (20.10): build
+  step 3 one PR at a time, each reviewed with `code-review` (fix what it finds) and merged on green CI; at the end of
+  the day stop, summarise, continue in another session. Design track: small iterations, one main board per prompt
+  (ADR 0021 amended); later the same day: move on from design to building, design only when it's critical (Claude
+  Design for an undrawn detail only), slice by slice: components in Storybook, then the apps (ADR 0021 amended).
+  [ADR 0017](../decisions/0017-booking-model.md) revised for complaints ("Gelmedi" from the start until 24 h after the
+  end and taking the place of an earlier complaint; "Gijä galdy" from the start; others any time). Every "how" Claude
+  decided while building step 3 is a 20.10.2026 row in the book's chapter 9 marked "Claude (delegated)" for the owner
+  to look over: Q-270, Q-171, Q-172, Q-156, Q-206 revised, Q-254, Q-126, Q-124, Q-163, A6, Q-113, Q-267, Q-168, Q-165,
+  Q-127, Q-159, Q-107, Q-120, Q-105.
 - **2026-10-20 · P2 step 3 finished, step 4 begun, the backend reviewed** (each PR reviewed with `code-review` and
   fixed before merging; details in `log/2026-10-20-p2-*.md`). Step 3: the owner's preview of a page in review
   `32d906d` (#62); offers keep a request on top of Upcoming `f285044` (#64); no average bill, "Price at the place"
@@ -194,7 +263,14 @@
   (`bookings.told`) `62627b2` (#81, migration 0024); bookings and hours saves ordered under the business row, requests
   on a closed day declined `276e50f` (#82, migration 0025). The reviews of #81 and #82 found more (an SMS sent before a
   booking's undo could come, bookings made before `told` never told of a move, lock-order deadlocks), all fixed before
-  merging. Left: PR 3 (contract), PR 4 (structure), PR 5 (SMS caps, step 7).
+  merging. Left: PR 3 (contract), PR 4 (structure), PR 5 (SMS caps, step 7). The owner (20.10, later): go on with
+  step 4 the same way; talk in English only (Turkmen product words translated); then review the backend api for best
+  practices, architecture, patterns and the decisions, make a plan of fixes and work it PR by PR (PR 1–4 now, PR 5
+  with step 7), then step 4 goes on; save the progress at the end of the session. Step 4 and the review fixes added
+  more 20.10.2026 "Claude (delegated)" rows to chapter 9: the booking rules (B-41, B-42), the menu (B-38), the profile
+  (B-37, Q-215), requests (B-19–B-21), the team's bookings (B-23–B-25), move and cancel (B-26, B-27), hours and
+  special days (B-39, B-40, Q-211), the SMS a booking's changes send (B-24, B-26: what the client knows,
+  `bookings.told`), and bookings vs an hours save (Q-211).
 - **2026-10-20/21 · P2 steps 4–7 and P4 slice 1** (each PR reviewed with `code-review` and fixed before merging;
   details in `log/2026-10-20-*` and `log/2026-10-21-*`). Backend, 20.10: a business cancel as a code `bbcdae5` (#84);
   clients hear when a business moves `46a5546` (#86, migration 0026); the engine's shared pieces `29643e6` (#87);
@@ -214,7 +290,23 @@
   business shell `950cc1b` (#119), My account `b5a8adf` (#121), slice 1's how decisions `9ae5baa` (#131). Releases
   paused `76ed572` (#133, ADR 0009 amended). Ýeral's support line `580811e` (#134); the flaky demo-bookings test fixed
   `a2e0418` (#135). Main at a2e0418 deployed to the server by hand, then `23a1c14` (#139) the same evening (migrations
-  0000–0038).
+  0000–0038). The owner (21.10): backend and api only in this session (design in another); clients hear when a
+  business moves (#86); release when possible, without waiting for the design, Storybook or the frontend. The repo is
+  public (Actions run again). At a wall (CI not running, billing, a missing secret or account, a decision only the
+  owner can make): stop the work that depends on it, send a push notification, report, wait; the same failure twice is
+  a wall; no stacking work that can't merge; one review round per PR; an unattended run needs a goal and a budget
+  (global `~/.claude/CLAUDE.md`). "Lets remove release logic for now. We are under development. There is no even
+  working MVP version." → no releases, versions or changesets until the MVP works, back before the first launch (P2
+  step 7); the `release` skill became `ship` (#133). The owner had web-b2 fix and merge every open PR; the backend
+  stack merged in order the same day. Ýeral's support line is the owner's phone and Telegram until it has its own
+  (#134); deploy main to the server by hand (done the same day); "delete everything unnecessary" and "delete
+  everything we don't need anymore" (left to the owner); keep `yeral-proto` until all the web apps are live. Business
+  decisions: the recommended option when it isn't critical; a critical one goes to the owner in the chat before the
+  work starts, with its full description (no IDs to look up). On the code on the screen (Q-036): "Go with option B …,
+  its demo version still. When we launch in TKM we will add real phone number code protection." → no real businesses
+  at the first launch. The day's "how" rows are 21.10.2026 rows in chapter 9 marked "Claude (delegated)": photos, the
+  timed notices, the floor, the admin tool's sign-in, businesses, reviews, closing and adding, the first launch, the
+  SMS limits, and slice 1's (#105, #131); they stand (the recommended option unless critical).
 - **2026-10-21 (evening) · P2 step 6 finished, the frontend's gaps closed** (each PR reviewed with `code-review`, one
   round, and fixed before merging; details in `log/2026-10-21-*`): six concerns settled `0b58ef9` (#137); no business
   verified while the code shows on the screen `9d97d5a` (#138, ADR 0023 amended); `GET /v1/auth/mode` for the
@@ -223,18 +315,39 @@
   delete confirms touch `aa3fe98` (#142); the switcher's page state, specialization and reviews to answer `0c6a8b7`
   (#144); a day in the demo workspace for any visitor `62709b5` (#145, ADR 0019 amended); two unused columns dropped
   `10c3bce` (#147, 0041, the first contract migration); the demo note on both sign-ins `3469215` (#146). Left open:
-  #148 (the "How was it?" card's api, in conflict after #147) and `feat/api-address-search` (no PR yet).
+  #148 (the "How was it?" card's api, in conflict after #147) and `feat/api-address-search` (no PR yet). The six
+  concerns settled (chapter 9, 21.10.2026): Q-299 the SMS safety limit stays, Q-270 no password, Q-259 a "How was it?"
+  card once per completed visit (F-243, no SMS), Q-105 flexible where businesses differ with good defaults, Q-103 a
+  price level later (F-244), Q-101 a native proofread before the Turkmenistan launch. Q-036's concern was critical;
+  the owner chose: no real businesses at the first launch, they come with the Turkmenistan launch's real SMS sign-in;
+  while the code shows on the screen the api verifies nothing (`verify_unavailable`;
+  [ADR 0023](../decisions/0023-one-deployment-per-market.md) amended, #138).
+  [ADR 0019](../decisions/0019-own-phone-login-and-sessions.md) amended: the demo workspace's sessions in a cookie of
+  their own (#145). The book has no open question left.
 - **2026-10-22 · The owner's answers:** no backups and no error tracking or uptime alerts for the demo launch (with
   the real working MVP, P6; Claude's concern on the uptime check); the first launch approved in advance; the DNS
   records for `api`, `business` and `cms` now (`infra/server/README.md`, "DNS records"); book chapter 9, 22.10.2026.
   Later the same day the old site was retired: `yeral.app` and `www` point at the server now too, and the apex shows a
-  coming-soon page from Caddy until the client site takes it over; then `apps/legacy` and the Worker go.
+  coming-soon page from Caddy until the client site takes it over; then `apps/legacy` and the Worker go. The owner's
+  words: "Backups are not necessary for now. We can add it later on real working MVP. Error tracking is also not
+  favorite for demo one." → both come with the real working MVP, before any real business's data (P6; F-211, F-209);
+  uptime alerts wait with them (Claude's concern: nobody hears that the demo is down; a free uptime check could come
+  back alone); until then the api's alert lines stay in its Docker logs, read at each deploy. "I approve launch": the
+  first launch is approved in advance and goes out once the apps are built and checked locally. The owner adds the DNS
+  records; for the admin account nothing secret goes through the chat. "i dont think we need current working
+  yeral.app, lets make dns for it too" → the coming-soon page in `infra/server/yeral/yeral.caddy`; after the switch the
+  owner deletes the Worker `yeral-web` and a PR removes `apps/legacy` (done 23.10). No ADR: the book's chapter 9,
+  22.10.2026 (DNS for the own server: Claude, delegated).
 - **2026-10-23 · yeral.app on the own server:** the owner's A records for `@`, `www`, `api`, `business` and `cms` (DNS
   only, 22.10); the coming-soon page `5c07be4` (#150); main at 5c07be4 deployed by hand with `PUBLIC=1` after a
   database backup (migrations 0039–0041; Let's Encrypt certificates for `yeral.app`, `www`, `api`; `www` → the apex;
   `api.yeral.app/v1/health` answers). The old site left the repo: `apps/legacy`, its deploy option and smoke check,
   its ignore, lint-hook, Renovate, Turborepo and pnpm entries `1bda69d` (#151). The owner deleted the Worker
-  `yeral-web` the same evening.
+  `yeral-web` the same evening. The deploy went out 2026-10-22 21:18 UTC (23.10 the owner's time); kept on the server:
+  `/srv/yeral/backup-2026-10-23-before-5c07be4.sql.gz` (mode 600, as every backup there) and the edge config
+  `/srv/edge/Caddyfile.before-2026-10-23`. The owner (23.10): "Lets go back to email settings later. FOr now lest go
+  with deploy and other tasks." → the e-mail records waited (lock down, or receive mail at an address through Email
+  Routing); replaced by the next evening's answer (below).
 - **2026-10-23 (night) · P4 slice 2 started, P2 step 4 finished** (an unattended 2-hour run, each PR reviewed with
   `code-review`, one round, on green CI; details in `log/2026-10-21-how-was-it.md`, `log/2026-10-21-address-search.md` and
   `log/2026-10-23-setup-wizard.md`): the "How was it?" card's api
@@ -242,7 +355,8 @@
   geocoder port, Photon over OpenStreetMap); the wizard's pieces in `@yeral/ui` (ProgressBar, WizardFooter, vertical
   Stepper, Field counter and optional) `e75cd83` (#152); the wizard's frame and business step `9fedd9f` (#154); the
   login reopens an unfinished setup `782e05d` (#155, B-07 revised); the draft's category id `a3c0eda` (#156). Not
-  deployed (the server runs 5c07be4).
+  deployed (the server runs 5c07be4). The owner (23.10, night): "Lets go. U have 2 hours, do not hit the wall more
+  than 3 times. And do not make the macbook heat, by using too much cpu/gpu and etc." Seven PRs merged, no wall.
 - **2026-10-23 (evening) · The setup wizard built end to end** (a second unattended 2-hour run, the same way; details
   in `log/2026-10-23-setup-{address,hours,rules,services,done,team,phone}.md` and
   `log/2026-10-23-starter-services.md`): the night's docs `c4ef6a8` (#157); `@yeral/ui`: TimeRangeField and Select
@@ -255,7 +369,13 @@
   same time),
   booking rules `3acada4` (#166), done with the link, the QR and the finish `d806340` (#169), services `72c4d04`
   (#170), phone for someone signed out (`features/sign-in`, shared with the login) `bf282fb` (#172), team `d11ec52`
-  (#173). Deployed 2026-10-25 (below). Gaps left: in Next steps (activeContext).
+  (#173). Deployed 2026-10-25 (below). Gaps left: in Next steps (activeContext). The owner (23.10, evening): deleted
+  the Worker `yeral-web` and the untracked `docs/design/Claude outputs/`; "can we set getting email for yeral?" →
+  receive mail at `hello@` through Cloudflare Email Routing, forwarded to the owner's inbox, with a DMARC record
+  against mail sent in yeral.app's name; sending stays off (the owner sets it up; `infra/server/README.md`, "DNS
+  records"; no ADR: the book's chapter 9, 23.10.2026, DMARC reject, the details Claude's, delegated). Docker Desktop
+  stays as it is (the api tests run in CI, not locally). "Lets continue on tasks, u have one more 2 hours" → the rest
+  of the wizard, #157–#173, no wall.
 - **2026-10-24/25 (night) · Settings built** (an unattended run of 2 + 2 hours, three agents, each PR reviewed with
   `code-review`, one round, on green CI; details in `log/2026-10-24-*.md`): the night's docs `14e2b0f` (#174); the
   frame and Link and QR `a219a92` (#177), Permissions read-only `f160fa5` (#179); booking rules: the shared form
@@ -265,6 +385,8 @@
   `a840f2a` (#184), photos `40028aa` (#187, `PhotoManager`), the address `2946fbb` (#190, `features/edit-address`);
   services: the list `d0e8466` (#186, `AvatarStack`), the drawer, delete and groups `797e7de` (#189,
   `ChipRadioGroup`); Team's list `3d796e1` (#188); follow-ups `7884f7c` (#181); a flaky client story `6c9d0a0` (#185).
+  The owner (24.10): "Go for 2 hours, email settings leave for other session. Focus on yeral." Extended by 2 hours the
+  same night: Settings built but Team's add and drawer; the e-mail records waited for another session.
 - **2026-10-25 · The business app live, the owner's test fixed** (an all-day run): the business app at
   `business.yeral.app` with the code on the screen `07952fd` (#192), deployed 08:42 UTC; that deploy skipped its
   backup, fixed `a0a0433` (#193, `log/2026-10-25-business-live.md`). The owner's test: the disabled button, the toast,
@@ -272,7 +394,20 @@
   the wizard and renamed in Settings `1c8a8e9` (#197); the done step's link and QR as Settings shows them `592cfd2`
   (#199); a tab icon without the light frame `0c78de0` (#200); ADR 0011 amended, forms are plain state, AGENTS.md rule
   10a `94c2767` (#196). Deployed at 592cfd2, 10:45 UTC (a backup first). Then: «Add a team member» `c35d70a` (#198);
-  the page address a business chooses, its api with migration 0043 `50d532e` (#201).
+  the page address a business chooses, its api with migration 0043 `50d532e` (#201). The owner (25.10): "i dont wanna
+  check locally, go live on our domains." Asked, the owner chose the business app only at `business.yeral.app` (the
+  apex keeps the coming-soon page; the example businesses and the demo workspace stay off) with the sign-in code on
+  the screen, open to anyone (anyone who types a number signs in as it: test data only; the book's chapter 9,
+  25.10.2026; no ADR). #192: `deploy.sh` builds the business image, a `business` service, `business.yeral.app` in
+  `yeral.caddy`. After testing it live: six fixes asked (the disabled button, the toast, digits in selects, «Create a
+  business» again for someone who has one, naming the own services' group, clearer service groups) and the done step's
+  QR as clear as Settings'. "Go with recommendation. The main idea is not overcomplicating things. For example if we
+  can use some library for date picker and etc. Lets use it, no need for making own one." →
+  [ADR 0011](../decisions/0011-state-management.md) amended: a form is the owning slice's hook with plain state, no
+  TanStack Form; a well-known library before our own component (AGENTS.md rule 10a). A business chooses its own page
+  address instead of `turkmen-barber-2` ("add it to the plan"); updates feel slow rather than instant. Kept on the
+  server: `/srv/yeral/backup-2026-10-25-after-07952fd.sql.gz` (the one before it was skipped),
+  `backup-2026-10-25-before-592cfd2.sql.gz`, the site files `/srv/edge/sites-yeral.caddy.before-07952fd`.
 - **2026-10-25 (afternoon and evening) · Slice 2 finished, slice 3's booking loop built** (four agents, each PR
   reviewed with `code-review`, one round, on green CI; details in `log/2026-10-25-*.md`, the plan in
   `log/2026-10-25-slice-3-plan.md`). Slice 2: the staff drawer's api `08145e0` (#203), profile, services and access
@@ -294,23 +429,35 @@
   (#222), the request drawer `548b666` (#223), declining with offered times `7240a90` (#226), a move request
   `8c41857` (#228) and its fit line `c62a5cc` (#231), the phone day `cb750d6` (#230).
   `make-example` (D2) `9c83869` (#233). Deployed 2026-10-26 11:20 UTC at `74fae7d` with the owner's go (migration
-  0044, a backup first); then Ýeral paused for the week (owner).
-- **2026-10-26/27 · Paused: the token budget, a review, the README:** the weekly token budget for agents (ADR 0014
-  amended, AGENTS.md → "Token budget") `e7941e5` (#247); a two-week review of the project (a private page for the
-  owner; its findings in activeContext.md); a README for visitors with the in-development status, the live sites and
-  how it's built, and the repo's About (description, homepage, topics), for the owner's portfolio `bd6659c` (#248).
-  Found: `main` has no branch protection any more; it stays off until the demo app is done (owner; operations.md →
-  "Repository"). E-mail for `hello@yeral.app` set up by the owner (its DNS records checked 27.10).
-- **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
-  demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
-  the app as an option). Build plan written as book chapter 10.
-- **2026-10-18 · Book answers, batch 2:** 106 more answers written into the book: the owner's for most questions, the
-  recommended option for the rest (owner delegated non-critical questions; marked "Claude (delegated)" in chapter 9).
-  Two launches: first in English on Cloudflare, then Turkmenistan on its own servers; [ADR 0023](../decisions/0023-one-deployment-per-market.md)
-  (one deployment per market). No review-ask SMS (Q-259); "Başga ýerde", internal statuses and the business PWA in the
-  MVP; phone-only staff set to Never by the owner, reopened as Q-216; client karma later (F-241). Four critical
-  questions left: Q-004 (who the first launch is for), Q-005 (name spelling), Q-036 (paying for SMS), Q-216. The page
-  keeps Claude's decisions changeable ("Decided by Claude" filter) and marks the owner's later replies as "Changed".
+  0044, a backup first); then Ýeral paused for the week (owner). The owner (25.10, later): "U have whole day to work on
+  this tasks, dont limit yourself" (a run until about 23:00 MSK). Asked about slice 3: the client site takes
+  `yeral.app` now (noindex until the launch), the example businesses go on, and one of the owner's test businesses can
+  be opened to clients with a server command (the book's chapter 9, 25.10.2026). Kept on the server:
+  `/srv/yeral/backup-2026-10-25-before-8ebb8bc.sql.gz`, `backup-2026-10-26-before-74fae7d.sql.gz`, the site files
+  `/srv/edge/sites-yeral.caddy.before-{latest,client}`. Flaky once: the business calendar story «Confirm Request»
+  (#245).
+- **2026-10-26/27 · Paused: the token budget, a review, the README:** 26.10 the day's agents had taken the weekly
+  limit to 52 % (four agents resumed all day re-read ~500k tokens of context at every step); the owner: "U can use as
+  many agents u want, but when its context full, drop it, and start a new one … limit yourself on a week plan. We can
+  not spend more tokens that we have for a weekly limit." → the weekly token budget for agents (ADR 0014 amended,
+  AGENTS.md → "Token budget") `e7941e5` (#247); the day's fold (#246); "For this week we stop working on yeral. push
+  all the changes and deploy them" → merged and deployed at 74fae7d (above), no open PRs. 27.10: "Lets make it public
+  repo and some words about still in development, i need this for my portfolio" → the repo was public already (21.10);
+  a README for visitors with the in-development status, the live sites, what works and how it's built, and the repo's
+  About (description, homepage, topics) `bd6659c` (#248); Ýeral may be shown in the owner's portfolio, always as in
+  development; the README's credit line stays. A two-week review of the project (a private page for the owner) found:
+  no end-to-end test yet; `main` without branch protection, so two PRs merged on a stale base broke it once (#240
+  after #235, fixed in #243) — "no need for branch protection, we are still developing, we will turn it on when we
+  finish with demo app" (owner; operations.md → "Repository"); no HSTS or CSP on the sites; backups only on the
+  server's own disk until P6; long files and activeContext's history weighing on every session. The support phone and
+  Telegram leave the repo for the server's config, with Ýeral's own e-mail beside them (owner). Memory bank `b56648c`
+  (#249), the 27.10 answers `ec19bd6` (#250). E-mail for `hello@yeral.app` set up by the owner (checked 27.10:
+  Cloudflare's three MX, SPF, DKIM and the `_dmarc` reject record; `infra/server/README.md`, "DNS records").
+- **2026-10-30 · Resumed:** the owner tested `hello@yeral.app` from another account: it arrives, the address is
+  configured. The order of work chosen: (1) hygiene — activeContext.md trimmed into this file (history older than a
+  week folded into the entries above, the file down from 327 lines to about 135), the support line out of the repo
+  with `hello@` beside it, HSTS + CSP in `yeral.caddy`; (2) close P4 slice 3 with its end-to-end check and the first
+  Playwright test; (3) slice 4, then 5; (4) slices 6 + 7, then the first launch (P5).
 
 ## Roadmap
 
