@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useLocation, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import type { BookingDetail } from '@yeral/contract/bookings'
 import type { BusinessDetail } from '@yeral/contract/catalog'
@@ -132,29 +132,38 @@ export function MovePage() {
   const total = selectionTotal(picked)
   const people = [...new Set(items.map((i) => i.staffId))]
   const current = people.length === 1 ? (people[0] ?? null) : null
-  // one no longer on the page (removed from the team) leaves anyone
-  const staff = chosenStaff(detail, ids, search.staff ?? current ?? 'any')
+  const asked = search.staff ?? current ?? 'any'
+  // one no longer on the page, or no longer doing the services, leaves anyone (the api never swaps them)
+  const staff = chosenStaff(detail, ids, asked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
   const own = b ? { code, date: b.date, start: b.start, current } : null
   const date = search.date && search.date >= today(now) ? search.date : null
   const locked = send.isPending || send.isSuccess
+  // what the booking says of its move; the api's first free-times read has the last word
+  const movableAsRead =
+    b !== undefined && b.business.slug === detail.slug && b.what.type === 'appointment' && b.status === 'confirmed' && b.actions.reschedule
   // the first free-times read (the time step's own, without a day) says before the time step whether the booking can
   // still move online, and whether its specialist still does its services; the page waits for it only while the
   // address names nobody (its first open): a specialist chosen later keeps the step while their times come
   const first = useQuery({
     ...sdk.availability.appointment(detail.slug, { lang, staff, move: code }),
-    enabled: b !== undefined && !search.moved,
-    placeholderData: keepPreviousData,
+    enabled: movableAsRead && !search.moved,
   })
   const gating = first.isPending && search.staff === undefined
   const refusal = moveRefusal(first.error, staff) ?? moveRefusal(send.error, staff)
-  const staffGone = refusal === 'staff_gone'
+  // the specialist asked for is gone: the page's catalogue says so, or the api's 404 when the page is behind it
+  const staffGone = b !== undefined && ((asked !== 'any' && staff === 'any') || refusal === 'staff_gone')
+  const askedName = detail.specialists.find((s) => s.id === asked)?.name ?? items.find((i) => i.staffId === asked)?.staff ?? null
   useEffect(() => {
-    // the api never swaps the specialist: the move asks for anyone, and says why
     if (!staffGone) return
-    toast(m('staffGone', { name: staffName }))
+    if (askedName) toast(m('staffGone', { name: askedName }))
     void navigate({ to: '.', search: (prev: Record<string, unknown>) => ({ ...prev, staff: 'any', time: undefined }), replace: true })
-  }, [staffGone, staffName, navigate, m])
+  }, [staffGone, askedName, navigate, m])
+  // any other refusal of the first read (cancelled meanwhile, its free change time over): what the booking is now decides
+  const stale = first.error !== null && !refusal && isApiError(first.error) && first.error.code !== 'network'
+  useEffect(() => {
+    if (stale) void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey })
+  }, [stale, queryClient, sdk, code, lang])
   // the chosen day's free times, as the time step asks them: a time the day no longer has isn't chosen any more
   const freeTimes = sdk.availability.appointment(detail.slug, { lang, staff, date: date ?? undefined, move: code })
   const free = useQuery({ ...freeTimes, enabled: date !== null && search.time !== undefined && !search.moved })
@@ -192,13 +201,7 @@ export function MovePage() {
 
   if (search.moved && b) return <MoveSent booking={b} detail={detail} picked={picked} staffName={staffName} />
 
-  const movable =
-    b !== undefined &&
-    b.business.slug === detail.slug &&
-    b.what.type === 'appointment' &&
-    b.status === 'confirmed' &&
-    b.actions.reschedule &&
-    refusal !== 'not_bookable'
+  const movable = movableAsRead && refusal !== 'not_bookable'
   if (!b || !movable || gating) {
     const signedOut = isApiError(booking.error, 'unauthorized')
     const missing = isApiError(booking.error, 'not_found') || isApiError(booking.error, 'validation_error')

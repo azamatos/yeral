@@ -1,8 +1,8 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
 import { useFmt } from '@yeral/i18n'
-import { cn } from '@yeral/ui/cn'
 import { Clock, History, Wallet } from 'lucide-react'
 import { useTranslations } from 'use-intl'
+import { Part } from './part'
 
 /**
  * The business's booking rules on the confirm step (Booking `.csec .rules`, book B-41): the free cancel or change
@@ -13,8 +13,7 @@ export function Rules({ rules, pay = true, className }: { rules: BusinessDetail[
   const t = useTranslations('booking.confirm')
   const fmt = useFmt()
   return (
-    <section className={cn('flex flex-col gap-4 border-t border-n-200 py-7', className)}>
-      <h2 className="m-0 text-[20px] leading-[26px] font-semibold tracking-[-0.015em]">{t('rules')}</h2>
+    <Part title={t('rules')} className={className}>
       <ul className="m-0 flex list-none flex-col gap-3.5 p-0 text-body [&_svg]:mt-px [&_svg]:size-5 [&_svg]:flex-none [&_svg]:text-n-600">
         <li className="flex items-start gap-3">
           <History aria-hidden strokeWidth={1.75} />
@@ -32,6 +31,6 @@ export function Rules({ rules, pay = true, className }: { rules: BusinessDetail[
         )}
       </ul>
       {rules.note && <p className="m-0 rounded-m bg-group px-3.5 py-3 text-small text-n-600">{rules.note}</p>}
-    </section>
+    </Part>
   )
 }

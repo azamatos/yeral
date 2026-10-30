@@ -109,7 +109,26 @@ export const CantMoveOnline: Story = {
   },
 }
 
-/** Aýna no longer does the haircut: the api won't swap her, so the move asks for any specialist and says so. */
+/** Aýna no longer does the haircut, as the business's page says: the move asks for any specialist and says so. */
+export const SpecialistLeft: Story = {
+  args: {
+    server: moveApi({
+      details: { 'YR-48190': { reschedule: null } },
+      business: {
+        business: { ...GLOW, specialists: GLOW.specialists.map((s) => (s.id === 'st-ayna' ? { ...s, serviceIds: ['s2'] } : s)) },
+      },
+    }),
+  },
+  play: async ({ canvas }) => {
+    const group = within(await canvas.findByRole('radiogroup', { name: 'Specialist' }))
+    await expect(group.getByRole('radio', { name: /Any specialist/ })).toHaveAttribute('aria-checked', 'true')
+    await expect(group.getByRole('radio', { name: /Aýna/ })).toBeDisabled()
+    const toast = await within(document.body).findByText('Aýna no longer does these services. The new time is with any specialist.')
+    await waitFor(() => expect(toast).toBeVisible())
+  },
+}
+
+/** The page is behind the business: the api won't swap Aýna either (404 naming her), with the same outcome. */
 export const SpecialistGone: Story = {
   args: { server: moveApi({ details: { 'YR-48190': { reschedule: null } }, business: { moveRead: { staffGone: 'st-ayna' } } }) },
   play: async ({ canvas }) => {
@@ -118,8 +137,7 @@ export const SpecialistGone: Story = {
     const group = () => within(canvas.getByRole('radiogroup', { name: 'Specialist' }))
     await waitFor(() => expect(group().getByRole('radio', { name: /Any specialist/ })).toHaveAttribute('aria-checked', 'true'))
     await expect(group().getByText('Current')).toBeVisible()
-    const toast = await within(document.body).findByText('Aýna no longer does these services. The new time is with any specialist.')
-    await waitFor(() => expect(toast).toBeVisible())
+    // the toast is SpecialistLeft's check: the toaster keeps a story's toasts alive into the next one
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
     await expect(await canvas.findByRole('heading', { level: 2, name: 'Choose the new time' })).toBeVisible()
     await expect(within(canvas.getByRole('complementary', { name: 'Your booking' })).getByText('Any specialist')).toBeVisible()

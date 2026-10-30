@@ -11,6 +11,7 @@ import { CircleCheck } from 'lucide-react'
 import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { NOTE_MAX } from '@/entities/booking'
+import { Part } from './part'
 import { Rules } from './rules'
 import { StepTitle } from './step-title'
 
@@ -19,20 +20,6 @@ const LoginModal = lazy(() => import('@/features/log-in').then((m) => ({ default
 
 /** A time the api offered when the chosen one was just taken (`slot_taken`). */
 export type Alternative = { date: string; start: number; end: number }
-
-/** A part of the step (Booking `.csec`): a line above, 28 apart, its own heading. */
-function Part({ title, titleRef, children }: { title?: string; titleRef?: React.Ref<HTMLHeadingElement>; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-4 border-t border-n-200 py-7">
-      {title && (
-        <h2 ref={titleRef} tabIndex={-1} className="m-0 text-[20px] leading-[26px] font-semibold tracking-[-0.015em] focus:outline-none">
-          {title}
-        </h2>
-      )}
-      {children}
-    </section>
-  )
-}
 
 /**
  * Step 4 (Booking `step=confirm`, book C-18, C-20, C-21): the time just taken with the nearest free ones (Booking
