@@ -77,8 +77,9 @@ fi
 docker compose up -d --wait --remove-orphans
 
 if [ "${PUBLIC:-0}" = 1 ]; then
-  # the site file as it was, the way back from a bad header or policy without a rebuild (README, "Deploying Ýeral by hand")
-  if [ -f /srv/edge/sites/yeral.caddy ]; then
+  # the site file as it was, the way back from a bad header or policy without a rebuild (README, "Deploying Ýeral by
+  # hand"); only when it changes, so `-latest` stays the one before the last change
+  if [ -f /srv/edge/sites/yeral.caddy ] && ! cmp -s src/infra/server/yeral/yeral.caddy /srv/edge/sites/yeral.caddy; then
     cp -p /srv/edge/sites/yeral.caddy "/srv/edge/sites-yeral.caddy.before-${COMMIT:0:7}"
     cp -p /srv/edge/sites/yeral.caddy /srv/edge/sites-yeral.caddy.before-latest
   fi

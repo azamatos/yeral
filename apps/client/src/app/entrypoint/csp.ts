@@ -28,8 +28,8 @@ export function contentSecurityPolicy(nonce: string, hosts: { api: string; tiles
     `font-src 'self'`,
     // the api (the sdk's requests and the events stream) and OpenFreeMap (style, glyphs, sprites, tiles)
     `connect-src 'self' ${hosts.api} ${hosts.tiles}`,
-    // MapLibre runs its worker from a blob
-    `worker-src blob:`,
+    // MapLibre's worker is the bundled file under /assets/ (MapFrame's `setWorkerUrl`); a blob only for a cross-origin one
+    `worker-src 'self'`,
     // the same as the edge's X-Frame-Options SAMEORIGIN
     `frame-ancestors 'self'`,
     `base-uri 'self'`,

@@ -89,13 +89,13 @@ no image rebuilt. The client site's own policy rolls back with its image (the pr
 `yeral.caddy`'s `(yeral_site)` sends every site `Strict-Transport-Security "max-age=31536000; includeSubDomains"`
 (a year of HTTPS only, every `*.yeral.app` host being on TLS already: "DNS records"; no `preload`, which a browser
 list keeps for months), `X-Content-Type-Options nosniff`, `Referrer-Policy strict-origin-when-cross-origin` and
-`X-Frame-Options SAMEORIGIN`. The Content Security Policy is per site, written from an inventory of what each app
+`X-Frame-Options SAMEORIGIN` (`www`'s redirect included). The Content Security Policy is per site, written from an inventory of what each app
 loads (`docs/memory-bank/log/2026-10-30-hsts-csp.md`; nothing is allowed on a guess):
 
 | Site | Policy | Set by |
 |---|---|---|
 | `api.yeral.app` | `default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'` (JSON, photos, the OpenAPI document load nothing); `/docs` only `frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'` until Scalar's CDN bundle is inventoried | `yeral.caddy` |
-| `business.yeral.app` | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'` | `yeral.caddy` |
+| `business.yeral.app` | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'` | `yeral.caddy` |
 | `yeral.app` | the business app's, with `script-src 'self' 'nonce-…'`: a nonce per page on the scripts TanStack Start writes inline (hydration, React's streaming), so Caddy sets none here | the app: `apps/client/src/app/entrypoint/csp.ts`, `start.ts` |
 
 `infra/docker/Caddyfile` mirrors it for the production-like stack, where CI's «Docker stack» job asserts the headers

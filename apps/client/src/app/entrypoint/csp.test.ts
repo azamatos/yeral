@@ -14,7 +14,8 @@ describe('contentSecurityPolicy', () => {
     const directives = contentSecurityPolicy('n', hosts).split('; ')
     expect(directives).toContain(`connect-src 'self' https://api.example https://tiles.example`)
     expect(directives).toContain(`img-src 'self' data: blob: https://api.example`)
-    expect(directives).toContain(`worker-src blob:`)
+    // MapFrame hands MapLibre the bundled worker file, same origin as the page
+    expect(directives).toContain(`worker-src 'self'`)
   })
 
   it('keeps the page out of other sites’ frames and forms on its own origin', () => {

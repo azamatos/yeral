@@ -66,7 +66,7 @@ http://yeral.localhost {
 # yeral.caddy's with this stack's api address (the inventory: docs/memory-bank/log/2026-10-30-hsts-csp.md)
 http://business.yeral.localhost {
 	import yeral_site
-	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://api.yeral.localhost; font-src 'self'; connect-src 'self' http://api.yeral.localhost https://tiles.openfreemap.org; worker-src blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://api.yeral.localhost; font-src 'self'; connect-src 'self' http://api.yeral.localhost https://tiles.openfreemap.org; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	reverse_proxy business:80
 }
 

@@ -56,8 +56,8 @@ business.yeral.app {
 	# a static build with no inline script; styles: React and MapLibre set style attributes, the workspace shell and
 	# MapLibre add a <style>; images: uploaded photos from the api, MapLibre's blobs and transparent data: pixel; the font
 	# is bundled; the api (requests, the events stream) and OpenFreeMap (style, glyphs, sprites, tiles) over fetch;
-	# MapLibre's worker from a blob. The inventory: docs/memory-bank/log/2026-10-30-hsts-csp.md
-	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+	# MapLibre's worker is the bundled file under /assets/. The inventory: docs/memory-bank/log/2026-10-30-hsts-csp.md
+	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	reverse_proxy yeral-business:80
 }
 
@@ -72,5 +72,6 @@ yeral.app {
 }
 
 www.yeral.app {
+	import yeral_site
 	redir https://yeral.app{uri} permanent
 }
