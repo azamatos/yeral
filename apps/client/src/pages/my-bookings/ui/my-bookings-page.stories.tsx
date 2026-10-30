@@ -2,7 +2,8 @@
  * My bookings (Account-Bookings, book C-23–C-26, C-40): Upcoming with a waiting request, a declined one with offered
  * times (one taken), an expired one with free times, a waiting move, Call; Past with a completed visit, the client's own
  * cancel with Undo and a phone booking whose offered time has passed; an offered time just taken; Undo refused; the
- * empty tabs; the phone.
+ * «How was it?» card (F-243: its stars open the form, sent the row says «You rated»; closed for good), a reviewed row
+ * with «Edit the review», the review refused (the booking read again); the empty tabs; the phone.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
@@ -24,6 +25,7 @@ const meta = {
 } satisfies Meta<typeof PageStory>
 export default meta
 type Story = StoryObj<typeof meta>
+type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
 
 /** Upcoming: the waiting request, the declined one's reason and offered times; a tap asks, Book takes it. */
 export const Upcoming: Story = {
@@ -91,6 +93,87 @@ export const WriteAReview: Story = {
   },
 }
 
+/** The «How was it?» card (F-243) over the list; the card's section, named by its title. */
+const card = async (canvas: Canvas) => within(await canvas.findByRole('region', { name: 'How was it?' }))
+
+/**
+ * The «How was it?» card asks about the latest completed visit without a review: a star pressed opens the form with it
+ * picked; sent, the card goes and the visit's row says «★ 5 · You rated» with «Edit the review».
+ */
+export const HowWasIt: Story = {
+  args: { path: '/en/account/bookings?tab=past' },
+  play: async ({ canvas }) => {
+    const ask = await card(canvas)
+    await expect(ask.getByText('Glow Studio')).toBeVisible()
+    await expect(ask.getByText(/^Women’s haircut · Aýna · \w{3}, \d+ \w{3}$/)).toBeVisible()
+    await expect(ask.getByRole('button', { name: 'Close' })).toBeVisible()
+    await userEvent.click(ask.getByRole('radio', { name: '5 stars' }))
+    const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
+    await expect(form.getByRole('radio', { name: '5 stars' })).toBeChecked()
+    await expect(form.getByRole('button', { name: 'Send review' })).toBeEnabled()
+    // the story before may have thanked moments ago (a toast lives 4–6 s): this send adds one more
+    const thanked = within(document.body).queryAllByText('Thank you! Your review is published.').length
+    await userEvent.click(form.getByRole('button', { name: 'Send review' }))
+    await waitFor(() => expect(within(document.body).getAllByText('Thank you! Your review is published.')).toHaveLength(thanked + 1))
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
+    const edit = await canvas.findByRole('button', { name: /^Edit the review: Glow Studio, / })
+    await expect(edit).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: /^Write a review: / })).toBeNull()
+    // Glow Studio's row now, Barber Loft's already
+    await expect(canvas.getAllByRole('img', { name: 'You rated it 5 out of 5' })).toHaveLength(2)
+  },
+}
+
+/** The cross closes the card for good for that visit (one tap, no «Later»); the row still offers «Write a review». */
+export const HowWasItClosed: Story = {
+  args: { path: '/en/account/bookings?tab=past' },
+  play: async ({ canvas }) => {
+    const ask = await card(canvas)
+    await userEvent.click(ask.getByRole('button', { name: 'Close' }))
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
+    await expect(canvas.getByRole('button', { name: /^Write a review: Glow Studio, / })).toBeVisible()
+  },
+}
+
+/** A reviewed visit: «★ 5 · You rated» in the row; «Edit the review» changes it while it may (C-35, 7 days). */
+export const Reviewed: Story = {
+  args: { path: '/en/account/bookings?tab=past' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('img', { name: 'You rated it 5 out of 5' })).toHaveTextContent('5 · You rated')
+    await userEvent.click(canvas.getByRole('button', { name: /^Edit the review: Barber Loft, / }))
+    const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
+    await waitFor(() => expect(form.getByRole('radio', { name: '5 stars' })).toBeChecked())
+    await expect(form.getByRole('button', { name: 'On time' })).toHaveAttribute('aria-pressed', 'true')
+    const save = form.getByRole('button', { name: 'Save changes' })
+    await expect(save).toBeDisabled()
+    await userEvent.click(form.getByRole('radio', { name: '4 stars' }))
+    await userEvent.click(save)
+    const changed = await within(document.body).findByText('Your review is changed.')
+    await waitFor(() => expect(changed).toBeVisible())
+    await expect(await canvas.findByRole('img', { name: 'You rated it 4 out of 5' })).toHaveTextContent('4 · You rated')
+  },
+}
+
+/**
+ * The review refused (its 30 days passed meanwhile): the form closes with the reason, and the booking read again no
+ * longer offers a review, in the row or on the card.
+ */
+export const ReviewRefused: Story = {
+  args: { path: '/en/account/bookings?tab=past', server: myBookingsApi({ refuseReview: 'review_window_passed' }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: /^Write a review: Glow Studio, / }))
+    const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
+    await waitFor(() => expect(form.getByRole('radiogroup', { name: 'Rating' })).toBeVisible())
+    await userEvent.click(form.getByRole('radio', { name: '5 stars' }))
+    await userEvent.click(form.getByRole('button', { name: 'Send review' }))
+    const why = await within(document.body).findByText('Reviews can be written up to 30 days after the visit.')
+    await waitFor(() => expect(why).toBeVisible())
+    await waitFor(() => expect(within(document.body).queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(canvas.queryByRole('button', { name: /^Write a review: / })).toBeNull())
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
+  },
+}
+
 /** Undo refused (the time went to someone else): said in the row with the way to another time, Undo gone. */
 export const UndoRefused: Story = {
   args: { path: '/en/account/bookings?tab=past', server: myBookingsApi({ refuse: 'slot_taken' }) },
@@ -110,10 +193,11 @@ export const Empty: Story = {
   },
 }
 
-/** Phone: the rows stack their price and actions under the text. */
+/** Phone: the card's stars and word wrap within 390; the rows stack their price and actions under the text. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('The business declined')).toBeVisible()
+    await expect((await card(canvas)).getByRole('radio', { name: '5 stars' })).toBeVisible()
   },
 }

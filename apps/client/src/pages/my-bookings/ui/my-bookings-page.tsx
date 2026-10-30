@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { CalendarX2, CircleAlert } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { ReviewModal } from '@/features/write-review'
+import { HowWasItCard, ReviewModal } from '@/features/write-review'
 import { BookingRow, rowLinkId } from './booking-row'
 
 export type BookingsTab = 'upcoming' | 'past'
@@ -21,7 +21,8 @@ export type BookingsTab = 'upcoming' | 'past'
  * declined or expired requests that still have a time to take on top, then the rest soonest first; Past is newest
  * first (the api's order). Changes made elsewhere (the business answers, a request runs out) come in through the live
  * updates the site starts in the browser. A row opens its booking in the drawer over the list (`/account/bookings/{code}`,
- * the child route's `<Outlet />`).
+ * the child route's `<Outlet />`). Under the title, the «How was it?» card (`features/write-review`, book F-243) asks
+ * about the latest completed visit without a review, whatever the tab.
  */
 export function MyBookingsPage() {
   const t = useTranslations('myBookings')
@@ -33,7 +34,7 @@ export function MyBookingsPage() {
   const tab = search.tab ?? 'upcoming'
   const list = useInfiniteQuery(sdk.bookings.list(tab, lang))
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
-  // one review form for the page: a sent review refreshes the list, and the row's button goes, not the form; the focus
+  // one review form for the rows: a sent review refreshes the list, and the row's button goes, not the form; the focus
   // comes back to the row's link
   const [reviewing, setReviewing] = useState<MyBooking | null>(null)
   const backTo = useRef<HTMLElement | null>(null)
@@ -41,6 +42,10 @@ export function MyBookingsPage() {
     backTo.current = document.getElementById(rowLinkId(b.code))
     setReviewing(b)
   }
+  // the card's form: sent, its stars go with the card, so the focus goes to the reviewed row when it's on the screen
+  // (Past), else to the title; closed without sending, the modal's own fallback takes the star pressed
+  const title = useRef<HTMLHeadingElement | null>(null)
+  const cardBackTo = useRef<HTMLElement | null>(null)
   const panel = (
     <>
       {list.isError && !list.data ? (
@@ -108,7 +113,16 @@ export function MyBookingsPage() {
   )
   return (
     <>
-      <h1 className="m-0 text-h2 max-sm:text-[26px] max-sm:leading-8">{t('title')}</h1>
+      <h1 ref={title} tabIndex={-1} className="m-0 text-h2 outline-none max-sm:text-[26px] max-sm:leading-8">
+        {t('title')}
+      </h1>
+      <HowWasItCard
+        className="mt-5"
+        returnFocus={cardBackTo}
+        onDone={(b) => {
+          cardBackTo.current = document.getElementById(rowLinkId(b.code)) ?? title.current
+        }}
+      />
       <Tabs
         value={tab}
         onValueChange={(v) => void navigate({ to: '.', search: { tab: v === 'past' ? 'past' : undefined }, replace: true })}
@@ -125,7 +139,15 @@ export function MyBookingsPage() {
           </TabsContent>
         ))}
       </Tabs>
-      {reviewing && <ReviewModal booking={reviewing} open onOpenChange={(open) => !open && setReviewing(null)} returnFocus={backTo} />}
+      {reviewing && (
+        <ReviewModal
+          booking={reviewing}
+          review={reviewing.review}
+          open
+          onOpenChange={(open) => !open && setReviewing(null)}
+          returnFocus={backTo}
+        />
+      )}
       <Outlet />
     </>
   )

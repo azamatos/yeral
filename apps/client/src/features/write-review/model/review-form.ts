@@ -1,5 +1,6 @@
 import type { BookingDetail } from '@yeral/contract/bookings'
 import { REVIEW_TAGS, REVIEW_TAGS_MAX, REVIEW_TEXT_MAX, type ReviewTag } from '@yeral/domain/lifecycle'
+import { isApiError } from '@yeral/sdk'
 
 /** A review as the booking carries it: the stars, the tags, the words and when it was written. */
 export type WrittenReview = NonNullable<BookingDetail['review']>
@@ -40,6 +41,14 @@ export function reviewBody(form: ReviewForm): { rating: number; tags: string[]; 
   const text = form.text.trim()
   return { rating: form.rating, tags: form.tags, ...(text ? { text } : {}) }
 }
+
+/**
+ * Whether the api refused the review because the booking moved on (403: the visit isn't completed, its 30 days or the
+ * review's 7 days passed; 404: the booking is gone; 409: reviewed already): the form closes and the booking is read
+ * again. Anything else (the network, the api down, a session that ended, a wait asked for) lets the form say so and
+ * try again with what was written.
+ */
+export const refused = (error: unknown): boolean => isApiError(error) && [403, 404, 409].includes(error.status)
 
 /** Whether a change of a written review changes anything (its Save waits until it does). */
 export function changed(form: ReviewForm, written: WrittenReview): boolean {

@@ -1,5 +1,6 @@
+import { ApiError } from '@yeral/sdk'
 import { describe, expect, it } from 'vitest'
-import { changed, initialForm, reviewBody, toggleTag, tooLong, type WrittenReview } from './review-form'
+import { changed, initialForm, refused, reviewBody, toggleTag, tooLong, type WrittenReview } from './review-form'
 
 const written: WrittenReview = { rating: 4, tags: ['clean', 'Old words'], text: 'Good haircut.', createdAt: Date.UTC(2026, 9, 20) }
 
@@ -38,5 +39,16 @@ describe('the review form', () => {
     expect(changed({ ...initialForm(written), tags: ['Old words', 'clean'] }, written)).toBe(false)
     expect(changed({ ...initialForm(written), rating: 5 }, written)).toBe(true)
     expect(changed({ ...initialForm(written), tags: ['clean'] }, written)).toBe(true)
+  })
+
+  it('tells the api’s refusal (the booking moved on) from a failure the form may retry', () => {
+    expect(refused(new ApiError(409, 'review_exists'))).toBe(true)
+    expect(refused(new ApiError(403, 'review_window_passed'))).toBe(true)
+    expect(refused(new ApiError(404, 'not_found'))).toBe(true)
+    expect(refused(new ApiError(401, 'unauthorized'))).toBe(false)
+    expect(refused(new ApiError(429, 'rate_limited'))).toBe(false)
+    expect(refused(new ApiError(500, 'internal'))).toBe(false)
+    expect(refused(new ApiError(0, 'network'))).toBe(false)
+    expect(refused(new TypeError('offline'))).toBe(false)
   })
 })

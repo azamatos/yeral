@@ -1,5 +1,5 @@
 import type { Me } from '@yeral/contract/account'
-import type { BookingDetail, MyBooking } from '@yeral/contract/bookings'
+import type { BookingDetail, BookingSummary, MyBooking } from '@yeral/contract/bookings'
 import { addDays, epochOf, today } from '@yeral/domain/time'
 import { businessApi, type BusinessApiOptions } from './business'
 import { AYJEMAL, authApi, fakeFetch, json, refuse } from './fake-api'
@@ -71,8 +71,9 @@ const offer = (start: number, state: 'free' | 'taken' | 'past') => ({
 /**
  * My bookings as the api lists them (`GET /me/bookings`, #215's rows): Upcoming has a request waiting for its answer,
  * a declined one with times offered (one already taken), an expired one with free times, a confirmed booking with a
- * move waiting, and a confirmed one at Barber Loft; Past has a completed visit, one the client cancelled (Undo) and a phone booking the business
- * cancelled whose offered time has passed.
+ * move waiting, and a confirmed one at Barber Loft; Past has a completed visit without a review (the «How was it?»
+ * card's), one the client cancelled (Undo), a phone booking the business cancelled whose offered time has passed, and
+ * an older visit at Barber Loft reviewed two days ago (its review may still change).
  */
 export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
   upcoming: [
@@ -140,10 +141,38 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
       offers: { source: 'cancel', times: [{ ...offer(660, 'past'), date: addDays(today(), -1) }] },
       actions: { ...ACTIONS, bookAgain: true },
     }),
+    row('YR-48095', {
+      business: LOFT,
+      what: {
+        type: 'appointment',
+        items: [{ serviceId: 'loft-cut', service: 'Men’s haircut', staffId: 'loft-merdan', staff: 'Merdan', start: 660, end: 705 }],
+      },
+      date: addDays(today(), -10),
+      start: 660,
+      end: 705,
+      status: 'completed',
+      price: { type: 'fixed', amount: 60 },
+      review: { rating: 5, tags: ['on_time', 'skilled'], text: null, createdAt: Date.now() - 2 * 86_400_000 },
+      actions: { ...ACTIONS, bookAgain: true, editReview: true },
+    }),
   ],
 }
 
 const HOUR = 3_600_000
+
+/** A row as the «How was it?» card has it (`GET /me/how-was-it`'s `visit`, a booking summary). */
+const summaryOf = (b: MyBooking): BookingSummary => ({
+  code: b.code,
+  business: b.business,
+  what: b.what,
+  date: b.date,
+  start: b.start,
+  end: b.end,
+  status: b.status,
+  cancelledBy: b.cancelledBy,
+  price: b.price,
+  source: b.source,
+})
 
 /**
  * A row's booking as `GET /me/bookings/{code}` has it: its history by what happened to it (sent two days before; a
@@ -207,21 +236,26 @@ export function detailOf(b: MyBooking, over: Partial<BookingDetail> = {}): Booki
 }
 
 /**
- * My bookings' api: the two lists, each booking (`details` over what {@link detailOf} makes of a row), and what the
- * list and the drawer do: Undo, taking an offered time, cancelling, withdrawing a move and the note (`refuse` makes
- * Undo and taking a time fail with that code); the sign-in (`authApi`) for everything else.
+ * My bookings' api: the two lists, each booking (`details` over what {@link detailOf} makes of a row), the «How was
+ * it?» card's visit (the latest completed row without a review, its card not closed; book F-243) and what the list,
+ * the drawer and the card do: Undo, taking an offered time, cancelling, withdrawing a move, the note, the review and
+ * closing the card (`refuse` makes Undo and taking a time fail with that code; `refuseReview` the review, the row then
+ * no longer offering it, as the api's answer would say); the sign-in (`authApi`) for everything else.
  */
 export const myBookingsApi =
   ({
     lists = MY_BOOKINGS,
     signedIn = AYJEMAL,
     refuse: fail,
+    refuseReview,
     details = {},
     instant = false,
   }: {
     lists?: typeof MY_BOOKINGS
     signedIn?: Me
     refuse?: string
+    /** The review is refused with this code (a 4xx), and the booking read again no longer offers one. */
+    refuseReview?: string
     details?: Record<string, Partial<BookingDetail>>
     /** A move changes the time at once, as at a business that confirms at once. */
     instant?: boolean
@@ -231,6 +265,8 @@ export const myBookingsApi =
     const all = [...lists.upcoming, ...lists.past]
     /** What an action changed on a booking, by code: the row and the drawer say it alike, as the api does. */
     const changed = new Map<string, Partial<MyBooking>>()
+    /** The visits whose «How was it?» card was closed for good. */
+    const closed = new Set<string>()
     const rowOf = (b: MyBooking): MyBooking => ({ ...b, ...changed.get(b.code) })
     const find = (code: string) => {
       const b = all.find((r) => r.code === code)
@@ -240,6 +276,20 @@ export const myBookingsApi =
       if (route === 'GET /me/bookings') {
         const items = (query.get('tab') === 'past' ? lists.past : lists.upcoming).map(rowOf)
         return json({ items, total: items.length, cursor: null })
+      }
+      if (route === 'GET /me/how-was-it') {
+        // the latest completed visit still open to a review, without one, its card not closed
+        const asking = all
+          .map(rowOf)
+          .filter((b) => b.status === 'completed' && b.review === null && b.actions.review && !closed.has(b.code))
+          .sort((a, b) => b.date.localeCompare(a.date) || b.start - a.start)
+        return json({ visit: asking[0] ? summaryOf(asking[0]) : null })
+      }
+      const closing = /^POST \/me\/bookings\/([^/]+)\/how-was-it\/close$/.exec(route)
+      if (closing?.[1]) {
+        if (!find(closing[1])) return refuse(404, 'not_found')
+        closed.add(closing[1])
+        return json(null, 204)
       }
       const one = /^GET \/me\/bookings\/([^/]+)$/.exec(route)
       if (one?.[1]) {
@@ -266,6 +316,11 @@ export const myBookingsApi =
           case 'withdraw-move':
             return json({ ...booking, reschedule: null })
           case 'review': {
+            if (refuseReview) {
+              // refused: the booking, read again, no longer offers a review (its window passed, say)
+              changed.set(booking.code, { actions: { ...booking.actions, review: false, editReview: false } })
+              return refuse(409, refuseReview)
+            }
             // written or changed: the stars, tags and words, then open to change for 7 days
             const { rating, tags = [], text = null } = body as { rating: number; tags?: string[]; text?: string | null }
             const review = {
@@ -297,7 +352,7 @@ export const myBookingsApi =
     })
     return (input, init) => {
       const path = new URL(new Request(input, init).url).pathname
-      return path.startsWith('/v1/me/bookings') ? mine(input, init) : signIn(input, init)
+      return path.startsWith('/v1/me/bookings') || path === '/v1/me/how-was-it' ? mine(input, init) : signIn(input, init)
     }
   }
 
