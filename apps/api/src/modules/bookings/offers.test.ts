@@ -13,6 +13,8 @@ import { runDueJobs } from '../jobs/run'
 const MIN = 60_000
 const THU = '2026-10-15'
 const FRI = '2026-10-16'
+// a day the other tests leave alone: bookings whose service goes
+const GONE = '2026-10-22'
 
 interface Offer {
   date: string
@@ -104,6 +106,50 @@ describe('offered times', () => {
     const tried = await b.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
     expect(tried.status).toBe(409)
     expect(tried.json.error.code).toBe('slot_taken')
+  })
+
+  it('a booking whose service is gone for good: nothing offered on expiry, earlier offers taken, none to accept', async () => {
+    // a second service Aýna and Maral do, booked beside the haircut, then its row goes (never a booking of fewer services)
+    const [h] = await db.select().from(services).where(eq(services.id, haircut))
+    const { id: _id, ...rest } = h!
+    const spare = async (name: string) => {
+      const [row] = await db
+        .insert(services)
+        .values({ ...rest, name: { tk: name, ru: name, en: name }, sort: 99 })
+        .returning({ id: services.id })
+      await db.insert(staffServices).values([who['Aýna']!, who.Maral!].map((staffId) => ({ staffId, serviceId: row!.id })))
+      return row!.id
+    }
+    const ask = async (phone: string, extra: string, n: number) => {
+      const b = browser(t.app)
+      await b.login(phone, 'Client')
+      const free = await b.req(`/v1/businesses/glow-studio/availability?services=${haircut},${extra}&staff=${who['Aýna']}&date=${GONE}`)
+      const starts = (free.json.slots as { start: number }[]).map((x) => x.start)
+      const body = { type: 'appointment', business: 'glow-studio', serviceIds: [haircut, extra], staffId: who['Aýna'], date: GONE }
+      const made = await b.req('/v1/bookings', { body: { ...body, start: starts[starts.length - 1 - n] } })
+      expect(made.status).toBe(201)
+      return { b, code: made.json.code as string }
+    }
+    // gone before the request expires: nothing is offered
+    const one = await spare('Gone first')
+    const first = await ask('+99365444040', one, 0)
+    await db.delete(services).where(eq(services.id, one))
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    expect(await offersOf(first.b, first.code)).toEqual([])
+    // gone after: the offers show taken, and none can be accepted
+    const two = await spare('Gone later')
+    const second = await ask('+99365444041', two, 3)
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    const before = await offersOf(second.b, second.code)
+    expect(before.length).toBeGreaterThan(0)
+    expect(before.every((o) => o.state === 'free')).toBe(true)
+    await db.delete(services).where(eq(services.id, two))
+    expect((await offersOf(second.b, second.code)).every((o) => o.state === 'taken')).toBe(true)
+    const tried = await second.b.req(`/v1/me/bookings/${second.code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
+    expect(tried.status).toBe(409)
+    expect(tried.json.error.code).toBe('not_bookable')
   })
 
   it('once one is taken the others go, and the row names the new booking', async () => {

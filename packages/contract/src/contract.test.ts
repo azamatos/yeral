@@ -3,7 +3,7 @@ import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { messages } from '@yeral/i18n/messages'
 import { describe, expect, it } from 'vitest'
 import { sendCodeSchema, updateMeSchema, verifyCodeSchema } from './account'
-import { appointmentAvailabilityQuerySchema, tableAvailabilityQuerySchema } from './availability'
+import { appointmentAvailabilityQuerySchema, specialistsAvailabilityQuerySchema, tableAvailabilityQuerySchema } from './availability'
 import { bookingSummarySchema, createBookingSchema, rescheduleSchema, reviewInputSchema } from './bookings'
 import { businessQuerySchema, searchQuerySchema } from './catalog'
 import { langQuerySchema, localizedSchema } from './common'
@@ -146,13 +146,19 @@ describe('query strings', () => {
     expect(searchQuerySchema.safeParse({ party: String(MAX_ONLINE_PARTY + 1) }).success).toBe(false)
   })
 
-  it('availability takes a comma list of services and a specialist or "any"', () => {
-    expect(appointmentAvailabilityQuerySchema.parse({ services: `${ID},${ID2}` })).toMatchObject({
-      services: [ID, ID2],
-      staff: 'any',
-      days: 14,
-    })
+  it('availability takes a comma list of services and a specialist or "any"; in move mode the booking’s own', () => {
+    const asked = appointmentAvailabilityQuerySchema.parse({ services: `${ID},${ID2}` })
+    expect(asked).toMatchObject({ services: [ID, ID2], days: 14 })
+    // no default: left out in move mode, the booking's own specialist
+    expect(asked).not.toHaveProperty('staff')
+    expect(appointmentAvailabilityQuerySchema.parse({ services: ID, staff: 'any' }).staff).toBe('any')
     expect(appointmentAvailabilityQuerySchema.safeParse({ services: '' }).success).toBe(false)
+    expect(appointmentAvailabilityQuerySchema.safeParse({}).success).toBe(false)
+    const moving = appointmentAvailabilityQuerySchema.parse({ move: 'YR-48213' })
+    expect(moving).toMatchObject({ move: 'YR-48213' })
+    expect(moving.services).toBeUndefined()
+    expect(specialistsAvailabilityQuerySchema.safeParse({}).success).toBe(false)
+    expect(specialistsAvailabilityQuerySchema.parse({ move: 'YR-48213' }).services).toBeUndefined()
   })
 
   it('a service listed twice in a link counts once', () => {

@@ -21,7 +21,7 @@ import { all, type Queryable } from '../../db/client'
 import { bookings, staff, type TimeSlot } from '../../db/schema'
 import { appointmentContext, loadBusinesses, loadBusy, type LoadedBusiness } from '../availability/context'
 import { bookOnlineFor } from '../clients/online'
-import { bookedServices, bookedServicesOf, rebookQuery, type BookedServices } from './engine'
+import { bookedServices, bookedServicesOf, rebookable, rebookQuery, type BookedServices } from './engine'
 import { recipientOf } from './links'
 import { stateOf, type BookingRow } from './repo'
 
@@ -127,8 +127,9 @@ export async function offeredTimes(
   const names = ids.length ? await db.select({ id: staff.id, name: staff.name }).from(staff).where(inArray(staff.id, ids)) : []
   const ahead = offers.filter((o) => !offerPast(o, lb.rules.leadMinutes, now))
   let isFree = (_: TimeSlot) => false
-  if (ahead.length) {
-    const booked = known ?? (await bookedServices(db, from.id))
+  const booked = ahead.length ? (known ?? (await bookedServices(db, from.id))) : null
+  // a booking that can't be re-booked as it was (a service of it off the menu) has no chip to take
+  if (booked && rebookable(lb.services, booked, { online: false })) {
     // busy time on the offered days only (each load takes the days around it too, for nights past midnight)
     const busy = new Map<string, BusyInterval>()
     for (const date of new Set(ahead.map((o) => o.date)))
@@ -177,7 +178,8 @@ export function pickAlternatives(
   booked: BookedServices,
   exclude: readonly string[] = [b.id],
 ): { offers: TimeSlot[]; held: BusyInterval[] } {
-  if (!booked.serviceIds.length) return { offers: [], held: [] }
+  // none for a booking that can't be re-booked as it was (a service of it off the menu): a chip never to be taken
+  if (!booked.serviceIds.length || !rebookable(ctx.services, booked, { online: false })) return { offers: [], held: [] }
   const q = {
     serviceIds: booked.serviceIds,
     staffId: null,

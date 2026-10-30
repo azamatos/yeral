@@ -411,24 +411,25 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   }
 
   const availability = {
-    /** `staff`: a specialist id or `'any'` («Islendik hünärmen»). */
-    appointment: (slug: string, p: Params<typeof appointmentAvailabilityQuerySchema, 'lang' | 'services' | 'staff'>) => {
-      const query = clean({ ...p, services: p.services.join(',') })
+    /**
+     * `staff`: a specialist id or `'any'` («Islendik hünärmen»). In move mode (`move`) `services` and `staff` may be
+     * left out: the booking's own; without `move`, nothing is asked until a service is chosen.
+     */
+    appointment: (slug: string, p: Params<typeof appointmentAvailabilityQuerySchema, 'lang'>) => {
+      const query = clean({ ...p, services: p.services?.join(',') })
       return queryOptions({
         queryKey: keys.availability(slug, 'appointment', query),
-        queryFn: ({ signal }) =>
-          call(v1.businesses[':slug'].availability.$get({ param: { slug }, query: query as never }, abortWith(signal))),
-        enabled: p.services.length > 0,
+        queryFn: ({ signal }) => call(v1.businesses[':slug'].availability.$get({ param: { slug }, query }, abortWith(signal))),
+        enabled: !!p.move || (p.services?.length ?? 0) > 0,
         staleTime: 15_000,
       })
     },
-    specialists: (slug: string, p: Params<typeof specialistsAvailabilityQuerySchema, 'lang' | 'services'>) => {
-      const query = clean({ ...p, services: p.services.join(',') })
+    specialists: (slug: string, p: Params<typeof specialistsAvailabilityQuerySchema, 'lang'>) => {
+      const query = clean({ ...p, services: p.services?.join(',') })
       return queryOptions({
         queryKey: keys.availability(slug, 'specialists', query),
-        queryFn: ({ signal }) =>
-          call(v1.businesses[':slug'].specialists.availability.$get({ param: { slug }, query: query as never }, abortWith(signal))),
-        enabled: p.services.length > 0,
+        queryFn: ({ signal }) => call(v1.businesses[':slug'].specialists.availability.$get({ param: { slug }, query }, abortWith(signal))),
+        enabled: !!p.move || (p.services?.length ?? 0) > 0,
         staleTime: 15_000,
       })
     },
