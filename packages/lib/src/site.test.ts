@@ -62,6 +62,30 @@ describe('siteFromEnv', () => {
     expect(siteFromEnv({ VITE_PORT_BASE: '', PORT_BASE: '3200' }, 'VITE_').urls.api).toBe('http://localhost:3204')
   })
 
+  it('reads the ways to reach Ýeral, each optional (book F-174)', () => {
+    expect(siteFromEnv({}).support).toEqual({})
+    expect(siteConfig({ env: 'production' }).support).toEqual({})
+    expect(
+      siteFromEnv({ YERAL_SUPPORT_PHONE: '+99312345678', YERAL_SUPPORT_TELEGRAM: 'yeral_support', YERAL_SUPPORT_EMAIL: 'hello@yeral.app' })
+        .support,
+    ).toEqual({ phone: '+99312345678', telegram: 'yeral_support', email: 'hello@yeral.app' })
+    expect(siteFromEnv({ VITE_YERAL_SUPPORT_PHONE: '+99312345678', VITE_YERAL_SUPPORT_EMAIL: '' }, 'VITE_').support).toEqual({
+      phone: '+99312345678',
+    })
+  })
+
+  it.each([
+    ['YERAL_SUPPORT_PHONE', '993 12 34 56 78'],
+    ['YERAL_SUPPORT_PHONE', '+0123456789'],
+    ['YERAL_SUPPORT_TELEGRAM', '@yeral'],
+    ['YERAL_SUPPORT_TELEGRAM', 'abc'],
+    ['YERAL_SUPPORT_EMAIL', 'hello'],
+  ])('rejects a bad %s by name, never by value', (name, value) => {
+    expect(() => siteFromEnv({ [name]: value })).toThrow(name)
+    expect(() => siteFromEnv({ [name]: value })).not.toThrow(value)
+    expect(() => siteFromEnv({ [`VITE_${name}`]: value }, 'VITE_')).toThrow(`VITE_${name}`)
+  })
+
   it('names the bad variables as they are spelled in the environment', () => {
     try {
       siteFromEnv({ VITE_YERAL_ENV: 'prod', VITE_YERAL_DOMAIN: 'not a domain', PORT_BASE: '80' }, 'VITE_')

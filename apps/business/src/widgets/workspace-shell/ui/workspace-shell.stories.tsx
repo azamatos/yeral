@@ -5,7 +5,7 @@
  * and Glow Nails; Aýna is a Specialist at Glow Studio and owns her own studio.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
+import { SUPPORT_LINE } from '@/shared/config'
 import { useParams, useSearch } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
@@ -302,7 +302,8 @@ export const PhoneMore: Story = {
     const sheet = await within(document.body).findByRole('dialog', { name: 'More' })
     await expect(within(sheet).getByText('Maýsa Annaýewa')).toBeVisible()
     // Contact Ýeral: its small sheet over More; Esc closes it back to the row
-    const contactRow = within(sheet).getByRole('button', { name: `Contact Ýeral ${SUPPORT_LINE.phone} · Telegram` })
+    // the row's caption lists the ways that are set (Storybook sets all three)
+    const contactRow = within(sheet).getByRole('button', { name: `Contact Ýeral ${SUPPORT_LINE.phone} · Telegram · E-mail` })
     await expect(contactRow).toHaveAttribute('aria-haspopup', 'dialog')
     await userEvent.click(contactRow)
     const contact = await within(document.body).findByRole('dialog', { name: 'Contact Ýeral' })

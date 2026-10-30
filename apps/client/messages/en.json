@@ -124,7 +124,8 @@
   "support": {
     "contact": "Contact {brand}",
     "call": "Call",
-    "write": "Write on Telegram"
+    "write": "Write on Telegram",
+    "email": "Write an e-mail"
   },
   "services": {
     "groups": "Service groups",

@@ -1,27 +1,40 @@
-import { MARKET } from '@yeral/domain/market'
 import { formatPhone } from '@yeral/domain/phone'
+import type { Support } from '@yeral/lib/site'
 import type { MenuLink } from '@yeral/ui/menu'
-import { Phone, Send } from 'lucide-react'
+import { Mail, Phone, Send } from 'lucide-react'
 
-/** The market's support line (`MARKET.support`) as the screens write and link it. */
-export const SUPPORT_LINE = {
-  phone: formatPhone(MARKET.support.phone),
-  phoneHref: `tel:${MARKET.support.phone}`,
-  telegram: `@${MARKET.support.telegram}`,
-  telegramHref: `https://t.me/${MARKET.support.telegram}`,
-} as const
+/** The ways to reach Ýeral (`site.support`) as the screens write and link them; a way that isn't set is undefined. */
+export interface SupportLine {
+  /** `+993 12 34 56 78`, as the market writes numbers. */
+  phone?: string
+  phoneHref?: string
+  /** `@name`. */
+  telegram?: string
+  telegramHref?: string
+  email?: string
+  emailHref?: string
+}
 
-/** Contact Ýeral's two links (B-Shell): call the number, or write on Telegram in a new tab. */
-export function supportLinks(words: { call: string; write: string }): MenuLink[] {
-  return [
-    { id: 'call', label: words.call, caption: SUPPORT_LINE.phone, icon: <Phone />, href: SUPPORT_LINE.phoneHref },
-    {
-      id: 'telegram',
-      label: words.write,
-      caption: SUPPORT_LINE.telegram,
-      icon: <Send />,
-      href: SUPPORT_LINE.telegramHref,
-      external: true,
-    },
-  ]
+export function supportLine({ phone, telegram, email }: Support): SupportLine {
+  return {
+    ...(phone && { phone: formatPhone(phone), phoneHref: `tel:${phone}` }),
+    ...(telegram && { telegram: `@${telegram}`, telegramHref: `https://t.me/${telegram}` }),
+    ...(email && { email, emailHref: `mailto:${email}` }),
+  }
+}
+
+/**
+ * Contact Ýeral's links (B-Shell ContactMenu), the ways that are set in the drawn order: call the number, write on
+ * Telegram in a new tab, write an e-mail (the Telegram row's pattern). None set: no links, and no Contact Ýeral.
+ */
+export function supportLinks(support: Support, words: { call: string; write: string; email: string }): MenuLink[] {
+  const line = supportLine(support)
+  const links: MenuLink[] = []
+  if (line.phone && line.phoneHref)
+    links.push({ id: 'call', label: words.call, caption: line.phone, icon: <Phone />, href: line.phoneHref })
+  if (line.telegram && line.telegramHref)
+    links.push({ id: 'telegram', label: words.write, caption: line.telegram, icon: <Send />, href: line.telegramHref, external: true })
+  if (line.email && line.emailHref)
+    links.push({ id: 'email', label: words.email, caption: line.email, icon: <Mail />, href: line.emailHref })
+  return links
 }

@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router'
 import type { SetupStep } from '@yeral/domain/setup'
-import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { Logo } from '@yeral/ui/brand'
 import { ProgressBar } from '@yeral/ui/progress-bar'
 import { Stepper } from '@yeral/ui/stepper'
@@ -8,7 +7,11 @@ import { textLink } from '@yeral/ui/text-link'
 import { LogOut } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
+import { SUPPORT_LINE } from '@/shared/config'
 import { stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
+
+/** The first way to reach Ýeral that is set, for the sidebar's "Questions?" line; none: no line. */
+const SUPPORT_CONTACT = SUPPORT_LINE.phone ?? SUPPORT_LINE.telegram ?? SUPPORT_LINE.email
 
 /** What a step tells the frame: whether it can go on (and the hint while it can't), and how to keep what's typed. */
 export type StepAction = {
@@ -130,13 +133,15 @@ export function SetupFrame({
               <span className="-mt-1 text-dense text-n-600">{t('setup.laterNote')}</span>
             </>
           )}
-          <span className="text-dense text-n-600">
-            {t.rich('setup.questions', {
-              brand: t('common.brand'),
-              phone: SUPPORT_LINE.phone,
-              b: (chunks) => <span className="font-semibold whitespace-nowrap text-n-900">{chunks}</span>,
-            })}
-          </span>
+          {SUPPORT_CONTACT && (
+            <span className="text-dense text-n-600">
+              {t.rich('setup.questions', {
+                brand: t('common.brand'),
+                contact: SUPPORT_CONTACT,
+                b: (chunks) => <span className="font-semibold whitespace-nowrap text-n-900">{chunks}</span>,
+              })}
+            </span>
+          )}
         </div>
       </aside>
 

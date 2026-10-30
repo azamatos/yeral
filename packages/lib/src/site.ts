@@ -12,8 +12,23 @@ export type SiteEnv = (typeof SITE_ENVS)[number]
 export const SITE_APPS = ['client', 'business', 'cms', 'api', 'storybook'] as const
 export type SiteApp = (typeof SITE_APPS)[number]
 
+/**
+ * The ways to reach Ýeral (book F-174): Contact Ýeral in the apps, the example businesses' phone. Set per deployment
+ * (`YERAL_SUPPORT_*`, the owner's own contacts until Ýeral has a line: never in the repo); a way that isn't set isn't
+ * shown.
+ */
+export interface Support {
+  /** E.164: `+99312345678`. */
+  phone?: string
+  /** A Telegram username, without the `@`. */
+  telegram?: string
+  /** `hello@yeral.app`. */
+  email?: string
+}
+
 export interface SiteConfig {
   env: SiteEnv
+  support: Support
   /** Origin of each site, no trailing slash. */
   urls: Record<SiteApp, string>
   /** `Domain` of the shared session cookie (client + business); undefined = host-only (localhost). */
@@ -42,9 +57,11 @@ export interface SiteOptions {
   domain?: string
   /** First local port: 3000, or 3100, 3200… in a parallel worktree. */
   portBase?: number
+  /** The ways to reach Ýeral; none by default (local work without them shows no Contact Ýeral). */
+  support?: Support
 }
 
-export function siteConfig({ env, domain = 'yeral.app', portBase = 3000 }: SiteOptions): SiteConfig {
+export function siteConfig({ env, domain = 'yeral.app', portBase = 3000, support = {} }: SiteOptions): SiteConfig {
   let urls: Record<SiteApp, string>
   let cookieDomain: string | undefined = domain
   let cookiePrefix = 'yeral'
@@ -84,6 +101,7 @@ export function siteConfig({ env, domain = 'yeral.app', portBase = 3000 }: SiteO
   }
   return {
     env,
+    support,
     urls,
     cookieDomain,
     cookiePrefix,
@@ -99,11 +117,23 @@ const siteEnvSchema = z.object({
     .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/)
     .default('yeral.app'),
   PORT_BASE: z.coerce.number().int().min(1024).max(65000).default(3000),
+  // the ways to reach Ýeral, each optional: E.164 (the market's own rules live in @yeral/domain, which lib never
+  // imports), a Telegram username (5–32 letters, digits and underscores, a letter first) without the `@`, an e-mail
+  YERAL_SUPPORT_PHONE: z
+    .string()
+    .regex(/^\+[1-9]\d{7,14}$/)
+    .optional(),
+  YERAL_SUPPORT_TELEGRAM: z
+    .string()
+    .regex(/^[A-Za-z][A-Za-z0-9_]{4,31}$/)
+    .optional(),
+  YERAL_SUPPORT_EMAIL: z.email().optional(),
 })
 
 /**
- * Site config from environment variables: `YERAL_ENV`, `YERAL_DOMAIN`, `PORT_BASE`. Vite apps pass `import.meta.env`
- * with prefix `VITE_` (`VITE_YERAL_ENV` …); the api passes `process.env` or the Worker's env.
+ * Site config from environment variables: `YERAL_ENV`, `YERAL_DOMAIN`, `PORT_BASE`, `YERAL_SUPPORT_PHONE`,
+ * `YERAL_SUPPORT_TELEGRAM`, `YERAL_SUPPORT_EMAIL`. Vite apps pass `import.meta.env` with prefix `VITE_`
+ * (`VITE_YERAL_ENV` …); the api passes `process.env` or the Worker's env.
  */
 export function siteFromEnv(source: Record<string, unknown>, prefix = ''): SiteConfig {
   // an empty variable (`VITE_YERAL_DOMAIN=`) counts as unset, so the default applies
@@ -120,5 +150,10 @@ export function siteFromEnv(source: Record<string, unknown>, prefix = ''): SiteC
     if (e instanceof EnvError) throw new EnvError(e.variables.map(nameOf))
     throw e
   }
-  return siteConfig({ env: env.YERAL_ENV, domain: env.YERAL_DOMAIN, portBase: env.PORT_BASE })
+  return siteConfig({
+    env: env.YERAL_ENV,
+    domain: env.YERAL_DOMAIN,
+    portBase: env.PORT_BASE,
+    support: { phone: env.YERAL_SUPPORT_PHONE, telegram: env.YERAL_SUPPORT_TELEGRAM, email: env.YERAL_SUPPORT_EMAIL },
+  })
 }

@@ -216,9 +216,13 @@
   },
   "support": {
     "contact": "Contact {brand}",
-    "contactCaption": "{phone} · Telegram",
     "call": "Call",
-    "write": "Write on Telegram"
+    "write": "Write on Telegram",
+    "email": "Write an e-mail",
+    "way": {
+      "telegram": "Telegram",
+      "email": "E-mail"
+    }
   },
   "hours": {
     "same": "Same hours Monday to Friday",
@@ -363,7 +367,7 @@
     "later": "Continue later",
     "laterNote": "Saves this step. Log in again and setup reopens right here.",
     "laterSaved": "Saved. Log in again with {phone} and setup reopens at “{step}”.",
-    "questions": "Questions? Contact {brand}: <b>{phone}</b>",
+    "questions": "Questions? Contact {brand}: <b>{contact}</b>",
     "back": "Back",
     "cancel": "Cancel",
     "hasBusiness": {

@@ -1,5 +1,4 @@
 /** The api's environment (`config.ts`). */
-import { MARKET } from '@yeral/domain/market'
 import { describe, expect, it } from 'vitest'
 import { DEV_ADMIN_KEY, loadConfig } from './config'
 
@@ -17,12 +16,29 @@ describe('ADMIN_SECRET_KEY (ADR 0026)', () => {
 })
 
 describe('EXAMPLE_BUSINESSES (book Q-004)', () => {
-  it("shows the market's support line, or EXAMPLE_PHONE", () => {
-    expect(loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true' })).toMatchObject({ examplePhone: MARKET.support.phone })
-    expect(loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true', EXAMPLE_PHONE: '+99312000000' })).toMatchObject({
+  it("shows Ýeral's support phone, or EXAMPLE_PHONE, and needs one of the two", () => {
+    expect(loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true', YERAL_SUPPORT_PHONE: '+99312345678' })).toMatchObject({
+      examplePhone: '+99312345678',
+    })
+    expect(
+      loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true', YERAL_SUPPORT_PHONE: '+99312345678', EXAMPLE_PHONE: '+99312000000' }),
+    ).toMatchObject({
       exampleBusinesses: true,
       examplePhone: '+99312000000',
     })
+    expect(loadConfig(base)).toMatchObject({ exampleBusinesses: false, examplePhone: null })
+    expect(() => loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true' })).toThrow(/EXAMPLE_PHONE, YERAL_SUPPORT_PHONE/)
+  })
+})
+
+describe('the ways to reach Ýeral (book F-174)', () => {
+  it('come from YERAL_SUPPORT_*, each optional, and a bad one is named', () => {
+    expect(loadConfig(base).site.support).toEqual({})
+    expect(loadConfig({ ...base, YERAL_SUPPORT_TELEGRAM: 'yeral_support', YERAL_SUPPORT_EMAIL: 'hello@yeral.app' }).site.support).toEqual({
+      telegram: 'yeral_support',
+      email: 'hello@yeral.app',
+    })
+    expect(() => loadConfig({ ...base, YERAL_SUPPORT_TELEGRAM: '@yeral' })).toThrow(/YERAL_SUPPORT_TELEGRAM/)
   })
 })
 

@@ -4,7 +4,7 @@
  * ones lock), so each story walks a sign-in and checks what the board draws at every step.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
+import { SUPPORT_LINE } from '@/shared/config'
 import { useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { Setup } from '@yeral/contract/setup'

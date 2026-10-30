@@ -100,7 +100,7 @@ flowchart LR
 **Edge cases**
 
 - Someone already signed in on yeral.app with the same phone: the wizard still starts at the phone step; the account is the same (B-02).
-- The support phone and Telegram are the market's support line (`MARKET.support`; the owner's own until Ýeral has one, chapter 9, 21.10.2026).
+- The support phone, Telegram and e-mail are the deployment's configuration (`site.support`; the owner's own until Ýeral has a line, chapter 9, 21.10 and 30.10.2026); a way that isn't set isn't shown.
 
 **Status** — Design: drawn (B-Landing) · Code: not built.
 
@@ -2042,7 +2042,7 @@ flowchart TD
 **Edge cases**
 
 - No article found: "Başga söz bilen ýazyp görüň ýa-da soragyňyzy goldaw çatyna ýazyň."
-- The support phone and Telegram are the market's support line (`MARKET.support`; chapter 9, 21.10.2026); the business app's account menu has them as Contact Ýeral.
+- The support phone, Telegram and e-mail are the deployment's configuration (`site.support`; chapter 9, 30.10.2026); the business app's account menu has them as Contact Ýeral.
 - Help articles and the support chat come after launch; the launch admin tool covers businesses and reported reviews (chapter 3, "The Ýeral team"; Q-010, decided 18.10.2026).
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.

@@ -21,11 +21,17 @@ fi
 
 image="yeral-api:${COMMIT:0:12}"
 docker build -f src/infra/docker/api.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$image" src
-# the business app: production hosts baked in at build time (@yeral/lib/site's default domain)
+# the sites: production hosts baked in at build time (@yeral/lib/site's default domain), and the ways to reach Ýeral
+# (YERAL_SUPPORT_PHONE, YERAL_SUPPORT_TELEGRAM, YERAL_SUPPORT_EMAIL in .env, book F-174; one unset = not shown)
+support_args=()
+for name in YERAL_SUPPORT_PHONE YERAL_SUPPORT_TELEGRAM YERAL_SUPPORT_EMAIL; do
+  value=$(grep "^$name=" .env | tail -n1 | cut -d= -f2- || true)
+  support_args+=(--build-arg "$name=$value")
+done
 business_image="yeral-business:${COMMIT:0:12}"
-docker build -f src/infra/docker/business.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$business_image" src
+docker build -f src/infra/docker/business.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" "${support_args[@]}" -t "$business_image" src
 client_image="yeral-client:${COMMIT:0:12}"
-docker build -f src/infra/docker/client.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$client_image" src
+docker build -f src/infra/docker/client.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" "${support_args[@]}" -t "$client_image" src
 
 # the images go into .env before any `docker compose` command reads compose.yml (the backup's dump is one): a variable
 # it asks for and .env lacks would stop it (25.10.2026). Plain `docker compose ps|logs` in /srv/yeral work too.

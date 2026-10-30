@@ -1,11 +1,11 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import { BottomTab, BottomTabBar, BottomTabButton } from '@yeral/ui/bottom-tab-bar'
 import { MoreSheet, MoreSheetDivider, MoreSheetPerson, MoreSheetRow } from '@yeral/ui/more-sheet'
-import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { ExternalLink, Headset, LogOut, Menu, User } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { ContactYeral, useContactYeral } from '@/features/contact-yeral'
+import { SUPPORT_LINE } from '@/shared/config'
 import { sectionOf, sectionsFor, type Section } from '../model/sections'
 import { useAccount } from '../model/use-account'
 import { useWorkspace } from '../model/use-workspace'
@@ -102,7 +102,13 @@ export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | n
               drill
               icon={<Headset />}
               label={contact.title}
-              caption={words('support.contactCaption', { phone: SUPPORT_LINE.phone })}
+              caption={[
+                SUPPORT_LINE.phone,
+                SUPPORT_LINE.telegram && words('support.way.telegram'),
+                SUPPORT_LINE.email && words('support.way.email'),
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             />
           }
         />
