@@ -19,6 +19,8 @@ describe('the support line', () => {
   it('leaves out a way that is not set', () => {
     expect(supportLine({ phone: '+99312345678' })).toEqual({ phone: '+993 12 34 56 78', phoneHref: 'tel:+99312345678' })
     expect(supportLine({})).toEqual({})
+    // another country's number isn't rewritten as the market's
+    expect(supportLine({ phone: '+79123456789' }).phone).toBe('+79123456789')
   })
 
   it('links the ways that are set in the drawn order; Telegram in a new tab, the call and the mail in place', () => {

@@ -1,4 +1,4 @@
-import { formatPhone } from '@yeral/domain/phone'
+import { E164, formatPhone } from '@yeral/domain/phone'
 import type { Support } from '@yeral/lib/site'
 import type { MenuLink } from '@yeral/ui/menu'
 import { Mail, Phone, Send } from 'lucide-react'
@@ -17,7 +17,8 @@ export interface SupportLine {
 
 export function supportLine({ phone, telegram, email }: Support): SupportLine {
   return {
-    ...(phone && { phone: formatPhone(phone), phoneHref: `tel:${phone}` }),
+    // written the market's way when it's the market's number (the api insists on one); any other E.164 as it is
+    ...(phone && { phone: E164.test(phone) ? formatPhone(phone) : phone, phoneHref: `tel:${phone}` }),
     ...(telegram && { telegram: `@${telegram}`, telegramHref: `https://t.me/${telegram}` }),
     ...(email && { email, emailHref: `mailto:${email}` }),
   }

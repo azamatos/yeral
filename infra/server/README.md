@@ -52,7 +52,9 @@ EOF
 
 `deploy.sh` reads them from `.env`: the api gets them from the compose environment (the example businesses' phone),
 the client site and the business app bake them in at build time (build args → `VITE_YERAL_SUPPORT_*`), so a change
-needs a deploy. One left empty isn't shown; the examples need a phone (`EXAMPLE_PHONE` or `YERAL_SUPPORT_PHONE`).
+needs a deploy. One left empty isn't shown. `deploy.sh` refuses to deploy before anything is built when the phone is
+missing (the examples need it) or a value breaks the rules (the phone E.164 and the market's, the Telegram name
+without `@`, a plain e-mail): a bad one would leave both sites blank.
 
 `deploy.sh` builds the api, client and business images on the server, saves the database first
 (`/srv/yeral/backup-<date>-before-<commit>.sql.gz`, mode 600; a failed dump stops the deploy; the way back from a bad

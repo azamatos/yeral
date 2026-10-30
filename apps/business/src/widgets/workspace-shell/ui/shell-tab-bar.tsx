@@ -18,7 +18,7 @@ const TABS: readonly Section[] = ['calendar', 'bookings', 'clients']
 /**
  * The phone's menu under 768 (B-Mobile): Calendar · Bookings (the requests this person may answer) · Clients · More.
  * More opens the sheet above the bar: the workspace (its switcher), Reviews and Settings where the level has them, the
- * person, the client site, Contact Ýeral (its small sheet over More: call or Telegram) and Log out.
+ * person, the client site, Contact Ýeral (its small sheet over More: the ways that are set; none, no row) and Log out.
  */
 export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | null) => void }) {
   const t = useTranslations('shell')

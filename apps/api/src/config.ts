@@ -1,6 +1,7 @@
 /** Environment for the api, read once from `process.env` (ADR 0024). */
 import { resolve } from 'node:path'
 import { BOOKING_TYPES, type BookingType } from '@yeral/domain/model'
+import { E164 } from '@yeral/domain/phone'
 import { EnvError, parseEnv } from '@yeral/lib/env'
 import { siteFromEnv, type SiteConfig } from '@yeral/lib/site'
 import { z } from 'zod'
@@ -41,10 +42,7 @@ const envSchema = z.object({
    * people's. Without it, Ýeral's support phone (`YERAL_SUPPORT_PHONE`, `site.support.phone`); the examples need one
    * of the two.
    */
-  EXAMPLE_PHONE: z
-    .string()
-    .regex(/^\+\d{8,15}$/, 'E.164, such as +99312345678')
-    .optional(),
+  EXAMPLE_PHONE: z.string().regex(E164, "the market's number, such as +99312345678").optional(),
   /**
    * The business app's demo workspace (book F-242): the jobs make it when it's missing and again every night at 04:00.
    * Off unless set.
@@ -100,6 +98,9 @@ export interface Config {
 export function loadConfig(source: Record<string, unknown>): Config {
   const env = parseEnv(envSchema, source)
   const site = siteFromEnv(source)
+  // a number of the market (@yeral/lib/site checks E.164 only): the examples store it, the screens write it
+  if (site.support.phone && !E164.test(site.support.phone))
+    throw new EnvError(['YERAL_SUPPORT_PHONE'], "the market's number, such as +99312345678")
   const examplePhone = env.EXAMPLE_PHONE ?? site.support.phone ?? null
   if (env.EXAMPLE_BUSINESSES === 'true' && !examplePhone)
     throw new EnvError(['EXAMPLE_PHONE', 'YERAL_SUPPORT_PHONE'], 'the example businesses need a phone to show: one of the two')

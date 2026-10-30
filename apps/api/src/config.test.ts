@@ -39,6 +39,9 @@ describe('the ways to reach Ýeral (book F-174)', () => {
       email: 'hello@yeral.app',
     })
     expect(() => loadConfig({ ...base, YERAL_SUPPORT_TELEGRAM: '@yeral' })).toThrow(/YERAL_SUPPORT_TELEGRAM/)
+    // the phone must be the market's: the examples store it, the screens write it the market's way
+    expect(() => loadConfig({ ...base, YERAL_SUPPORT_PHONE: '+79123456789' })).toThrow(/YERAL_SUPPORT_PHONE/)
+    expect(() => loadConfig({ ...base, EXAMPLE_PHONE: '+79123456789' })).toThrow(/EXAMPLE_PHONE/)
   })
 })
 

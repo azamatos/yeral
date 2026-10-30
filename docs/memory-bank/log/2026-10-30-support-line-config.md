@@ -21,7 +21,11 @@
   - The api: `examplePhone` is `EXAMPLE_PHONE`, else the support phone, else null; `EXAMPLE_BUSINESSES=true` without
     either is a config error naming both.
   - Infra: `client.Dockerfile` and `business.Dockerfile` take the three as build args (→ `VITE_*`); `deploy.sh` reads
-    them from `/srv/yeral/.env` and passes them; the server's `compose.yml` hands them to the api (`${…:-}`).
+    them from `/srv/yeral/.env` (quotes dropped, as compose does), checks them by the lib's rules and refuses before
+    building when the phone is missing or a value is bad (a bad one would leave both sites blank: `siteFromEnv`
+    throws at page load; the review's finding), and passes them; the server's `compose.yml` hands them to the api
+    (`${…:-}`). The api insists on the market's number (`E164`) for the support phone and `EXAMPLE_PHONE`; the
+    screens format only the market's numbers.
     `.env.example` (api, server) document them with placeholders. Storybook sets placeholders in
     `.storybook/env.ts` (a number in the market's unused range, `yeral_support`, `hello@example.com`), imported by
     `main.ts` and `vitest.config.ts`.
@@ -30,6 +34,9 @@
 - How the variables reach each build: `deploy.sh` builds the sites on the server with `--build-arg` from `.env`
   (before this, only `GITHUB_SHA` was passed; the hosts came from the Dockerfiles' defaults). The api reads its
   compose environment at start.
+- Known, left as is: without any way set (local work only, since `deploy.sh` insists on the phone) the sign-in's
+  «Contact Ýeral to sort out the number» callout (client and business) keeps its sentence with no link; the More
+  row's caption joins the ways with « · » in code, as the document title and Team's hours do.
 - Left: the owner adds the three lines to `/srv/yeral/.env` and deploys (`infra/server/README.md`, "Deploying Ýeral
   by hand"); until then the deployed sites keep the old values baked in, and the next deploy without the lines would
   show no Contact Ýeral and refuse `EXAMPLE_BUSINESSES` without a phone. The local Docker stack (`infra/docker`)

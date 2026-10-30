@@ -86,7 +86,7 @@ interface Ctx {
    * visitor's booking), no invites, no reviews of their own, and only the design's yearly days off.
    */
   example?: boolean
-  /** The phone an example shows: the market's support line, or `EXAMPLE_PHONE`. */
+  /** The phone an example shows: Ýeral's support phone (`YERAL_SUPPORT_PHONE`), or `EXAMPLE_PHONE`. */
   examplePhone?: string
   /** A design number as it's stored: as it is, or in the demo workspace the market's unused range's (`demoPhones`). */
   phone: (designPhone: string) => string
@@ -499,7 +499,7 @@ export async function seedExamples(db: Db, opts: { now: number; phone: string })
         await seedBusiness(ctx, def)
         added++
       }
-    // the phone they show follows the config's (the market's support line or `EXAMPLE_PHONE`), a change of it included;
+    // the phone they show follows the config's (`YERAL_SUPPORT_PHONE` or `EXAMPLE_PHONE`), a change of it included;
     // not an owner's test business made an example (`make-example`, which may sit at a design address): it has a team
     const examples = BUSINESSES.filter((d) => d.type === 'appointment').map((d) => d.slug)
     const teams = tx.select({ id: t.staff.businessId }).from(t.staff).where(isNotNull(t.staff.userId))
