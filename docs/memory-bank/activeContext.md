@@ -5,8 +5,8 @@ _Last updated: 2026-10-30_ · the current state only; the history by day is in `
 ## Current focus
 
 **2026-10-30: work resumed in the order the owner chose.** Ýeral was paused 26–29.10 for the week's token budget
-(AGENTS.md → "Token budget"); everything merged is live (main at 74fae7d on the server since 26.10; the README for
-visitors and the 27.10 review's notes merged after it, #248–#250). The owner tested `hello@yeral.app` on 30.10: it
+(AGENTS.md → "Token budget"); everything but docs is live (main at 74fae7d on the server since 26.10; the token
+budget, the README for visitors and the 27.10 review's notes merged after it, #247–#250, docs only). The owner tested `hello@yeral.app` on 30.10: it
 works and is configured. The order from 30.10: (1) hygiene — this file trimmed into `progress.md`, the support line
 out of the repo with `hello@` beside it, HSTS + CSP in `yeral.caddy` (three agents in parallel); (2) close P4 slice 3
 with its end-to-end check and the first Playwright test; (3) slice 4, then 5; (4) slices 6 + 7, then the first launch
@@ -23,7 +23,8 @@ the drawn boards, components in Storybook first.
 ## Owner's direction
 
 Rules still in force that live nowhere else (the rest are in `AGENTS.md`, the ADRs, `operations.md` and the book's
-chapter 9; each day's quotes are in `progress.md`):
+chapter 9; each day's quotes are in `progress.md`'s entry for that day, which is where the book's "Source:
+activeContext" rows now point):
 
 - Business decisions (21.10): the recommended option when it isn't critical; a critical one goes to the owner in the
   chat before the work starts, with its full description (no IDs to look up). Claude's decisions are "Claude
@@ -68,7 +69,7 @@ The ADRs in `docs/decisions/` (its `README.md` links them); the day each was tak
 | 0024 | the own server runs every app (Docker + Caddy) | 2026-10-19 | |
 | 0025 | fixed levels, team rows, invites | 2026-10-19 | |
 | 0026 | the Ýeral team's accounts: password + authenticator | 2026-10-21 | |
-| 0027 | the address search behind a geocoder port (Photon) | 2026-10-23 | |
+| 0027 | the address search behind a geocoder port (Photon) | 2026-10-21 | merged 23.10 (#153) |
 | 0028 | the push channel: SSE nudged by Postgres NOTIFY | 2026-10-25 | |
 
 Without an ADR, in the book's chapter 9: backups and error tracking with the real working MVP, the first launch

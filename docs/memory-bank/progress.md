@@ -171,6 +171,25 @@
   with the client site, the business app and the CMS; the team adds the first businesses in the CMS; Ýeral on
   yeral.app; no average bill; businesses may be open past midnight and options stay flexible; the city is a choice
   (Q-001–Q-003, Q-100–Q-109).
+- **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
+  demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
+  the app as an option). Build plan written as book chapter 10. The owner's words: the first launch is an English pilot
+  with Turkmenistan's settings: example businesses marked "Example" beside real ones, a nightly-reset demo of the
+  business app, no SMS (codes on screen); the name is written *Ýeral*, "Yeral" only where the letter can't be used; a
+  specialist may work without the app (an option, not a level).
+- **2026-10-18 · Book answers, batch 2:** 106 more answers written into the book: the owner's for most questions, the
+  recommended option for the rest (owner delegated non-critical questions; marked "Claude (delegated)" in chapter 9).
+  Two launches: first in English on Cloudflare, then Turkmenistan on its own servers; [ADR 0023](../decisions/0023-one-deployment-per-market.md)
+  (one deployment per market). No review-ask SMS (Q-259); "Başga ýerde", internal statuses and the business PWA in the
+  MVP; phone-only staff set to Never by the owner, reopened as Q-216; client karma later (F-241). Four critical
+  questions left: Q-004 (who the first launch is for), Q-005 (name spelling), Q-036 (paying for SMS), Q-216. The page
+  keeps Claude's decisions changeable ("Decided by Claude" filter) and marks the owner's later replies as "Changed".
+  The owner (18.10, batch 2): answers only critical questions; Claude decides the rest with the recommended option and
+  records it ("Claude (delegated)"), saying so where it disagrees (a concern). Two launches: first in English on
+  Cloudflare (investors and early users, from Turkmenistan through a VPN; also a portfolio piece), then Turkmenistan
+  with Turkmen, Russian and its own servers and database, after investment; one deployment per country (ADR 0023). No
+  server to buy for the first launch (changed 19.10: the VPS). Appointments first, tables and classes after the MVP;
+  no review-ask SMS; "Başga ýerde", internal statuses and the business PWA in the MVP; client karma later.
 - **2026-10-19 · Two tracks start:** design pass round 1 (design system in English, #33) with Claude Design, round 2
   (business app part 1) written; the owner's netcup VPS 1000 (EU) set up with a shared Caddy, Postgres and the api
   (#34, `infra/server`); the backend runs alongside the design (ADR 0021 amended); the first launch runs on that
@@ -439,25 +458,6 @@
   week folded into the entries above, the file down from 327 lines to about 135), the support line out of the repo
   with `hello@` beside it, HSTS + CSP in `yeral.caddy`; (2) close P4 slice 3 with its end-to-end check and the first
   Playwright test; (3) slice 4, then 5; (4) slices 6 + 7, then the first launch (P5).
-- **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
-  demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
-  the app as an option). Build plan written as book chapter 10. The owner's words: the first launch is an English pilot
-  with Turkmenistan's settings: example businesses marked "Example" beside real ones, a nightly-reset demo of the
-  business app, no SMS (codes on screen); the name is written *Ýeral*, "Yeral" only where the letter can't be used; a
-  specialist may work without the app (an option, not a level).
-- **2026-10-18 · Book answers, batch 2:** 106 more answers written into the book: the owner's for most questions, the
-  recommended option for the rest (owner delegated non-critical questions; marked "Claude (delegated)" in chapter 9).
-  Two launches: first in English on Cloudflare, then Turkmenistan on its own servers; [ADR 0023](../decisions/0023-one-deployment-per-market.md)
-  (one deployment per market). No review-ask SMS (Q-259); "Başga ýerde", internal statuses and the business PWA in the
-  MVP; phone-only staff set to Never by the owner, reopened as Q-216; client karma later (F-241). Four critical
-  questions left: Q-004 (who the first launch is for), Q-005 (name spelling), Q-036 (paying for SMS), Q-216. The page
-  keeps Claude's decisions changeable ("Decided by Claude" filter) and marks the owner's later replies as "Changed".
-  The owner (18.10, batch 2): answers only critical questions; Claude decides the rest with the recommended option and
-  records it ("Claude (delegated)"), saying so where it disagrees (a concern). Two launches: first in English on
-  Cloudflare (investors and early users, from Turkmenistan through a VPN; also a portfolio piece), then Turkmenistan
-  with Turkmen, Russian and its own servers and database, after investment; one deployment per country (ADR 0023). No
-  server to buy for the first launch (changed 19.10: the VPS). Appointments first, tables and classes after the MVP;
-  no review-ask SMS; "Başga ýerde", internal statuses and the business PWA in the MVP; client karma later.
 
 ## Roadmap
 
