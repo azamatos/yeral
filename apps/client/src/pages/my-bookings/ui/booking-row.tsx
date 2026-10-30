@@ -15,6 +15,12 @@ import { useLocale, useTranslations } from 'use-intl'
 import { BookingStatusBadge, useUndoFailed, whatParts } from '@/entities/booking'
 import { OfferTimes, useVisitLine, useWhen } from './offer-times'
 
+/**
+ * The part of an action's name read but not seen (`<hidden>` in `callLabel`, `undoLabel`…): the word shown stays the
+ * start of the accessible name in every language (axe: label-content-name-mismatch).
+ */
+const hidden = (chunks: ReactNode) => <span className="sr-only">{chunks}</span>
+
 /** A line under the status (`.bby`): a 14 icon and a 13/18 caption. */
 export function ByLine({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
   return (
@@ -211,40 +217,25 @@ export function BookingRow({
             <Button asChild size="s" variant="ghost">
               <a href={telHref(b.business.phone)}>
                 <Phone aria-hidden />
-                {t.rich('callLabel', { business: b.business.name, hidden: (chunks) => <span className="sr-only">{chunks}</span> })}
+                {t.rich('callLabel', { business: b.business.name, hidden })}
               </a>
             </Button>
           )}
           {b.actions.restore && !undoFailed && (
-            <Button
-              size="s"
-              variant="ghost"
-              loading={restore.isPending}
-              aria-label={t('undoLabel', { business: b.business.name, when })}
-              onClick={() => !restore.isPending && undo()}
-            >
-              {t('undo')}
+            // the row's actions name their booking the same way: the word seen, the booking read
+            <Button size="s" variant="ghost" loading={restore.isPending} onClick={() => !restore.isPending && undo()}>
+              {t.rich('undoLabel', { business: b.business.name, when, hidden })}
             </Button>
           )}
           {b.actions.review && onReview && (
-            <Button
-              size="s"
-              variant="secondary"
-              aria-label={t('writeReviewLabel', { business: b.business.name, when })}
-              onClick={() => onReview(b)}
-            >
-              {t('writeReview')}
+            <Button size="s" variant="secondary" onClick={() => onReview(b)}>
+              {t.rich('writeReviewLabel', { business: b.business.name, when, hidden })}
             </Button>
           )}
           {b.actions.editReview && b.review && onReview && (
             // the review to change while it may be (book C-35, 7 days), as the drawer offers it
-            <Button
-              size="s"
-              variant="ghost"
-              aria-label={t('editReviewLabel', { business: b.business.name, when })}
-              onClick={() => onReview(b)}
-            >
-              {t('editReview')}
+            <Button size="s" variant="ghost" onClick={() => onReview(b)}>
+              {t.rich('editReviewLabel', { business: b.business.name, when, hidden })}
             </Button>
           )}
           {b.actions.bookAgain && (

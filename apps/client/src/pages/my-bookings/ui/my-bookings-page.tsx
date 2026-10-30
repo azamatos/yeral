@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { Link, Outlet, useNavigate, useSearch } from '@tanstack/react-router'
 import type { MyBooking } from '@yeral/contract/bookings'
 import { useFmt } from '@yeral/i18n'
@@ -35,11 +35,18 @@ export function MyBookingsPage() {
   const search: { tab?: BookingsTab } = useSearch({ strict: false })
   const navigate = useNavigate()
   const tab = search.tab ?? 'upcoming'
+  // the last list stays while the language changes its key: no tab without its count for a round-trip
   const lists = {
-    upcoming: useInfiniteQuery(sdk.bookings.list('upcoming', lang)),
-    past: useInfiniteQuery(sdk.bookings.list('past', lang)),
+    upcoming: useInfiniteQuery({ ...sdk.bookings.list('upcoming', lang), placeholderData: keepPreviousData }),
+    past: useInfiniteQuery({ ...sdk.bookings.list('past', lang), placeholderData: keepPreviousData }),
   }
   const list = lists[tab]
+  // both lists stay subscribed, so a tab switch no longer mounts a fresh observer: read the chosen one again as a
+  // mount would when it's stale (the live updates keep it fresh meanwhile, best-effort)
+  const switchTo = (next: BookingsTab) => {
+    if (lists[next].isStale) void lists[next].refetch()
+    void navigate({ to: '.', search: { tab: next === 'past' ? 'past' : undefined }, replace: true })
+  }
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
   // the tab's count once its list has answered (every page repeats `total`); nothing while it loads or failed
   const countOf = (value: BookingsTab) => {
@@ -135,11 +142,7 @@ export function MyBookingsPage() {
           cardBackTo.current = document.getElementById(rowLinkId(b.code)) ?? title.current
         }}
       />
-      <Tabs
-        value={tab}
-        onValueChange={(v) => void navigate({ to: '.', search: { tab: v === 'past' ? 'past' : undefined }, replace: true })}
-        className="mt-5"
-      >
+      <Tabs value={tab} onValueChange={(v) => switchTo(v === 'past' ? 'past' : 'upcoming')} className="mt-5">
         <TabsList aria-label={t('label')}>
           <TabsTrigger value="upcoming" count={countOf('upcoming')}>
             {t('upcoming')}
