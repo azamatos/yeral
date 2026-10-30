@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { epochOf, localOf, today } from '@yeral/domain/time'
+import { localOf, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
-import { buildIcs, ICS_TYPE } from '@yeral/lib/ics'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
@@ -13,17 +12,16 @@ import { Price } from '@yeral/ui/price'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Timeline } from '@yeral/ui/timeline'
 import { CalendarPlus, Check, CircleAlert, Send } from 'lucide-react'
-import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BookingStatusBadge, whatParts } from '@/entities/booking'
-import { site } from '@/shared/config'
-import { addressLine, calendarAt, downloadFile } from '@/shared/lib'
+import { addressLine, calendarAt } from '@/shared/lib'
+import { useAddToCalendar } from './add-to-calendar'
 
 /**
  * The sent page (Booking `step=sent`, book C-20, C-21): «Booking sent» and Pending for a business that confirms by hand,
  * «Booking confirmed» for an instant one; the booking's card (the business, the services with their minutes, the
- * specialist, the time, the address, the total, the code); what happens next; My bookings, Add to calendar (an `.ics`
- * file) and Home. No SMS is promised (the first launch sends none, book Q-036): the answer shows in My bookings. Opened
+ * specialist, the time, the address, the total, the code); what happens next; My bookings, Add to calendar
+ * (`useAddToCalendar`) and Home. No SMS is promised (the first launch sends none, book Q-036): the answer shows in My bookings. Opened
  * again later (a reload, the address kept), a booking no longer waiting or confirmed says only what it is now; one that
  * can't be read (signed out, another person's) points to My bookings.
  */
@@ -31,13 +29,12 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
   const t = useTranslations('booking.sent')
 
   const tb = useTranslations('booking')
-  const brand = useTranslations('common')('brand')
   const now = useClock()
   const lang = useLocale()
   const sdk = useSdk()
   const fmt = useFmt()
   const booking = useQuery(sdk.bookings.detail(code, lang))
-  const [ics, setIcs] = useState(false)
+  const calendar = useAddToCalendar()
   const b = booking.data
   const myBookings = (
     <Button asChild size="l" variant="primary">
@@ -73,18 +70,8 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
   const when = tb('summary.when', { date: fmt.weekdayDate(visit.date), range: fmt.timeRange(b.start, b.end) })
   const address = addressLine(b, fmt)
   const answerBy = b.holdUntil ? localOf(b.holdUntil) : null
-  const addToCalendar = () => {
-    const file = buildIcs({
-      uid: `${b.code}@${new URL(site.urls.client).host}`,
-      product: brand,
-      start: epochOf(b.date, b.start),
-      end: epochOf(b.date, b.end),
-      title: t('icsTitle', { services, business: b.business.name }),
-      location: address,
-    })
-    downloadFile(t('icsFile', { code: b.code }), file, ICS_TYPE)
-    setIcs(true)
-  }
+  const addToCalendar = () =>
+    calendar.add({ code: b.code, date: b.date, start: b.start, end: b.end, services, business: b.business.name, address })
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col items-center gap-4 text-center">
@@ -181,7 +168,7 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
           {state !== 'other' && (
             <Button size="l" variant="secondary" onClick={addToCalendar}>
               <CalendarPlus aria-hidden />
-              {t('addToCalendar')}
+              {calendar.label}
             </Button>
           )}
           <Button asChild size="l" variant="ghost">
@@ -190,9 +177,9 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
             </Link>
           </Button>
         </div>
-        {ics && (
+        {calendar.done && (
           <span role="status" className="text-dense text-n-600">
-            {t('icsDone')}
+            {calendar.doneText}
           </span>
         )}
         {state !== 'other' && (

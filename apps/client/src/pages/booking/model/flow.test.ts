@@ -1,3 +1,4 @@
+import { ApiError } from '@yeral/sdk'
 import { describe, expect, it } from 'vitest'
 import {
   bookingSearchSchema,
@@ -5,6 +6,7 @@ import {
   currentMoveStep,
   currentStep,
   isOwnTime,
+  moveRefusal,
   namedSpecialist,
   notDoneBy,
   partOfDay,
@@ -123,5 +125,16 @@ describe('move mode', () => {
     expect(isOwnTime(move, 'any', '2026-10-26', 870)).toBe(true)
     expect(isOwnTime(move, 'maral', '2026-10-26', 870)).toBe(false)
     expect(isOwnTime(move, 'ayna', '2026-10-26', 900)).toBe(false)
+  })
+
+  it('reads the api’s refusal: can’t move online, or the chosen specialist no longer does the services', () => {
+    expect(moveRefusal(new ApiError(409, 'not_bookable'), 'ayna')).toBe('not_bookable')
+    expect(moveRefusal(new ApiError(404, 'not_found', { staffId: 'ayna' }), 'ayna')).toBe('staff_gone')
+    // another specialist's, or the booking's own, not found: not this rule
+    expect(moveRefusal(new ApiError(404, 'not_found', { staffId: 'maral' }), 'ayna')).toBeNull()
+    expect(moveRefusal(new ApiError(404, 'not_found'), 'ayna')).toBeNull()
+    expect(moveRefusal(new ApiError(404, 'not_found', { staffId: 'any' }), 'any')).toBeNull()
+    expect(moveRefusal(new ApiError(409, 'slot_taken'), 'ayna')).toBeNull()
+    expect(moveRefusal(new TypeError('offline'), 'ayna')).toBeNull()
   })
 })

@@ -18,9 +18,9 @@ import { StepTitle } from './step-title'
  * struck through), the chosen day's title, its free times by part of day, and for a day without one the way to the
  * next free day. The api works out what fits the whole visit back to back with the specialist (or anyone) and the
  * business's lead time; the address naming no day, it answers for today (full or closed: the next free day's button).
- * While another day's times come, the old ones aren't offered. In move mode (C-30) the booking's own time doesn't count
- * as busy; with its own specialist (or anyone) it stays out of the choice, named «your previous time» (another
- * specialist at the same time is a move too).
+ * While another day's times come, the old ones aren't offered. In move mode (C-30) the api reads the booking's own
+ * services, and its own time doesn't count as busy; with its own specialist (or anyone) it stays out of the choice,
+ * named «your previous time» (another specialist at the same time is a move too).
  */
 export function TimeStep({
   slug,
@@ -54,7 +54,14 @@ export function TimeStep({
   const now = useClock()
   const day0 = today(now)
   const free = useQuery({
-    ...sdk.availability.appointment(slug, { lang, services: serviceIds, staff, date: date ?? undefined, move: move?.code }),
+    // in move mode the api reads the booking's own services (2026-10-30-move-own-services.md)
+    ...sdk.availability.appointment(slug, {
+      lang,
+      services: move ? undefined : serviceIds,
+      staff,
+      date: date ?? undefined,
+      move: move?.code,
+    }),
     // another day keeps the strip in place while its times come
     placeholderData: keepPreviousData,
   })

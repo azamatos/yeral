@@ -7,10 +7,11 @@ import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { textLink } from '@yeral/ui/text-link'
 import { TimeSlot } from '@yeral/ui/time-slots'
-import { CircleCheck, Clock, History, Wallet } from 'lucide-react'
+import { CircleCheck } from 'lucide-react'
 import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { NOTE_MAX } from '@/entities/booking'
+import { Rules } from './rules'
 import { StepTitle } from './step-title'
 
 // the login comes over the page only when someone needs it: its steps stay out of the flow's first download
@@ -37,8 +38,8 @@ function Part({ title, titleRef, children }: { title?: string; titleRef?: React.
  * Step 4 (Booking `step=confirm`, book C-18, C-20, C-21): the time just taken with the nearest free ones (Booking
  * `slotTaken`), the summary under 1024 (`summary`), who's booking (`person`, signed in with a name: their name and
  * confirmed number; otherwise «Confirm your number», the site's login over the page: number, code, "Is this you?",
- * the name), the note for the business, and the business's rules. Sending is the summary's and the bar's «Send
- * booking».
+ * the name), the note for the business, and the business's rules (`Rules`). Sending is the summary's and the bar's
+ * «Send booking».
  */
 export function ConfirmStep({
   detail,
@@ -65,7 +66,6 @@ export function ConfirmStep({
   // kept once opened, so it closes as it opens and gives the focus back (to the details: its trigger is gone by then)
   const [login, setLogin] = useState<boolean | null>(null)
   const details = useRef<HTMLHeadingElement>(null)
-  const rules = detail.rules
   return (
     <div className="flex flex-col">
       <StepTitle title={t('title')} />
@@ -132,23 +132,7 @@ export function ConfirmStep({
             />
           </Field>
         </Part>
-        <Part title={t('rules')}>
-          <ul className="m-0 flex list-none flex-col gap-3.5 p-0 text-body [&_svg]:mt-px [&_svg]:size-5 [&_svg]:flex-none [&_svg]:text-n-600">
-            <li className="flex items-start gap-3">
-              <History aria-hidden strokeWidth={1.75} />
-              {rules.cancelWindowMinutes ? t('cancelUpTo', { time: fmt.duration(rules.cancelWindowMinutes) }) : t('cancelAnyTime')}
-            </li>
-            <li className="flex items-start gap-3">
-              <Clock aria-hidden strokeWidth={1.75} />
-              {t('late', { minutes: rules.lateToleranceMinutes })}
-            </li>
-            <li className="flex items-start gap-3">
-              <Wallet aria-hidden strokeWidth={1.75} />
-              {t('pay')}
-            </li>
-          </ul>
-          {rules.note && <p className="m-0 rounded-m bg-group px-3.5 py-3 text-small text-n-600">{rules.note}</p>}
-        </Part>
+        <Rules rules={detail.rules} />
       </div>
       {login !== null && (
         <Suspense fallback={null}>

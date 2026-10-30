@@ -21,7 +21,8 @@ type NextFree = { date: string; start: number } | null
  * Step 2 (Booking `step=staff`, book C-13): «Any specialist» with the earliest free time, then everyone who does the
  * picked services with their next free time (`OptionCard`s, arrow keys between them); someone who doesn't do them all
  * stays listed, disabled, saying so. When nobody does them all, the note says a free specialist is chosen for each.
- * In move mode (C-30) the times leave the booking's own out of the busy ones, and the one it's with now says «Current».
+ * In move mode (C-30) the api reads the booking's own services and leaves its own time out of the busy ones; the one
+ * it's with now says «Current».
  */
 export function StaffStep({
   detail,
@@ -44,7 +45,8 @@ export function StaffStep({
   const lang = useLocale()
   const sdk = useSdk()
   const now = useClock()
-  const free = useQuery(sdk.availability.specialists(detail.slug, { lang, services: serviceIds, move: move?.code }))
+  // in move mode the api reads the booking's own services (2026-10-30-move-own-services.md)
+  const free = useQuery(sdk.availability.specialists(detail.slug, { lang, services: move ? undefined : serviceIds, move: move?.code }))
   // a start past midnight reads on the next calendar day
   const when = (next: NextFree) => {
     if (!next) return null

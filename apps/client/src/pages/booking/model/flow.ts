@@ -1,5 +1,6 @@
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import { isYmd } from '@yeral/domain/time'
+import { isApiError } from '@yeral/sdk'
 import { z } from 'zod'
 
 export const STEPS = ['services', 'staff', 'time', 'confirm'] as const
@@ -62,6 +63,17 @@ export const isOwnTime = (
   date: string | null | undefined,
   start: number,
 ) => date === move.date && start === move.start && (staff === 'any' || staff === move.current)
+
+/**
+ * What the api's answer to a move's read or send says about the move itself (`2026-10-30-move-own-services.md`):
+ * `not_bookable`, the booking can't move online any more (a service of it gone from the menu, archived or offline);
+ * `staff_gone`, the chosen specialist no longer does its services (404 `not_found` naming them; the api never swaps
+ * them, so the move asks for «Any specialist»); null for anything else (a time taken, the network…).
+ */
+export function moveRefusal(error: unknown, staff: string): 'not_bookable' | 'staff_gone' | null {
+  if (isApiError(error, 'not_bookable')) return 'not_bookable'
+  return isApiError(error, 'not_found') && staff !== 'any' && error.details.staffId === staff ? 'staff_gone' : null
+}
 
 /** The move's step the address asks for, held back to the time step until a new time is chosen. */
 export function currentMoveStep(asked: Step | undefined, timed: boolean): MoveStep {
