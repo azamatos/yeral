@@ -4,7 +4,7 @@ import {
   acceptAlternativeSchema,
   bookingCodeParamSchema,
   bookingDetailSchema,
-  bookingListSchema,
+  myBookingListSchema,
   cancelBookingSchema,
   createBookingSchema,
   editNoteSchema,
@@ -62,7 +62,7 @@ const listRoute = createRoute({
   tags,
   summary: 'My bookings: upcoming (requests with an offered time ahead first, then soonest first) or past (newest first)',
   request: { query: myBookingsQuerySchema },
-  responses: { 200: json(bookingListSchema), 401: errors[401] },
+  responses: { 200: json(myBookingListSchema), 401: errors[401] },
 })
 
 const howWasItRoute = createRoute({

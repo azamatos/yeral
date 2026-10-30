@@ -1,5 +1,5 @@
 /** Booking rows → `BookingSummary` / `BookingDetail` (client spec §4.8: cards, detail drawer, actions). */
-import type { BookingDetail, BookingSummary, MyBooking, OfferSource } from '@yeral/contract/bookings'
+import type { BookingDetail, BookingReview, BookingSummary, MyBooking, OfferSource } from '@yeral/contract/bookings'
 import {
   addressAsShown,
   cancelDeadline,
@@ -104,6 +104,10 @@ interface Known {
   /** May this booking's client book there online now (asked once per business and phone). */
   online: (row: BookingRow, lb: LoadedBusiness) => Promise<boolean>
 }
+
+/** The client's review as the row and the drawer carry it; null until the visit is reviewed. */
+const reviewOf = (review: typeof reviews.$inferSelect | undefined): BookingReview | null =>
+  review ? { rating: review.rating, tags: review.tags, text: review.text, createdAt: review.createdAt.getTime() } : null
 
 /** `accountPhone`: the signed-in client's phone, when every row is theirs (My bookings); else it's asked per row. */
 async function knownFor(db: Queryable, rows: readonly BookingRow[], accountPhone?: string): Promise<Known> {
@@ -214,6 +218,8 @@ export async function mineOf(
     rows.map((row, i) => async (): Promise<MyBooking> => {
       const summary = list[i]!
       const lb = businesses.get(row.businessId)
+      // the review is the visit's, whatever the business's state (read once for the page)
+      const review = reviewOf(known.reviews.get(row.id))
       // a business without its rules row (not loaded): the card without its extras, not the page refused
       if (!lb)
         return {
@@ -226,6 +232,7 @@ export async function mineOf(
           offerTakenBy: null,
           bookOnline: false,
           actions: NO_ACTIONS,
+          review,
         }
       const side = await clientSideOf(db, row, lb, known, now)
       return {
@@ -238,6 +245,7 @@ export async function mineOf(
         offerTakenBy: side.taker,
         bookOnline: side.bookOnline,
         actions: side.actions,
+        review,
       }
     }),
   )
@@ -320,6 +328,6 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     moveRefused,
     reschedule,
     actions,
-    review: review ? { rating: review.rating, tags: review.tags, text: review.text, createdAt: review.createdAt.getTime() } : null,
+    review: reviewOf(review),
   }
 }
