@@ -27,18 +27,30 @@ export const dayStateSchema = z
 
 // ── Appointment ──
 
-export const appointmentAvailabilityQuerySchema = langQuerySchema.extend({
-  services: idListQuery,
-  /** A specialist id, or `any` for «Islendik hünärmen». */
-  staff: z.union([z.literal('any'), idSchema]).default('any'),
-  date: ymdSchema.optional(),
-  days: z.coerce.number().int().min(1).max(31).default(14),
-  /**
-   * Move mode (book Q-165): the signed-in client's confirmed appointment being moved; its own time and a move already
-   * waiting don't count as busy, so a new time may overlap them with the same specialist.
-   */
-  move: bookingCodeSchema.optional(),
-})
+/** `services` may be left out only in move mode (`move`): the booking's own services then. */
+const servicesOrMove = { message: 'services or move', path: ['services'] }
+const hasServicesOrMove = (q: { services?: string[]; move?: string }) => !!q.services || !!q.move
+
+export const appointmentAvailabilityQuerySchema = langQuerySchema
+  .extend({
+    /** The services in order; in move mode left out, the booking's own services as booked, in their order. */
+    services: idListQuery.optional(),
+    /**
+     * A specialist id, or `any` for «Islendik hünärmen» (the default). In move mode left out, the booking's own
+     * specialist while one does every service and still does them here; else `any`.
+     */
+    staff: z.union([z.literal('any'), idSchema]).optional(),
+    date: ymdSchema.optional(),
+    days: z.coerce.number().int().min(1).max(31).default(14),
+    /**
+     * Move mode (book Q-165, C-30): the signed-in client's confirmed appointment being moved; its own time and a move
+     * already waiting don't count as busy, so a new time may overlap them with the same specialist. A booking that
+     * can't move online any more answers 409 `not_bookable`: a service of it gone from the business's menu (deleted,
+     * archived or no longer booked online), as the reschedule would.
+     */
+    move: bookingCodeSchema.optional(),
+  })
+  .refine(hasServicesOrMove, servicesOrMove)
 
 export const appointmentAvailabilitySchema = z
   .object({
@@ -51,11 +63,14 @@ export const appointmentAvailabilitySchema = z
   .meta({ id: 'AppointmentAvailability' })
 
 /** Step 2: "Indiki boş wagt: ertir 10:00" per specialist and for «Islendik hünärmen». */
-export const specialistsAvailabilityQuerySchema = langQuerySchema.extend({
-  services: idListQuery,
-  /** Move mode, as in the appointment availability. */
-  move: bookingCodeSchema.optional(),
-})
+export const specialistsAvailabilityQuerySchema = langQuerySchema
+  .extend({
+    /** In move mode left out, the booking's own services. */
+    services: idListQuery.optional(),
+    /** Move mode, as in the appointment availability (a booking that can't move online: 409 `not_bookable`). */
+    move: bookingCodeSchema.optional(),
+  })
+  .refine(hasServicesOrMove, servicesOrMove)
 export const specialistsAvailabilitySchema = z
   .object({
     any: nextFreeSchema,

@@ -6,7 +6,18 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingRules, bookings, businesses, events, rateLimits, services, staff, staffServices, users } from '../../db/schema'
+import {
+  bookingItems,
+  bookingRules,
+  bookings,
+  businesses,
+  events,
+  rateLimits,
+  services,
+  staff,
+  staffServices,
+  users,
+} from '../../db/schema'
 import { seed } from '../../db/seed'
 import { rescheduleBooking } from './actions'
 import { runDueJobs } from '../jobs/run'
@@ -17,6 +28,8 @@ const FRI = '2026-10-16'
 const SAT = '2026-10-17'
 // a day the other tests leave alone
 const LATER = '2026-10-21'
+// move mode's own-services tests
+const OWN = '2026-10-23'
 
 describe('moves', () => {
   let db: Db
@@ -47,24 +60,27 @@ describe('moves', () => {
 
   const rules = (set: Partial<typeof bookingRules.$inferInsert>) =>
     db.update(bookingRules).set(set).where(eq(bookingRules.businessId, glowId))
-  const starts = async (b: ReturnType<typeof browser>, date: string, staffId: string, move?: string) =>
+  const starts = async (b: ReturnType<typeof browser>, date: string, staffId: string, move?: string, services = [haircut]) =>
     (
-      await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=${staffId}&date=${date}${move ? `&move=${move}` : ''}`)
+      await b.req(
+        `/v1/businesses/glow-studio/availability?services=${services.join(',')}&staff=${staffId}&date=${date}${move ? `&move=${move}` : ''}`,
+      )
     ).json.slots.map((x: { start: number }) => x.start) as number[]
 
-  /** A confirmed haircut with Aýna at her first free start, from `from` on, that has an hour free after it. */
-  async function confirmed(phone: string, from: string) {
+  /** A confirmed haircut (and `extra` services) with Aýna at her first free start, from `from` on, that has an hour free after it. */
+  async function confirmed(phone: string, from: string, extra: string[] = []) {
     const b = browser(t.app)
     await b.login(phone, 'Client')
+    const serviceIds = [haircut, ...extra]
     let date = from
     let start: number | undefined
     for (; start === undefined && date < addDays(from, 10); start === undefined && (date = addDays(date, 1))) {
-      const free = await starts(b, date, who['Aýna']!)
+      const free = await starts(b, date, who['Aýna']!, undefined, serviceIds)
       start = free.find((m) => free.includes(m + 30) && free.includes(m + 60))
     }
     if (start === undefined) throw new Error('Aýna has no free hour and a half in ten days')
     const made = await b.req('/v1/bookings', {
-      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: who['Aýna'], date, start },
+      body: { type: 'appointment', business: 'glow-studio', serviceIds, staffId: who['Aýna'], date, start },
     })
     expect(made.status).toBe(201)
     const [row] = await db.select().from(bookings).where(eq(bookings.code, made.json.code))
@@ -163,6 +179,80 @@ describe('moves', () => {
     expect(refused.json.error.code).toBe('invalid_status')
     const specialists = await b.req(`/v1/businesses/glow-studio/specialists/availability?services=${haircut}&move=${code}`)
     expect(specialists.status).toBe(200)
+  })
+
+  /** A second service Aýna and Maral do, a copy of the haircut, to book beside it. */
+  async function spareService(name: string): Promise<string> {
+    const [h] = await db.select().from(services).where(eq(services.id, haircut))
+    const { id: _id, ...rest } = h!
+    const [row] = await db
+      .insert(services)
+      .values({ ...rest, name: { tk: name, ru: name, en: name }, sort: 99 })
+      .returning({ id: services.id })
+    await db.insert(staffServices).values([who['Aýna']!, who['Maral']!].map((staffId) => ({ staffId, serviceId: row!.id })))
+    return row!.id
+  }
+
+  const refused = async (b: ReturnType<typeof browser>, url: string, code: string) => {
+    const res = await b.req(url)
+    expect(res.status, url).toBe(409)
+    expect(res.json.error.code, url).toBe(code)
+  }
+
+  it('move mode without services or staff reads the booking’s own: the same times and next free as asked by them (C-30)', async () => {
+    const { b, code, date } = await confirmed('+99365444221', OWN)
+    const url = `/v1/businesses/glow-studio/availability?date=${date}&move=${code}`
+    const own = (await b.req(url)).json
+    const asked = (await b.req(`${url}&services=${haircut}&staff=${who['Aýna']}`)).json
+    expect(own.slots.length).toBeGreaterThan(0)
+    expect(own).toEqual(asked)
+    const next = `/v1/businesses/glow-studio/specialists/availability?move=${code}`
+    expect((await b.req(next)).json).toEqual((await b.req(`${next}&services=${haircut}`)).json)
+    // outside move mode the services are needed
+    expect((await b.req(`/v1/businesses/glow-studio/availability?date=${date}`)).status).toBe(400)
+    expect((await b.req('/v1/businesses/glow-studio/specialists/availability')).status).toBe(400)
+  })
+
+  it('move mode: the booking’s own specialist no longer doing its service leaves anyone (never a swap)', async () => {
+    const { b, code, date } = await confirmed('+99365444222', OWN)
+    await db.delete(staffServices).where(and(eq(staffServices.staffId, who['Aýna']!), eq(staffServices.serviceId, haircut)))
+    try {
+      const url = `/v1/businesses/glow-studio/availability?date=${date}&move=${code}`
+      const own = (await b.req(url)).json
+      expect(own.slots.length).toBeGreaterThan(0) // Maral's
+      expect(own).toEqual((await b.req(`${url}&staff=any`)).json)
+    } finally {
+      await db.insert(staffServices).values({ staffId: who['Aýna']!, serviceId: haircut })
+    }
+  })
+
+  it('a move that would lose a service is refused: a service gone for good, by the reschedule and by the free times', async () => {
+    const extra = await spareService('Gone')
+    const { b, code, date, start, id } = await confirmed('+99365444223', OWN, [extra])
+    await db.delete(services).where(eq(services.id, extra))
+    const moved = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    expect(moved.status).toBe(409)
+    expect(moved.json.error.code).toBe('not_bookable')
+    const free = `/v1/businesses/glow-studio/availability?date=${date}&move=${code}`
+    await refused(b, free, 'not_bookable')
+    await refused(b, `${free}&services=${haircut}&staff=any`, 'not_bookable')
+    await refused(b, `/v1/businesses/glow-studio/specialists/availability?move=${code}`, 'not_bookable')
+    // the booking stays as it is, with both its items
+    const [row] = await db.select().from(bookings).where(eq(bookings.id, id))
+    expect(row).toMatchObject({ status: 'confirmed', date, start })
+    expect(await db.$count(bookingItems, eq(bookingItems.bookingId, id))).toBe(2)
+  })
+
+  it('a service the business deleted (archived) or took offline refuses the move the same way', async () => {
+    const extra = await spareService('Hidden')
+    const { b, code, date, start } = await confirmed('+99365444224', OWN, [extra])
+    for (const set of [{ archived: true }, { online: false }]) {
+      await db.update(services).set(set).where(eq(services.id, extra))
+      const moved = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+      expect(moved.json.error.code, JSON.stringify(set)).toBe('not_bookable')
+      await refused(b, `/v1/businesses/glow-studio/availability?date=${date}&move=${code}`, 'not_bookable')
+      await db.update(services).set({ archived: false, online: true }).where(eq(services.id, extra))
+    }
   })
 
   it('a specialist who no longer does the service isn’t swapped: the client picks another', async () => {

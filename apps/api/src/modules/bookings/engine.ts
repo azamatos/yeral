@@ -89,6 +89,11 @@ export interface BookedServices {
   serviceIds: string[]
   /** The one specialist doing them all, or null when split. */
   staffId: string | null
+  /**
+   * An item whose service row is gone for good (`serviceId` null: a group's or a setup plan's hard delete) is missing
+   * from `serviceIds`, so the booking can't be re-booked as it was (`assertRebookable`).
+   */
+  lost: boolean
 }
 
 /** A booking's services and its one specialist, from its items in their order. */
@@ -97,6 +102,21 @@ export function bookedFrom(items: readonly Pick<ItemRow, 'serviceId' | 'staffId'
   return {
     serviceIds: items.flatMap((i) => (i.serviceId ? [i.serviceId] : [])),
     staffId: first && items.every((i) => i.staffId === first) ? first : null,
+    lost: items.some((i) => !i.serviceId),
+  }
+}
+
+/**
+ * A booking re-booked as it was (a move, an offered time) needs every service it holds, as the business's menu stands:
+ * one gone for good (`lost`) or one deleted since (archived: off the menu, book Q-210) refuses it with `not_bookable`,
+ * never a booking of fewer services; `online`, one no longer booked online here too (a move is an online booking, an
+ * offered time is just taken, as its chip says). The client's «can't move online».
+ */
+export function assertRebookable(lb: LoadedBusiness, booked: BookedServices, opts: { online: boolean }): void {
+  if (booked.lost) throw new ApiError('not_bookable')
+  for (const id of booked.serviceIds) {
+    const s = lb.services.find((x) => x.id === id)
+    if (!s || (opts.online && !s.online)) throw new ApiError('not_bookable')
   }
 }
 
