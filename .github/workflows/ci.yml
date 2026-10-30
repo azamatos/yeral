@@ -116,6 +116,28 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: yeral.localhost' http://localhost/)" = 307
           curl -fsS -H 'Host: yeral.localhost' http://localhost/en | grep -q '<html lang="en"'
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: yeral.localhost' http://localhost/en/nothing-here)" = 404
+      - name: Security headers through Caddy
+        run: |
+          # yeral.caddy's headers, mirrored in infra/docker/Caddyfile (infra/server/README.md, "Security headers")
+          check() { # host, path, then every header line the answer must carry
+            local host=$1 path=$2 out
+            out=$(curl -sS -o /dev/null -D - -H "Host: $host" "http://localhost$path")
+            shift 2
+            for want in "$@"; do
+              echo "$out" | grep -qiF "$want" || { echo "$host$path lacks: $want"; echo "$out"; exit 1; }
+            done
+          }
+          hsts='strict-transport-security: max-age=31536000; includeSubDomains'
+          check api.yeral.localhost /v1/health "$hsts" "content-security-policy: default-src 'none'; frame-ancestors 'none'"
+          check api.yeral.localhost /docs "$hsts" "content-security-policy: frame-ancestors 'none'"
+          check business.yeral.localhost /login "$hsts" "content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+          # the client site's policy comes from the app: one nonce per page, on the header and on every script it writes
+          page=$(curl -sS -D - -H 'Host: yeral.localhost' http://localhost/en)
+          echo "$page" | grep -qiF "$hsts"
+          nonce=$(echo "$page" | grep -i '^content-security-policy:' | sed -E "s/.*'nonce-([^']+)'.*/\1/")
+          test -n "$nonce" || { echo 'the client page carries no nonce'; echo "$page" | head -20; exit 1; }
+          echo "$page" | grep -q "<script[^>]* nonce=\"$nonce\""
+          if echo "$page" | grep -o '<script[^>]*>' | grep -v "nonce=\"$nonce\""; then echo 'a script without the nonce'; exit 1; fi
       - name: The push channel through Caddy
         run: |
           # signed in (outside production the code is 1234), the stream's `ready` comes at once, neither held back nor

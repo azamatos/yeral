@@ -67,6 +67,42 @@ While the sign-in code shows on the screen, one of the owner's test businesses o
 confirming by hand) with `ssh yeral-vps 'docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js
 make-example <slug>'`, and loses the mark (back to "in review") with `make-example <slug> --off` (operations.md).
 
+**After a deploy that changed the headers** (`yeral.caddy` or the client site's policy, "Security headers" below),
+with the browser console open and no CSP violation reported (`Refused to load…` / `violates the following Content
+Security Policy directive`):
+
+1. `https://business.yeral.app`: sign in, the setup's done step (the page QR and its downloads), Settings → Address
+   (the map, with tiles and the pin), Settings → Photos (uploaded photos), the calendar day (its layers, a request's
+   drawer).
+2. `https://yeral.app`: a business page with photos and the map, its booking (the calendar, the time, the confirm),
+   My bookings (live updates: the events stream stays connected in the Network tab).
+3. `curl -sI https://yeral.app/en https://business.yeral.app/login https://api.yeral.app/v1/health | grep -i
+   'strict-transport\|content-security'`: HSTS on every site, a policy on each.
+
+**Rolling the site file back:** `deploy.sh` keeps the previous `yeral.caddy` as `/srv/edge/sites-yeral.caddy.before-<commit>`
+(and `-latest`); `ssh yeral-vps 'cp /srv/edge/sites-yeral.caddy.before-latest /srv/edge/sites/yeral.caddy && docker
+compose -f /srv/edge/compose.yml exec caddy caddy reload --config /etc/caddy/Caddyfile'` puts it back in seconds,
+no image rebuilt. The client site's own policy rolls back with its image (the previous commit deployed the same way).
+
+## Security headers
+
+`yeral.caddy`'s `(yeral_site)` sends every site `Strict-Transport-Security "max-age=31536000; includeSubDomains"`
+(a year of HTTPS only, every `*.yeral.app` host being on TLS already: "DNS records"; no `preload`, which a browser
+list keeps for months), `X-Content-Type-Options nosniff`, `Referrer-Policy strict-origin-when-cross-origin` and
+`X-Frame-Options SAMEORIGIN`. The Content Security Policy is per site, written from an inventory of what each app
+loads (`docs/memory-bank/log/2026-10-30-hsts-csp.md`; nothing is allowed on a guess):
+
+| Site | Policy | Set by |
+|---|---|---|
+| `api.yeral.app` | `default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'` (JSON, photos, the OpenAPI document load nothing); `/docs` only `frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'` until Scalar's CDN bundle is inventoried | `yeral.caddy` |
+| `business.yeral.app` | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'` | `yeral.caddy` |
+| `yeral.app` | the business app's, with `script-src 'self' 'nonce-…'`: a nonce per page on the scripts TanStack Start writes inline (hydration, React's streaming), so Caddy sets none here | the app: `apps/client/src/app/entrypoint/csp.ts`, `start.ts` |
+
+`infra/docker/Caddyfile` mirrors it for the production-like stack, where CI's «Docker stack» job asserts the headers
+on every site and that the client page's nonce is on the header and on each of its scripts. No `report-uri`: nobody
+would read it (error tracking comes with P6). A new third-party host (a CDN, an analytics script) means a new line in
+the inventory and the policy, never `'unsafe-inline'` for scripts.
+
 ## DNS records
 
 The zone `yeral.app` is on Cloudflare (ADR 0024; the plan: book chapter 9, 22.10.2026). The owner edits it in the dashboard:

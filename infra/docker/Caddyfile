@@ -1,5 +1,7 @@
 # The production-like stack's front door, like the server's shared Caddy (infra/server/edge, yeral.caddy), on plain
-# HTTP: *.localhost resolves to this machine without /etc/hosts. The cms host joins with its app.
+# HTTP: *.localhost resolves to this machine without /etc/hosts. The cms host joins with its app. The headers mirror
+# yeral.caddy's (infra/server/README.md, "Security headers"), so CI's «Docker stack» job can assert them; the api's
+# address in the policies is this stack's.
 {
 	auto_https off
 	# a booking link's token opens the booking (book Q-168), a setup link's an admin account (ADR 0026): handler errors log
@@ -14,13 +16,11 @@
 	}
 }
 
-http://api.yeral.localhost {
+# what every site sends and logs (yeral.caddy's `yeral_site`; browsers ignore HSTS over plain HTTP, CI reads it)
+(yeral_site) {
 	encode zstd gzip
-	# a photo is 10 MB at most (PHOTO_MAX_BYTES, @yeral/domain/photos); the form around it adds a few bytes
-	request_body {
-		max_size 11MB
-	}
 	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options nosniff
 		Referrer-Policy strict-origin-when-cross-origin
 		X-Frame-Options SAMEORIGIN
@@ -36,41 +36,37 @@ http://api.yeral.localhost {
 			}
 		}
 	}
+}
+
+http://api.yeral.localhost {
+	import yeral_site
+	# a photo is 10 MB at most (PHOTO_MAX_BYTES, @yeral/domain/photos); the form around it adds a few bytes
+	request_body {
+		max_size 11MB
+	}
+	# JSON, photos and the OpenAPI document load nothing and belong in no frame; the docs page keeps only the directives
+	# that don't govern loading (yeral.caddy)
+	@docs path /docs
+	@not_docs not path /docs
+	header @not_docs Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+	header @docs Content-Security-Policy "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER)
 	reverse_proxy api:3004
 }
 
 # the client site: its Node server renders the pages and serves the files (client.Dockerfile); this door adds the
-# headers and compresses
+# headers and compresses. Its Content-Security-Policy comes from the app (apps/client/src/app/entrypoint/csp.ts): a
+# nonce per page for the scripts TanStack Start writes inline.
 http://yeral.localhost {
-	encode zstd gzip
-	header {
-		X-Content-Type-Options nosniff
-		Referrer-Policy strict-origin-when-cross-origin
-		X-Frame-Options SAMEORIGIN
-		-Server
-	}
-	log {
-		# a booking link's token opens the booking (book Q-168; yeral.app/l/…): logged as /l/…
-		format filter {
-			wrap json
-			fields {
-				request>uri regexp "(/l/|/v1/links/)[^/?]+" "${1}…"
-			}
-		}
-	}
+	import yeral_site
 	reverse_proxy client:3000
 }
 
-# the business app: its image serves the files (static.Caddyfile); this door adds the headers
+# the business app: its image serves the files (static.Caddyfile); this door adds the headers. The policy is
+# yeral.caddy's with this stack's api address (the inventory: docs/memory-bank/log/2026-10-30-hsts-csp.md)
 http://business.yeral.localhost {
-	header {
-		X-Content-Type-Options nosniff
-		Referrer-Policy strict-origin-when-cross-origin
-		X-Frame-Options SAMEORIGIN
-		-Server
-	}
-	log
+	import yeral_site
+	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://api.yeral.localhost; font-src 'self'; connect-src 'self' http://api.yeral.localhost https://tiles.openfreemap.org; worker-src blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	reverse_proxy business:80
 }
 

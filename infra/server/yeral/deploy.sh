@@ -77,6 +77,11 @@ fi
 docker compose up -d --wait --remove-orphans
 
 if [ "${PUBLIC:-0}" = 1 ]; then
+  # the site file as it was, the way back from a bad header or policy without a rebuild (README, "Deploying Ýeral by hand")
+  if [ -f /srv/edge/sites/yeral.caddy ]; then
+    cp -p /srv/edge/sites/yeral.caddy "/srv/edge/sites-yeral.caddy.before-${COMMIT:0:7}"
+    cp -p /srv/edge/sites/yeral.caddy /srv/edge/sites-yeral.caddy.before-latest
+  fi
   cp src/infra/server/yeral/yeral.caddy /srv/edge/sites/yeral.caddy
   docker compose -f /srv/edge/compose.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile
 fi
