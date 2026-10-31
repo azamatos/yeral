@@ -140,13 +140,14 @@ export const NewRequest: Story = {
   },
 }
 
-/** A client asking to move: «Time change request», without the specialist (the move keeps her). */
+/** A client asking to move: «Time change request», without the specialist (the move keeps her) and without the sound. */
 export const TimeChange: Story = {
   name: 'Time change · in front',
   args: { browser: fakeBrowserNotifications(), arriving: [request('YR-MOVE1', 'move', { client: client('Ogulgerek M.') })] },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, args }) => {
     await arrives(canvas)
     await toastSaying('Time change request: Ogulgerek M. · today · 15:30')
+    await expect(args.browser.state.sounds).toBe(0)
   },
 }
 

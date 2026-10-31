@@ -19,18 +19,22 @@ type Word = 'new' | 'move' | 'warn'
  * S-16, F-123, F-170; the owner's choice D1 of the slice 4 plan): a new request or a client's time change, «New
  * request: Ejegyz T. · Aýna · today · 15:30» with «Open», and five minutes before one runs out, «Request time running
  * out: …», for those who may answer it (the api's `warnAt`, kept on the page's own clock so it fires in a background
- * tab too). In front: the toast with the soft sound. In the background: the browser notification with the sound, if
- * allowed, whose click brings the tab back and opens the request in the calendar's drawer. Only the requests this
- * person may see here (the list is theirs); the ones already waiting when the page opened stay quiet.
+ * tab too). In front: the toast. In the background: the browser notification, if allowed, whose click brings the tab
+ * back and opens the request in the calendar's drawer (the toast when none could be shown). The soft sound with a new
+ * request and the warning, not with a time change (book chapter 8). Only the requests this person may see here (the
+ * list is theirs); the ones already waiting when the page opened stay quiet.
  */
 export function RequestArrivals({ slug }: { slug: string }) {
   const sdk = useSdk()
   const list = useQuery(sdk.requests.list(slug))
+  const notifications = useBrowserNotifications()
   const say = useSay(slug)
   // the codes heard of so far; null until the first answer
   const seen = useRef<Set<string> | null>(null)
-  // the warnings given
-  const warned = useRef(new Set<string>())
+  // the warnings given: the tab remembers them through a reload (a request inside its last five minutes isn't
+  // announced again at every load), each tab for itself
+  const warned = useRef<Set<string> | null>(null)
+  warned.current ??= new Set(notifications.warningsHeard())
 
   useEffect(() => {
     const items = list.data?.items
@@ -45,24 +49,26 @@ export function RequestArrivals({ slug }: { slug: string }) {
   useEffect(() => {
     const items = list.data?.items
     if (!items) return
+    const heard = (warned.current ??= new Set(notifications.warningsHeard()))
     let timer: number | undefined
     const check = () => {
       const now = Date.now()
-      for (const r of warningsDue(items, now, warned.current)) {
-        warned.current.add(r.code)
+      for (const r of warningsDue(items, now, heard)) {
+        heard.add(r.code)
+        notifications.markWarningHeard(r.code)
         say('warn', r)
       }
-      const wait = nextWarningIn(items, now, warned.current)
+      const wait = nextWarningIn(items, now, heard)
       if (wait !== null) timer = window.setTimeout(check, wait)
     }
     check()
     return () => window.clearTimeout(timer)
-  }, [list.data, say])
+  }, [list.data, say, notifications])
 
   return null
 }
 
-/** Says a word about a request: the toast in front, the browser notification in the background, the sound with both. */
+/** Says a word about a request: the toast in front, the browser notification in the background, the sound when the word has one. */
 function useSay(slug: string) {
   const t = useTranslations('shell.arrival')
   const fmt = useFmt()
@@ -82,11 +88,11 @@ function useSay(slug: string) {
           params: { slug },
           search: { ...(r.date === now ? {} : { date: r.date }), request: r.code },
         })
-      notifications.sound()
-      if (notifications.hidden() && notifications.permission() === 'granted') {
-        notifications.show({ title: t(`${word}Title`), body: what, tag: `${word}:${r.code}`, onClick: open })
+      // the sound for a new request and the warning, not for a time change (book chapter 8, decision 7)
+      if (word !== 'move') notifications.sound()
+      // the toast when the notification couldn't be shown (not allowed, a browser without the constructor)
+      if (notifications.hidden() && notifications.show({ title: t(`${word}Title`), body: what, tag: `${word}:${r.code}`, onClick: open }))
         return
-      }
       const Icon = word === 'warn' ? TimerOff : Clock
       toast(t(word, { what }), {
         icon: <Icon aria-hidden className="size-4 text-st-pending-line" />,

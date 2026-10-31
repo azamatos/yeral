@@ -11,7 +11,9 @@ import { useBrowserNotifications, useNotificationPermission } from '@/shared/lib
  * page, for everyone who gets notifications here (the list of requests is already the person's own). Not asked yet:
  * the accent line «Turn on notifications to hear new requests.» + Allow, which opens the browser's own prompt (never
  * on load) and goes once it's answered. Blocked: the quiet line «Notifications are blocked in this browser…» with
- * Close, which stays closed in this browser. Allowed, or a browser without notifications: nothing.
+ * Close, which stays closed in this browser. Allowed, or a browser without notifications: nothing. The board says
+ * `role="status"`, but the banner mounts again with every page, and a note present at mount is a static one by the
+ * Callout's rule (it would be re-read aloud on every navigation): it stays silent.
  */
 export function NotificationPermissionBanner() {
   const t = useTranslations('shell.notifications')
@@ -24,7 +26,6 @@ export function NotificationPermissionBanner() {
       <Callout
         tone="accent"
         icon={<Bell />}
-        live
         className="py-3 pr-3"
         action={
           <Button variant="secondary" size="s" onClick={() => void request()}>
@@ -41,7 +42,6 @@ export function NotificationPermissionBanner() {
       <Callout
         tone="neutral"
         icon={<BellOff />}
-        live
         className="py-3 pr-3"
         action={
           <Button

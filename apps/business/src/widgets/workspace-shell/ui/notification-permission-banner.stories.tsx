@@ -42,10 +42,10 @@ const BLOCKED = 'Notifications are blocked in this browser. Allow them in the br
 /** Not asked yet: the accent line with Allow. Allow opens the browser's prompt; allowed, the banner goes. */
 export const Ask: Story = {
   play: async ({ canvas }) => {
-    const banner = canvas.getByRole('status')
+    const banner = canvas.getByText(/notifications/i)
     await expect(banner).toHaveTextContent(ASK)
     await userEvent.click(canvas.getByRole('button', { name: 'Allow' }))
-    await waitFor(() => expect(canvas.queryByRole('status')).toBeNull())
+    await waitFor(() => expect(canvas.queryByText(/notifications/i)).toBeNull())
   },
 }
 
@@ -64,9 +64,9 @@ export const AskThenBlocked: Story = {
 export const Blocked: Story = {
   args: { browser: { permission: 'denied' } },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('status')).toHaveTextContent(BLOCKED)
+    await expect(canvas.getByText(/notifications/i)).toHaveTextContent(BLOCKED)
     await userEvent.click(canvas.getByRole('button', { name: 'Close' }))
-    await waitFor(() => expect(canvas.queryByRole('status')).toBeNull())
+    await waitFor(() => expect(canvas.queryByText(/notifications/i)).toBeNull())
   },
 }
 
@@ -75,7 +75,7 @@ export const BlockedClosedBefore: Story = {
   name: 'Blocked, closed before',
   args: { browser: { permission: 'denied', blockedClosed: true } },
   play: async ({ canvas }) => {
-    await expect(canvas.queryByRole('status')).toBeNull()
+    await expect(canvas.queryByText(/notifications/i)).toBeNull()
   },
 }
 
@@ -83,7 +83,7 @@ export const BlockedClosedBefore: Story = {
 export const Allowed: Story = {
   args: { browser: { permission: 'granted' } },
   play: async ({ canvas }) => {
-    await expect(canvas.queryByRole('status')).toBeNull()
+    await expect(canvas.queryByText(/notifications/i)).toBeNull()
   },
 }
 
@@ -91,7 +91,7 @@ export const Allowed: Story = {
 export const Unsupported: Story = {
   args: { browser: { permission: 'unsupported' } },
   play: async ({ canvas }) => {
-    await expect(canvas.queryByRole('status')).toBeNull()
+    await expect(canvas.queryByText(/notifications/i)).toBeNull()
   },
 }
 
@@ -102,7 +102,7 @@ export const AskKeyboard: Story = {
     await userEvent.tab()
     await expect(canvas.getByRole('button', { name: 'Allow' })).toHaveFocus()
     await userEvent.keyboard('{Enter}')
-    await waitFor(() => expect(canvas.queryByRole('status')).toBeNull())
+    await waitFor(() => expect(canvas.queryByText(/notifications/i)).toBeNull())
   },
 }
 

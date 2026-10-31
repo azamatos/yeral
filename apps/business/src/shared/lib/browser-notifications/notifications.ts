@@ -26,8 +26,11 @@ export interface BrowserNotifications {
   permission(): NotificationPermission
   /** Opens the browser's own prompt: only from a click on «Allow», never on load (decision 7 of the slice 4 plan). */
   request(): Promise<NotificationPermission>
-  /** A notification, while allowed; its click brings the tab to the front, closes it and runs `onClick`. */
-  show(notice: Notice): void
+  /**
+   * A notification, while allowed; its click brings the tab to the front, closes it and runs `onClick`. False when
+   * none could be shown (not allowed, or a browser with notifications only through a service worker): say it another way.
+   */
+  show(notice: Notice): boolean
   /** The soft sound; quiet when the browser refuses to play without a gesture or the file didn't load. */
   sound(): void
   /** Is the tab in the background (`document.hidden`): then the notification speaks, not the toast. */
@@ -35,12 +38,19 @@ export interface BrowserNotifications {
   /** The «blocked» banner was closed in this browser: it stays closed (per browser, no account setting). */
   blockedBannerClosed(): boolean
   closeBlockedBanner(): void
+  /** The requests this tab already warned about (kept through a reload of the tab, not into another tab). */
+  warningsHeard(): ReadonlySet<string>
+  markWarningHeard(code: string): void
 }
 
 /** The sound file in `public/`: a short two-note chime made by hand (no licence to carry), 16 kHz mono, 16 KB. */
 export const SOUND_URL = '/sounds/new-request.wav'
 /** The flag's name in the browser's storage. */
 export const BLOCKED_CLOSED_KEY = 'yeral.business.notifications.blocked-closed'
+/** The warned requests' codes in the tab's storage (`sessionStorage`: a reload keeps them, another tab has its own). */
+export const WARNED_KEY = 'yeral.business.notifications.warned'
+/** How many warned codes the tab keeps: a request's hold is hours at most, so the oldest are long gone. */
+const WARNED_KEPT = 50
 
 /** What the browser driver reads of the window (tests pass their own). */
 export interface NotificationWindow {
@@ -54,6 +64,7 @@ export interface NotificationWindow {
   focus?(): void
   Audio?: new (src: string) => Pick<HTMLAudioElement, 'play' | 'currentTime'>
   localStorage?: Pick<Storage, 'getItem' | 'setItem'>
+  sessionStorage?: Pick<Storage, 'getItem' | 'setItem'>
 }
 
 /**
@@ -62,12 +73,20 @@ export interface NotificationWindow {
  */
 export function createBrowserNotifications(win: () => NotificationWindow = () => globalThis): BrowserNotifications {
   let audio: Pick<HTMLAudioElement, 'play' | 'currentTime'> | null = null
-  const storage = () => {
+  const storage = (kind: 'localStorage' | 'sessionStorage') => {
     try {
-      return win().localStorage ?? null
+      return win()[kind] ?? null
     } catch {
       // storage access refused (a private window, blocked site data): the flag can't be kept
       return null
+    }
+  }
+  const readWarned = (): string[] => {
+    try {
+      const raw: unknown = JSON.parse(storage('sessionStorage')?.getItem(WARNED_KEY) ?? '[]')
+      return Array.isArray(raw) ? raw.filter((c): c is string => typeof c === 'string') : []
+    } catch {
+      return []
     }
   }
   const permission = (): NotificationPermission => {
@@ -89,7 +108,7 @@ export function createBrowserNotifications(win: () => NotificationWindow = () =>
     },
     show({ title, body, tag, onClick }) {
       const w = win()
-      if (permission() !== 'granted' || !w.Notification) return
+      if (permission() !== 'granted' || !w.Notification) return false
       try {
         const n = new w.Notification(title, { body, tag, icon: brand.touchIcon })
         n.onclick = () => {
@@ -97,8 +116,10 @@ export function createBrowserNotifications(win: () => NotificationWindow = () =>
           n.close()
           onClick?.()
         }
+        return true
       } catch {
-        // Chrome on Android has notifications only through a service worker (`Illegal constructor`): nothing to show
+        // Chrome on Android has notifications only through a service worker (`Illegal constructor`): nothing shown
+        return false
       }
     },
     sound() {
@@ -115,16 +136,25 @@ export function createBrowserNotifications(win: () => NotificationWindow = () =>
     hidden: () => win().document?.hidden ?? false,
     blockedBannerClosed() {
       try {
-        return storage()?.getItem(BLOCKED_CLOSED_KEY) === '1'
+        return storage('localStorage')?.getItem(BLOCKED_CLOSED_KEY) === '1'
       } catch {
         return false
       }
     },
     closeBlockedBanner() {
       try {
-        storage()?.setItem(BLOCKED_CLOSED_KEY, '1')
+        storage('localStorage')?.setItem(BLOCKED_CLOSED_KEY, '1')
       } catch {
         // storage full or refused: the banner closes for this page at least
+      }
+    },
+    warningsHeard: () => new Set(readWarned()),
+    markWarningHeard(code) {
+      try {
+        const codes = [...readWarned().filter((c) => c !== code), code].slice(-WARNED_KEPT)
+        storage('sessionStorage')?.setItem(WARNED_KEY, JSON.stringify(codes))
+      } catch {
+        // storage full or refused: the page's own memory still holds it
       }
     },
   }

@@ -337,8 +337,7 @@ export const NotificationsAsk: Story = {
   play: async ({ canvas }) => {
     const main = within(canvas.getByRole('main'))
     await expect(await main.findByText('Bag kafe')).toBeVisible()
-    const banner = await main.findByRole('status')
-    await expect(banner).toHaveTextContent('Turn on notifications to hear new requests.')
+    const banner = await main.findByText('Turn on notifications to hear new requests.')
     // the invite's note first, the notifications banner under it
     await expect(banner.compareDocumentPosition(main.getByText('Bag kafe')) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy()
     await userEvent.click(main.getByRole('button', { name: 'Allow' }))

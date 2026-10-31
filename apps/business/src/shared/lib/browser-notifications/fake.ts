@@ -2,8 +2,8 @@ import type { BrowserNotifications, NotificationPermission, Notice } from './not
 
 /**
  * A browser that does as told, for stories and tests (the real prompt can't be driven from either): it starts at
- * `permission`, «Allow» ends at `answer`, and it remembers what was shown, played and closed. `hidden` puts the tab in
- * the background.
+ * `permission`, «Allow» ends at `answer`, and it remembers what was shown, played, closed and heard. `hidden` puts
+ * the tab in the background.
  */
 export function fakeBrowserNotifications({
   permission = 'default',
@@ -16,7 +16,7 @@ export function fakeBrowserNotifications({
   hidden?: boolean
   blockedClosed?: boolean
 } = {}) {
-  const state = { permission, hidden, blockedClosed, shown: [] as Notice[], sounds: 0 }
+  const state = { permission, hidden, blockedClosed, shown: [] as Notice[], sounds: 0, heard: new Set<string>() }
   const fake: BrowserNotifications & { state: typeof state } = {
     state,
     permission: () => state.permission,
@@ -25,7 +25,9 @@ export function fakeBrowserNotifications({
       return Promise.resolve(answer)
     },
     show: (notice) => {
+      if (state.permission !== 'granted') return false
       state.shown.push(notice)
+      return true
     },
     sound: () => {
       state.sounds += 1
@@ -34,6 +36,10 @@ export function fakeBrowserNotifications({
     blockedBannerClosed: () => state.blockedClosed,
     closeBlockedBanner: () => {
       state.blockedClosed = true
+    },
+    warningsHeard: () => new Set(state.heard),
+    markWarningHeard: (code) => {
+      state.heard.add(code)
     },
   }
   return fake

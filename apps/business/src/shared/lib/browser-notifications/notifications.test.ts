@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { BLOCKED_CLOSED_KEY, createBrowserNotifications, SOUND_URL, type NotificationWindow } from './notifications'
+import { BLOCKED_CLOSED_KEY, createBrowserNotifications, SOUND_URL, WARNED_KEY, type NotificationWindow } from './notifications'
 
 /** A window with notifications the way a desktop browser has them; `permission` is what the person decided so far. */
 function browser(permission: globalThis.NotificationPermission = 'default', answer: globalThis.NotificationPermission = 'granted') {
@@ -66,7 +66,7 @@ describe('createBrowserNotifications', () => {
   it('shows a notification while allowed; its click brings the tab to the front, closes it and opens the request', () => {
     const { focus, made, notifications } = browser('granted')
     const onClick = vi.fn()
-    notifications.show({ title: 'New request', body: 'Ejegyz T. · Aýna · today · 15:30', tag: 'new:YR-1', onClick })
+    expect(notifications.show({ title: 'New request', body: 'Ejegyz T. · Aýna · today · 15:30', tag: 'new:YR-1', onClick })).toBe(true)
     expect(made).toHaveLength(1)
     expect(made[0]).toMatchObject({ title: 'New request', options: { body: 'Ejegyz T. · Aýna · today · 15:30', tag: 'new:YR-1' } })
     made[0]!.onclick?.()
@@ -75,12 +75,45 @@ describe('createBrowserNotifications', () => {
     expect(onClick).toHaveBeenCalledOnce()
   })
 
-  it('shows nothing before the permission is given or once it is blocked', () => {
+  it('shows nothing before the permission is given, once it is blocked, or where the constructor refuses, and says so', () => {
     for (const p of ['default', 'denied'] as const) {
       const { made, notifications } = browser(p)
-      notifications.show({ title: 'New request', body: '', tag: 'new:YR-1' })
+      expect(notifications.show({ title: 'New request', body: '', tag: 'new:YR-1' })).toBe(false)
       expect(made).toEqual([])
     }
+    // Chrome on Android: notifications only through a service worker
+    const { win } = browser('granted')
+    class Refusing {
+      static permission = 'granted' as const
+      static requestPermission = () => Promise.resolve('granted' as const)
+      constructor() {
+        throw new TypeError('Illegal constructor')
+      }
+      close() {}
+      onclick = null
+    }
+    const android = createBrowserNotifications(() => ({ ...win, Notification: Refusing }))
+    expect(android.show({ title: 'New request', body: '', tag: 'new:YR-1' })).toBe(false)
+  })
+
+  it('remembers the warnings this tab gave through a reload: the newest 50, each code once', () => {
+    const { win, notifications } = browser()
+    const session = new Map<string, string>()
+    win.sessionStorage = { getItem: (k) => session.get(k) ?? null, setItem: (k, v) => void session.set(k, v) }
+    expect(notifications.warningsHeard()).toEqual(new Set())
+    notifications.markWarningHeard('YR-1')
+    notifications.markWarningHeard('YR-2')
+    notifications.markWarningHeard('YR-1')
+    expect(createBrowserNotifications(() => win).warningsHeard()).toEqual(new Set(['YR-1', 'YR-2']))
+    for (let i = 0; i < 60; i++) notifications.markWarningHeard(`YR-${100 + i}`)
+    const heard = notifications.warningsHeard()
+    expect(heard.size).toBe(50)
+    expect(heard.has('YR-1')).toBe(false)
+    expect(heard.has('YR-159')).toBe(true)
+    // a tab whose storage is missing or holds rubbish starts afresh
+    session.set(WARNED_KEY, '{oops')
+    expect(notifications.warningsHeard()).toEqual(new Set())
+    expect(createBrowserNotifications(() => ({})).warningsHeard()).toEqual(new Set())
   })
 
   it('plays the sound from the start each time, with one audio element, and stays quiet when the browser refuses', async () => {

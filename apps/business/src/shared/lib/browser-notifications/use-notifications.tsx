@@ -13,9 +13,9 @@ export function useBrowserNotifications(): BrowserNotifications {
 }
 
 /**
- * The permission as the page knows it, and the one way to ask for it (from a click). It's read again when the tab
- * comes back to the front: someone who allowed or blocked notifications in the browser's settings and returned sees
- * the banner follow.
+ * The permission as the page knows it, and the one way to ask for it (from a click). It follows a change made
+ * outside the banner (the browser's site settings, its address-bar bubble): through the Permissions API where the
+ * browser has it, and when the tab comes back to the front everywhere.
  */
 export function useNotificationPermission(): [NotificationPermission, () => Promise<NotificationPermission>] {
   const notifications = useBrowserNotifications()
@@ -25,7 +25,19 @@ export function useNotificationPermission(): [NotificationPermission, () => Prom
     const read = () => setPermission(notifications.permission())
     read()
     document.addEventListener('visibilitychange', read)
-    return () => document.removeEventListener('visibilitychange', read)
+    let status: PermissionStatus | null = null
+    // an unknown permission name throws in some browsers, and an old one has no Permissions API at all
+    navigator.permissions
+      ?.query({ name: 'notifications' })
+      .then((s) => {
+        status = s
+        s.addEventListener('change', read)
+      })
+      .catch(() => undefined)
+    return () => {
+      document.removeEventListener('visibilitychange', read)
+      status?.removeEventListener('change', read)
+    }
   }, [notifications])
 
   const request = useCallback(async () => {
