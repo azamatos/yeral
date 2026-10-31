@@ -204,6 +204,16 @@ export const PastFreeCancel: Story = {
   },
 }
 
+/** The same drawer with words a third longer (Storybook's «Text: Russian length»): its «Call» keeps the word it shows in its name. */
+export const PastFreeCancelLongWords: Story = {
+  args: PastFreeCancel.args,
+  globals: { viewport: { value: 'xs' }, text: 'longer' },
+  play: async () => {
+    const d = await drawer()
+    await expect(await d.findByRole('link', { name: /^Call\b.*Barber Loft: / })).toHaveAttribute('href', 'tel:+99312334455')
+  },
+}
+
 /** The business refused the new time: the booking keeps its own, with the reason. */
 export const MoveRefused: Story = {
   args: {

@@ -1,6 +1,7 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { Link, Outlet, useNavigate, useSearch } from '@tanstack/react-router'
 import type { MyBooking } from '@yeral/contract/bookings'
+import { useFmt } from '@yeral/i18n'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
@@ -22,18 +23,36 @@ export type BookingsTab = 'upcoming' | 'past'
  * first (the api's order). Changes made elsewhere (the business answers, a request runs out) come in through the live
  * updates the site starts in the browser. A row opens its booking in the drawer over the list (`/account/bookings/{code}`,
  * the child route's `<Outlet />`). Under the title, the «How was it?» card (`features/write-review`, book F-243) asks
- * about the latest completed visit without a review, whatever the tab.
+ * about the latest completed visit without a review, whatever the tab. Each tab carries its count (Account-Bookings
+ * `.tn`: how many bookings it holds in all, the list's `total`), so both lists are read: the other tab's first page too.
  */
 export function MyBookingsPage() {
   const t = useTranslations('myBookings')
   const failed = useTranslations('failed')
   const lang = useLocale()
+  const fmt = useFmt()
   const sdk = useSdk()
   const search: { tab?: BookingsTab } = useSearch({ strict: false })
   const navigate = useNavigate()
   const tab = search.tab ?? 'upcoming'
-  const list = useInfiniteQuery(sdk.bookings.list(tab, lang))
+  // the last list stays while the language changes its key: no tab without its count for a round-trip
+  const lists = {
+    upcoming: useInfiniteQuery({ ...sdk.bookings.list('upcoming', lang), placeholderData: keepPreviousData }),
+    past: useInfiniteQuery({ ...sdk.bookings.list('past', lang), placeholderData: keepPreviousData }),
+  }
+  const list = lists[tab]
+  // both lists stay subscribed, so a tab switch no longer mounts a fresh observer: read the chosen one again as a
+  // mount would when it's stale (the live updates keep it fresh meanwhile, best-effort)
+  const switchTo = (next: BookingsTab) => {
+    if (lists[next].isStale) void lists[next].refetch()
+    void navigate({ to: '.', search: { tab: next === 'past' ? 'past' : undefined }, replace: true })
+  }
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
+  // the tab's count once its list has answered (every page repeats `total`); nothing while it loads or failed
+  const countOf = (value: BookingsTab) => {
+    const total = lists[value].data?.pages[0]?.total
+    return total === undefined ? undefined : fmt.number(total)
+  }
   // one review form for the rows: a sent review refreshes the list, and the row's button goes, not the form; the focus
   // comes back to the row's link
   const [reviewing, setReviewing] = useState<MyBooking | null>(null)
@@ -123,14 +142,14 @@ export function MyBookingsPage() {
           cardBackTo.current = document.getElementById(rowLinkId(b.code)) ?? title.current
         }}
       />
-      <Tabs
-        value={tab}
-        onValueChange={(v) => void navigate({ to: '.', search: { tab: v === 'past' ? 'past' : undefined }, replace: true })}
-        className="mt-5"
-      >
+      <Tabs value={tab} onValueChange={(v) => switchTo(v === 'past' ? 'past' : 'upcoming')} className="mt-5">
         <TabsList aria-label={t('label')}>
-          <TabsTrigger value="upcoming">{t('upcoming')}</TabsTrigger>
-          <TabsTrigger value="past">{t('past')}</TabsTrigger>
+          <TabsTrigger value="upcoming" count={countOf('upcoming')}>
+            {t('upcoming')}
+          </TabsTrigger>
+          <TabsTrigger value="past" count={countOf('past')}>
+            {t('past')}
+          </TabsTrigger>
         </TabsList>
         {/* both panels stay in the page (each tab names its own), the one not chosen hidden and empty */}
         {(['upcoming', 'past'] as const).map((value) => (

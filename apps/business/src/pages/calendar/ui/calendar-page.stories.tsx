@@ -442,7 +442,8 @@ export const ConfirmRequest: Story = {
     await expect(drawer.getByText('1 / 2')).toBeVisible()
     await expect(await drawer.findByText(/^\d+ min left to answer$/)).toBeVisible()
     await expect(
-      drawer.getByText(/^If no one answers, the request is cancelled at \d\d:\d\d and the client is offered 3 other times\.$/),
+      // the hold (18 min from the real clock) may run out past midnight in the market's zone: «at 00:13 tomorrow»
+      drawer.getByText(/^If no one answers, the request is cancelled at \d\d:\d\d( tomorrow)? and the client is offered 3 other times\.$/),
     ).toBeVisible()
     await expect(drawer.getByText('3 visits')).toBeVisible()
     await expect(drawer.getByText('1 no-show')).toBeVisible()

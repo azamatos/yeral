@@ -3,7 +3,8 @@
  * times (one taken), an expired one with free times, a waiting move, Call; Past with a completed visit, the client's own
  * cancel with Undo and a phone booking whose offered time has passed; an offered time just taken; Undo refused; the
  * «How was it?» card (F-243: its stars open the form, sent the row says «You rated»; closed for good), a reviewed row
- * with «Edit the review», the review refused (the booking read again); the empty tabs; the phone.
+ * with «Edit the review», the review refused (the booking read again); the tabs' counts; the empty tabs; the phone;
+ * the page with words a third longer.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
@@ -27,10 +28,15 @@ export default meta
 type Story = StoryObj<typeof meta>
 type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
 
-/** Upcoming: the waiting request, the declined one's reason and offered times; a tap asks, Book takes it. */
+/**
+ * Upcoming: the waiting request, the declined one's reason and offered times; a tap asks, Book takes it. Each tab
+ * carries how many bookings it holds (the list's `total`), the count part of its name.
+ */
 export const Upcoming: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'My bookings' })).toBeVisible()
+    await expect(await canvas.findByRole('tab', { name: 'Upcoming 5' })).toHaveAttribute('aria-selected', 'true')
+    await expect(await canvas.findByRole('tab', { name: 'Past 4' })).toBeVisible()
     await expect(await canvas.findByText('The business declined')).toBeVisible()
     await expect(canvas.getByText("Reason: This time isn't free")).toBeVisible()
     await expect(canvas.getByText('No answer in time')).toBeVisible()
@@ -65,13 +71,13 @@ export const OfferJustTaken: Story = {
 /** Past: a completed visit with Book again, the client's own cancel with Undo, an offered time that has passed. */
 export const Past: Story = {
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('tab', { name: 'Past' }))
+    await userEvent.click(await canvas.findByRole('tab', { name: 'Past 4' }))
     await expect(await canvas.findByText('You cancelled')).toBeVisible()
     await expect(canvas.getAllByRole('link', { name: 'Book again' })[0]).toHaveAttribute('href', '/en/b/glow-studio')
     await expect(canvas.getByText('The offered times have passed')).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Choose another time' })).toHaveAttribute('href', '/en/b/barber-loft')
     await expect(canvas.getByRole('img', { name: 'Booked by phone' })).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: /^Undo: Glow Studio, / }))
+    await userEvent.click(canvas.getByRole('button', { name: /^Undo Glow Studio, / }))
     const back = await within(document.body).findByText('Your booking is back')
     await waitFor(() => expect(back).toBeVisible())
   },
@@ -81,7 +87,7 @@ export const Past: Story = {
 export const WriteAReview: Story = {
   args: { path: '/en/account/bookings?tab=past' },
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: /^Write a review: Glow Studio, / }))
+    await userEvent.click(await canvas.findByRole('button', { name: /^Write a review Glow Studio, / }))
     const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
     await waitFor(() => expect(form.getByRole('radiogroup', { name: 'Rating' })).toBeVisible())
     await userEvent.click(form.getByRole('radio', { name: '5 stars' }))
@@ -116,9 +122,9 @@ export const HowWasIt: Story = {
     await userEvent.click(form.getByRole('button', { name: 'Send review' }))
     await waitFor(() => expect(within(document.body).getAllByText('Thank you! Your review is published.')).toHaveLength(thanked + 1))
     await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
-    const edit = await canvas.findByRole('button', { name: /^Edit the review: Glow Studio, / })
+    const edit = await canvas.findByRole('button', { name: /^Edit the review Glow Studio, / })
     await expect(edit).toBeVisible()
-    await expect(canvas.queryByRole('button', { name: /^Write a review: / })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: /^Write a review / })).toBeNull()
     // Glow Studio's row now, Barber Loft's already
     await expect(canvas.getAllByRole('img', { name: 'You rated it 5 out of 5' })).toHaveLength(2)
   },
@@ -131,7 +137,7 @@ export const HowWasItClosed: Story = {
     const ask = await card(canvas)
     await userEvent.click(ask.getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
-    await expect(canvas.getByRole('button', { name: /^Write a review: Glow Studio, / })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: /^Write a review Glow Studio, / })).toBeVisible()
   },
 }
 
@@ -140,7 +146,7 @@ export const Reviewed: Story = {
   args: { path: '/en/account/bookings?tab=past' },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('img', { name: 'You rated it 5 out of 5' })).toHaveTextContent('5 · You rated')
-    await userEvent.click(canvas.getByRole('button', { name: /^Edit the review: Barber Loft, / }))
+    await userEvent.click(canvas.getByRole('button', { name: /^Edit the review Barber Loft, / }))
     const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
     await waitFor(() => expect(form.getByRole('radio', { name: '5 stars' })).toBeChecked())
     await expect(form.getByRole('button', { name: 'On time' })).toHaveAttribute('aria-pressed', 'true')
@@ -161,7 +167,7 @@ export const Reviewed: Story = {
 export const ReviewRefused: Story = {
   args: { path: '/en/account/bookings?tab=past', server: myBookingsApi({ refuseReview: 'review_window_passed' }) },
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: /^Write a review: Glow Studio, / }))
+    await userEvent.click(await canvas.findByRole('button', { name: /^Write a review Glow Studio, / }))
     const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
     await waitFor(() => expect(form.getByRole('radiogroup', { name: 'Rating' })).toBeVisible())
     await userEvent.click(form.getByRole('radio', { name: '5 stars' }))
@@ -169,7 +175,7 @@ export const ReviewRefused: Story = {
     const why = await within(document.body).findByText('Reviews can be written up to 30 days after the visit.')
     await waitFor(() => expect(why).toBeVisible())
     await waitFor(() => expect(within(document.body).queryByRole('dialog')).toBeNull())
-    await waitFor(() => expect(canvas.queryByRole('button', { name: /^Write a review: / })).toBeNull())
+    await waitFor(() => expect(canvas.queryByRole('button', { name: /^Write a review / })).toBeNull())
     await waitFor(() => expect(canvas.queryByRole('region', { name: 'How was it?' })).toBeNull())
   },
 }
@@ -178,18 +184,49 @@ export const ReviewRefused: Story = {
 export const UndoRefused: Story = {
   args: { path: '/en/account/bookings?tab=past', server: myBookingsApi({ refuse: 'slot_taken' }) },
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: /^Undo: Glow Studio, / }))
+    await userEvent.click(await canvas.findByRole('button', { name: /^Undo Glow Studio, / }))
     await expect(await canvas.findByRole('alert')).toHaveTextContent("Couldn't undo — this time was already given to another client.")
-    await expect(canvas.queryByRole('button', { name: /^Undo: / })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: /^Undo / })).toBeNull()
   },
 }
 
-/** No bookings yet: the empty Upcoming with the way to a place. */
+/** No bookings yet: the empty Upcoming with the way to a place; the tabs count 0 (Account-Bookings draws every count). */
 export const Empty: Story = {
   args: { server: myBookingsApi({ lists: { upcoming: [], past: [] } }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('No upcoming bookings')).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Find a place' })).toHaveAttribute('href', '/en')
+    await expect(await canvas.findByRole('tab', { name: 'Upcoming 0' })).toBeVisible()
+    await expect(await canvas.findByRole('tab', { name: 'Past 0' })).toBeVisible()
+  },
+}
+
+/**
+ * The page with words a third longer (Storybook's «Text: Russian length») on a phone: the rows' «Call» keeps the word
+ * it shows in its name (axe's label-content-name-mismatch fails the story otherwise), the counts stay numbers, and
+ * nothing overflows 390.
+ */
+export const LongWords: Story = {
+  globals: { viewport: { value: 'xs' }, text: 'longer' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText(/^The business declined/)).toBeVisible()
+    await expect(await canvas.findByRole('tab', { name: /^Upcoming\b.* 5$/ })).toBeVisible()
+    await expect(await canvas.findByRole('tab', { name: /^Past\b.* 4$/ })).toBeVisible()
+    const call = canvas.getAllByRole('link', { name: /^Call\b.*Glow Studio/ })[0]!
+    await expect(call).toHaveAttribute('href', 'tel:+99312456789')
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
+  },
+}
+
+/** Past with words a third longer: Undo, «Write a review» and «Edit the review» keep their words in their names too. */
+export const LongWordsPast: Story = {
+  args: { path: '/en/account/bookings?tab=past' },
+  globals: { viewport: { value: 'xs' }, text: 'longer' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('button', { name: /^Undo\b.*Glow Studio/ })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: /^Write a review\b.*Glow Studio/ })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: /^Edit the review\b.*Barber Loft/ })).toBeVisible()
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
   },
 }
 

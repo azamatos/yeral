@@ -61,25 +61,27 @@ export function OfferTimes({
   const queryClient = useQueryClient()
   const errorText = useErrorText()
   const when = useWhen()
-  const accept = useMutation(sdk.bookings.acceptAlternative(lang))
-  const take = (index: number) => {
-    const offer = offers.times[index]
-    accept.mutate(
-      { code, body: { source: offers.source, index } },
-      {
-        onSuccess: (made) => {
-          toast(made.status === 'pending' ? t('requested') : t('booked', { when: offer ? when(offer.date, offer.start, offer.end) : '' }))
-          onTaken?.(made.code)
-        },
-        onError: (error) => {
-          // the times as they are now (the one taken shows as taken), and words that fit a chip
-          void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey })
-          void queryClient.invalidateQueries({ queryKey: sdk.bookings.list('upcoming', lang).queryKey })
-          toast(isApiError(error, 'slot_taken') ? t('offerGone') : errorText(error))
-        },
-      },
-    )
-  }
+  const base = sdk.bookings.acceptAlternative(lang)
+  // the answer's callbacks on the mutation itself, not on the `mutate` call: the sdk reads the lists again before
+  // those would run, and the first list back takes the offers (and this component) out of the row, so callbacks on
+  // a component gone are dropped
+  const accept = useMutation({
+    ...base,
+    onSuccess: (...args) => {
+      const [made, { body }] = args
+      const offer = offers.times[body.index]
+      toast(made.status === 'pending' ? t('requested') : t('booked', { when: offer ? when(offer.date, offer.start, offer.end) : '' }))
+      onTaken?.(made.code)
+      return base.onSuccess?.(...args)
+    },
+    onError: (error) => {
+      // the times as they are now (the one taken shows as taken), and words that fit a chip
+      void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey })
+      void queryClient.invalidateQueries({ queryKey: sdk.bookings.list('upcoming', lang).queryKey })
+      toast(isApiError(error, 'slot_taken') ? t('offerGone') : errorText(error))
+    },
+  })
+  const take = (index: number) => accept.mutate({ code, body: { source: offers.source, index } })
   const expired = offers.source === 'expired'
   return (
     <div className="flex min-w-0 flex-col items-start gap-2.5">
