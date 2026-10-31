@@ -290,7 +290,7 @@ question in this book, the answer is added here with its date, and the chapters 
 | 19.10.2026 | The backend runs alongside the design pass (the book is closed); components and the apps wait for the design (the wait ended 20.10.2026, above) | owner | ADR 0021 (amended), chapter 10 |
 | 18.10.2026 | The owner answers only critical questions; Claude decides the rest with the recommended option and records who decided | owner | this book, README |
 | 18.10.2026 | Claude doesn't take an answer for granted: a weaker or risky answer gets a concern; without a reply the owner's answer stands | owner | this book, README |
-| 18.10.2026 | No separate decisions app: the repository stays the record and this book's page stays where the owner answers | owner | activeContext |
+| 18.10.2026 | No separate decisions app: the repository stays the record and this book's page stays where the owner answers | owner | progress.md (the day's entry) |
 | 17.10.2026 | The plan is reset: first a complete product book with no open questions, then the design, then components in Storybook, then code (the design step cut back 20.10.2026: design only where it's needed, above) | owner | this book, chapter 1 |
 | 17.10.2026 | Claude Code writes every prompt for Claude Design; the owner reviews, pastes and submits it; Claude Code reads the result from the canvas and checks it against the book | owner | this book, README |
 | 17.10.2026 | The book lives as Markdown in `docs/product`; a published page is built from it for reading, answering and commenting | owner | this book, README |
@@ -305,15 +305,15 @@ question in this book, the answer is added here with its date, and the chapters 
 | 18.10.2026 | Two launches: first in English on Cloudflare (investors, early users, a portfolio piece), then Turkmenistan with Turkmen, Russian and servers in the country | owner | chapter 1; Q-032, Q-037, Q-133 |
 | 17.10.2026 | Round 6, part B: the client side of declines, expiries and moves is drawn; tables and classes can't be moved (cancel and book again); a move never swaps the specialist silently; undo works for 5 minutes; search gets a party-size filter for restaurants; tables can be combined when creating a reservation; hours may end at 24:00; no back-dated bookings; unverified business links show "not open yet"; reviews under moderation are shown but not counted; login codes go to mobile numbers only | owner, through design v0.5 | `ROUND6-ANSWERS.md`, client spec §14, business spec §26 |
 | 16.10.2026 | Round 6, part A: one account for client and business; a person can be in several workspaces with a level in each; a workspace is one address (no branches); three fixed access levels and a permission matrix; a setting for who answers requests; invites by SMS link for 7 days; ownership transfer; every status has an icon; optional team-only internal statuses; the business app works fully on phones; native apps later | owner, through design v0.5 | business spec §25 |
-| 16.10.2026 | Ýeral is free for now: no plans, commission or invoices; the paid model is kept for later | owner | activeContext, business spec §25 |
+| 16.10.2026 | Ýeral is free for now: no plans, commission or invoices; the paid model is kept for later | owner | progress.md (the day's entry) |
 | 14.10.2026 | Only verified businesses are public; they use the workspace from the first minute | business design round 4 | ADR 0018 |
 | 14.10.2026 | Manual confirmation is the default; a business can switch on instant confirmation; requests expire after the business's hold time (default 30 minutes) with 3 other times for the client | owner, through business design round 4 | ADR 0017 |
 | 14.10.2026 | Declines carry a reason and up to 3 offered times; complaints replace a "came" button; after N no-shows a client books only by phone | business design round 4 | ADR 0017 |
 | 14.10.2026 | One booking engine with appointment, table and class types (resource later) and five statuses | design v0.3 | ADR 0017 |
 | 14.10.2026 | Turkmen first, then Russian and English; every client address carries its language (Turkmen first replaced by English first, 18.10.2026) | owner | ADR 0016, ADR 0022 |
 | 14.10.2026 | The marketplace lives on yeral.app; there's no separate landing site; businesses use business.yeral.app | owner | ADR 0015 |
-| 14.10.2026 | Maps: MapLibre with OpenFreeMap tiles | owner | activeContext |
-| 14.10.2026 | The old mobile designs are removed: the web has its own design and logic | owner | activeContext |
+| 14.10.2026 | Maps: MapLibre with OpenFreeMap tiles | owner | progress.md (the day's entry) |
+| 14.10.2026 | The old mobile designs are removed: the web has its own design and logic | owner | progress.md (the day's entry) |
 | 14.10.2026 | Ýeral is for any business that sells its time, not only beauty | design v0.3 | projectbrief |
 
 ## Technology

@@ -58,8 +58,8 @@ work on 2026-10-17.
 
 - No new product code until the relevant chapters are closed; the roadmap milestones M3/M5 are paused and re-planned from
   the book's scope chapter.
-- Every product question has one home (`docs/product/questions.md`) and one ID; the activeContext open-questions table
-  points there.
+- Every product question has one home (`docs/product/questions.md`) and one ID; the old activeContext open-questions
+  table is history (`progress.md`, 2026-10-17).
 - The design canvas becomes something Claude Code checks, not only something exported; exports still land in
   `docs/design/` unchanged.
 - Since 2026-10-20 the screens are reviewed where they're built (Storybook, the local app), and the client site's

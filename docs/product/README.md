@@ -59,7 +59,7 @@ no redraw comes for them: build what the book says, not what the board shows.
 - Plain English, short sentences. UI words in English (ADR 0022); where a Turkmen word from design v0.5 is quoted,
   put it in italics with the English: *Garaşylýar* (Pending).
 - Every fact carries its source in brackets: "(business spec §25)", "(ROUND6-ANSWERS A3)", "(ADR 0017)", "(code: …)".
-- Which source wins: the owner's answers in this book → the owner's direction in `docs/memory-bank/activeContext.md` →
+- Which source wins: the owner's answers in this book → the owner's direction (`docs/memory-bank/progress.md`, the day's entry; the rules still in force in `activeContext.md`) →
   the latest design export (`docs/design`) → older specs and ADRs → code. Code that differs from a decided rule is noted
   as "Code differs", not asked again.
 - Markdown subset (the page renderer reads exactly this): `#`–`###` headings, paragraphs, `-` / `1.` lists with one

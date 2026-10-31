@@ -11,9 +11,13 @@ An agent's private memory holds only how to work with the owner. Don't duplicate
 ## End of a session (working alone)
 
 1. Read `activeContext.md` and `progress.md`.
-2. `activeContext.md`: set `_Last updated_` to today's date; rewrite "Current focus"; add decisions taken today (with ADR
-   links); move answered questions out of "Open questions"; refresh "Next steps".
-3. `progress.md`: mark milestones and items done with the date and commit hashes; add bugs or gaps found but not fixed.
+2. `activeContext.md` holds the **current state only** (about 130 lines; it's imported into every session): set
+   `_Last updated_`; rewrite "Current focus" as one paragraph for today plus "Where things stand"; "Owner's direction"
+   keeps only rules still in force that live nowhere else; "Decisions" is the ADR table (a row or an amendment, no
+   prose); refresh "Next steps" and "Waiting on the owner". Nothing historical goes here.
+3. `progress.md` → "Done": the day's entry — what merged with PR numbers and hashes, the owner's quotes, the decisions'
+   context, bugs or gaps found but not fixed; mark milestones in the roadmap. History older than a week in
+   `activeContext.md` is folded here, never kept there.
 4. Code changed a pattern, a library or a helper → update `systemPatterns.md` / `techContext.md` ("Where shared things live").
 5. Infra changed → `operations.md`. Agent rules changed → `AGENTS.md`.
 6. Commit `docs: update memory bank` (together with the work when it's the same change).
