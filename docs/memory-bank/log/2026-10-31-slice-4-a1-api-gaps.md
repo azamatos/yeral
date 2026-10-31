@@ -61,11 +61,15 @@ yet). Migration 0045 adds the `block_kind` enum and `staff_blocks.kind` (nullabl
 ## Choices made here (object to any)
 
 - The note is `PUT`, whole, not `PATCH`: an autosave sends the field it owns, and `null` is the clear (the client's
-  own note is `PATCH /v1/me/bookings/:code/note`, which also takes the whole text).
+  own note is `PATCH /v1/me/bookings/:code/note`, which also takes the whole text). The same text again writes nothing
+  and wakes nobody; a move request's own code answers 404, as the one-booking read does.
+- The one-booking read and the note go through `teamBooking` (`calendar/repo`) with `original: true` and no action
+  permission; `complaintOf`/`complaintAuthors` live in `bookings/team-view` beside the team's item and price mappers.
 - The one-booking read lives in the calendar module and shape rather than a new `TeamBooking` DTO: the drawer that
   opens from the list is the calendar's drawer (B2), so one shape, one key prefix.
 - `kind` is optional on input and nullable on output; `reason` stays free text for every kind (a Training block may
-  still say which course), the form decides what to send.
+  still say which course), the form decides what to send; Other without words and a `repeat` without `repeatUntil`
+  are refused (400 on `reason` / `repeatUntil`), not stored half.
 - Tests: `modules/calendar/booking.test.ts` (new: gaps 1, 2, 5), `blocks.test.ts` (the daily repeat, `kind`),
   `menu.test.ts` (a specialist reads, can't write), `clients.test.ts` (the card's `by`),
   `packages/domain/src/hours.test.ts` (`blockDates` daily).
