@@ -16,7 +16,7 @@ Rules that run through every flow:
 - **Hold time.** An unanswered request expires after the business's hold time (15 min to 24 h, default 30 min, never past the visit start) and the client is offered 3 other times (client spec §1, ROUND6-ANSWERS A2). The hold runs only during the business's opening hours (Q-120, decided 18.10.2026).
 - **Appointments first.** The MVP takes appointments only; tables and classes come after it, so the table and class parts of these flows (C-16, C-17, C-32 and the table and class lines elsewhere) apply then. One business has one booking type at launch (Q-030, Q-022, decided 18.10.2026).
 - **Money** is whole manats, shown `40 TMT`; payment at the place. **No city name** ever appears in the copy (client spec §1, §8).
-- **Ýeral is free** for businesses and clients for now (owner, activeContext 2026-10-16).
+- **Ýeral is free** for businesses and clients for now (owner, 2026-10-16; `progress.md`).
 
 ## The five statuses
 

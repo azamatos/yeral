@@ -459,6 +459,27 @@
   with `hello@` beside it, HSTS + CSP in `yeral.caddy`; (2) close P4 slice 3 with its end-to-end check and the first
   Playwright test; (3) slice 4, then 5; (4) slices 6 + 7, then the first launch (P5).
 
+- **2026-10-30/31 · Hygiene, slice 3 closed but for its e2e flows, slice 4 planned, the agents' rules** (#251–#262;
+  details in `log/2026-10-30-*.md`, `log/2026-10-31-*.md`): activeContext trimmed 327 → 139 lines `8c89d3c` (#251);
+  `MyBooking` rows carry their review, the list its `total` `8c2c2e7` (#252); HSTS and a per-site CSP, the client
+  site's with a per-request nonce from TanStack Start, header checks in CI's stack (#253, merged 31.10 after a
+  rebase); move mode's free times from the booking's own items, a move losing a service refused `ead8090` (#254);
+  the support contacts from the environment, `hello@yeral.app` beside phone and Telegram, `MARKET.support` gone
+  `4214734` (#255); move mode on the own-items reads, the rules on the confirm step, «Add to calendar» after an instant
+  move `107b153` (#256); the «How was it?» card, «You rated», the review's refusal `3b9d849` (#257); Playwright and the
+  first two flows in CI's Docker stack, ADR 0013 amended `45875d8` (#258); the slice 4 plan `fee793e` (#259); the
+  tabs' counts, the «Call» link's name, the «Confirm Request» flake `0da8d69` (#260); ADR 0014 amended — one agent at
+  a time, two at most, one on battery, no worktree per agent — and `gh pr merge` allowed `d058c11` (#261); the
+  special-day story on a month's last day (#262: `main` was red on the 31st for it, 741/742). The owner (30.10):
+  `hello@yeral.app` works; "Lets work with order u recommended. For agents also use at least high effort with
+  fable"; "No need to wait for reset, u can go till limit is reached … fable has own different limits". The night
+  took Fable's weekly limit (164M tokens read, 25 agents, ~13M a PR); 31.10 the owner: "third of the week is too
+  much, why we need that amount?" → ~7 % a day; then, after `kernel_task`/`fseventsd` above 300 % on battery (17
+  worktrees, 14 GB, orphaned Postgres and dev servers): "Two agents at time … Does this worth it?" → the rules in ADR
+  0014 and the owner's global `agent-runs` skill (`log/2026-10-31-agents-one-at-a-time.md`); "allow gh pr merge".
+  Parked as drafts when the limit cut the agents off: #263 (e2e flows), #264 (A1), #265 (U1), #266 (U2). Not
+  deployed: the server stays at 74fae7d until the owner's go (the three `.env` lines first).
+
 ## Roadmap
 
 **Re-planned 2026-10-18:** the product book is closed and its chapter 10 (`docs/product/10-plan.md`) is the build plan:

@@ -10,8 +10,8 @@ Read `activeContext.md` first, then whatever the task touches.
 | [systemPatterns.md](systemPatterns.md) | architecture: monorepo map, FSD rules, data flow, state, rendering, auth, i18n, errors | when architecture changes (with an ADR) |
 | [techContext.md](techContext.md) | libraries and versions, shared utils, code conventions, local dev | when a dependency or convention changes |
 | [operations.md](operations.md) | environments, domains, CI/CD, versioning and releases, hosting, secrets | when infra changes |
-| [activeContext.md](activeContext.md) | current focus, recent decisions, open questions, next steps | every work session |
-| [progress.md](progress.md) | roadmap with status and done-criteria | when a milestone moves |
+| [activeContext.md](activeContext.md) | the current state only: focus, the owner's rules still in force, the ADR table, next steps (about 130 lines; read by every session) | every work session |
+| [progress.md](progress.md) | the history by day ("Done": PRs, quotes, decisions' context) and the roadmap with status | every work session |
 | [log/](log) | append-only notes, one file per task or session (`YYYY-MM-DD-<topic>.md`) | during parallel work; folded into the files above by the lead |
 
 Decisions with a "why" live in [`../decisions`](../decisions) (ADRs). The memory bank states the current truth;
