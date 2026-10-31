@@ -1387,36 +1387,18 @@
     },
     "openMostUrgent": " — open the most urgent",
     "specialist": "Specialist",
-    "decline": {
-      "title": "Decline the request",
-      "titleMove": "Decline the new time",
-      "close": "Close",
-      "lead": "The client will see the reason.",
-      "leadMove": "The client will see the reason. The booking stays at its time.",
-      "when": "{date} · {time}",
-      "moveFromTo": "{from} → {to}",
-      "reason": "Reason",
-      "reasons": {
-        "slot_busy": "This time isn’t free",
-        "no_staff": "No specialist free",
-        "cannot_do": "We can’t do this service",
-        "other": "Another reason"
-      },
-      "otherLabel": "Another reason",
-      "otherPlaceholder": "Write the reason in a few words — the client will see it",
-      "offer": "Offer another time",
-      "offerCaption": "The client can accept an offered time in one tap",
-      "loadingTimes": "Loading the free times",
-      "today": "Today",
-      "tomorrow": "Tomorrow",
-      "picked": "{n} / {max} times selected",
-      "pickUpTo": "You can pick up to {max} times",
-      "noTimes": "No free times in the next 14 days.",
-      "back": "Back",
-      "decline": "Decline",
-      "declined": "{n, plural, =0 {Request declined · the client sees the reason} one {Request declined · the client sees the reason and # other time} other {Request declined · the client sees the reason and # other times}}",
-      "declinedMove": "New time declined · the booking stays at its time · the client sees the reason"
-    },
+    "layers": {
+      "break": "Break",
+      "closed": "Closed",
+      "closedFor": "Closed · {reason}",
+      "dayOff": "Day off",
+      "timeOff": "Time off",
+      "elsewhere": "Busy elsewhere",
+      "buffer": "Buffer · {length}",
+      "at": ", {time}"
+    }
+  },
+  "bookingDrawer": {
     "request": {
       "title": "Request",
       "titleMove": "Time change request",
@@ -1470,15 +1452,35 @@
       "movedTo": "New time confirmed: {when} · the client is notified",
       "nextRequest": "Next request"
     },
-    "layers": {
-      "break": "Break",
-      "closed": "Closed",
-      "closedFor": "Closed · {reason}",
-      "dayOff": "Day off",
-      "timeOff": "Time off",
-      "elsewhere": "Busy elsewhere",
-      "buffer": "Buffer · {length}",
-      "at": ", {time}"
+    "decline": {
+      "title": "Decline the request",
+      "titleMove": "Decline the new time",
+      "close": "Close",
+      "lead": "The client will see the reason.",
+      "leadMove": "The client will see the reason. The booking stays at its time.",
+      "when": "{date} · {time}",
+      "moveFromTo": "{from} → {to}",
+      "reason": "Reason",
+      "reasons": {
+        "slot_busy": "This time isn’t free",
+        "no_staff": "No specialist free",
+        "cannot_do": "We can’t do this service",
+        "other": "Another reason"
+      },
+      "otherLabel": "Another reason",
+      "otherPlaceholder": "Write the reason in a few words — the client will see it",
+      "offer": "Offer another time",
+      "offerCaption": "The client can accept an offered time in one tap",
+      "loadingTimes": "Loading the free times",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "picked": "{n} / {max} times selected",
+      "pickUpTo": "You can pick up to {max} times",
+      "noTimes": "No free times in the next 14 days.",
+      "back": "Back",
+      "decline": "Decline",
+      "declined": "{n, plural, =0 {Request declined · the client sees the reason} one {Request declined · the client sees the reason and # other time} other {Request declined · the client sees the reason and # other times}}",
+      "declinedMove": "New time declined · the booking stays at its time · the client sees the reason"
     }
   }
 }

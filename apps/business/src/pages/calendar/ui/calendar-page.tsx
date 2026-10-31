@@ -17,10 +17,10 @@ import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useDatePickerWords } from '@/shared/i18n'
+import { RequestDrawer } from '@/widgets/booking-drawer'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import type { CalendarSearch } from '../model/search'
 import { DayGrid } from './day-grid'
-import { RequestDrawer } from './request-drawer'
 
 /**
  * The calendar's day (B-Calendar, design §4 and §27.4, book B-16): `?date=` (today without it), the toolbar (Today,

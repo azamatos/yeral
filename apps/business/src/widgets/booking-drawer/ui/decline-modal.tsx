@@ -60,7 +60,7 @@ export function DeclineModal({
   /** Refused (the request gone, a time taken): the drawer reads the requests again. */
   onRefused: () => void
 }) {
-  const t = useTranslations('calendar.decline')
+  const t = useTranslations('bookingDrawer.decline')
   const fmt = useFmt()
   const join = useJoin()
   const sdk = useSdk()
