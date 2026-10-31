@@ -120,6 +120,12 @@ describe('one booking by its code, its note and its complaint’s author', () =>
     expect((await note(maysa, code, null)).status).toBe(204)
     expect((await one(maysa, code)).json.internalNote).toBeNull()
     expect((await note(maysa, code, 'Back again')).status).toBe(204)
+    // the same text again writes nothing (the drawer autosaves on every pause)
+    const [before] = await db.select({ updatedAt: bookings.updatedAt }).from(bookings).where(eq(bookings.code, code))
+    t.clock.now += 1_000
+    expect((await note(maysa, code, 'Back again')).status).toBe(204)
+    const [after] = await db.select({ updatedAt: bookings.updatedAt }).from(bookings).where(eq(bookings.code, code))
+    expect(after!.updatedAt).toEqual(before!.updatedAt)
     expect((await note(maysa, code, '   ')).status).toBe(204)
     expect((await one(maysa, code)).json.internalNote).toBeNull()
     expect((await note(maysa, code, 'x'.repeat(TEAM_NOTE_MAX + 1))).status).toBe(400)

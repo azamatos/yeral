@@ -100,7 +100,7 @@ const blockRoute = createRoute({
   method: 'post',
   path: '/w/{slug}/calendar/blocks',
   tags,
-  summary: '"Wagty ýap": close part of a day for one person, optionally every week up to a date; never over a booking',
+  summary: '"Wagty ýap": close part of a day for one person, with why, optionally every day or week up to a date; never over a booking',
   request: { params: workspaceParamSchema, ...jsonBody(blockInputSchema) },
   responses: { 201: json(blockListSchema, 'Blocked'), 400: errors[400], 409: errors[409], ...denied },
 })
@@ -108,7 +108,7 @@ const unblockRoute = createRoute({
   method: 'delete',
   path: '/w/{slug}/calendar/blocks/{id}',
   tags,
-  summary: 'Take blocked time away: this one, or this one and the later ones of its weekly repeat',
+  summary: 'Take blocked time away: this one, or this one and the later ones of its repeat',
   request: { params: blockParamSchema, query: blockDeleteQuerySchema },
   responses: { ...noContent, ...denied },
 })

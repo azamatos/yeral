@@ -161,6 +161,8 @@ export const blockInputSchema = z
   })
   .strict()
   .refine((b) => b.end > b.start, { path: ['end'], message: 'After the start' })
+  .refine((b) => b.kind !== 'other' || !!b.reason, { path: ['reason'], message: 'Say what, for Other' })
+  .refine((b) => !b.repeat || !!b.repeatUntil, { path: ['repeatUntil'], message: 'A repeat needs its last day' })
   .meta({ id: 'BlockInput' })
 
 export const blockSchema = z

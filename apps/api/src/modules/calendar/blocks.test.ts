@@ -144,6 +144,11 @@ describe('blocked time (book B-18)', () => {
     expect(other.json.items[0]).toMatchObject({ kind: 'other', reason: 'Dentist', seriesId: null })
     expect((await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, kind: 'holiday' })).status).toBe(400)
     expect((await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, repeat: 'monthly' })).status).toBe(400)
+    // Other without words, a repeat without its last day: refused rather than stored half
+    const noWords = await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, kind: 'other' })
+    expect(noWords.json.error.details.issues).toEqual([{ path: ['reason'], code: 'custom' }])
+    const noEnd = await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, repeat: 'daily' })
+    expect(noEnd.json.error.details.issues).toEqual([{ path: ['repeatUntil'], code: 'custom' }])
   })
 
   it('never over a booking; not in the past; a specialist blocks only their own time and sees only their own', async () => {

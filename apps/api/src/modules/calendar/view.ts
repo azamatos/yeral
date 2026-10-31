@@ -15,46 +15,24 @@ import { businessTotal, daySummary } from '@yeral/domain/pricing'
 import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, isNotNull, isNull, lte } from 'drizzle-orm'
 import type { z } from 'zod'
-import { all, type Queryable } from '../../db/client'
+import { all } from '../../db/client'
 import { groupBy } from '../../lib/group'
 import { bookingItems, bookings, staff } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { loadBusiness, loadElsewhere } from '../availability/context'
 import { photoOf } from '../catalog/map'
-import { awaitingAnswer, itemsOf, itemsOfBookings, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
-import { teamItemOf, teamPriceOf } from '../bookings/team-view'
+import { awaitingAnswer, itemsOfBookings, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
+import { complaintAuthors, complaintOf, teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { statusesOf } from '../settings/statuses'
 import { teamPhotos } from '../team/service'
 import { alertNotesOf } from '../clients/facts'
 import { blocksBetween } from './blocks'
-import { staffOf, type Business } from './repo'
+import { teamBooking, type Business } from './repo'
 
 type CalendarQuery = z.infer<typeof calendarQuerySchema>
 
 const priceOf = (i: Pick<ItemRow, 'priceType' | 'priceAmount'>) => ({ type: i.priceType, amount: i.priceAmount })
-
-/** Who filed the complaints among these bookings, by id: the team's rows stay after someone leaves, so the name is kept. */
-export async function complaintAuthors(db: Queryable, rows: readonly Pick<BookingRow, 'complaintBy'>[]): Promise<Map<string, string>> {
-  const ids = [...new Set(rows.flatMap((r) => (r.complaintBy ? [r.complaintBy] : [])))]
-  if (!ids.length) return new Map()
-  const people = await db.select({ id: staff.id, name: staff.name }).from(staff).where(inArray(staff.id, ids))
-  return new Map(people.map((p) => [p.id, p.name]))
-}
-
-/** The complaint on a booking as the team sees it (B-28), with who filed it. */
-export const complaintOf = (
-  row: Pick<BookingRow, 'complaintType' | 'complaintText' | 'complaintAt' | 'complaintBy'>,
-  authors: ReadonlyMap<string, string>,
-): CalendarBooking['complaint'] =>
-  row.complaintType && row.complaintAt
-    ? {
-        type: row.complaintType,
-        text: row.complaintText,
-        by: row.complaintBy && authors.has(row.complaintBy) ? { staffId: row.complaintBy, name: authors.get(row.complaintBy)! } : null,
-        at: row.complaintAt.getTime(),
-      }
-    : null
 
 /** What a booking block needs besides its row: the language, the markers switched on, the alerts, who filed what. */
 interface BlockContext {
@@ -105,13 +83,7 @@ function bookingBlock(
 export async function calendarBooking(deps: Deps, business: Business, actor: Actor, code: string, lang: Locale): Promise<CalendarBooking> {
   const { db } = deps
   const now = deps.now()
-  const [row] = await db
-    .select()
-    .from(bookings)
-    .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code), isNull(bookings.rescheduleOf)))
-  if (!row) throw new ApiError('not_found')
-  const items = await itemsOf(db, row.id)
-  if (!canOn(actor, 'calendar', staffOf(items))) throw new ApiError('not_found')
+  const { b: row, items } = await teamBooking(db, business, actor, code, { original: true, permission: null })
   const [[move], alerts, statuses, authors] = await all(db, [
     () =>
       db
@@ -119,7 +91,7 @@ export async function calendarBooking(deps: Deps, business: Business, actor: Act
         .from(bookings)
         .where(and(eq(bookings.rescheduleOf, row.id), awaitingAnswer(now))),
     () => alertNotesOf(db, row.clientId ? [row.clientId] : []),
-    () => statusesOf(db, business.id),
+    () => (row.internalStatusId ? statusesOf(db, business.id) : Promise.resolve([])),
     () => complaintAuthors(db, [row]),
   ])
   const enabled = statuses.filter((s) => s.enabled)
