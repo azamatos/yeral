@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { blockOverBookingsDetailsSchema, type BlockOverBookingsDetails } from '@yeral/contract/errors'
+import { BLOCK_REPEAT_DAYS } from '@yeral/domain/hours'
 import { addDays, localOf } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
@@ -85,7 +86,8 @@ export function BlockTimeModal({
 
   const change = (next: BlockForm) => {
     setForm(next)
-    setHit(null)
+    // the refusal stands until the time, the person or the repeat changes: another reason wouldn't move the booking
+    if (hit && (['staffId', 'date', 'start', 'end', 'repeat', 'until'] as const).some((k) => next[k] !== form[k])) setHit(null)
   }
   const problems = blockProblems(form, now)
   const options = timeOptions(hours.from, hours.to)
@@ -283,6 +285,7 @@ export function BlockTimeModal({
                   copy={{ ...words, placeholder: t('date') }}
                   today={today}
                   min={addDays(form.date, 1)}
+                  max={addDays(form.date, BLOCK_REPEAT_DAYS)}
                   value={form.until}
                   onValueChange={(until) => change({ ...form, until })}
                 />

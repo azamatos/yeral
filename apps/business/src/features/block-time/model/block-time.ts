@@ -1,12 +1,12 @@
 import { BLOCK_KINDS, BLOCK_REPEAT_DAYS, blockDates, type BlockKind, type BlockRepeat as ApiRepeat } from '@yeral/domain/hours'
-import { addDays, diffDays, epochOf } from '@yeral/domain/time'
+import { addDays, diffDays, epochOf, QUARTER_HOUR } from '@yeral/domain/time'
 
 export type BlockRepeat = 'none' | ApiRepeat
 export const BLOCK_REPEAT_OPTIONS: readonly BlockRepeat[] = ['none', 'daily', 'weekly']
 export { BLOCK_KINDS, type BlockKind }
 
-/** The form steps by a quarter hour (B-Calendar «Block time»); the api takes 5. */
-export const STEP = 15
+/** The form steps by a quarter hour, as the grid's slots do (B-Calendar «Block time»); the api takes 5. */
+export const STEP = QUARTER_HOUR
 /** «Other» said in a few words (B-Calendar `.inp` ≤ 30; the api allows 40). */
 export const OTHER_MAX = 30
 /** The repeat's last day as proposed: four weeks on, moved along when the first day moves past it. */

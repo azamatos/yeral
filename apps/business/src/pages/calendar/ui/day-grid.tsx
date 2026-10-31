@@ -14,6 +14,7 @@ import type { BlockSlot } from '@/features/block-time'
 import {
   besideLive,
   buffersOf,
+  cutoffOn,
   gridHours,
   HOUR_PX,
   movesIn,
@@ -89,8 +90,8 @@ export function DayGrid({
   // the now line on today, and past midnight on the night before's grid (a night bar's day runs on)
   const nowMinute = today(now) === date ? nowAt.min : addDays(today(now), -1) === date ? nowAt.min + 1440 : null
   const nowTop = nowMinute !== null && nowMinute >= from * 60 && nowMinute <= to * 60 ? pxOf(nowMinute, from) : null
-  // the minutes gone by: no slot before them (a day gone: none at all)
-  const cutoff = nowMinute ?? (date < today(now) ? Infinity : null)
+  // the minutes gone by on this day's grid: no slot ends before them
+  const cutoff = cutoffOn(date, now)
   // closed now: a request that came in waits for the opening, its timer says by when (B-Calendar «by 09:30»)
   const closed = business ? openMinutesBetween(business, now, now + 60_000) === 0 : false
 
@@ -100,21 +101,26 @@ export function DayGrid({
   const [focused, setFocused] = useState<string | null>(null)
   const onLink = (how: Link, code: string | null) => (how === 'hover' ? setHovered : setFocused)(code)
 
-  // the free slot clicked, its menu open beside it (a sheet on a phone); another day closes it
-  const [menu, setMenu] = useState<{ staffId: string; date: string; start: number; anchor: HTMLElement; phone: boolean } | null>(null)
-  const open = menu?.date === date ? menu : null
-  const onSlot = (column: CalendarView['columns'][number], slot: Slot, anchor: HTMLElement, busyAt?: { start: number; end: number }) => {
+  // the free slot clicked, its menu open beside it (a sheet on a phone); another day closes it, so does the slot going
+  const [menu, setMenu] = useState<{ staffId: string; start: number; anchor: HTMLElement } | null>(null)
+  const [menuDay, setMenuDay] = useState(date)
+  if (menuDay !== date) {
+    setMenuDay(date)
+    setMenu(null)
+  }
+  const open = menu?.anchor.isConnected ? menu : null
+  const onSlot = (column: CalendarView['columns'][number], slot: Slot, anchor: HTMLElement) => {
     if (slot.state === 'elsewhere') {
       // B-14 step 4: refused, with when they're busy
-      const time = fmt.timeRange(busyAt?.start ?? slot.start, busyAt?.end ?? slot.end)
+      const time = fmt.timeRange(slot.busy.start, slot.busy.end)
       toast(specialist ? t('elsewhereSelf', { time }) : t('elsewhereRefused', { name: column.name, time }))
       return
     }
-    setMenu({ staffId: column.staffId, date, start: slot.start, anchor, phone: window.matchMedia('(max-width: 767px)').matches })
+    setMenu({ staffId: column.staffId, start: slot.start, anchor })
   }
   const pick = (m: NonNullable<typeof open>, go: (slot: BlockSlot) => void) => () => {
     setMenu(null)
-    go({ staffId: m.staffId, date: m.date, start: m.start })
+    go({ staffId: m.staffId, date, start: m.start })
   }
 
   const phone = (c: CalendarView['columns'][number]) => (c.staffId === phoneStaff ? ONLY_ON_PHONE : NOT_ON_PHONE)
@@ -226,7 +232,7 @@ export function DayGrid({
               menuAt={open?.staffId === c.staffId ? open.start : null}
               onLink={onLink}
               onOpen={onOpen}
-              onSlot={(slot, anchor, busyAt) => onSlot(c, slot, anchor, busyAt)}
+              onSlot={(slot, anchor) => onSlot(c, slot, anchor)}
             />
           ))}
           {nowTop !== null && (
@@ -237,7 +243,6 @@ export function DayGrid({
       {open && (
         <SlotMenu
           anchor={open.anchor}
-          phone={open.phone}
           title={t('slotTitle', { time: fmt.time(open.start), name: view.columns.find((c) => c.staffId === open.staffId)?.name ?? '' })}
           date={fmt.weekdayDate(date)}
           onBlock={pick(open, onBlock)}
@@ -280,14 +285,14 @@ function DayColumn({
   className: string
   picked: Picked
   linked: string | null
-  /** The grid's minute now: no slot before it; null on a day ahead, Infinity on a day gone. */
-  cutoff: number | null
+  /** The grid's minute now on this day (`cutoffOn`): no slot ends before it. */
+  cutoff: number
   /** The slot whose menu is open. */
   menuAt: number | null
   onLink: (how: Link, code: string | null) => void
   onOpen: (pick: Pick) => void
-  /** A click on a slot: the button it landed on and, under «Busy elsewhere», when they're busy. */
-  onSlot: (slot: Slot, anchor: HTMLElement, busyAt?: { start: number; end: number }) => void
+  /** A click on a slot, with the button it landed on. */
+  onSlot: (slot: Slot, anchor: HTMLElement) => void
 }) {
   const t = useTranslations('calendar.layers')
   const tc = useTranslations('calendar')
@@ -301,7 +306,7 @@ function DayColumn({
   const shown = <T extends { start: number; end: number }>(x: T | null): T[] => (x && onGrid(x, from, to) ? [x] : [])
   const busy = view.elsewhere.flatMap((e) => (e.staffId === c.staffId ? shown(stretchOn(date, e)) : []))
   const blocks = view.blocks.flatMap((k) => (k.staffId === c.staffId ? shown(stretchOn(date, k)) : []))
-  const slots = slotsOf({ day, placed, blocks, busy, fromHour: from, toHour: to, cutoff })
+  const slots = slotsOf({ day, live, moves, blocks, busy, fromHour: from, toHour: to, cutoff })
   const at = (start: number, end: number) => placeOf(start, end, from, to)
   const link = (code: string) => (on: boolean, how: Link) => onLink(how, on ? code : null)
   const lock = <Lock aria-hidden strokeWidth={2} className="size-3.5 flex-none" />
@@ -369,7 +374,7 @@ function DayColumn({
             aria-label={free ? tc('slot', { name: c.name, time }) : tc('slotElsewhere', { name: c.name, time })}
             aria-haspopup={free ? 'menu' : undefined}
             aria-expanded={free ? menuAt === s.start : undefined}
-            onClick={(e) => onSlot(s, e.currentTarget, free ? undefined : busy.find((b) => b.start < s.end && s.start < b.end))}
+            onClick={(e) => onSlot(s, e.currentTarget)}
             className={cn(
               'group absolute inset-x-0 z-2 m-0 h-5 border-0 bg-transparent px-2 text-left text-micro font-semibold text-a-600 tabular-nums focus-visible:outline-none',
               free

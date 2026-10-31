@@ -6,17 +6,19 @@ B-Calendar `panel=block-time | block-error` (B-Mobile 2b–2c as sheets). Flows 
 
 ## What's there
 
-- `pages/calendar/model/grid.ts` → `slotsOf()`: the quarter hours a click can land on, `free` or `elsewhere`; none
-  under a booking with its buffer, a break, a block, the hours off, or gone by (`cutoff`: the grid's minute now; a day
-  gone offers none). Unit-tested in `grid.test.ts`.
+- `pages/calendar/model/grid.ts` → `slotsOf()`: the quarter hours (`QUARTER_HOUR`, `@yeral/domain/time`) a click can
+  land on, `free` or `elsewhere` (with when they're busy); none under a booking with its buffer, a client's waiting
+  move, a break, a block, the hours off, or ended before `cutoffOn(date, now)` (the grid's minute now on that day:
+  negative on a day ahead, past the grid on a day gone). Unit-tested in `grid.test.ts`.
 - `pages/calendar/ui/day-grid.tsx`: a button per slot (B-Calendar `.qs`, 20 px, «+ 14:30» while pointed at or
   focused, the violet inset ring while its menu is open; named «Maral, 14:30 — new booking or block time», under
   «Busy elsewhere» «… — busy elsewhere»). A click under busy elsewhere toasts «Aýna is busy elsewhere 19:00–20:00.
   Pick another time.» (a specialist: «You’re busy elsewhere …»). The Closed layer shows the block's `kind` translated
   (`blockTime.kinds`), Other's `reason` as written, «Closed» for a block without either.
 - `pages/calendar/ui/slot-menu.tsx` → `SlotMenu`: a popover of 220 on a virtual anchor (the slot button) above 768,
-  a `Modal` sheet under it (decided with `matchMedia` when the slot is tapped); `role="menu"` with the arrow keys; the
-  focus goes back to the slot. «New booking» renders only when the page gives `onBook`: the quick booking is B5's.
+  a `Modal` sheet under it (`useMediaQuery`, now exported as `@yeral/ui/media-query`); `role="menu"` with the arrow
+  keys; the focus goes back to the slot. The menu closes when the day changes or its slot leaves the grid (a refetch
+  took it). «New booking» renders only when the page gives `onBook`: the quick booking is B5's.
 - `features/block-time` → `BlockTimeModal({ slug, slot, people, specialist, hours, today, now, bookings?,
   onOpenBooking, onClose })`, modal 400: Person (Select of the columns the reader sees; a specialist their own name
   read-only with «You can block only your own time.»), Date and time (DatePicker named by the group through
@@ -47,5 +49,5 @@ it; «New booking» joins the slot menu with B5.
 
 - Deleting a block from the app (`calendar.unblock`, one or the series): not in the row; the api has it.
 - The week views (decision 1) draw the blocks when they come; the same `closedLabel` rule.
-- `DatePicker` has no `max`: a repeat over a year away is caught by the form's rule («Pick an end date after the
-  first day.» doubles for it) and by the api (`too_big`).
+- «Until» can't go past a year (`max` on the picker, the api's `BLOCK_REPEAT_DAYS`); the form also refuses «Until»
+  on the first day itself (the board's rule), which the api would take as one occurrence.

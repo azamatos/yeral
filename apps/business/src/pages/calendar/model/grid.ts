@@ -1,5 +1,5 @@
 import type { CalendarView } from '@yeral/contract/calendar'
-import { addDays } from '@yeral/domain/time'
+import { addDays, diffDays, localOf, QUARTER_HOUR } from '@yeral/domain/time'
 
 /** B-Calendar's day grid: an hour is 80 px, a quarter 20 (the rows a click lands on). */
 export const HOUR_PX = 80
@@ -137,20 +137,24 @@ export const onGrid = (x: Stretch, fromHour: number, toHour: number) => x.end > 
 /** Whether a stretch overlaps any of these. */
 export const overlaps = (x: Stretch, list: readonly Stretch[]) => list.some((o) => o.start < x.end && x.start < o.end)
 
-/** A quarter hour of the day: what a click on it does. */
-export type Slot = Stretch & { state: 'free' | 'elsewhere' }
-/** The slots step by a quarter hour (B-Calendar `.qs`); the api takes 5. */
-export const SLOT_MINUTES = 15
+/** A quarter hour of the day: free, or under time busy elsewhere (with when). */
+export type Slot = Stretch & ({ state: 'free' } | { state: 'elsewhere'; busy: Stretch })
+
+/** The grid's minute now on this day: negative on a day ahead, past the grid on a day gone, today's minute otherwise. */
+export const cutoffOn = (date: string, now: number): number => {
+  const at = localOf(now)
+  return diffDays(at.date, date) * DAY_MINUTES + at.min
+}
 
 /**
  * The quarter hours a click can land on (B-Calendar `.qs`, book B-18 step 3 and B-14 step 4): `free` opens the slot
  * menu; `elsewhere` (the person busy in another workspace) is refused with a toast. The rest aren't offered: under a
- * booking with its buffer, a break, blocked time, the hours off, or gone by (`cutoff`: the grid's minute now, null
- * on a day ahead; Infinity on a day gone).
+ * booking with its buffer, a client's waiting move, a break, blocked time, the hours off, or ended by `cutoff`.
  */
 export function slotsOf({
   day,
-  placed,
+  live,
+  moves,
   blocks,
   busy,
   fromHour,
@@ -158,21 +162,33 @@ export function slotsOf({
   cutoff,
 }: {
   day: Day | undefined
-  placed: readonly Placed[]
+  /** The person's bookings on the day but the cancelled. */
+  live: readonly Placed[]
+  moves: readonly Stretch[]
   blocks: readonly Stretch[]
   busy: readonly Stretch[]
   fromHour: number
   toHour: number
-  cutoff: number | null
+  cutoff: number
 }): Slot[] {
-  const live = placed.filter((p) => p.booking.status !== 'cancelled')
-  const taken: Stretch[] = [...shadesOf(day, fromHour, toHour), ...(day?.breaks ?? []), ...blocks, ...live, ...buffersOf(placed, day)]
+  const taken: Stretch[] = [
+    ...shadesOf(day, fromHour, toHour),
+    ...(day?.breaks ?? []),
+    ...blocks,
+    ...live,
+    ...buffersOf(live, day),
+    ...moves,
+  ]
   const slots: Slot[] = []
-  for (let start = fromHour * 60; start + SLOT_MINUTES <= toHour * 60; start += SLOT_MINUTES) {
-    const slot = { start, end: start + SLOT_MINUTES }
-    if (cutoff !== null && slot.end <= cutoff) continue
-    if (overlaps(slot, taken)) continue
-    slots.push({ ...slot, state: overlaps(slot, busy) ? 'elsewhere' : 'free' })
+  for (
+    let start = Math.max(fromHour * 60, Math.floor(cutoff / QUARTER_HOUR) * QUARTER_HOUR);
+    start + QUARTER_HOUR <= toHour * 60;
+    start += QUARTER_HOUR
+  ) {
+    const slot = { start, end: start + QUARTER_HOUR }
+    if (slot.end <= cutoff || overlaps(slot, taken)) continue
+    const at = busy.find((b) => b.start < slot.end && slot.start < b.end)
+    slots.push(at ? { ...slot, state: 'elsewhere', busy: at } : { ...slot, state: 'free' })
   }
   return slots
 }

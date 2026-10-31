@@ -1,4 +1,4 @@
-import { cn } from '@yeral/ui/cn'
+import { useMediaQuery } from '@yeral/ui/media-query'
 import { Modal, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { Popover, PopoverAnchor, PopoverContent } from '@yeral/ui/popover'
 import { Lock, Plus } from 'lucide-react'
@@ -15,7 +15,6 @@ const ITEM =
  */
 export function SlotMenu({
   anchor,
-  phone,
   title,
   date,
   onBook,
@@ -24,8 +23,6 @@ export function SlotMenu({
 }: {
   /** The slot button the menu opens from. */
   anchor: HTMLElement
-  /** Under 768: the sheet instead of the popover (decided when the slot was tapped). */
-  phone: boolean
   /** «14:30 · Maral». */
   title: string
   /** The day in words, under the title. */
@@ -36,6 +33,8 @@ export function SlotMenu({
   onClose: () => void
 }) {
   const t = useTranslations('calendar.slotMenu')
+  // under 768 the sheet, following a turn of the phone while it's open
+  const phone = useMediaQuery('(max-width: 767px)')
   const list = useRef<HTMLDivElement>(null)
   // the arrow keys move between the items, as in a menu
   const onKeyDown = (e: KeyboardEvent) => {
@@ -91,7 +90,7 @@ export function SlotMenu({
         sideOffset={2}
         aria-label={title}
         onCloseAutoFocus={back}
-        className={cn('flex w-55 min-w-0 flex-col p-1.5')}
+        className="flex w-55 min-w-0 flex-col p-1.5"
       >
         <div className="flex flex-col px-2.5 pt-1.5 pb-1">
           <span className="text-label text-n-600 uppercase">{title}</span>
