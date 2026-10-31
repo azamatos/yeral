@@ -1,24 +1,14 @@
 /** Data table — DS-Components → «Table with sort, filter and bulk actions» (business bookings). */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { ArrowDown, ChevronDown, Download, MoreHorizontal, Phone, Search, X } from 'lucide-react'
+import { ArrowDown, ChevronDown, Download, MoreHorizontal, Phone, Search } from 'lucide-react'
 import { useState } from 'react'
 import { expect, userEvent } from 'storybook/test'
 import { Button } from '../button'
 import { Checkbox } from '../checkbox'
 import { Chip } from '../chip'
 import { StatusBadge, type BookingStatus } from '../status-badge'
-import {
-  BulkBar,
-  BulkBarButton,
-  CellNote,
-  Table,
-  TableCell,
-  TableColumnHeader,
-  TableFrame,
-  TableHeader,
-  TableRow,
-  TableToolbar,
-} from './table'
+import { BulkBar } from '../bulk-bar'
+import { CellNote, Table, TableCell, TableColumnHeader, TableFrame, TableHeader, TableRow, TableToolbar } from './table'
 
 const rows: {
   id: string
@@ -168,13 +158,22 @@ function Bookings() {
         ))}
       </Table>
       {selected.size > 0 && (
-        <BulkBar count={`${selected.size} saýlandy`}>
-          <BulkBarButton primary>Tassykla</BulkBarButton>
-          <BulkBarButton>Başga wagta geçir</BulkBarButton>
-          <BulkBarButton>Ýatyr</BulkBarButton>
-          <BulkBarButton aria-label="Saýlawy aýyr" className="w-9 border-transparent px-0" onClick={() => setSelected(new Set())}>
-            <X />
-          </BulkBarButton>
+        <BulkBar
+          count={`${selected.size} saýlandy`}
+          aria-label="Saýlanan ýazylyşlar"
+          clearLabel="Saýlawy aýyr"
+          onClear={() => setSelected(new Set())}
+        >
+          <Button variant="inverse-solid" size="s">
+            Tassykla
+          </Button>
+          <Button variant="inverse-outline" size="s">
+            Ret et
+          </Button>
+          <Button variant="inverse-outline" size="s">
+            <Download />
+            CSV
+          </Button>
         </BulkBar>
       )}
     </TableFrame>

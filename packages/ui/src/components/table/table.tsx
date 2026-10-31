@@ -1,4 +1,4 @@
-import type { ComponentProps, CSSProperties, ReactNode } from 'react'
+import type { ComponentProps, CSSProperties } from 'react'
 import { cn } from '../../lib/cn'
 
 /**
@@ -55,40 +55,11 @@ export function TableToolbar({ className, ...props }: ComponentProps<'div'>) {
   return <div {...props} className={cn('flex flex-wrap items-center gap-3 border-b border-n-200 px-5 py-4', className)} />
 }
 
-/** Bordered box around toolbar + table + bulk bar. */
-export function TableFrame({ className, ...props }: ComponentProps<'div'>) {
-  return <div {...props} className={cn('flex flex-col overflow-hidden rounded-card border border-n-200', className)} />
-}
-
 /**
- * Bulk actions (ink bar at the table foot, sticky to the viewport bottom): «2 saýlandy» + actions + clear.
- * Put white or outline-on-ink buttons inside (`BulkBarButton`).
+ * Bordered box around toolbar + table + bulk bar. `overflow-clip`, not `hidden`: both clip the children to the
+ * radius, but `hidden` makes the frame a scroll container, and a `sticky` bulk bar then sticks to the frame's foot
+ * instead of the viewport's.
  */
-export function BulkBar({ count, children, className }: { count: ReactNode; children: ReactNode; className?: string }) {
-  return (
-    <div
-      role="region"
-      aria-live="polite"
-      className={cn('sticky bottom-0 flex items-center gap-4 bg-n-900 py-3 pr-3 pl-5 text-white', className)}
-    >
-      <span className="text-small font-semibold">{count}</span>
-      <div className="flex-1" />
-      <div className="flex flex-wrap items-center gap-2">{children}</div>
-    </div>
-  )
-}
-
-export function BulkBarButton({ primary, className, ...props }: ComponentProps<'button'> & { primary?: boolean }) {
-  return (
-    <button
-      type="button"
-      {...props}
-      className={cn(
-        'inline-flex h-9 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-s border px-3.5 text-small font-semibold whitespace-nowrap',
-        'focus-visible:shadow-focus focus-visible:outline-none [&_svg]:size-[18px]',
-        primary ? 'border-transparent bg-n-0 text-n-900 hover:bg-n-100' : 'border-n-600 bg-transparent text-white hover:bg-ink-btn-hover',
-        className,
-      )}
-    />
-  )
+export function TableFrame({ className, ...props }: ComponentProps<'div'>) {
+  return <div {...props} className={cn('flex flex-col overflow-clip rounded-card border border-n-200', className)} />
 }

@@ -31,6 +31,13 @@ export const buttonVariants = cva(
         'danger-ghost': 'bg-transparent text-danger-ink hover:bg-error-tint',
         'danger-solid': 'bg-danger-solid text-white hover:bg-danger-solid-hover',
         ink: 'bg-ink-btn text-white hover:bg-ink-btn-hover',
+        // the on-ink set (DS-Patterns → Button «On ink · bulk bar, toast, move bar»): white, outline n-600, clear;
+        // disabled on ink keeps the transparent fill with an n-600 line and n-500 text
+        'inverse-solid': 'bg-n-0 text-n-900 hover:bg-n-100 disabled:border-n-600 disabled:bg-transparent disabled:text-n-500',
+        'inverse-outline':
+          'border-n-600 bg-transparent text-white hover:bg-ink-btn-hover disabled:border-n-600 disabled:bg-transparent disabled:text-n-500',
+        'inverse-ghost':
+          'bg-transparent text-white hover:bg-ink-btn-hover disabled:border-transparent disabled:bg-transparent disabled:text-n-500',
       },
       size: {
         s: "h-9 min-w-18 rounded-s px-3.5 text-small [&_svg:not([class*='size-'])]:size-4",
