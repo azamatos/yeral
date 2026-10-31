@@ -49,6 +49,11 @@ const envSchema = z.object({
    */
   DEMO_WORKSPACE: z.enum(['true', 'false']).default('false'),
   /**
+   * The end-to-end flows' hooks (`POST /v1/e2e/…`, e2e/): a test lets one booking's time pass instead of waiting for
+   * its hold to run out or its visit to end. Off unless set; refused in production.
+   */
+  E2E_HOOKS: z.enum(['true', 'false']).default('false'),
+  /**
    * The geocoder behind the address search (ADR 0027): a Photon server's address (http or https, its `api` under it), the
    * public one by default (fair use, no guarantee); `off` turns the search off (the pin is placed by hand).
    */
@@ -89,6 +94,8 @@ export interface Config {
   examplePhone: string | null
   /** `DEMO_WORKSPACE`: the business app's demo workspace (book F-242). */
   demoWorkspace: boolean
+  /** `E2E_HOOKS`: the end-to-end flows' hooks (`/v1/e2e/…`); never in production. */
+  e2eHooks: boolean
   /** `GEOCODER_URL`: the address search's Photon server; null when it's off (ADR 0027). */
   geocoderUrl: string | null
   /** `ADMIN_SECRET_KEY`'s bytes; null in production until it's set (the admin tool answers `admin_unavailable`). */
@@ -104,6 +111,7 @@ export function loadConfig(source: Record<string, unknown>): Config {
   const examplePhone = env.EXAMPLE_PHONE ?? site.support.phone ?? null
   if (env.EXAMPLE_BUSINESSES === 'true' && !examplePhone)
     throw new EnvError(['EXAMPLE_PHONE', 'YERAL_SUPPORT_PHONE'], 'the example businesses need a phone to show: one of the two')
+  if (env.E2E_HOOKS === 'true' && site.env === 'production') throw new EnvError(['E2E_HOOKS'], 'the test hooks never run in production')
   return {
     databaseUrl: env.DATABASE_URL,
     port: env.PORT ?? Number(new URL(site.urls.api).port || 3004),
@@ -117,6 +125,7 @@ export function loadConfig(source: Record<string, unknown>): Config {
     exampleBusinesses: env.EXAMPLE_BUSINESSES === 'true',
     examplePhone,
     demoWorkspace: env.DEMO_WORKSPACE === 'true',
+    e2eHooks: env.E2E_HOOKS === 'true',
     geocoderUrl: env.GEOCODER_URL === 'off' ? null : env.GEOCODER_URL,
     adminKey: env.ADMIN_SECRET_KEY
       ? Uint8Array.from(atob(env.ADMIN_SECRET_KEY), (ch) => ch.charCodeAt(0))

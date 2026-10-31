@@ -24,6 +24,7 @@ import { catalogRoutes } from './modules/catalog/routes'
 import { clientRoutes } from './modules/clients/routes'
 import { demoGuard } from './modules/demo/guard'
 import { demoRoutes } from './modules/demo/routes'
+import { e2eRoutes } from './modules/e2e/routes'
 import { eventRoutes } from './modules/events/routes'
 import { healthRoutes } from './modules/health/routes'
 import { meRoutes } from './modules/me/routes'
@@ -107,6 +108,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', reviewRoutes)
     .route('/v1', setupRoutes)
     .route('/v1', demoRoutes)
+    .route('/v1', e2eRoutes)
     .route('/v1', adminRoutes)
     .route('/v1', adminBusinessRoutes)
     .route('/v1', adminReviewRoutes)

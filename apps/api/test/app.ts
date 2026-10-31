@@ -32,6 +32,7 @@ export function testApp(
     adminKey?: Uint8Array<ArrayBuffer> | null
     bookingTypes?: Deps['bookingTypes']
     demoWorkspace?: boolean
+    e2eHooks?: boolean
     geocoder?: Deps['geocoder']
   } = {},
 ) {
@@ -52,6 +53,7 @@ export function testApp(
     // every kind, so the table and class paths stay tested; the first launch's rule has its own test
     bookingTypes: opts.bookingTypes ?? BOOKING_TYPES,
     demoWorkspace: opts.demoWorkspace ?? false,
+    e2eHooks: opts.e2eHooks ?? false,
     geocoder: opts.geocoder ?? noGeocoder,
     live: createLive(db),
   }

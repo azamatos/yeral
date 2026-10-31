@@ -116,6 +116,11 @@ for backups and accounts for error tracking and uptime checks (owner, 2026-10-22
   the market's unused range (`MARKET.phone.unusedPrefix`), each a team member uses held by a demo account (`users.demo`),
   kept from night to night. It's never public, sends no SMS and links nothing to a real account (`businesses.sandbox`).
   Turn it on with the examples when the first launch opens.
+- The end-to-end flows' hook (`apps/api/src/modules/e2e`): `E2E_HOOKS=true` opens `POST /v1/e2e/bookings/{code}/elapse`,
+  which lets one booking's time pass (a waiting request's hold ends now; a confirmed visit moves to the same time on an
+  earlier day) and runs the real jobs, so the flows see what expiry and completion really show. Off (404) unless set; on
+  in CI's stack (`infra/docker/compose.yml`) and a developer's api; the api refuses to start with it in production, and
+  the server's compose never sets it.
 - The address search (ADR 0027): `GEOCODER_URL` is a Photon server's address (its `api` under it), the public
   `https://photon.komoot.io` by default (fair use, no guarantee; the api caches a day, pauses a minute after a failure,
   and counts 120 searches an hour per account and 240 per address); `off` turns it off and the pin is placed by hand. For the Turkmenistan launch: a self-hosted Photon with the country's extract, or a paid
@@ -153,8 +158,10 @@ stack (below). The stack shows the sign-in code on the screen (`SIGN_IN_CODE_ON_
 `pnpm e2e` runs the Playwright flows in `e2e/` (workspace package `@yeral/e2e`, Chromium only; ADR 0013, skill
 `testing`) against apps already up: nothing is started or seeded by the tests. By default they go to the stack's
 hosts (`http://yeral.localhost`, `http://business.yeral.localhost`; Chromium resolves `*.localhost` by itself);
-`E2E_CLIENT_URL` and `E2E_BUSINESS_URL` point them at dev servers (`http://localhost:3401` and `:3402` for
-`PORT_BASE=3400`), whose api must show the code on the screen (`SIGN_IN_CODE_ON_SCREEN=true` in its environment).
+`E2E_CLIENT_URL`, `E2E_BUSINESS_URL` and `E2E_API_URL` point them at dev servers (`http://localhost:3401`, `:3402`
+and `:3404` for `PORT_BASE=3400`), whose api must show the code on the screen (`SIGN_IN_CODE_ON_SCREEN=true` in its
+environment) and have the test hook on (`E2E_HOOKS=true`, above: the expiry and review flows let a booking's time pass
+through it).
 The flows use the demo seed's Glow Studio (`glow-studio`, confirms by hand) and its owner's number; each test signs a
 fresh random client number up, so nothing is reset between runs, and the bookings they make stay in the database.
 The owner signs in once per run (`tests/owner.setup.ts`, the session in `e2e/.auth/`, ignored): the api gives a number

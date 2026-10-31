@@ -6,7 +6,8 @@ description: Choose and write the right test in Yeral — Vitest unit tests for 
 # Testing
 
 Strategy: ADR 0013. Today: Vitest unit tests in `packages/*` and the api, Storybook story tests in `apps/storybook`,
-API tests in `apps/api` against Postgres, and the Playwright flows in `e2e/` (the booking loop; since 2026-10-31).
+API tests in `apps/api` against Postgres, and the Playwright flows in `e2e/` (slice 3's booking loop, expiry, cancel
+and Undo, a move, the review, at a phone's width; since 2026-10-31).
 
 ## Which test
 
@@ -37,7 +38,10 @@ API tests in `apps/api` against Postgres, and the Playwright flows in `e2e/` (th
   Glow Studio and its owner, who signs in once per run (`tests/owner.setup.ts`, a `storageState`). The client site
   is rendered on the server: the first click on a page retries until React has taken over (`expect(...).toPass()`).
   Open a request on the calendar from its address (`?date=&request=`) rather than its block, which may sit under a
-  neighbour's. Nothing is reset: a test leaves only what the next run doesn't depend on.
+  neighbour's. The shared steps (book, send, confirm as the owner, the My bookings row, the booking's drawer) are in
+  `e2e/src/booking.ts`; a flow that needs a hold to run out or a visit to end calls `elapse(request, code)` there: the
+  api's test hook (`E2E_HOOKS`, `apps/api/src/modules/e2e`) lets that one booking's time pass and the real jobs do the
+  rest. Nothing is reset: a test leaves only what the next run doesn't depend on.
 - Tests must pass in parallel and in any order. No snapshots of whole pages.
 
 ## When CI fails

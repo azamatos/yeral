@@ -37,6 +37,8 @@ services:
       TRUSTED_IP_HEADER: x-forwarded-for
       # the sign-in code on the screen, as on the server (book Q-036): the end-to-end flows (e2e/) read it there
       SIGN_IN_CODE_ON_SCREEN: 'true'
+      # the flows let a booking's time pass (`POST /v1/e2e/…`, modules/e2e); refused in production
+      E2E_HOOKS: 'true'
     depends_on:
       postgres:
         condition: service_healthy

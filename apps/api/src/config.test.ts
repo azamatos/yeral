@@ -15,6 +15,16 @@ describe('ADMIN_SECRET_KEY (ADR 0026)', () => {
   })
 })
 
+describe('E2E_HOOKS (the end-to-end flows, e2e/)', () => {
+  it('off unless set, on outside production, refused in production', () => {
+    expect(loadConfig(base).e2eHooks).toBe(false)
+    expect(loadConfig({ ...base, E2E_HOOKS: 'true' }).e2eHooks).toBe(true)
+    expect(loadConfig({ ...base, YERAL_ENV: 'docker', E2E_HOOKS: 'true' }).e2eHooks).toBe(true)
+    expect(loadConfig({ ...base, YERAL_ENV: 'production' }).e2eHooks).toBe(false)
+    expect(() => loadConfig({ ...base, YERAL_ENV: 'production', E2E_HOOKS: 'true' })).toThrow(/E2E_HOOKS/)
+  })
+})
+
 describe('EXAMPLE_BUSINESSES (book Q-004)', () => {
   it("shows Ýeral's support phone, or EXAMPLE_PHONE, and needs one of the two", () => {
     expect(loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true', YERAL_SUPPORT_PHONE: '+99312345678' })).toMatchObject({

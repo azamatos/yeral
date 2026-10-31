@@ -36,6 +36,8 @@ export interface Deps {
   adminKey: Uint8Array<ArrayBuffer> | null
   /** The business app's demo workspace (`DEMO_WORKSPACE`, book F-242): kept by the jobs, made again every night. */
   demoWorkspace: boolean
+  /** The end-to-end flows' hooks (`E2E_HOOKS`, `modules/e2e`): a test lets one booking's time pass. */
+  e2eHooks: boolean
   /** The address search behind the map pin (ADR 0027). */
   geocoder: GeocoderPort
   /** The open event streams and their nudges (`modules/events/live.ts`); the Node entry LISTENs into it. */
@@ -59,6 +61,7 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     adminKey: config.adminKey,
     bookingTypes: config.bookingTypes,
     demoWorkspace: config.demoWorkspace,
+    e2eHooks: config.e2eHooks,
     // named, as the public Photon asks of every app: the site's own address (from config), the api's version
     geocoder: config.geocoderUrl
       ? photonGeocoder(config.geocoderUrl, `${new URL(config.site.urls.client).host}/${build.version} (+${config.site.urls.client})`)
