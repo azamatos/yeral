@@ -1,6 +1,7 @@
 # 0014. Working with several agents in parallel
 
-- Status: Accepted 2026-10-13; amended 2026-10-26 (a weekly token budget; a full agent is dropped, not resumed)
+- Status: Accepted 2026-10-13; amended 2026-10-26 (a weekly token budget; a full agent is dropped, not resumed);
+  amended 2026-10-31 (one agent at a time by default, two at most; no worktree per agent; agents clean up)
 - Decided by: owner (2–3 agents in parallel in future) + Claude
 
 ## Context
@@ -13,8 +14,11 @@ edit the same files, collide on dev-server ports and databases, and overwrite ea
 - **Instructions for every agent tool** live in `AGENTS.md` (tool-agnostic); `CLAUDE.md` imports it and adds Claude specifics.
 - **Tasks are GitHub Issues** (board: GitHub Project). One issue = one task with scope (apps/packages/slices it may
   touch) and acceptance criteria. An agent claims a task by adding the label `agent:<name>` and moving it to *In progress*.
-- **One task = one git worktree + one branch** (`feat/<issue>-<topic>`), never work on `main` directly.
-  Claude Code: `claude --worktree` / worktree isolation; others: `git worktree add ../yeral-wt/<topic> -b <branch>`.
+- **One task = one branch** (`feat/<issue>-<topic>`), never work on `main` directly. **One agent at a time by default**,
+  in the main checkout (amended 2026-10-31, owner). A second agent runs only when the owner wants speed within a time
+  window and the two tasks touch different packages; it works in **one shared, long-lived worktree**
+  (`.claude/worktrees/shared`, installed once, reused), never a fresh worktree per agent. Two agents at most; on
+  battery, one.
 - **No collisions in local runs**: `PORT_BASE` env per worktree (3000, 3100, 3200…; each app adds its offset);
   one local Postgres container, one database per worktree (`pnpm db:setup` creates `yeral_<branch>`).
 - **Hot spots** go first, in their own small PRs, and are announced on the issue: `packages/contract`, `packages/ui`
@@ -28,6 +32,15 @@ edit the same files, collide on dev-server ports and databases, and overwrite ea
   is dropped and a fresh one starts from its PR and log note; a run is sized against the weekly limit, never the whole
   of it in one night. On 2026-10-25 four agents resumed all day re-read ~500k tokens of context at every step (85 % of
   the day's tokens) and the week's limit reached 52 %. `AGENTS.md` → "Token budget".
+- **The machine's resources** (amended 2026-10-31, owner): on 2026-10-30/31 seventeen agent worktrees (14 GB, ~200k
+  files each after `pnpm install`), four to five agents running `pnpm check` at once, and Postgres and dev servers left
+  behind by agents a rate limit had killed put `fseventsd` and `kernel_task` above 300 % on battery. Parallel agents
+  don't save tokens — a PR costs context × calls whether agents run together or one after another, and running
+  together adds rebases, duplicate reads and CI re-runs; it only compresses the clock, and the weekly limit is what
+  stops the work. So: checks filtered to the touched package (`--filter`); no local story suite, dev servers or
+  Playwright while another agent runs (CI runs the whole thing); an agent stops its Postgres and servers before it
+  reports; the lead removes a worktree as soon as its branch is pushed and runs the owner's `cleanup.sh`
+  (`~/.claude/skills/agent-runs`) after every run; a brief keeps an agent's context under about 120k tokens.
 - **Suggested lanes**: platform (monorepo, CI, Docker, packages, api), client app, business app. The skill `parallel-work` is the checklist.
 
 ## Consequences
@@ -37,5 +50,8 @@ edit the same files, collide on dev-server ports and databases, and overwrite ea
 
 ## Alternatives considered
 
-- **Agents sharing one checkout**: constant conflicts on files, ports and databases.
+- **Agents sharing one checkout** at the same time: conflicts on files, ports and databases — which is why a second
+  concurrent agent gets the shared worktree. One agent at a time in the main checkout has none of these.
+- **A fresh worktree per agent** (used 2026-10-25 to 2026-10-31): isolation for free, but an install per agent, a file
+  count the file-system journal pays for, and nobody removing them.
 - **A tasks file in the repo**: merge conflicts on every claim; issues are atomic.

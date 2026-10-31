@@ -232,7 +232,10 @@ that reads a file outside every package lists it as an input with `$TURBO_ROOT$`
 
 - Instructions for any agent tool: `AGENTS.md`; Claude Code adds `CLAUDE.md` and `.claude/skills`.
 - Task = GitHub issue with scope + acceptance criteria; claim with label `agent:<name>`.
-- One worktree + branch per task; `PORT_BASE` per worktree; database `yeral_<branch>` in the shared local Postgres.
+- One branch per task; one agent at a time by default, two at most, one on battery (31.10). A second concurrent agent
+  works in the shared worktree `.claude/worktrees/shared` (installed once, reused; never a worktree per agent) with its
+  own `PORT_BASE` and database `yeral_<branch>`. Agents run filtered checks, stop their Postgres and servers before
+  reporting; the lead runs `~/.claude/skills/agent-runs/cleanup.sh` after each run.
 - Hot spots (contract, ui tokens, catalog, turbo/root config, migrations) in small PRs that merge first.
 - Memory notes go to `docs/memory-bank/log/YYYY-MM-DD-<topic>.md` during parallel work; the lead folds them in.
 
