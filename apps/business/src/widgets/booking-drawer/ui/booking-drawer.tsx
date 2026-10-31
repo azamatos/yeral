@@ -19,7 +19,7 @@ import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { toast } from '@yeral/ui/toast'
 import { Globe, Phone, User, X } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useInternalStatusName, useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
@@ -63,9 +63,11 @@ export function BookingDrawer({
   const locale = useLocale()
   const errorText = useErrorText()
   const read = useQuery({ ...sdk.calendar.booking(slug, code, locale), placeholderData: placeholder })
-  const booking = read.isError ? undefined : read.data
-  // the whole team reads the statuses; only the ones switched on are offered
-  const statuses = useQuery(sdk.settings.statuses(slug)).data?.items.filter((s) => s.enabled) ?? []
+  // a booking read once stays through a failed read-back (a note or status saved refreshes it); a failed first read
+  // (the page's copy still shown as the placeholder) is the error
+  const booking = read.isError && (read.data === undefined || read.isPlaceholderData) ? undefined : read.data
+  // the whole team reads the statuses (the field offers the ones switched on, and the booking's own if it was since switched off)
+  const statuses = useQuery(sdk.settings.statuses(slug)).data?.items ?? []
   const clientId = booking?.client.id ?? null
   // the client's facts (decision 4): one more than shown, as the booking open may be among the past ones
   const card = useQuery({
@@ -130,8 +132,6 @@ function Body({
   const join = useJoin()
   const errorText = useErrorText()
   const Icon = BOOKING_STATUS_ICON[b.status]
-  const start = Math.min(...b.items.map((i) => i.start))
-  const end = Math.max(...b.items.map((i) => i.end))
   const staff = join([...new Set(b.items.map((i) => i.staff).filter((n): n is string => !!n))], 'list')
   const note = useNoteAutosave({ slug, code: b.code, saved: b.internalNote })
 
@@ -143,9 +143,9 @@ function Body({
         </StatusBadge>
         <SourceLine booking={b} />
       </div>
-      {statuses.length > 0 && b.status === 'confirmed' && <InternalStatusField slug={slug} booking={b} statuses={statuses} />}
+      {b.status === 'confirmed' && <InternalStatusField slug={slug} booking={b} statuses={statuses} />}
       <AlertNotes card={card} />
-      <ClientBlock slug={slug} client={b.client} card={card} onBookAgain={onBookAgain} />
+      <ClientBlock client={b.client} card={card} onBookAgain={onBookAgain} />
       <KeyValueList
         items={[
           {
@@ -156,8 +156,8 @@ function Body({
             ),
           },
           ...(staff ? [{ key: t('specialist'), value: staff }] : []),
-          { key: t('dateTime'), value: t('when', { date: fmt.weekdayDate(b.date), time: fmt.timeRange(start, end) }) },
-          { key: t('duration'), value: fmt.duration(end - start) },
+          { key: t('dateTime'), value: t('when', { date: fmt.weekdayDate(b.date), time: fmt.timeRange(b.start, b.end) }) },
+          { key: t('duration'), value: fmt.duration(b.end - b.start) },
           ...(b.price ? [{ key: t('price'), value: fmt.price(b.price) }] : []),
         ]}
       />
@@ -165,8 +165,17 @@ function Body({
       {b.clientNote && <Quote label={t('clientNote')}>{t('noteText', { note: b.clientNote })}</Quote>}
       <Field
         label={t('internalNote')}
-        // the caption carries the state (B-Calendar `noteCap`): saving, saved, or saved automatically before anything's typed
-        hint={note.state === 'saving' ? t('noteSaving') : note.typed || b.internalNote ? t('noteSaved') : t('noteAuto')}
+        // the caption carries the state (B-Calendar `noteCap`): saving, saved, or saved automatically before anything's
+        // typed; a failed save has the error alone
+        hint={
+          note.state === 'failed'
+            ? undefined
+            : note.state === 'saving'
+              ? t('noteSaving')
+              : note.typed || b.internalNote
+                ? t('noteSaved')
+                : t('noteAuto')
+        }
         error={note.state === 'failed' && t('noteFailed', { error: errorText(note.error) })}
       >
         <Textarea
@@ -200,8 +209,9 @@ function SourceLine({ booking: b }: { booking: CalendarBooking }) {
 }
 
 /**
- * «Internal status» on a confirmed booking (book B-29, B-Calendar `internal`): None or one switched on; a change
- * saves at once, and the toast's Undo puts the one before back.
+ * «Internal status» on a confirmed booking (book B-29, B-Calendar `internal`): None or one switched on (the booking's
+ * own stays offered, off, if it was switched off since); nothing when the workspace has none on. A change saves at
+ * once, and the toast's Undo puts the one before back.
  */
 function InternalStatusField({ slug, booking: b, statuses }: { slug: string; booking: CalendarBooking; statuses: InternalStatus[] }) {
   const t = useTranslations('bookingDrawer.booking')
@@ -213,6 +223,7 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
   // the api's value shows
   const [picked, setPicked] = useState<{ from: string | null; to: string | null } | null>(null)
   const value = picked && picked.from === b.internalStatusId ? picked.to : b.internalStatusId
+  const offered = statuses.filter((s) => s.enabled || s.id === b.internalStatusId)
   const change = (statusId: string | null, undo: boolean) => {
     const before = value
     setPicked({ from: b.internalStatusId, to: statusId })
@@ -223,7 +234,8 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
           if (undo) return
           const status = statusId ? statuses.find((s) => s.id === statusId) : undefined
           toast(status ? t('internalStatusSet', { name: name(status) }) : t('internalStatusCleared'), {
-            action: { label: t('undo'), onClick: () => change(before, true) },
+            // the undo runs later, over the booking as it reads then (not as it was when picked)
+            action: { label: t('undo'), onClick: () => latest.current(before, true) },
           })
         },
         onError: (error) => {
@@ -233,12 +245,17 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
       },
     )
   }
+  const latest = useRef(change)
+  useEffect(() => {
+    latest.current = change
+  })
+  if (!offered.length) return null
   return (
     <Field label={t('internalStatus')} hint={t('internalStatusCaption')}>
       <Select size="m" className="max-w-60" value={value ?? ''} onChange={(e) => change(e.target.value || null, false)}>
         <option value="">{t('none')}</option>
-        {statuses.map((s) => (
-          <option key={s.id} value={s.id}>
+        {offered.map((s) => (
+          <option key={s.id} value={s.id} disabled={!s.enabled}>
             {name(s)}
           </option>
         ))}
@@ -255,7 +272,7 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
 function Footer({ booking: b, now, onMove }: { booking: CalendarBooking; now: number; onMove?: () => void }) {
   const t = useTranslations('bookingDrawer.booking')
   const at = localOf(now)
-  const ahead = b.date > at.date || (b.date === at.date && Math.min(...b.items.map((i) => i.start)) >= at.min)
+  const ahead = b.date > at.date || (b.date === at.date && b.start >= at.min)
   const canMove = b.status === 'confirmed' && ahead && !b.move
   if (!(canMove && onMove)) return null
   return (

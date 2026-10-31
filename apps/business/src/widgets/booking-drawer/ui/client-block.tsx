@@ -6,8 +6,7 @@ import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
 import { Pill } from '@yeral/ui/pill'
-import { textLink } from '@yeral/ui/text-link'
-import { ArrowRight, Phone, TriangleAlert } from 'lucide-react'
+import { Phone, TriangleAlert } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
@@ -24,12 +23,10 @@ const hidden = (chunks: ReactNode) => <span className="sr-only">{chunks}</span>
  * the card. The card comes from the page's cache (`sdk.clients.card`), so a booking opens before it's read.
  */
 export function ClientBlock({
-  slug,
   client,
   card,
   onBookAgain,
 }: {
-  slug: string
   client: CalendarBooking['client']
   card: ClientCard | undefined
   onBookAgain?: () => void
@@ -73,16 +70,8 @@ export function ClientBlock({
           </span>
         </span>
       </div>
-      {client.id && (
-        // the card's page (book B-34, `/w/{slug}/clients/{id}`): a plain link until that route exists (slice 4's B11)
-        <a
-          href={`/w/${slug}/clients/${client.id}`}
-          className={cn(textLink, 'inline-flex items-center gap-1.5 self-start text-small font-semibold')}
-        >
-          {t('openCard')}
-          <ArrowRight aria-hidden strokeWidth={1.75} className="size-4" />
-        </a>
-      )}
+      {/* «Open the client's card →» (book B-34, `/w/{slug}/clients/{id}`) joins with the card's route (slice 4's B11): a
+          router `Link`, so an unsent note still goes */}
     </div>
   )
 }

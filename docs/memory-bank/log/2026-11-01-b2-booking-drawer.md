@@ -22,7 +22,8 @@ to the `bookingDrawer.request` and `bookingDrawer.decline` namespaces); the cale
   without «See revenue», so an administrator's line has none), no-shows, Phone only, the notes «shown when they
   book», the last three past bookings but the one open (a specialist reads no prices, as the board). «Call» is a
   `tel:` link named by its visible word plus a hidden part (`t.rich`, the axe rule under stretched words). «Open the
-  client's card» is a plain `<a href="/w/{slug}/clients/{id}">` until B11 adds that route (then a `Link`).
+  client's card →» isn't rendered yet: the route doesn't exist, and a plain `<a>` would leave the app with an unsent
+  note; B11 adds a router `Link` where the comment in `ClientBlock` says.
 - `model/use-note-autosave.ts` — the internal note goes whole to `calendar.setNote` 800 ms after the typing pauses, on
   blur and when the drawer closes with words unsent; a save that lands with newer words is followed by another; a
   failed one shows the error in the field and is retried with the next change. The caption says «saving…», «saved»

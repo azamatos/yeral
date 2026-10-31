@@ -183,7 +183,6 @@ export const Confirmed: Story = {
     await expect(d.getByText('Allergic to ammonia dyes')).toBeVisible()
     await expect(d.queryByText('Prefers mornings')).toBeNull()
     await expect(d.getByRole('link', { name: 'Call Gözel Annaýewa, +993 65 10 20 30' })).toHaveAttribute('href', 'tel:+99365102030')
-    await expect(d.getByRole('link', { name: 'Open the client’s card' })).toHaveAttribute('href', `/w/glow-studio/clients/${id(7)}`)
     await expect(d.getByText('Women’s haircut', { selector: 'dd' })).toBeVisible()
     await expect(d.getByText('Aýna')).toBeVisible()
     await expect(d.getByText(/ · 10:00–11:00$/)).toBeVisible()

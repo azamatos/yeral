@@ -11,18 +11,22 @@ export function useInternalStatusName() {
 
 /**
  * InternalStatusChip (DS-Business → InternalStatusChip, B-Calendar `.ca-ich`, book B-29): the team's marker on a
- * confirmed booking's block, an 18 px white circle with a faint ring and the status's icon, 12 px, in its colour;
- * `labelled` adds the name beside it (wide blocks). Decorative: the block's name says the status in words.
+ * confirmed booking's block, an 18 px white circle with a faint ring and the status's icon, 12 px, in its colour
+ * (the wide blocks' labelled form comes with the one-specialist day, slice 4's B7). Decorative: the block's name
+ * says the status in words.
  */
-export function InternalStatusChip({ status, labelled, className }: { status: InternalStatus; labelled?: boolean; className?: string }) {
+export function InternalStatusChip({ status, className }: { status: InternalStatus; className?: string }) {
   const Icon = INTERNAL_STATUS_ICON[status.icon]
-  const name = useInternalStatusName()
   return (
-    <span aria-hidden className={cn('inline-flex items-center gap-1', className)} style={{ color: status.color }}>
-      <span className="inline-flex size-4.5 flex-none items-center justify-center rounded-full bg-n-0 shadow-[0_0_0_1px_rgba(16,16,20,0.1)]">
-        <Icon strokeWidth={2.25} style={{ width: 12, height: 12 }} />
-      </span>
-      {labelled && <span className="text-[12px] leading-4 font-semibold">{name(status)}</span>}
+    <span
+      aria-hidden
+      className={cn(
+        'inline-flex size-4.5 flex-none items-center justify-center rounded-full bg-n-0 shadow-[0_0_0_1px_rgba(16,16,20,0.1)]',
+        className,
+      )}
+      style={{ color: status.color }}
+    >
+      <Icon strokeWidth={2.25} style={{ width: 12, height: 12 }} />
     </span>
   )
 }
