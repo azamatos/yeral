@@ -975,6 +975,23 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryFn: ({ signal }) => call(w.calendar.$get({ param: { slug }, query: query as never }, abortWith(signal))),
       })
     },
+    /**
+     * One booking by its code as the calendar draws it, whatever its status: the list's drawer, the client card's rows
+     * and a notification's "Open" (slice 4's gap 2); 404 for one the reader doesn't see in the calendar.
+     */
+    booking: (slug: string, code: string, lang: Locale) =>
+      queryOptions({
+        queryKey: keys.teamBooking(slug, code, lang),
+        queryFn: ({ signal }) => call(w.bookings[':code'].$get({ param: { slug, code }, query: { lang } }, abortWith(signal))),
+      }),
+    /** The team's note on a saved booking, autosaved whole from the drawer; null clears it (slice 4's gap 1). */
+    setNote: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ code, note }: { code: string; note: string | null }) =>
+          call(w.bookings[':code'].note.$put({ param: { slug, code }, json: { note } })),
+        // only the team's screens show it
+        onSuccess: () => invalidate(keys.calendar(slug)),
+      }),
     /** "Ýazylyşlar" (book B-30): pages of a tab, searched and filtered; booking events refresh it with the calendar. */
     bookings: (slug: string, p: Omit<Params<typeof bookingListQuerySchema, 'tab' | 'lang'>, 'cursor'>) => {
       const query = clean(p)

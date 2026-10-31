@@ -2,9 +2,12 @@
  * "Senenama" (book B-16, B-17): a day or a week of the business as the reader may see it. Columns for the bookable team
  * (a specialist: their own), each day's working stretch, breaks and why someone's off; the bookings with their status
  * as people see it now and the team's markers; a client's waiting move as its ghost where it asks to be; blocked time;
- * time taken in another workspace with no details; each day's line, with the money the reader may see.
+ * time taken in another workspace with no details; each day's line, with the money the reader may see. One booking on
+ * its own by its code, the same block, for the list's drawer, the client card's rows and a notification's "Open".
  */
-import type { calendarQuerySchema, CalendarView } from '@yeral/contract/calendar'
+import type { CalendarBooking, calendarQuerySchema, CalendarView } from '@yeral/contract/calendar'
+import type { Locale } from '@yeral/contract/common'
+import type { InternalStatus } from '@yeral/contract/settings'
 import { DAY_MINUTES, staffDay, staffOffReason, type BusinessHours } from '@yeral/domain/hours'
 import { effectiveStatus } from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
@@ -19,17 +22,81 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { loadBusiness, loadElsewhere } from '../availability/context'
 import { photoOf } from '../catalog/map'
-import { awaitingAnswer, itemsOfBookings, stateOf, type ItemRow } from '../bookings/repo'
-import { teamItemOf, teamPriceOf } from '../bookings/team-view'
+import { awaitingAnswer, itemsOfBookings, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
+import { complaintAuthors, complaintOf, teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { statusesOf } from '../settings/statuses'
 import { teamPhotos } from '../team/service'
 import { alertNotesOf } from '../clients/facts'
 import { blocksBetween } from './blocks'
-import type { Business } from './repo'
+import { teamBooking, type Business } from './repo'
 
 type CalendarQuery = z.infer<typeof calendarQuerySchema>
 
 const priceOf = (i: Pick<ItemRow, 'priceType' | 'priceAmount'>) => ({ type: i.priceType, amount: i.priceAmount })
+
+/** What a booking block needs besides its row: the language, the markers switched on, the alerts, who filed what. */
+interface BlockContext {
+  lang: Locale
+  enabled: readonly InternalStatus[]
+  alerts: ReadonlyMap<string, string[]>
+  authors: ReadonlyMap<string, string>
+}
+
+/** A booking block: the row with its status as people see it now, its items, and its client's waiting move if any. */
+function bookingBlock(
+  row: BookingRow,
+  { status, cancelledBy }: Pick<ReturnType<typeof effectiveStatus>, 'status' | 'cancelledBy'>,
+  items: readonly ItemRow[],
+  move: BookingRow | undefined,
+  ctx: BlockContext,
+): CalendarBooking {
+  return {
+    code: row.code,
+    type: row.type,
+    date: row.date,
+    start: row.start,
+    end: row.end,
+    status,
+    cancelledBy,
+    source: row.source,
+    client: { id: row.clientId, name: row.clientName, phone: row.clientPhone },
+    items: items.map((i) => ({ ...teamItemOf(i, ctx.lang), bufferAfter: i.bufferAfter })),
+    price: teamPriceOf(row),
+    internalStatusId: row.internalStatusId && ctx.enabled.some((s) => s.id === row.internalStatusId) ? row.internalStatusId : null,
+    alert: !!row.clientId && ctx.alerts.has(row.clientId),
+    clientNote: row.clientNote,
+    internalNote: row.internalNote,
+    holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
+    complaint: complaintOf(row, ctx.authors),
+    // the asked time for the line under the block; its ghost is in `moves` when that time is in view
+    move: move
+      ? { code: move.code, date: move.date, start: move.start, end: move.end, holdUntil: move.holdUntil?.getTime() ?? null }
+      : null,
+  }
+}
+
+/**
+ * One booking by its code, as the calendar draws it (slice 4's gap 2): whatever its status, for the list's drawer and
+ * a notification's "Open". One the reader doesn't see in the calendar is 404, as is a move request's own code (the
+ * requests carry those).
+ */
+export async function calendarBooking(deps: Deps, business: Business, actor: Actor, code: string, lang: Locale): Promise<CalendarBooking> {
+  const { db } = deps
+  const now = deps.now()
+  const { b: row, items } = await teamBooking(db, business, actor, code, { original: true, permission: null })
+  const [[move], alerts, statuses, authors] = await all(db, [
+    () =>
+      db
+        .select()
+        .from(bookings)
+        .where(and(eq(bookings.rescheduleOf, row.id), awaitingAnswer(now))),
+    () => alertNotesOf(db, row.clientId ? [row.clientId] : []),
+    () => (row.internalStatusId ? statusesOf(db, business.id) : Promise.resolve([])),
+    () => complaintAuthors(db, [row]),
+  ])
+  const enabled = statuses.filter((s) => s.enabled)
+  return bookingBlock(row, effectiveStatus(stateOf(row), now), items, move, { lang, enabled, alerts, authors })
+}
 
 export async function calendarView(deps: Deps, business: Business, actor: Actor, q: CalendarQuery): Promise<CalendarView> {
   const { db } = deps
@@ -73,7 +140,7 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
     .filter(({ row, status }) => inRange(row) && (q.cancelled || status !== 'cancelled'))
   const ids = new Set(shown.map((s) => s.row.id))
   // a waiting move of a booking in view (its line "→ Sat, 17 Oct · 11:30?"), wherever it asks to go
-  const [ofShown, alerts] = await all(db, [
+  const [ofShown, alerts, authors] = await all(db, [
     async () =>
       ids.size
         ? db
@@ -86,6 +153,11 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
         db,
         shown.flatMap((s) => (s.row.clientId ? [s.row.clientId] : [])),
       ),
+    () =>
+      complaintAuthors(
+        db,
+        shown.map((s) => s.row),
+      ),
   ])
   const ghosts = askedHere.filter(inRange)
   const originals = ghosts.filter((m) => !ids.has(m.rescheduleOf!)).map((m) => m.rescheduleOf!)
@@ -97,6 +169,7 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
   const moveOf = new Map(ofShown.map((m) => [m.rescheduleOf!, m]))
   const originalOf = new Map([...found, ...extra].map((b) => [b.id, b]))
   const enabled = statuses.filter((s) => s.enabled)
+  const ctx: BlockContext = { lang: q.lang, enabled, alerts, authors }
   const itemView = (i: ItemRow) => ({ ...teamItemOf(i, q.lang), bufferAfter: i.bufferAfter })
 
   // the columns: the bookable team the reader sees (a specialist always their own), and anyone removed whose kept
@@ -152,33 +225,9 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
     from,
     to,
     columns,
-    bookings: shown.map(({ row, status, cancelledBy }) => {
-      const move = moveOf.get(row.id)
-      return {
-        code: row.code,
-        type: row.type,
-        date: row.date,
-        start: row.start,
-        end: row.end,
-        status,
-        cancelledBy,
-        source: row.source,
-        client: { id: row.clientId, name: row.clientName, phone: row.clientPhone },
-        items: (itemsBy.get(row.id) ?? []).map(itemView),
-        price: teamPriceOf(row),
-        internalStatusId: row.internalStatusId && enabled.some((s) => s.id === row.internalStatusId) ? row.internalStatusId : null,
-        alert: !!row.clientId && alerts.has(row.clientId),
-        clientNote: row.clientNote,
-        internalNote: row.internalNote,
-        holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
-        complaint:
-          row.complaintType && row.complaintAt ? { type: row.complaintType, text: row.complaintText, at: row.complaintAt.getTime() } : null,
-        // the asked time for the line under the block; its ghost is in `moves` when that time is in view
-        move: move
-          ? { code: move.code, date: move.date, start: move.start, end: move.end, holdUntil: move.holdUntil?.getTime() ?? null }
-          : null,
-      }
-    }),
+    bookings: shown.map(({ row, status, cancelledBy }) =>
+      bookingBlock(row, { status, cancelledBy }, itemsBy.get(row.id) ?? [], moveOf.get(row.id), ctx),
+    ),
     // the ghosts at the asked time, in the columns in view
     moves: ghosts.flatMap((m) => {
       const of = originalOf.get(m.rescheduleOf!)

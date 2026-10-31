@@ -23,7 +23,7 @@ import { bookingItems, bookings, clientNotes, clients, services, staff } from '.
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { itemsOfBookings, stateOf } from '../bookings/repo'
-import { teamItemOf, teamPriceOf } from '../bookings/team-view'
+import { complaintAuthors, complaintOf, teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { likeOf, phoneLike, wordStartLikes } from '../catalog/search'
 import { rulesOf } from '../settings/service'
 import { alertNotesOf, avgCheckOf, bookingsByIds, clientFacts, doneAt, ownOnly, phoneOnlyOf, withStaff, type ClientFacts } from './facts'
@@ -236,7 +236,6 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
   const reported = seen
     .filter((s) => s.row.complaintType && s.row.complaintAt)
     .sort((a, b) => b.row.complaintAt!.getTime() - a.row.complaintAt!.getTime())
-  const authorIds = [...new Set(reported.flatMap((s) => (s.row.complaintBy ? [s.row.complaintBy] : [])))]
   const c = facts.client
   const [items, authors, phoneOnly] = await all(db, [
     () =>
@@ -244,7 +243,11 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
         db,
         [...ahead, ...history].map((s) => s.row.id),
       ),
-    async () => (authorIds.length ? db.select({ id: staff.id, name: staff.name }).from(staff).where(inArray(staff.id, authorIds)) : []),
+    () =>
+      complaintAuthors(
+        db,
+        reported.map((s) => s.row),
+      ),
     () => phoneOnlyOf(db, [c], rules),
   ])
   const view = ({ row, status }: (typeof seen)[number]) => ({
@@ -277,14 +280,8 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
     upcoming: ahead.map(view),
     history: history.map(view),
     moreHistory: past.length > history.length,
-    reports: reported.map(({ row }) => ({
-      code: row.code,
-      date: row.date,
-      type: row.complaintType!,
-      text: row.complaintText,
-      by: authors.find((a) => a.id === row.complaintBy)?.name ?? null,
-      at: row.complaintAt!.getTime(),
-    })),
+    // the same `by` as the calendar booking's complaint: a specialist removes their own by id (B-28)
+    reports: reported.map(({ row }) => ({ code: row.code, date: row.date, ...complaintOf(row, authors)! })),
     settings: { phoneOnly: phoneOnly.on.has(c.id), phoneOnlyByCount: phoneOnly.byCount.has(c.id), noReminders: c.noRemindersSms },
   }
 }

@@ -140,7 +140,11 @@ const viewOf = (date: string, cancelled: boolean, only?: string): CalendarView =
     bookings,
     moves: date === DAY ? [move].filter((m) => m.items.some(mine)) : [],
     blocks:
-      date === DAY ? [{ id: id(9), staffId: id(3), date, start: 990, end: 1050, reason: 'Training', seriesId: null }].filter(mine) : [],
+      date === DAY
+        ? [
+            { id: id(9), staffId: id(3), date, start: 990, end: 1050, kind: 'training' as const, reason: 'Training', seriesId: null },
+          ].filter(mine)
+        : [],
     elsewhere: date === DAY ? [{ staffId: id(1), date, start: 1140, end: 1200 }].filter(mine) : [],
     summary: [
       {

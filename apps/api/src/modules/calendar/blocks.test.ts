@@ -59,7 +59,7 @@ describe('blocked time (book B-18)', () => {
     const made = await block(maysa, { staffId: maralId, date: THU, start: 990, end: 1050, reason: 'Okuw' })
     expect(made.status).toBe(201)
     expect(made.json.items).toEqual([
-      { id: expect.any(String), staffId: maralId, date: THU, start: 990, end: 1050, reason: 'Okuw', seriesId: null },
+      { id: expect.any(String), staffId: maralId, date: THU, start: 990, end: 1050, kind: null, reason: 'Okuw', seriesId: null },
     ])
     const free = await starts(maysa, THU)
     expect(free).not.toContain(990)
@@ -94,14 +94,61 @@ describe('blocked time (book B-18)', () => {
 
   it('every week up to a date, taken away one or the rest of the series', async () => {
     const maysa = await as(MAYSA)
-    const made = await block(maysa, { staffId: aynaId, date: FRI, start: 720, end: 780, reason: 'Lunch', repeatUntil: '2026-12-11' })
-    const items = made.json.items as { id: string; date: string; seriesId: string }[]
+    const made = await block(maysa, { staffId: aynaId, date: FRI, start: 720, end: 780, kind: 'break', repeatUntil: '2026-12-11' })
+    const items = made.json.items as { id: string; date: string; kind: string; seriesId: string }[]
     expect(items.map((b) => b.date)).toEqual([FRI, '2026-11-27', '2026-12-04', '2026-12-11'])
     expect(new Set(items.map((b) => b.seriesId)).size).toBe(1)
+    // the chip's key is on every row of the series, for the teammate's language
+    expect(items.every((b) => b.kind === 'break')).toBe(true)
     expect((await maysa.req(`${W}/calendar/blocks/${items[0]!.id}`, { method: 'DELETE' })).status).toBe(204)
     expect((await maysa.req(`${W}/calendar/blocks/${items[2]!.id}?scope=series`, { method: 'DELETE' })).status).toBe(204)
     const left = (await maysa.req(`${W}/calendar/blocks?from=${FRI}&to=2026-12-31`)).json.items as { date: string; staffId: string }[]
     expect(left.filter((b) => b.staffId === aynaId).map((b) => b.date)).toEqual(['2026-11-27'])
+  })
+
+  it('every day up to a date (design §27.4): each day its own row, checked the same way, and the calendar shows why', async () => {
+    const maysa = await as(MAYSA)
+    const made = await block(maysa, {
+      staffId: aynaId,
+      date: THU,
+      start: 540,
+      end: 570,
+      kind: 'personal',
+      repeat: 'daily',
+      repeatUntil: '2026-11-22',
+    })
+    expect(made.status).toBe(201)
+    const items = made.json.items as { id: string; date: string; kind: string; reason: string | null; seriesId: string }[]
+    expect(items.map((b) => b.date)).toEqual([THU, FRI, '2026-11-21', '2026-11-22'])
+    expect(new Set(items.map((b) => b.seriesId)).size).toBe(1)
+    expect(items[0]).toMatchObject({ kind: 'personal', reason: null })
+    const day = (await maysa.req(`${W}/calendar?date=${FRI}`)).json.blocks as { id: string; kind: string }[]
+    expect(day.find((b) => b.id === items[1]!.id)).toMatchObject({ kind: 'personal' })
+    // a daily one that meets a booking on one of its days is refused whole
+    const booked = await maysa.req(`${W}/bookings`, {
+      body: {
+        source: 'phone',
+        phone: '+99365800606',
+        serviceIds: [manicure],
+        staffId: maralId,
+        date: FRI,
+        start: 960,
+        notifyClient: false,
+      },
+    })
+    expect(booked.status).toBe(201)
+    const over = await block(maysa, { staffId: maralId, date: THU, start: 960, end: 990, repeat: 'daily', repeatUntil: '2026-11-21' })
+    expect(over.json.error).toMatchObject({ code: 'block_over_bookings', details: { bookings: [{ date: FRI, start: 960 }] } })
+    // "Other" is said in words; an unknown kind is refused
+    const other = await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, kind: 'other', reason: 'Dentist' })
+    expect(other.json.items[0]).toMatchObject({ kind: 'other', reason: 'Dentist', seriesId: null })
+    expect((await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, kind: 'holiday' })).status).toBe(400)
+    expect((await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, repeat: 'monthly' })).status).toBe(400)
+    // Other without words, a repeat without its last day: refused rather than stored half
+    const noWords = await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, kind: 'other' })
+    expect(noWords.json.error.details.issues).toEqual([{ path: ['reason'], code: 'custom' }])
+    const noEnd = await block(maysa, { staffId: aynaId, date: THU, start: 1140, end: 1170, repeat: 'daily' })
+    expect(noEnd.json.error.details.issues).toEqual([{ path: ['repeatUntil'], code: 'custom' }])
   })
 
   it('never over a booking; not in the past; a specialist blocks only their own time and sees only their own', async () => {

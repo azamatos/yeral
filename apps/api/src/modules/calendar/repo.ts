@@ -1,6 +1,6 @@
 /** The calendar's queries (book B-23–B-27): a team member's booking, who hears a change, the phone's client record. */
 import { canOn, type Actor } from '@yeral/domain/permissions'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookings, clients, staff } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -25,18 +25,20 @@ export async function teamBooking(
   business: Business,
   actor: Actor,
   code: string,
-  opts: { lock?: boolean; permission?: 'bookings' | 'noshow' } = {},
+  opts: { lock?: boolean; permission?: 'bookings' | 'noshow' | null; original?: boolean } = {},
 ) {
+  // `original`: not a move request's own code (the calendar's reads answer 404 for those; the requests carry them);
+  // `permission: null`: a read, no action to allow beyond seeing the booking
   const q = db
     .select()
     .from(bookings)
-    .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code)))
+    .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code), opts.original ? isNull(bookings.rescheduleOf) : undefined))
   const [b] = opts.lock ? await q.for('update') : await q
   if (!b) throw new ApiError('not_found')
   const items = await itemsOf(db, b.id)
   const staffIds = staffOf(items)
   if (!canOn(actor, 'calendar', staffIds)) throw new ApiError('not_found')
-  if (!canOn(actor, opts.permission ?? 'bookings', staffIds)) throw new ApiError('forbidden')
+  if (opts.permission !== null && !canOn(actor, opts.permission ?? 'bookings', staffIds)) throw new ApiError('forbidden')
   return { b, items, staffIds }
 }
 

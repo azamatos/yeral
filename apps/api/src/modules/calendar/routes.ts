@@ -14,6 +14,7 @@ import {
   bookingListQuerySchema,
   bookingListSchema,
   businessCancelSchema,
+  calendarBookingSchema,
   calendarQuerySchema,
   calendarViewSchema,
   complaintInputSchema,
@@ -23,8 +24,10 @@ import {
   newBookingResultSchema,
   newBookingSchema,
   setInternalStatusSchema,
+  setTeamNoteSchema,
   teamBookingParamSchema,
 } from '@yeral/contract/calendar'
+import { langQuerySchema } from '@yeral/contract/common'
 import { workspaceParamSchema } from '@yeral/contract/team'
 import { today } from '@yeral/domain/time'
 import { z } from 'zod'
@@ -35,7 +38,8 @@ import { setInternalStatus } from '../settings/statuses'
 import { addBlock, blocksFor, removeBlock } from './blocks'
 import { fileComplaint, removeComplaint } from './complaints'
 import { bookingList, exportBookings } from './list'
-import { calendarView } from './view'
+import { setTeamNote } from './note'
+import { calendarBooking, calendarView } from './view'
 import { addBooking, cancelByBusiness, freeTimes, moveBooking, undoBooking } from './service'
 
 const tags = ['calendar']
@@ -96,7 +100,7 @@ const blockRoute = createRoute({
   method: 'post',
   path: '/w/{slug}/calendar/blocks',
   tags,
-  summary: '"Wagty ýap": close part of a day for one person, optionally every week up to a date; never over a booking',
+  summary: '"Wagty ýap": close part of a day for one person, with why, optionally every day or week up to a date; never over a booking',
   request: { params: workspaceParamSchema, ...jsonBody(blockInputSchema) },
   responses: { 201: json(blockListSchema, 'Blocked'), 400: errors[400], 409: errors[409], ...denied },
 })
@@ -104,7 +108,7 @@ const unblockRoute = createRoute({
   method: 'delete',
   path: '/w/{slug}/calendar/blocks/{id}',
   tags,
-  summary: 'Take blocked time away: this one, or this one and the later ones of its weekly repeat',
+  summary: 'Take blocked time away: this one, or this one and the later ones of its repeat',
   request: { params: blockParamSchema, query: blockDeleteQuerySchema },
   responses: { ...noContent, ...denied },
 })
@@ -116,6 +120,24 @@ const internalStatusRoute = createRoute({
   summary: '"Içerki ýagdaý": a team-only marker on a confirmed booking, or none; the client never sees it',
   request: { params: teamBookingParamSchema, ...jsonBody(setInternalStatusSchema) },
   responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
+})
+
+const noteRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/bookings/{code}/note',
+  tags,
+  summary: 'The team’s note on a saved booking, whole (null clears it); whoever sees the booking in the calendar',
+  request: { params: teamBookingParamSchema, ...jsonBody(setTeamNoteSchema) },
+  responses: { ...noContent, 400: errors[400], ...denied },
+})
+
+const bookingRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/bookings/{code}',
+  tags,
+  summary: 'One booking by its code as the calendar draws it, whatever its status (the list’s drawer, a notification’s "Open")',
+  request: { params: teamBookingParamSchema, query: langQuerySchema },
+  responses: { 200: json(calendarBookingSchema), 400: errors[400], ...denied },
 })
 
 const calendarRoute = createRoute({
@@ -184,6 +206,18 @@ export const calendarRoutes = new OpenAPIHono<AppEnv>()
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="bookings-${slug}-${q.tab}-${today(c.var.deps.now())}.csv"`,
     })
+  })
+  // after the export: `/bookings/export` is the file, not a code
+  .openapi(bookingRoute, async (c) => {
+    const { slug, code } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    return c.json(await calendarBooking(c.var.deps, business, actor, code, c.req.valid('query').lang), 200)
+  })
+  .openapi(noteRoute, async (c) => {
+    const { slug, code } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    await setTeamNote(c.var.deps, business, actor, code, c.req.valid('json').note)
+    return c.body(null, 204)
   })
   .openapi(complaintRoute, async (c) => {
     const { slug, code } = c.req.valid('param')

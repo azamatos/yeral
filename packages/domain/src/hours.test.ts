@@ -232,4 +232,9 @@ describe('blocked time that repeats (B-18)', () => {
     // at most a year
     expect(blockDates('2026-10-15', '2028-01-01')).toHaveLength(53)
   })
+  it('every day up to the end', () => {
+    expect(blockDates('2026-10-15', '2026-10-17', 'daily')).toEqual(['2026-10-15', '2026-10-16', '2026-10-17'])
+    expect(blockDates('2026-10-15', '2026-10-15', 'daily')).toEqual(['2026-10-15'])
+    expect(blockDates('2026-10-15', '2028-01-01', 'daily')).toHaveLength(367)
+  })
 })

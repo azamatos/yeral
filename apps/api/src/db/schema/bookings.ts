@@ -13,6 +13,7 @@ import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueI
 import { users } from './auth'
 import { businesses, classSessions, clients, diningTables, internalStatuses, services, staff, tableAreas } from './business'
 import {
+  blockKind,
   bookingSource,
   bookingStatus,
   bookingType,
@@ -319,7 +320,7 @@ export const events = pgTable(
 
 /**
  * Blocked time (book B-18, Q-204): part of a day closed for one person ("Ýapyk · Okuw"), so nobody books it; whole
- * days off are their schedule's (B-47). A weekly repeat is a row per week, sharing `seriesId`.
+ * days off are their schedule's (B-47). A repeat (every day or every week) is a row per date, sharing `seriesId`.
  */
 export const staffBlocks = pgTable(
   'staff_blocks',
@@ -334,6 +335,8 @@ export const staffBlocks = pgTable(
     date: date({ mode: 'string' }).notNull(),
     start: integer().notNull(),
     end: integer().notNull(),
+    /** Why, as the form's chips (training, break, personal, other); null on blocks made before them. */
+    kind: blockKind(),
     reason: text(),
     seriesId: uuid(),
     createdBy: uuid().references(() => users.id, { onDelete: 'set null' }),

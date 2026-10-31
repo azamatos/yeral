@@ -62,7 +62,7 @@ describe('the services menu (book B-38)', () => {
       }[]
     ).flatMap((g) => g.services)
 
-  it('the owner sees all of it: every language, hidden amounts, services not online, who does each; a specialist gets 403', async () => {
+  it('the owner sees all of it: every language, hidden amounts, services not online, who does each; a specialist reads it too, changes nothing', async () => {
     const maysa = await as(MAYSA)
     const groups = await menuOf(maysa)
     expect(groups.length).toBeGreaterThan(1)
@@ -72,8 +72,14 @@ describe('the services menu (book B-38)', () => {
     // the client page shows the same services, in the same order, apart from those not online
     const online = groups.flatMap((g) => g.services.filter((s) => s.online).map((s) => s.id))
     expect((await pageServices(maysa)).map((s) => s.id)).toEqual(online)
+    // the whole team reads the menu (prices are booking information, design §28.1): the same menu, writes refused
     const ayna = await as(AYNA)
-    expect((await ayna.req(MENU)).status).toBe(403)
+    const hers = await ayna.req(MENU)
+    expect(hers.status).toBe(200)
+    expect(hers.json).toEqual((await maysa.req(MENU)).json)
+    const add = { groupId: groups[0]!.id, name: { en: 'Fringe trim' }, durationMin: 15, priceType: 'fixed', priceAmount: 20 }
+    expect((await ayna.req(MENU, { body: add })).status).toBe(403)
+    expect((await ayna.req(`${MENU}/${first!.id}`, { method: 'PATCH', body: { online: false } })).status).toBe(403)
   })
 
   it('a service added, changed and deleted: the client page follows; bookings ahead stay, and the delete can be undone (Q-210)', async () => {

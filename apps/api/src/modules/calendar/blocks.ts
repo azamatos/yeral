@@ -1,6 +1,6 @@
 /**
  * Blocked time (book B-18, Q-204): "Wagty ýap" closes part of a day for one person ("Ýapyk · Okuw"), so nobody books
- * it, optionally every week up to a date. The same people who add bookings block time, a specialist only their own;
+ * it, optionally every day or every week up to a date. The same people who add bookings block time, a specialist only their own;
  * a block can't cover a booking. It's busy time wherever free times are worked out (`loadBusy`), and a booking being
  * made checks it under the business's lock (`assertStaffFree`), which a block's save holds too.
  */
@@ -30,13 +30,15 @@ const viewOf = (b: BlockRow): Block => ({
   date: b.date,
   start: b.start,
   end: b.end,
+  kind: b.kind,
   reason: b.reason,
   seriesId: b.seriesId,
 })
 
 /**
- * Block time for one person: on `date`, and every week after it up to `repeatUntil` (a year at most). Refused when it
- * lies wholly in the past, or covers a booking of theirs that's waiting or confirmed, its buffer after included (409
+ * Block time for one person: on `date`, and every day or every week (`repeat`, weekly unless said) after it up to
+ * `repeatUntil` (a year at most), each date its own row of the series, checked the same way. Refused when it lies
+ * wholly in the past, or covers a booking of theirs that's waiting or confirmed, its buffer after included (409
  * `block_over_bookings`, the bookings in the way). Saved under the business row, as a booking takes it.
  */
 export async function addBlock(deps: Deps, business: Business, actor: Actor, userId: string, input: BlockInput): Promise<Block[]> {
@@ -47,7 +49,7 @@ export async function addBlock(deps: Deps, business: Business, actor: Actor, use
     throw invalid({ path: ['repeatUntil'], code: 'too_big' })
   const now = deps.now()
   if (epochOf(input.date, input.end) <= now) throw invalid({ path: ['date'], code: 'past' })
-  const dates = blockDates(input.date, input.repeatUntil)
+  const dates = blockDates(input.date, input.repeatUntil, input.repeat)
   return deps.db.transaction(async (tx) => {
     await loadHours(tx, business.id, { lock: 'no key update' })
     const [person] = await tx
@@ -67,6 +69,7 @@ export async function addBlock(deps: Deps, business: Business, actor: Actor, use
           date,
           start: input.start,
           end: input.end,
+          kind: input.kind ?? null,
           reason: input.reason || null,
           seriesId,
           createdBy: userId,
@@ -117,7 +120,7 @@ async function bookingsUnder(
 }
 
 /**
- * Take a block away: this one, or with `series` this one and the later ones of its weekly repeat. Someone who may block
+ * Take a block away: this one, or with `series` this one and the later ones of its repeat. Someone who may block
  * that person's time may take it away.
  */
 export async function removeBlock(deps: Deps, business: Business, actor: Actor, id: string, scope: 'one' | 'series'): Promise<void> {

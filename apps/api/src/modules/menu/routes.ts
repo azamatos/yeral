@@ -1,6 +1,7 @@
 /**
- * The services menu (book B-38; `/w/{slug}/services…`): the owner and administrators ("change services and prices")
- * keep groups and services; a specialist gets 403, someone not on the team 404.
+ * The services menu (book B-38; `/w/{slug}/services…`): the whole team reads it (prices are booking information,
+ * design §28.1: a specialist books for herself and filters the list by service); the owner and administrators ("change
+ * services and prices") keep groups and services, a specialist's write gets 403, someone not on the team 404.
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import {
@@ -38,7 +39,7 @@ const menuRoute = createRoute({
   method: 'get',
   path: '/w/{slug}/services',
   tags,
-  summary: 'The services menu: groups and services in the clients’ order, with who does each',
+  summary: 'The services menu: groups and services in the clients’ order, with who does each (the whole team reads it)',
   request: { params: workspaceParamSchema },
   responses: { 200: json(menuSchema), ...denied },
 })
@@ -109,7 +110,8 @@ const orderRoute = createRoute({
 
 export const menuRoutes = new OpenAPIHono<AppEnv>()
   .openapi(menuRoute, async (c) => {
-    const { business } = await requireServices(c, c.req.valid('param').slug)
+    // the whole team: a specialist books for herself from it and filters the bookings list by service
+    const { business } = await requireMember(c, c.req.valid('param').slug, { draft: true })
     return c.json(await menuOf(c.var.deps.db, business.id, c.var.deps.now()), 200)
   })
   // the fixed paths before `{serviceId}`

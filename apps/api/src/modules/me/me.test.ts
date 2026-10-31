@@ -496,6 +496,8 @@ describe('account', () => {
         '/v1/w/{slug}/calendar',
         '/v1/w/{slug}/calendar/blocks',
         '/v1/w/{slug}/calendar/blocks/{id}',
+        '/v1/w/{slug}/bookings/{code}',
+        '/v1/w/{slug}/bookings/{code}/note',
         '/v1/w/{slug}/bookings/{code}/undo',
         '/v1/w/{slug}/bookings/{code}/move',
         '/v1/w/{slug}/bookings/{code}/cancel',
