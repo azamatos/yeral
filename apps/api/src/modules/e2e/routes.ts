@@ -6,7 +6,7 @@
  */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { BOOKING_STATUSES } from '@yeral/domain/model'
-import { addDays } from '@yeral/domain/time'
+import { addDays, today } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
 import type { Db } from '../../db/client'
 import { bookingItems, bookings } from '../../db/schema'
@@ -19,6 +19,8 @@ import { completeVisits, expireRequests } from '../jobs/run'
 const elapseRoute = createRoute({
   method: 'post',
   path: '/e2e/bookings/{code}/elapse',
+  // a test hook has no place in the public OpenAPI document (`/openapi.json`)
+  hide: true,
   tags: ['e2e'],
   summary:
     'Test hook (`E2E_HOOKS`): time passes for one booking — a waiting request’s hold ends now and the expiry job runs; a confirmed visit becomes a day earlier and the completion job runs',
@@ -31,11 +33,14 @@ const DAYS_BACK = 7
 
 /**
  * A visit that has ended: the same time on an earlier day, the first one back where its specialist's day has room
- * (the no-overlap constraint on the items' `span`, which follows `date`).
+ * (the no-overlap constraint on the items' `span`, which follows `date`). Counted back from today or the visit's
+ * own day, whichever is earlier: a visit booked days ahead stepped back from its own day would still be ahead,
+ * and the completion job would leave it confirmed.
  */
-async function backdate(db: Db, b: { id: string; date: string }): Promise<void> {
+async function backdate(db: Db, b: { id: string; date: string }, todayDate: string): Promise<void> {
+  const from = b.date < todayDate ? b.date : todayDate
   for (let back = 1; back <= DAYS_BACK; back++) {
-    const date = addDays(b.date, -back)
+    const date = addDays(from, -back)
     try {
       await db.transaction(async (tx) => {
         await tx.update(bookings).set({ date }).where(eq(bookings.id, b.id))
@@ -62,7 +67,7 @@ export const e2eRoutes = new OpenAPIHono<AppEnv>().openapi(elapseRoute, async (c
       .where(eq(bookings.id, b.id))
     await expireRequests(deps)
   } else if (b.status === 'confirmed') {
-    await backdate(deps.db, b)
+    await backdate(deps.db, b, today(deps.now()))
     await completeVisits(deps)
   } else throw new ApiError('invalid_status')
   const [after] = await deps.db.select({ status: bookings.status }).from(bookings).where(eq(bookings.id, b.id))
