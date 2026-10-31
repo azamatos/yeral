@@ -96,17 +96,18 @@ export const HiddenValue: Story = {
   },
 }
 
-/** Loading · the skeletons keep the geometry; the row is a status. */
+/** Loading · the skeletons keep the geometry; the row stays a list and says `aria-busy` (a known tile may sit beside a skeleton). */
 export const Loading: Story = {
   render: () => (
     <StatRow columns={3} loading aria-label="Loading">
-      <StatTileSkeleton />
-      <StatTileSkeleton />
-      <StatTileSkeleton />
+      <StatTile label="Visits" value="12" size="m" />
+      <StatTileSkeleton size="m" />
+      <StatTileSkeleton size="m" />
     </StatRow>
   ),
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('status', { name: 'Loading' })).toHaveAttribute('aria-busy', 'true')
+    await expect(canvas.getByRole('list', { name: 'Loading' })).toHaveAttribute('aria-busy', 'true')
+    await expect(canvas.getByRole('listitem')).toHaveTextContent('Visits')
   },
 }
 

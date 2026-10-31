@@ -63,7 +63,7 @@ export function StatTileSkeleton({ size, className, ...props }: ComponentProps<'
   return (
     <div {...props} className={cn(tileVariants({ size }), className)}>
       <Skeleton className="h-3.5 w-18 rounded-sm" />
-      <Skeleton className={cn('w-22.5 rounded-sm', size === 'm' ? 'h-7' : 'h-[38px]')} />
+      <Skeleton className={cn('w-22.5 rounded-sm', size === 'm' ? 'h-7' : 'h-[38px] max-sm:h-[30px]')} />
       <Skeleton className="h-4.5 w-30 rounded-sm" />
     </div>
   )
@@ -72,7 +72,7 @@ export function StatTileSkeleton({ size, className, ...props }: ComponentProps<'
 export type StatRowProps = ComponentProps<'div'> & {
   /** How many tiles sit side by side (a tile left out re-flows the row 4 → 3). */
   columns?: 3 | 4
-  /** The tiles are skeletons: the row becomes a status («Loading», `aria-busy`). */
+  /** The tiles are skeletons: the row says `aria-busy` (it stays a list: a known tile beside a skeleton is still a list item). */
   loading?: boolean
 }
 
@@ -84,7 +84,7 @@ export type StatRowProps = ComponentProps<'div'> & {
 export function StatRow({ columns = 4, loading, className, ...props }: StatRowProps) {
   return (
     <div
-      role={loading ? 'status' : 'list'}
+      role="list"
       aria-busy={loading || undefined}
       {...props}
       className={cn(

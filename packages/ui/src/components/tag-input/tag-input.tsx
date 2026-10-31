@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react'
-import { useEffect, useId, useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Button } from '../button'
 import { Chip } from '../chip'
@@ -7,7 +7,8 @@ import { useField } from '../field'
 import { inputClass } from '../input'
 import { Pill, type PillProps } from '../pill'
 
-const same = (a: string, b: string) => a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase()
+// locale-independent on purpose: under Turkish casing `VIP`.toLocaleLowerCase() is `vıp`
+const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase()
 
 export type TagInputProps = Omit<ComponentProps<'div'>, 'onChange'> & {
   /** The tags to offer as toggle chips (the team's tags: VIP, Child, Student), in their order. */
@@ -54,11 +55,14 @@ export function TagInput({
   const [draft, setDraft] = useState('')
   const addRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const editorRef = useRef<HTMLSpanElement>(null)
   const wasAdding = useRef(false)
   const captionId = useId()
   const field = useField()
   const off = disabled ?? field?.disabled
-  const chips = [...options, ...value.filter((v) => !options.some((o) => same(o, v)))]
+  // the options, then the values that match none of them; one chip per tag whatever its case or spaces
+  const chips = [...options, ...value].reduce<string[]>((acc, tag) => (acc.some((c) => same(c, tag)) ? acc : [...acc, tag]), [])
+  const describedBy = [caption ? captionId : null, field?.describedBy].filter(Boolean).join(' ') || undefined
 
   // the field and the «+ tag» chip take turns in the same place: focus follows whichever has just mounted
   useEffect(() => {
@@ -67,29 +71,29 @@ export function TagInput({
     wasAdding.current = adding
   }, [adding])
 
-  // Esc while the field is open closes the field, nothing else. Inside a Modal or Drawer, Radix's DismissableLayer
-  // hears keydown on `document` in the capture phase, before the input's own handler, so a `preventDefault` there
-  // comes too late: claim the key on `window` first (Radix leaves a prevented event alone).
+  const close = useCallback(() => {
+    setAdding(false)
+    setDraft('')
+  }, [])
+
+  // Esc in the open field closes the field, nothing else. Inside a Modal or Drawer, Radix's DismissableLayer hears
+  // keydown on `document` in the capture phase, before the input's own handler, so a `preventDefault` there comes
+  // too late: claim the key on `window` first (Radix leaves a prevented event alone). Only for keys aimed at the
+  // field itself: Esc on a popover open beside it still goes to that popover.
   useEffect(() => {
     if (!adding) return
     const onEsc = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== 'Escape') return
+      if (e.key !== 'Escape' || !(e.target instanceof Node) || !editorRef.current?.contains(e.target)) return
       e.preventDefault()
-      setAdding(false)
-      setDraft('')
+      close()
     }
     window.addEventListener('keydown', onEsc, { capture: true })
     return () => window.removeEventListener('keydown', onEsc, { capture: true })
-  }, [adding])
+  }, [adding, close])
 
   // a tag in `value` matches an option in any case (`vip` is the `VIP` chip)
   const isOn = (tag: string) => value.some((v) => same(v, tag))
   const toggle = (tag: string) => onChange(isOn(tag) ? value.filter((v) => !same(v, tag)) : [...value, tag])
-
-  const close = () => {
-    setAdding(false)
-    setDraft('')
-  }
 
   const add = () => {
     const tag = draft.trim()
@@ -112,7 +116,8 @@ export function TagInput({
     <div
       role="group"
       aria-labelledby={field?.labelId}
-      aria-describedby={caption ? captionId : undefined}
+      aria-describedby={describedBy}
+      aria-invalid={field?.invalid || undefined}
       {...props}
       className={cn('flex flex-wrap items-center gap-2', className)}
     >
@@ -122,17 +127,18 @@ export function TagInput({
         </Chip>
       ))}
       {adding ? (
-        <span className="inline-flex items-center gap-1.5">
+        <span ref={editorRef} className="inline-flex items-center gap-1.5">
           <input
             ref={inputRef}
             aria-label={newTagLabel}
             placeholder={placeholder}
             value={draft}
+            disabled={off}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKeyDown}
             className={cn(inputClass, 'h-9 w-45 rounded-pill text-small')}
           />
-          <Button size="s" onClick={add}>
+          <Button size="s" disabled={off} onClick={add}>
             {addButtonLabel}
           </Button>
         </span>
