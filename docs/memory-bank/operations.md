@@ -134,7 +134,9 @@ demo seed while empty), the api (jobs tick inside), the business app, the client
 http://api.yeral.localhost/docs. A single-page app's image
 (`infra/docker/business.Dockerfile`) builds it with its hosts baked in (`YERAL_ENV`, `YERAL_DOMAIN` build arguments →
 `VITE_*`) and serves `dist/` with a small Caddy of its own (`static.Caddyfile`: every app address answers
-`index.html`, hashed files cached for a year, `noindex`); the front door adds the security headers. The client site's
+`index.html`, hashed files cached for a year, `noindex`); the front door adds the security headers (HSTS and a Content
+Security Policy per site, from an inventory of what each app loads: `infra/server/README.md`, "Security headers";
+the client site sends its own policy with a nonce per page, `apps/client/src/app/entrypoint/csp.ts`). The client site's
 image (`infra/docker/client.Dockerfile`) bakes its hosts in the same way and runs one Node process with no
 `node_modules`: Vite bundles the renderer (`ssr.noExternal`) and esbuild the server (`apps/client/server.mjs` →
 `dist/node.mjs`: hashed files cached for a year and a missing one a 404, every page rendered by TanStack Start). The

@@ -5,10 +5,13 @@
 # gateway and every such visitor would share one rate-limit bucket (infra/server/README.md, "Still to do").
 # The hosts are written here because Caddy needs them; the apps read theirs from config (@yeral/lib/site).
 
-# what every Ýeral site sends and logs
+# what every Ýeral site sends and logs (infra/server/README.md, "Security headers")
 (yeral_site) {
 	encode zstd gzip
 	header {
+		# a year of HTTPS only, for every *.yeral.app host (all of them are on TLS: README, "DNS records"); no `preload`,
+		# which couldn't be undone quickly
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options nosniff
 		Referrer-Policy strict-origin-when-cross-origin
 		X-Frame-Options SAMEORIGIN
@@ -33,6 +36,13 @@ api.yeral.app {
 	request_body {
 		max_size 11MB
 	}
+	# JSON, photos and the OpenAPI document load nothing and belong in no frame; the docs page (/docs) is Scalar's
+	# bundle from a CDN, whose needs aren't in the inventory yet, so it keeps only the directives that don't govern
+	# loading (README, "Security headers")
+	@docs path /docs
+	@not_docs not path /docs
+	header @not_docs Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+	header @docs Content-Security-Policy "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER); the
 	# events stream (`/v1/events/stream`, text/event-stream) goes through at once: reverse_proxy flushes it, and `encode`
 	# leaves its `no-transform` answer alone (checked in CI's Docker stack)
@@ -43,11 +53,18 @@ api.yeral.app {
 # the headers
 business.yeral.app {
 	import yeral_site
+	# a static build with no inline script; styles: React and MapLibre set style attributes, the workspace shell and
+	# MapLibre add a <style>; images: uploaded photos from the api, MapLibre's blobs and transparent data: pixel; the font
+	# is bundled; the api (requests, the events stream) and OpenFreeMap (style, glyphs, sprites, tiles) over fetch;
+	# MapLibre's worker is the bundled file under /assets/. The inventory: docs/memory-bank/log/2026-10-30-hsts-csp.md
+	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	reverse_proxy yeral-business:80
 }
 
 # the client site (since 25.10.2026, the owner: replacing the coming-soon page so slice 3's booking can be tried live):
-# its image renders the pages (client.Dockerfile). Kept out of search engines until the first launch opens.
+# its image renders the pages (client.Dockerfile). Kept out of search engines until the first launch opens. Its
+# Content-Security-Policy comes from the app itself (apps/client/src/app/entrypoint/csp.ts): every page gets a nonce
+# for the scripts TanStack Start writes inline, which no fixed header here could name.
 yeral.app {
 	import yeral_site
 	header X-Robots-Tag "noindex, nofollow"
@@ -55,5 +72,6 @@ yeral.app {
 }
 
 www.yeral.app {
+	import yeral_site
 	redir https://yeral.app{uri} permanent
 }

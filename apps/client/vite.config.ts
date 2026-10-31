@@ -17,7 +17,9 @@ export default defineConfig(({ command }) => ({
   plugins: [
     tanstackStart({
       srcDirectory: 'src',
-      // file routes in src/app/routes (Start splits each into its own chunk); the router in app/entrypoint (FSD app layer)
+      // file routes in src/app/routes (Start splits each into its own chunk); the router and the Start instance (the
+      // request middleware that sets the Content Security Policy) in app/entrypoint (FSD app layer)
+      start: { entry: 'app/entrypoint/start.ts' },
       router: {
         entry: 'app/entrypoint/router.tsx',
         routesDirectory: 'app/routes',

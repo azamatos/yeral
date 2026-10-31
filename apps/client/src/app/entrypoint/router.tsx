@@ -1,5 +1,6 @@
 import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
+import { getGlobalStartContext } from '@tanstack/react-start'
 import { createSiteApi } from './site-api'
 import { routeTree } from '../routeTree.gen'
 
@@ -10,9 +11,13 @@ import { routeTree } from '../routeTree.gen'
  */
 export function getRouter() {
   const api = createSiteApi()
+  // the request's nonce (start.ts) goes onto every script the server writes, so the page's Content Security Policy
+  // lets them run; the browser has no request context and reads the nonce from the page itself
+  const nonce = getGlobalStartContext()?.nonce
   const router = createRouter({
     routeTree,
     context: api,
+    ssr: nonce ? { nonce } : undefined,
     defaultPreload: 'intent',
     // the query cache decides what's fresh; the router asks every time
     defaultPreloadStaleTime: 0,
