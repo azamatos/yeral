@@ -180,7 +180,8 @@ async function tellExpiredInvites(deps: Deps): Promise<number> {
   })
 }
 
-async function expireRequests(deps: Deps): Promise<number> {
+/** Waiting requests whose hold ran out: cancelled with up to 3 offered times (book B-20); the e2e hook runs it too. */
+export async function expireRequests(deps: Deps): Promise<number> {
   const now = new Date(deps.now())
   const due = await deps.db
     .select()
@@ -225,7 +226,8 @@ async function skipStale(work: Promise<unknown>): Promise<void> {
   }
 }
 
-async function completeVisits(deps: Deps): Promise<number> {
+/** Confirmed visits whose end has passed: completed; the e2e hook runs it too. */
+export async function completeVisits(deps: Deps): Promise<number> {
   const { date, min } = localOf(deps.now())
   // a visit ends at minute `end` of its business day, which may run past midnight (book Q-105): yesterday's day is
   // done only once its end, counted into today (end − 1440), has passed

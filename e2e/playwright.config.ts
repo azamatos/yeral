@@ -3,8 +3,9 @@ import { defineConfig, devices } from '@playwright/test'
 /**
  * The end-to-end flows run against servers already up: CI's Docker stack on `*.yeral.localhost` (operations.md,
  * "The production-like stack"; Chromium resolves `*.localhost` to this machine by itself), or a developer's dev
- * servers through `E2E_CLIENT_URL` and `E2E_BUSINESS_URL` (`http://localhost:<PORT_BASE + 1>` and `+ 2`). Chromium
- * only (ADR 0013): the flows prove the apps and the api work together, not the browsers.
+ * servers through `E2E_CLIENT_URL`, `E2E_BUSINESS_URL` and `E2E_API_URL` (`http://localhost:<PORT_BASE + 1>`, `+ 2`
+ * and `+ 4`, the api with `E2E_HOOKS=true` for the flows that let a booking's time pass). Chromium only (ADR 0013):
+ * the flows prove the apps and the api work together, not the browsers.
  */
 export default defineConfig({
   testDir: './tests',

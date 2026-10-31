@@ -216,7 +216,7 @@ pnpm dev --filter=@yeral/storybook   # Storybook on :3005 (PORT_BASE + 5)
 pnpm dev --filter=@yeral/business --filter=@yeral/api   # the business app on :3002 (PORT_BASE + 2) with the api on :3004
 pnpm dev --filter=@yeral/client --filter=@yeral/api     # the client site on :3001 (PORT_BASE + 1) with the api
 pnpm --filter @yeral/client build && pnpm --filter @yeral/client start   # the built site on Node (PORT, default 3000)
-E2E_CLIENT_URL=http://localhost:3001 E2E_BUSINESS_URL=http://localhost:3002 pnpm e2e   # the Playwright flows against your dev servers (api with SIGN_IN_CODE_ON_SCREEN=true); without the variables, against the Docker stack
+E2E_CLIENT_URL=http://localhost:3001 E2E_BUSINESS_URL=http://localhost:3002 E2E_API_URL=http://localhost:3004 pnpm e2e   # the Playwright flows against your dev servers (api with SIGN_IN_CODE_ON_SCREEN=true and E2E_HOOKS=true); without the variables, against the Docker stack
 pnpm docker:up                  # production-like stack (Caddy + images) on *.yeral.localhost
 ```
 

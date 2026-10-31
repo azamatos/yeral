@@ -5,6 +5,8 @@
  */
 export const CLIENT_URL = (process.env.E2E_CLIENT_URL ?? 'http://yeral.localhost').replace(/\/$/, '')
 export const BUSINESS_URL = (process.env.E2E_BUSINESS_URL ?? 'http://business.yeral.localhost').replace(/\/$/, '')
+/** The api, for the test hook that lets a booking's time pass (`E2E_HOOKS`; `http://localhost:3504` for `PORT_BASE=3500`). */
+export const API_URL = (process.env.E2E_API_URL ?? 'http://api.yeral.localhost').replace(/\/$/, '')
 
 /**
  * The demo seed's salon (apps/api/src/db/seed/demo-data.ts): verified, so clients may book it, and confirming by
