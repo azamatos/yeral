@@ -10,6 +10,7 @@ import { addDays, today } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
 import type { Db } from '../../db/client'
 import { bookingItems, bookings } from '../../db/schema'
+import type { Deps } from '../../deps'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json } from '../../http/openapi'
@@ -31,27 +32,42 @@ const elapseRoute = createRoute({
 /** How many days back a visit may go to find its specialist free: the seed's days are never full that long. */
 const DAYS_BACK = 7
 
+/** The visit on another day, the same time (the items' `span` follows `date`); false when its specialist is busy then. */
+async function moveTo(db: Db, id: string, date: string): Promise<boolean> {
+  try {
+    await db.transaction(async (tx) => {
+      await tx.update(bookings).set({ date }).where(eq(bookings.id, id))
+      await tx.update(bookingItems).set({ date }).where(eq(bookingItems.bookingId, id))
+    })
+    return true
+  } catch (e) {
+    if (isSlotConflict(e)) return false
+    throw e
+  }
+}
+
+const statusOf = async (db: Db, id: string) =>
+  (await db.select({ status: bookings.status }).from(bookings).where(eq(bookings.id, id)))[0]!.status
+
 /**
  * A visit that has ended: the same time on an earlier day, the first one back where its specialist's day has room
- * (the no-overlap constraint on the items' `span`, which follows `date`). Counted back from today or the visit's
- * own day, whichever is earlier: a visit booked days ahead stepped back from its own day would still be ahead,
- * and the completion job would leave it confirmed.
+ * and the completion job then takes it. Counted back from today or the visit's own day, whichever is earlier: a
+ * visit booked days ahead stepped back from its own day would still be ahead. One day back isn't always enough
+ * (a visit past midnight, book Q-105, ends into the next day), so the job runs after each step until it did.
  */
-async function backdate(db: Db, b: { id: string; date: string }, todayDate: string): Promise<void> {
+async function endVisit(deps: Deps, b: { id: string; date: string }): Promise<void> {
+  const todayDate = today(deps.now())
   const from = b.date < todayDate ? b.date : todayDate
   for (let back = 1; back <= DAYS_BACK; back++) {
-    const date = addDays(from, -back)
-    try {
-      await db.transaction(async (tx) => {
-        await tx.update(bookings).set({ date }).where(eq(bookings.id, b.id))
-        await tx.update(bookingItems).set({ date }).where(eq(bookingItems.bookingId, b.id))
-      })
-      return
-    } catch (e) {
-      // the specialist is busy at that time on that day: a day earlier
-      if (!isSlotConflict(e) || back === DAYS_BACK) throw e
-    }
+    if (!(await moveTo(deps.db, b.id, addDays(from, -back)))) continue
+    await completeVisits(deps)
+    if ((await statusOf(deps.db, b.id)) !== 'confirmed') return
   }
+  throw new ApiError(
+    'invalid_status',
+    { daysTried: DAYS_BACK },
+    'no earlier day ended the visit: its specialist is busy at that time, or its end is still ahead',
+  )
 }
 
 export const e2eRoutes = new OpenAPIHono<AppEnv>().openapi(elapseRoute, async (c) => {
@@ -67,9 +83,9 @@ export const e2eRoutes = new OpenAPIHono<AppEnv>().openapi(elapseRoute, async (c
       .where(eq(bookings.id, b.id))
     await expireRequests(deps)
   } else if (b.status === 'confirmed') {
-    await backdate(deps.db, b, today(deps.now()))
-    await completeVisits(deps)
+    // moving a class or table booking's day would part it from its session or table: the flows book appointments
+    if (b.type !== 'appointment') throw new ApiError('invalid_status', { type: b.type }, 'only an appointment can end here')
+    await endVisit(deps, b)
   } else throw new ApiError('invalid_status')
-  const [after] = await deps.db.select({ status: bookings.status }).from(bookings).where(eq(bookings.id, b.id))
-  return c.json({ status: after!.status }, 200)
+  return c.json({ status: await statusOf(deps.db, b.id) }, 200)
 })

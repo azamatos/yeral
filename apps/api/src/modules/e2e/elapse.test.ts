@@ -1,5 +1,5 @@
 /** The end-to-end flows' hook: time passes for one booking, and the real jobs do the rest (`E2E_HOOKS`). */
-import { addDays, today } from '@yeral/domain/time'
+import { addDays, nowMin, today } from '@yeral/domain/time'
 import { and, eq, gt, gte } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -48,8 +48,8 @@ describe('e2e hook: time passes for one booking', () => {
         and(
           eq(bookings.businessId, salon),
           eq(bookings.status, 'confirmed'),
-          gte(bookings.date, '2026-10-14'),
-          gt(bookings.start, 11 * 60 + 20),
+          gte(bookings.date, today(DEMO_NOW)),
+          gt(bookings.start, nowMin(DEMO_NOW)),
         ),
       )
     expect(confirmed, 'the seed has a visit ahead').toBeDefined()
@@ -69,7 +69,7 @@ describe('e2e hook: time passes for one booking', () => {
     const [confirmed] = await db
       .select()
       .from(bookings)
-      .where(and(eq(bookings.businessId, salon), eq(bookings.status, 'confirmed'), gt(bookings.start, 11 * 60 + 20)))
+      .where(and(eq(bookings.businessId, salon), eq(bookings.status, 'confirmed'), gt(bookings.start, nowMin(DEMO_NOW))))
     expect(confirmed, 'the seed has another visit ahead').toBeDefined()
     const ahead = addDays(today(DEMO_NOW), 3)
     await db.transaction(async (tx) => {

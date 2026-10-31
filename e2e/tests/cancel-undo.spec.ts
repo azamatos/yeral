@@ -1,4 +1,5 @@
-import { expect, test, type Locator } from '@playwright/test'
+import type { Locator } from '@playwright/test'
+import { expect, test } from '../src/test'
 import { bookAndConfirm, bookingRow, chooseAndSignIn, confirmAsOwner, openBookingDrawer, openMyBookings, sendBooking } from '../src/booking'
 import { signInWithCode } from '../src/sign-in'
 import { clientName, freshPhone } from '../src/stack'

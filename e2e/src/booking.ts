@@ -27,9 +27,9 @@ export async function openRequest(owner: Page, date: string, code: string): Prom
   return drawer
 }
 
-/** The owner confirms the request from its drawer; the calendar page stays open for the test. */
+/** The owner confirms the request from its drawer (opened straight away, one page load); the calendar page stays open for the test. */
 export async function confirmAsOwner(browser: Browser, date: string, code: string): Promise<Page> {
-  const owner = await openOwnerCalendar(browser)
+  const owner = await (await browser.newContext({ storageState: OWNER_STATE })).newPage()
   const drawer = await openRequest(owner, date, code)
   await drawer.getByRole('button', { name: 'Confirm', exact: true }).click()
   await expect(owner.getByText('Booking confirmed · the client is notified')).toBeVisible()
@@ -90,8 +90,12 @@ export async function pickFirstFreeTime(page: Page): Promise<string> {
   const nextFree = page.getByRole('button', { name: /^Next free day/ })
   await expect(slot.first().or(nextFree)).toBeVisible()
   if (await nextFree.isVisible()) await nextFree.click()
-  const time = (await slot.first().textContent())?.trim()
-  await slot.first().click()
+  // read and click the same element: the list may re-render between two lookups (the push channel, a day's load)
+  const first = slot.first()
+  await expect(first).toBeVisible()
+  const handle = await first.elementHandle()
+  const time = (await handle.textContent())?.trim()
+  await handle.click()
   return time!
 }
 

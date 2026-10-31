@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../src/test'
 import { bookAndConfirm, bookingRow, openMyBookings } from '../src/booking'
 import { freshPhone } from '../src/stack'
 
