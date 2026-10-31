@@ -14,9 +14,19 @@
     "arrival": {
       "new": "New request: {what}",
       "move": "Time change request: {what}",
+      "warn": "Request time running out: {what}",
+      "newTitle": "New request",
+      "moveTitle": "Time change request",
+      "warnTitle": "Request time running out",
       "today": "today",
       "tomorrow": "tomorrow",
       "open": "Open"
+    },
+    "notifications": {
+      "ask": "<b>Turn on notifications to hear new requests.</b>",
+      "allow": "Allow",
+      "blocked": "Notifications are blocked in this browser. Allow them in the browser’s settings.",
+      "close": "Close"
     },
     "menu": "Main menu",
     "sections": {

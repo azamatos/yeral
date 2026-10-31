@@ -11,6 +11,7 @@ import type { Me } from '@yeral/contract/account'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { SectionPage } from '@/pages/section'
+import { fakeBrowserNotifications } from '@/shared/lib/browser-notifications'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from './workspace-shell'
 
@@ -323,6 +324,25 @@ export const InviteWaiting: Story = {
     await expect(await canvas.findByText('Bag kafe')).toBeVisible()
     await userEvent.click(canvas.getByRole('link', { name: 'Open' }))
     await expect(await canvas.findByText('Log in')).toBeVisible()
+  },
+}
+
+/**
+ * The browser hasn't been asked for notifications yet (F-170): the banner in the shell's slot at the top of the
+ * page, under a waiting invite's note; Allow asks the browser (a fake here) and the banner goes.
+ */
+export const NotificationsAsk: Story = {
+  name: 'Notifications · ask',
+  args: { server: fakeApi({ ...MAYSA, invites: [invite] }), browser: fakeBrowserNotifications() },
+  play: async ({ canvas }) => {
+    const main = within(canvas.getByRole('main'))
+    await expect(await main.findByText('Bag kafe')).toBeVisible()
+    const banner = await main.findByRole('status')
+    await expect(banner).toHaveTextContent('Turn on notifications to hear new requests.')
+    // the invite's note first, the notifications banner under it
+    await expect(banner.compareDocumentPosition(main.getByText('Bag kafe')) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy()
+    await userEvent.click(main.getByRole('button', { name: 'Allow' }))
+    await waitFor(() => expect(main.queryByText('Turn on notifications to hear new requests.')).toBeNull())
   },
 }
 
