@@ -76,15 +76,19 @@ and milestones: `docs/memory-bank/progress.md`.
 
 - The budget is the week, not the night: a run never spends more than the weekly limit allows. Before a run, weigh it
   against what's left of the week and the days left, and stop when its share is spent.
-- Use as many agents as the work needs, but when an agent's context is full, drop it and start a fresh one from its PR
-  and log note; never resume a full one. Every step re-reads the whole context: on 2026-10-25 four agents resumed all
+- One agent at a time by default, two at most (different packages, a time window the owner set), one on battery
+  (owner, 2026-10-31): parallel agents don't save tokens, only clock time. When an agent's context is full, drop it
+  and start a fresh one from its PR and log note; never resume a full one. Every step re-reads the whole context: on 2026-10-25 four agents resumed all
   day took 85 % of the day's tokens, and the week's limit went to 52 %.
 
 ## Parallel work (ADR 0014)
 
 - Take a task from GitHub Issues; claim it with the label `agent:<name>`; stay inside the scope it lists.
-- Work in your own git worktree and branch (`feat/<issue>-<topic>`), never on `main`. Set `PORT_BASE` (3100, 3200…)
-  and use your own database (`pnpm db:setup`).
+- Work on your own branch (`feat/<issue>-<topic>`), never on `main`: alone, in the main checkout; a second concurrent
+  agent in the one shared worktree (`.claude/worktrees/shared`, reused, never a fresh one per agent) with its own
+  `PORT_BASE` (3100, 3200…) and database (`pnpm db:setup`).
+- Checks filtered to what you touched (`--filter`); no local story suite, dev servers or Playwright while another agent
+  runs; stop your Postgres and servers before you report; remove a worktree once its branch is pushed.
 - Hot spots (`packages/contract`, `packages/ui` tokens, the dependency catalog, `turbo.json`, root configs, migrations):
   small separate PRs, announced on the issue.
 - Don't edit `activeContext.md` or `progress.md` during parallel work: add `docs/memory-bank/log/YYYY-MM-DD-<topic>.md`
