@@ -1523,6 +1523,58 @@
       "lastVisit": "Last visit: {date} · full history on the client’s card",
       "noVisits": "No earlier visits",
       "move": "Move to another time"
+    },
+    "report": {
+      "report": "Report",
+      "types": {
+        "noshow": "No-show",
+        "late": "Came late",
+        "rude": "Rude behaviour",
+        "other": "Other"
+      },
+      "otherMenu": "Other…",
+      "captions": {
+        "noshow": "The booking becomes No-show · counts towards Phone only",
+        "noshowReplaces": "Replaces the earlier report · the booking becomes No-show",
+        "late": "The booking doesn’t change",
+        "rude": "The booking doesn’t change",
+        "other": "Write what happened"
+      },
+      "otherTitle": "What happened?",
+      "close": "Close",
+      "otherField": "What happened, in a few words",
+      "otherPlaceholder": "Write a few words",
+      "otherCaption": "Saved to the client’s card; only the team sees it. Only no-shows count towards Phone only.",
+      "back": "Back",
+      "save": "Save",
+      "markedNoShow": "Marked as No-show · saved to the client’s card",
+      "markedNoShowReplaces": "Marked as No-show · replaces the earlier report",
+      "saved": "Report saved to the client’s card",
+      "removed": "Report removed",
+      "removedNoShow": "Report removed · the booking is {status, select, completed {Completed} other {Confirmed}} again",
+      "undo": "Undo",
+      "boxTitle": "Report",
+      "remove": "Remove report",
+      "removeAria": "Remove report: {type}",
+      "boxCaption": "The client isn’t told. You can remove it until {date}.",
+      "boxCaptionLocked": "The client isn’t told."
+    },
+    "cancel": {
+      "button": "Cancel booking",
+      "title": "Cancel the booking",
+      "close": "Close",
+      "lead": "The client is notified and sees the reason in My bookings.",
+      "reason": "Reason",
+      "reasons": {
+        "client_called": "The client called to cancel",
+        "staff_away": "The specialist can’t come in",
+        "other": "Another reason"
+      },
+      "otherLabel": "Reason in a few words",
+      "otherPlaceholder": "Write the reason in a few words — the client will see it",
+      "back": "Back",
+      "confirm": "Cancel booking",
+      "done": "Booking cancelled · the client is notified"
     }
   }
 }

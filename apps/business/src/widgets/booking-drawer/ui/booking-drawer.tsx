@@ -24,22 +24,29 @@ import { useLocale, useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useInternalStatusName, useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
+import { canCancelBooking, canRemoveReport, reportKinds } from '../model/report-rules'
 import { useNoteAutosave } from '../model/use-note-autosave'
+import { useReportActions } from '../model/use-report-actions'
+import { CancelBookingModal } from './cancel-booking-modal'
 import { AlertNotes, ClientBlock, RecentVisits, RECENT_VISITS } from './client-block'
+import { ReportBox } from './report-box'
+import { ReportMenu } from './report-menu'
 
 /**
  * The booking drawer (B-Calendar `panel=booking`, DS-Business BookingDrawer, book F-127, B-16 step 5, B-29): the
  * booking `code` from the address (`?booking=`), read on its own (`sdk.calendar.booking`), so the list and the client
  * card open it too. Its status and where it came from, «Internal status» on a confirmed one (saved at once, Undo in
  * the toast), the client with their facts from the card, the notes the team sees, the details, the client's note,
- * the internal note saved as it's typed, the last visits; the footer holds what its status allows (move, slice 4's
- * B4; report and cancel, B3). A bottom sheet under 768.
+ * the internal note saved as it's typed, the report filed («Remove report» for 7 days), the last visits; the footer
+ * holds what its status allows: «Move to another time» (slice 4's B4), «Report ▾» and «Cancel booking» (book B-27,
+ * B-28). A bottom sheet under 768.
  */
 export function BookingDrawer({
   slug,
   code,
   now,
   level,
+  staffId,
   placeholder,
   onBookAgain,
   onMove,
@@ -50,6 +57,8 @@ export function BookingDrawer({
   now: number
   /** The reader's level: a specialist reads no prices in the visits (B-Calendar `role=specialist`). */
   level: Level
+  /** The reader's own staff id: a specialist removes only the reports they filed (book Q-207). */
+  staffId?: string
   /** The booking as the page already has it (the day's view): shown at once while it's read on its own. */
   placeholder?: CalendarBooking
   /** «Book again» (B-23): a new booking for this client, with these services and this person. Without it, no button. */
@@ -84,7 +93,9 @@ export function BookingDrawer({
             key={booking.code}
             slug={slug}
             booking={booking}
+            now={now}
             level={level}
+            staffId={staffId}
             statuses={statuses}
             card={card}
             onBookAgain={onBookAgain && (() => onBookAgain(booking))}
@@ -101,7 +112,7 @@ export function BookingDrawer({
             </Callout>
           </DrawerBody>
         )}
-        {booking && <Footer booking={booking} now={now} onMove={onMove && (() => onMove(booking))} />}
+        {booking && <Footer slug={slug} booking={booking} now={now} onMove={onMove && (() => onMove(booking))} onClose={onClose} />}
       </DrawerContent>
     </Drawer>
   )
@@ -114,14 +125,18 @@ const isGone = (error: unknown) => isApiError(error) && error.status === 404
 function Body({
   slug,
   booking: b,
+  now,
   level,
+  staffId,
   statuses,
   card,
   onBookAgain,
 }: {
   slug: string
   booking: CalendarBooking
+  now: number
   level: Level
+  staffId?: string
   statuses: InternalStatus[]
   card: Parameters<typeof ClientBlock>[0]['card']
   onBookAgain?: () => void
@@ -131,6 +146,7 @@ function Body({
   const fmt = useFmt()
   const join = useJoin()
   const errorText = useErrorText()
+  const report = useReportActions(slug, now)
   const Icon = BOOKING_STATUS_ICON[b.status]
   const staff = join([...new Set(b.items.map((i) => i.staff).filter((n): n is string => !!n))], 'list')
   const note = useNoteAutosave({ slug, code: b.code, saved: b.internalNote })
@@ -161,7 +177,15 @@ function Body({
           ...(b.price ? [{ key: t('price'), value: fmt.price(b.price) }] : []),
         ]}
       />
-      {/* B3's ReportBox («Report · No-show · … · Remove report») goes here, under the details, when `b.complaint` */}
+      {b.complaint && (
+        <ReportBox
+          booking={b}
+          now={now}
+          canRemove={canRemoveReport(b, now, { level, staffId })}
+          removing={report.removing}
+          onRemove={() => report.remove(b)}
+        />
+      )}
       {b.clientNote && <Quote label={t('clientNote')}>{t('noteText', { note: b.clientNote })}</Quote>}
       <Field
         label={t('internalNote')}
@@ -265,21 +289,72 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
 }
 
 /**
- * The footer by status (B-Calendar `.drw-f`): «Move to another time» on a confirmed booking still ahead (B4); B3 adds
- * «Report ▾» on a confirmed or completed one and «Cancel booking» (danger text, its own line on the right) beside
- * the move. A no-show or a cancelled booking has none.
+ * The footer by status (B-Calendar `.drw-f`, book B-27, B-28): «Move to another time» on a confirmed booking still
+ * ahead (B4), «Report ▾» while the booking takes a report (confirmed or completed; after a no-show, or outside the
+ * window with a report, none: the report box alone), «Cancel booking» (danger text; on its own line, on the right,
+ * when the three don't fit) on a confirmed one that hasn't started. A cancelled booking has none.
  */
-function Footer({ booking: b, now, onMove }: { booking: CalendarBooking; now: number; onMove?: () => void }) {
+function Footer({
+  slug,
+  booking: b,
+  now,
+  onMove,
+  onClose,
+}: {
+  slug: string
+  booking: CalendarBooking
+  now: number
+  onMove?: () => void
+  onClose: () => void
+}) {
   const t = useTranslations('bookingDrawer.booking')
+  const c = useTranslations('bookingDrawer.cancel')
+  const fmt = useFmt()
+  const join = useJoin()
+  const [cancelling, setCancelling] = useState(false)
   const at = localOf(now)
   const ahead = b.date > at.date || (b.date === at.date && b.start >= at.min)
   const canMove = b.status === 'confirmed' && ahead && !b.move
-  if (!(canMove && onMove)) return null
+  const kinds = reportKinds(b, now)
+  const canCancel = canCancelBooking(b, now)
+  if (!((canMove && onMove) || kinds.length || canCancel)) return null
+  // the booking in one line, under the modals' titles (B-Calendar `ctxOf`)
+  const context = join(
+    [
+      b.client.name ?? t('unnamed'),
+      join(
+        b.items.map((i) => i.service),
+        'plus',
+      ),
+      t('when', { date: fmt.weekdayDate(b.date), time: fmt.timeRange(b.start, b.end) }),
+    ],
+    'dot',
+  )
   return (
-    <DrawerFooter>
-      <Button variant="secondary" onClick={onMove}>
-        {t('move')}
-      </Button>
+    <DrawerFooter className="sm:[&>*]:flex-none">
+      {canMove && onMove && (
+        <Button variant="secondary" onClick={onMove}>
+          {t('move')}
+        </Button>
+      )}
+      <ReportMenu slug={slug} booking={b} now={now} kinds={kinds} context={context} />
+      {canCancel && (
+        <Button variant="danger-ghost" className="sm:ml-auto" onClick={() => setCancelling(true)}>
+          {c('button')}
+        </Button>
+      )}
+      {cancelling && (
+        <CancelBookingModal
+          slug={slug}
+          booking={b}
+          context={context}
+          onOpenChange={setCancelling}
+          onCancelled={() => {
+            setCancelling(false)
+            onClose()
+          }}
+        />
+      )}
     </DrawerFooter>
   )
 }

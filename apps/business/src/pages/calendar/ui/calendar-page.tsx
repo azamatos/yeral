@@ -264,6 +264,8 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           code={search.booking}
           now={now}
           level={level}
+          // a specialist's view is their own column alone: its id is theirs (the reports they may remove)
+          staffId={specialist ? view.data?.columns[0]?.staffId : undefined}
           placeholder={view.data?.bookings.find((b) => b.code === search.booking)}
           onClose={() => go({ booking: undefined }, true)}
         />

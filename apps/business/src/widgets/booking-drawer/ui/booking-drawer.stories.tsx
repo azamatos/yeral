@@ -5,136 +5,12 @@
  * one the reader can't see, a phone, and the Russian length.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import type { CalendarBooking } from '@yeral/contract/calendar'
-import type { ClientCard } from '@yeral/contract/clients'
-import type { InternalStatus as Status } from '@yeral/contract/settings'
 import type { Level } from '@yeral/domain/permissions'
-import { addDays, today } from '@yeral/domain/time'
+import { addDays } from '@yeral/domain/time'
 import { expect, fn, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { BookingDrawer } from './booking-drawer'
-
-const now = Date.now()
-const DAY = today(now)
-const TOMORROW = addDays(DAY, 1)
-const id = (n: number) => `00000000-0000-4000-8000-00000000000${n}`
-const CODE = 'YR-48210'
-
-const booking = (patch: Partial<CalendarBooking> = {}): CalendarBooking => ({
-  code: CODE,
-  type: 'appointment',
-  date: TOMORROW,
-  start: 600,
-  end: 660,
-  status: 'confirmed',
-  cancelledBy: null,
-  source: 'web',
-  client: { id: id(7), name: 'Gözel Annaýewa', phone: '+99365102030' },
-  items: [{ serviceId: id(5), service: 'Women’s haircut', staffId: id(1), staff: 'Aýna', start: 600, end: 660, bufferAfter: 10 }],
-  price: { type: 'fixed', amount: 120 },
-  internalStatusId: null,
-  alert: false,
-  clientNote: 'Could you use the same colour as last time?',
-  internalNote: null,
-  holdUntil: null,
-  complaint: null,
-  move: null,
-  ...patch,
-})
-
-const visit = (n: number, daysAgo: number, service: string, status: ClientCard['history'][number]['status'], amount: number) => ({
-  code: `YR-4810${n}`,
-  date: addDays(DAY, -daysAgo),
-  start: 600,
-  end: 660,
-  status,
-  holdUntil: null,
-  items: [{ serviceId: id(5), service, staffId: id(1), staff: 'Aýna', start: 600, end: 660 }],
-  price: { type: 'fixed' as const, amount },
-})
-
-/** Gözel's card: 12 visits, one no-show, a note shown when she books, four past bookings (the one open among them). */
-const card = (patch: Partial<ClientCard> = {}, stats: Partial<ClientCard['stats']> = {}): ClientCard => ({
-  id: id(7),
-  name: 'Gözel Annaýewa',
-  phone: '+99365102030',
-  account: true,
-  birthday: null,
-  source: 'instagram',
-  tags: ['VIP'],
-  segments: ['regular'],
-  since: '2024-03-02',
-  stats: { visits: 12, avgCheck: 145, lastVisit: addDays(DAY, -9), noShows: 1, ...stats },
-  notes: [
-    { id: id(8), text: 'Allergic to ammonia dyes', alert: true, by: 'Maýsa', at: now - 86_400_000 },
-    { id: id(9), text: 'Prefers mornings', alert: false, by: 'Maýsa', at: now - 86_400_000 },
-  ],
-  upcoming: [],
-  history: [
-    { ...visit(0, 0, 'Women’s haircut', 'completed', 120), code: CODE },
-    visit(1, 9, 'Women’s haircut', 'completed', 120),
-    visit(2, 30, 'Hair colouring', 'noshow', 250),
-    visit(3, 62, 'Hair colouring', 'completed', 250),
-  ],
-  moreHistory: true,
-  reports: [],
-  settings: { phoneOnly: false, phoneOnlyByCount: false, noReminders: false },
-  ...patch,
-})
-
-const statuses: Status[] = [
-  { id: id(2), preset: 'arrived', name: 'Arrived', icon: 'user-check', color: '#066a41', enabled: true },
-  { id: id(3), preset: 'started', name: 'Started', icon: 'play', color: '#4429d6', enabled: false },
-  { id: id(4), preset: null, name: 'Preparing', icon: 'hourglass', color: '#93500a', enabled: true },
-]
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
-
-/** The api as the drawer asks it; `calls` collects what it was sent. */
-const fakeApi =
-  ({
-    booking: b = booking(),
-    card: c = card(),
-    internal = false,
-    gone = false,
-    calls = [],
-  }: {
-    booking?: CalendarBooking
-    card?: ClientCard | null
-    /** The workspace switched internal statuses on. */
-    internal?: boolean
-    /** The reader doesn't see this booking. */
-    gone?: boolean
-    calls?: { route: string; body: unknown }[]
-  } = {}): (() => typeof fetch) =>
-  () => {
-    // what was saved in this story, read back
-    let note = b.internalNote
-    let internalStatusId = b.internalStatusId
-    return async (input: RequestInfo | URL, init?: RequestInit) => {
-      const request = new Request(input, init)
-      const url = new URL(request.url)
-      const route = `${request.method} ${url.pathname.replace(/^\/v1/, '')}`
-      if (route === `GET /w/glow-studio/bookings/${CODE}`)
-        return gone ? json({ error: { code: 'not_found' } }, 404) : json({ ...b, internalNote: note, internalStatusId })
-      if (route === 'GET /w/glow-studio/settings/statuses') return json({ items: internal ? statuses : [], max: 5 })
-      if (route === `GET /w/glow-studio/clients/${id(7)}`) return c ? json(c) : json({ error: { code: 'not_found' } }, 404)
-      if (route === `PUT /w/glow-studio/bookings/${CODE}/note`) {
-        const body = (await request.json()) as { note: string | null }
-        calls.push({ route, body })
-        note = body.note
-        return new Response(null, { status: 204 })
-      }
-      if (route === `PUT /w/glow-studio/bookings/${CODE}/internal-status`) {
-        const body = (await request.json()) as { statusId: string | null }
-        calls.push({ route, body })
-        internalStatusId = body.statusId
-        return new Response(null, { status: 204 })
-      }
-      return json({ error: { code: 'not_found' } }, 404)
-    }
-  }
+import { booking, card, CODE, DAY, fakeApi, id, NOW as now, type Call } from './booking-drawer.fixtures'
 
 const onClose = fn()
 const onMove = fn()
@@ -196,7 +72,7 @@ export const Confirmed: Story = {
     await expect(visits).toHaveLength(3)
     await expect(within(visits[1]!).getByText('No-show')).toBeVisible()
     await expect(within(visits[1]!).getByText('250 TMT')).toBeVisible()
-    // no internal statuses switched on, no move offered: no select, no footer
+    // no internal statuses switched on, no move offered: no select, no move; the footer holds Report and Cancel booking (B3's stories)
     await expect(d.queryByRole('combobox')).toBeNull()
     await expect(d.queryByRole('button', { name: 'Move to another time' })).toBeNull()
   },
@@ -234,7 +110,7 @@ export const InternalStatusSet: Story = {
 }
 
 /** What the autosave story's api was sent. */
-const noteCalls: { route: string; body: unknown }[] = []
+const noteCalls: Call[] = []
 
 /** The internal note: typed, it goes to the api whole after a pause in the typing, and the caption says «saved». */
 export const NoteAutosave: Story = {
