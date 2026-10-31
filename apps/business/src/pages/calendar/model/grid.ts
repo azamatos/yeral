@@ -137,6 +137,46 @@ export const onGrid = (x: Stretch, fromHour: number, toHour: number) => x.end > 
 /** Whether a stretch overlaps any of these. */
 export const overlaps = (x: Stretch, list: readonly Stretch[]) => list.some((o) => o.start < x.end && x.start < o.end)
 
+/** A quarter hour of the day: what a click on it does. */
+export type Slot = Stretch & { state: 'free' | 'elsewhere' }
+/** The slots step by a quarter hour (B-Calendar `.qs`); the api takes 5. */
+export const SLOT_MINUTES = 15
+
+/**
+ * The quarter hours a click can land on (B-Calendar `.qs`, book B-18 step 3 and B-14 step 4): `free` opens the slot
+ * menu; `elsewhere` (the person busy in another workspace) is refused with a toast. The rest aren't offered: under a
+ * booking with its buffer, a break, blocked time, the hours off, or gone by (`cutoff`: the grid's minute now, null
+ * on a day ahead; Infinity on a day gone).
+ */
+export function slotsOf({
+  day,
+  placed,
+  blocks,
+  busy,
+  fromHour,
+  toHour,
+  cutoff,
+}: {
+  day: Day | undefined
+  placed: readonly Placed[]
+  blocks: readonly Stretch[]
+  busy: readonly Stretch[]
+  fromHour: number
+  toHour: number
+  cutoff: number | null
+}): Slot[] {
+  const live = placed.filter((p) => p.booking.status !== 'cancelled')
+  const taken: Stretch[] = [...shadesOf(day, fromHour, toHour), ...(day?.breaks ?? []), ...blocks, ...live, ...buffersOf(placed, day)]
+  const slots: Slot[] = []
+  for (let start = fromHour * 60; start + SLOT_MINUTES <= toHour * 60; start += SLOT_MINUTES) {
+    const slot = { start, end: start + SLOT_MINUTES }
+    if (cutoff !== null && slot.end <= cutoff) continue
+    if (overlaps(slot, taken)) continue
+    slots.push({ ...slot, state: overlaps(slot, busy) ? 'elsewhere' : 'free' })
+  }
+  return slots
+}
+
 /** A cancelled booking at the time of a live one (shown with «Show cancelled») takes the right half (B-Calendar `half`). */
 export function besideLive(p: Placed, column: readonly Placed[]): boolean {
   if (p.booking.status !== 'cancelled') return false

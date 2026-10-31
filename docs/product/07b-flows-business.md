@@ -706,7 +706,7 @@ flowchart LR
 
 > Open question Q-204: how to block time in the calendar.
 
-**Status** — Design: text only (layer drawn, creation not designed) · Code: api built (20.10.2026): `GET`/`POST /v1/w/{slug}/calendar/blocks`, `DELETE …/blocks/{id}` (one, or the rest of its repeat; a daily or weekly repeat and the reason's `kind` since 01.11.2026); a block is busy time for every free-time search, a move onto it is `cannot_move` (`blocked`), one over a booking is `block_over_bookings`.
+**Status** — Design: drawn (v0.6 round 2: B-Calendar `panel=slot-menu | block-time | block-error`, B-Mobile 2b–2c) · Code: api built (20.10.2026): `GET`/`POST /v1/w/{slug}/calendar/blocks`, `DELETE …/blocks/{id}` (one, or the rest of its repeat; a daily or weekly repeat and the reason's `kind` since 01.11.2026); a block is busy time for every free-time search, a move onto it is `cannot_move` (`blocked`), one over a booking is `block_over_bookings`. Business app (01.11.2026, slice 4's B1): a free slot's menu and «Block time» (`features/block-time`), the block drawn as «Closed · Training» in the reader's language; a click under «Busy elsewhere» is refused with the toast (B-14 step 4). Deleting a block from the app comes later.
 
 ### B-19 · Answer a booking request
 

@@ -5,10 +5,12 @@ import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { cn } from '@yeral/ui/cn'
 import { TimerPill } from '@yeral/ui/timer-pill'
+import { toast } from '@yeral/ui/toast'
 import { Coffee, Lock } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { BookingBlock, MoveBlock } from '@/entities/booking'
+import type { BlockSlot } from '@/features/block-time'
 import {
   besideLive,
   buffersOf,
@@ -22,8 +24,11 @@ import {
   pxOf,
   QUARTER_PX,
   shadesOf,
+  slotsOf,
   stretchOn,
+  type Slot,
 } from '../model/grid'
+import { SlotMenu } from './slot-menu'
 
 /** The gutter with the hours (B-Calendar `.ggut`, 64) and a column's least width (`.gcol`, 200). */
 const GUTTER = 'w-16 flex-none'
@@ -53,7 +58,10 @@ export function DayGrid({
   picked,
   phoneStaff,
   busy,
+  specialist,
   onOpen,
+  onBlock,
+  onBook,
 }: {
   view: CalendarView
   date: string
@@ -65,7 +73,13 @@ export function DayGrid({
   phoneStaff?: string
   /** Another day's on its way: this one stays until it comes. */
   busy?: boolean
+  /** The reader is a specialist: the refusal under «Busy elsewhere» speaks to them. */
+  specialist?: boolean
   onOpen: (pick: Pick) => void
+  /** «Block time» from a free slot's menu. */
+  onBlock: (slot: BlockSlot) => void
+  /** «New booking» from a free slot's menu; the item waits until it's given (slice 4's B5). */
+  onBook?: (slot: BlockSlot) => void
 }) {
   const t = useTranslations('calendar')
   const fmt = useFmt()
@@ -75,6 +89,8 @@ export function DayGrid({
   // the now line on today, and past midnight on the night before's grid (a night bar's day runs on)
   const nowMinute = today(now) === date ? nowAt.min : addDays(today(now), -1) === date ? nowAt.min + 1440 : null
   const nowTop = nowMinute !== null && nowMinute >= from * 60 && nowMinute <= to * 60 ? pxOf(nowMinute, from) : null
+  // the minutes gone by: no slot before them (a day gone: none at all)
+  const cutoff = nowMinute ?? (date < today(now) ? Infinity : null)
   // closed now: a request that came in waits for the opening, its timer says by when (B-Calendar «by 09:30»)
   const closed = business ? openMinutesBetween(business, now, now + 60_000) === 0 : false
 
@@ -83,6 +99,23 @@ export function DayGrid({
   const [hovered, setHovered] = useState<string | null>(null)
   const [focused, setFocused] = useState<string | null>(null)
   const onLink = (how: Link, code: string | null) => (how === 'hover' ? setHovered : setFocused)(code)
+
+  // the free slot clicked, its menu open beside it (a sheet on a phone); another day closes it
+  const [menu, setMenu] = useState<{ staffId: string; date: string; start: number; anchor: HTMLElement; phone: boolean } | null>(null)
+  const open = menu?.date === date ? menu : null
+  const onSlot = (column: CalendarView['columns'][number], slot: Slot, anchor: HTMLElement, busyAt?: { start: number; end: number }) => {
+    if (slot.state === 'elsewhere') {
+      // B-14 step 4: refused, with when they're busy
+      const time = fmt.timeRange(busyAt?.start ?? slot.start, busyAt?.end ?? slot.end)
+      toast(specialist ? t('elsewhereSelf', { time }) : t('elsewhereRefused', { name: column.name, time }))
+      return
+    }
+    setMenu({ staffId: column.staffId, date, start: slot.start, anchor, phone: window.matchMedia('(max-width: 767px)').matches })
+  }
+  const pick = (m: NonNullable<typeof open>, go: (slot: BlockSlot) => void) => () => {
+    setMenu(null)
+    go({ staffId: m.staffId, date: m.date, start: m.start })
+  }
 
   const phone = (c: CalendarView['columns'][number]) => (c.staffId === phoneStaff ? ONLY_ON_PHONE : NOT_ON_PHONE)
 
@@ -189,8 +222,11 @@ export function DayGrid({
               timer={timer}
               picked={picked}
               linked={hovered ?? focused}
+              cutoff={cutoff}
+              menuAt={open?.staffId === c.staffId ? open.start : null}
               onLink={onLink}
               onOpen={onOpen}
+              onSlot={(slot, anchor, busyAt) => onSlot(c, slot, anchor, busyAt)}
             />
           ))}
           {nowTop !== null && (
@@ -198,6 +234,17 @@ export function DayGrid({
           )}
         </div>
       </div>
+      {open && (
+        <SlotMenu
+          anchor={open.anchor}
+          phone={open.phone}
+          title={t('slotTitle', { time: fmt.time(open.start), name: view.columns.find((c) => c.staffId === open.staffId)?.name ?? '' })}
+          date={fmt.weekdayDate(date)}
+          onBlock={pick(open, onBlock)}
+          onBook={onBook && pick(open, onBook)}
+          onClose={() => setMenu(null)}
+        />
+      )}
     </div>
   )
 }
@@ -218,8 +265,11 @@ function DayColumn({
   timer,
   picked,
   linked,
+  cutoff,
+  menuAt,
   onLink,
   onOpen,
+  onSlot,
 }: {
   view: CalendarView
   column: CalendarView['columns'][number]
@@ -230,10 +280,18 @@ function DayColumn({
   className: string
   picked: Picked
   linked: string | null
+  /** The grid's minute now: no slot before it; null on a day ahead, Infinity on a day gone. */
+  cutoff: number | null
+  /** The slot whose menu is open. */
+  menuAt: number | null
   onLink: (how: Link, code: string | null) => void
   onOpen: (pick: Pick) => void
+  /** A click on a slot: the button it landed on and, under «Busy elsewhere», when they're busy. */
+  onSlot: (slot: Slot, anchor: HTMLElement, busyAt?: { start: number; end: number }) => void
 }) {
   const t = useTranslations('calendar.layers')
+  const tc = useTranslations('calendar')
+  const kinds = useTranslations('blockTime.kinds')
   const fmt = useFmt()
   const day = c.days.find((d) => d.date === date)
   const placed = placedIn(view.bookings, c.staffId, date)
@@ -243,9 +301,15 @@ function DayColumn({
   const shown = <T extends { start: number; end: number }>(x: T | null): T[] => (x && onGrid(x, from, to) ? [x] : [])
   const busy = view.elsewhere.flatMap((e) => (e.staffId === c.staffId ? shown(stretchOn(date, e)) : []))
   const blocks = view.blocks.flatMap((k) => (k.staffId === c.staffId ? shown(stretchOn(date, k)) : []))
+  const slots = slotsOf({ day, placed, blocks, busy, fromHour: from, toHour: to, cutoff })
   const at = (start: number, end: number) => placeOf(start, end, from, to)
   const link = (code: string) => (on: boolean, how: Link) => onLink(how, on ? code : null)
   const lock = <Lock aria-hidden strokeWidth={2} className="size-3.5 flex-none" />
+  // why the time is closed, in the reader's language (decision 5); Other in the writer's words; nothing on an old block
+  const closedLabel = (k: CalendarView['blocks'][number]) => {
+    const reason = k.kind && k.kind !== 'other' ? kinds(k.kind) : k.reason
+    return reason ? t('closedFor', { reason }) : t('closed')
+  }
   const layers = [
     ...(day?.breaks ?? []).flatMap(shown).map((b) => ({
       ...b,
@@ -253,7 +317,7 @@ function DayColumn({
       icon: <Coffee aria-hidden strokeWidth={2} className="size-3.5 flex-none" />,
       label: t('break'),
     })),
-    ...blocks.map((k) => ({ ...k, key: k.id, icon: lock, label: k.reason ? t('closedFor', { reason: k.reason }) : t('closed') })),
+    ...blocks.map((k) => ({ ...k, key: k.id, icon: lock, label: closedLabel(k) })),
   ]
   const offLabel = (off: NonNullable<ReturnType<typeof shadesOf>[number]['off']>) =>
     off.kind === 'dayoff'
@@ -294,6 +358,34 @@ function DayColumn({
           backgroundImage: `repeating-linear-gradient(to bottom, var(--color-n-200) 0 1px, transparent 1px ${HOUR_PX}px), repeating-linear-gradient(to bottom, var(--color-n-100) 0 1px, transparent 1px ${QUARTER_PX}px)`,
         }}
       />
+      {/* the quarter hours a click can land on (B-Calendar `.qs`): «+ 14:30» while pointed at; under a block or a booking, none */}
+      {slots.map((s) => {
+        const free = s.state === 'free'
+        const time = fmt.time(s.start)
+        return (
+          <button
+            key={s.start}
+            type="button"
+            aria-label={free ? tc('slot', { name: c.name, time }) : tc('slotElsewhere', { name: c.name, time })}
+            aria-haspopup={free ? 'menu' : undefined}
+            aria-expanded={free ? menuAt === s.start : undefined}
+            onClick={(e) => onSlot(s, e.currentTarget, free ? undefined : busy.find((b) => b.start < s.end && s.start < b.end))}
+            className={cn(
+              'group absolute inset-x-0 z-2 m-0 h-5 border-0 bg-transparent px-2 text-left text-micro font-semibold text-a-600 tabular-nums focus-visible:outline-none',
+              free
+                ? 'cursor-pointer hover:bg-a-50 focus-visible:bg-a-50 aria-expanded:bg-a-50 aria-expanded:shadow-[inset_0_0_0_2px_var(--color-a-400)]'
+                : 'cursor-not-allowed',
+            )}
+            style={{ top: pxOf(s.start, from) }}
+          >
+            {free && (
+              <span aria-hidden className="invisible group-hover:visible group-focus-visible:visible group-aria-expanded:visible">
+                {tc('slotPlus', { time })}
+              </span>
+            )}
+          </button>
+        )
+      })}
       {layers.map((l) => (
         <div
           key={l.key}

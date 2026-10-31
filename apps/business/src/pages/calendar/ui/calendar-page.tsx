@@ -14,12 +14,14 @@ import { cn } from '@yeral/ui/cn'
 import { Pill, pillVariants } from '@yeral/ui/pill'
 import { Spinner } from '@yeral/ui/spinner'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { BlockTimeModal, type BlockSlot } from '@/features/block-time'
 import { useSdk } from '@/shared/api'
 import { useDatePickerWords } from '@/shared/i18n'
 import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
+import { gridHours } from '../model/grid'
 import type { CalendarSearch } from '../model/search'
 import { DayGrid } from './day-grid'
 
@@ -57,6 +59,8 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
   // the business's hours, for the timers that count only while it's open (a specialist doesn't read them: wall time)
   const hours = useQuery({ ...sdk.settings.hours(slug), enabled: !specialist, retry: false })
   const business: BusinessHours | null = hours.data ? { hours: hours.data.hours, exceptions: hours.data.specialDays } : null
+  // the free slot whose «Block time» is open
+  const [blocking, setBlocking] = useState<BlockSlot | null>(null)
 
   const go = (patch: Partial<CalendarSearch>, replace = false) =>
     void navigate({ to: '.', search: (prev: CalendarSearch) => ({ ...prev, ...patch }), replace })
@@ -220,16 +224,33 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           picked={search}
           phoneStaff={phoneStaff}
           busy={view.isPlaceholderData}
+          specialist={specialist}
           onOpen={(pick) =>
             'request' in pick
               ? openRequest({ code: pick.request })
               : go({ booking: search.booking === pick.booking ? undefined : pick.booking, request: undefined }, true)
           }
+          onBlock={setBlocking}
         />
       ) : (
         <div className="flex flex-1 items-center justify-center py-20">
           <Spinner label={t('loading')} />
         </div>
+      )}
+      {/* «Block time» from a free slot (book B-18); the booking in its way opens in the drawer */}
+      {blocking && view.data && (
+        <BlockTimeModal
+          slug={slug}
+          slot={blocking}
+          people={columns}
+          specialist={specialist}
+          hours={gridHours(view.data, shown)}
+          today={todayDate}
+          now={now}
+          bookings={view.data.bookings}
+          onOpenBooking={(code) => go({ booking: code, request: undefined }, true)}
+          onClose={() => setBlocking(null)}
+        />
       )}
       {search.request && (
         <RequestDrawer
