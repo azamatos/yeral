@@ -5,6 +5,7 @@
  */
 import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, COMPLAINT_TYPES, TEAM_CANCEL_REASONS } from '@yeral/domain/model'
 import { TEAM_NOTE_MAX } from '@yeral/domain/clients'
+import { BLOCK_KINDS, BLOCK_REPEATS } from '@yeral/domain/hours'
 import { LEVELS } from '@yeral/domain/permissions'
 import { z } from 'zod'
 import { dayStateSchema } from './availability'
@@ -125,15 +126,27 @@ export const businessCancelSchema = z
   .refine((d) => d.reason !== 'other' || !!d.text, { path: ['text'], message: 'Say the reason in words' })
   .meta({ id: 'BusinessCancel' })
 
+// ── The team's note on a booking (B-16 step 5, slice 4's gap 1) ──
+
+/**
+ * The internal note of a saved booking, autosaved from the drawer: the whole text, or null (an empty one) to clear it.
+ * Whoever sees the booking in the calendar writes it; the client never sees it.
+ */
+export const setTeamNoteSchema = z
+  .object({ note: z.string().trim().max(TEAM_NOTE_MAX).nullable() })
+  .strict()
+  .meta({ id: 'SetTeamNote' })
+
 // ── Blocked time (B-18, Q-204) ──
 
 /** Blocked time's from–to go in 5-minute steps, as breaks do. */
 const blockMinute = minuteSchema.refine((m) => m % 5 === 0, 'Every 5 minutes')
 
 /**
- * "Wagty ýap": part of a day closed for one person, with a reason ("Okuw"), optionally every week on that weekday up to
- * `repeatUntil` (a year at most). The same people who add bookings block time; a specialist only their own. It can't
- * cover a booking (409 `block_over_bookings`).
+ * "Wagty ýap": part of a day closed for one person, with why (`kind`: the form's chips Training · Break · Personal, or
+ * Other said in words, `reason`), optionally every day or every week (`repeat`, weekly unless said) up to `repeatUntil`
+ * (a year at most). The same people who add bookings block time; a specialist only their own. It can't cover a booking
+ * (409 `block_over_bookings`).
  */
 export const blockInputSchema = z
   .object({
@@ -141,7 +154,9 @@ export const blockInputSchema = z
     date: ymdSchema,
     start: blockMinute,
     end: blockMinute,
+    kind: z.enum(BLOCK_KINDS).optional(),
     reason: z.string().trim().max(40).optional(),
+    repeat: z.enum(BLOCK_REPEATS).optional(),
     repeatUntil: ymdSchema.optional(),
   })
   .strict()
@@ -155,8 +170,10 @@ export const blockSchema = z
     date: ymdSchema,
     start: minuteSchema,
     end: minuteSchema,
+    /** Why, as a key the calendar translates; null on blocks made before the chips. */
+    kind: z.enum(BLOCK_KINDS).nullable(),
     reason: z.string().nullable(),
-    /** The weekly repeat it belongs to; null for a one-off. */
+    /** The repeat (daily or weekly) it belongs to; null for a one-off. */
     seriesId: idSchema.nullable(),
   })
   .meta({ id: 'Block' })
@@ -168,7 +185,7 @@ export const blocksQuerySchema = z
   .object({ from: ymdSchema, to: ymdSchema })
   .refine((q) => q.to >= q.from, { path: ['to'], message: 'Not before from' })
 export const blockParamSchema = z.object({ slug: slugSchema, id: idSchema })
-/** `series`: this one and the later ones of its weekly repeat. */
+/** `series`: this one and the later ones of its repeat. */
 export const blockDeleteQuerySchema = z.object({ scope: z.enum(['one', 'series']).default('one') })
 
 // ── An internal status on a booking (B-29, F-133) ──
@@ -221,7 +238,13 @@ const calendarItemSchema = teamItemSchema.extend({
   bufferAfter: z.number().int().min(0),
 })
 
-/** A booking block: its status as people see it now, who and what, the team's markers; a waiting move as its ghost. */
+/** Who filed a complaint (B-28): the team member by id (a specialist removes only their own) and name; null once gone. */
+export const complaintBySchema = z.object({ staffId: idSchema, name: z.string() }).nullable()
+
+/**
+ * A booking block: its status as people see it now, who and what, the team's markers; a waiting move as its ghost.
+ * Also one booking on its own (`GET …/bookings/{code}`), for the list's drawer and a notification's "Open".
+ */
 export const calendarBookingSchema = z
   .object({
     code: bookingCodeSchema,
@@ -244,14 +267,17 @@ export const calendarBookingSchema = z
     internalNote: z.string().nullable(),
     /** A request's answer time ("18 min"). */
     holdUntil: epochSchema.nullable(),
-    /** "Arz et" filed (B-28): what happened, in words for "other", and when (taken back within 7 days). */
-    complaint: z.object({ type: z.enum(COMPLAINT_TYPES), text: z.string().nullable(), at: epochSchema }).nullable(),
+    /** "Arz et" filed (B-28): what happened, in words for "other", by whom and when (taken back within 7 days). */
+    complaint: z
+      .object({ type: z.enum(COMPLAINT_TYPES), text: z.string().nullable(), by: complaintBySchema, at: epochSchema })
+      .nullable(),
     /** The client's move waiting for an answer (B-21): the asked time for the line under the block; its ghost is in `moves`. */
     move: z
       .object({ code: bookingCodeSchema, date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() })
       .nullable(),
   })
   .meta({ id: 'CalendarBooking' })
+export type CalendarBooking = z.infer<typeof calendarBookingSchema>
 
 /**
  * A client's move waiting for its answer, as a ghost at the asked time (B-21): in the column and on the day it asks

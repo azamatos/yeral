@@ -24,6 +24,7 @@ import {
   startMinuteSchema,
   ymdSchema,
 } from './common'
+import { complaintBySchema } from './calendar'
 import { teamItemSchema } from './requests'
 
 export const clientParamSchema = z.object({ slug: slugSchema, id: idSchema })
@@ -130,13 +131,16 @@ export const clientNoteSchema = z.object({
   at: epochSchema,
 })
 
-/** A report ("Arz et", B-28): one per booking; taken back from the booking within 7 days of `at`. */
+/**
+ * A report ("Arz et", B-28): one per booking; taken back from the booking within 7 days of `at`, by the owner and
+ * administrators any, by a specialist their own (`by.staffId`; the same shape as the calendar booking's `complaint.by`).
+ */
 export const clientReportSchema = z.object({
   code: bookingCodeSchema,
   date: ymdSchema,
   type: z.enum(COMPLAINT_TYPES),
   text: z.string().nullable(),
-  by: z.string().nullable(),
+  by: complaintBySchema,
   at: epochSchema,
 })
 

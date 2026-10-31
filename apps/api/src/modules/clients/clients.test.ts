@@ -234,7 +234,10 @@ describe('clients (book B-32, B-34)', () => {
     expect(short).toMatchObject({ moreHistory: true })
     expect(short.history).toHaveLength(2)
     const reported = (await maysa.req(`${W}/clients/${lapsed}?lang=en`)).json
-    expect(reported.reports).toEqual([expect.objectContaining({ type: 'late', by: 'Maýsa', date: addDays(TODAY, -90) })])
+    // who filed it, by id and name: the same `by` as the calendar booking's complaint
+    expect(reported.reports).toEqual([
+      expect.objectContaining({ type: 'late', by: { staffId: maysaId, name: 'Maýsa' }, date: addDays(TODAY, -90) }),
+    ])
     const blocked = (await maysa.req(`${W}/clients/${fresh}?lang=en`)).json
     expect(blocked).toMatchObject({ name: null, settings: { phoneOnly: true, phoneOnlyByCount: false } })
     expect((await maysa.req(`${W}/clients/00000000-0000-4000-8000-000000000000?lang=en`)).status).toBe(404)

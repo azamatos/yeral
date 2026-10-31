@@ -15,6 +15,7 @@ import {
   STAFF_STATUSES,
   VERIFICATION_STATUSES,
 } from '@yeral/domain/model'
+import { BLOCK_KINDS } from '@yeral/domain/hours'
 import { LEVELS } from '@yeral/domain/permissions'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { SETUP_STEPS } from '@yeral/domain/setup'
@@ -24,6 +25,7 @@ export const bookingType = pgEnum('booking_type', BOOKING_TYPES)
 export const bookingStatus = pgEnum('booking_status', BOOKING_STATUSES)
 export const cancelledBy = pgEnum('cancelled_by', CANCELLED_BY)
 export const bookingSource = pgEnum('booking_source', BOOKING_SOURCES)
+export const blockKind = pgEnum('block_kind', BLOCK_KINDS)
 export const confirmMode = pgEnum('confirm_mode', CONFIRM_MODES)
 export const declineReason = pgEnum('decline_reason', DECLINE_REASONS)
 export const businessCancelReason = pgEnum('business_cancel_reason', BUSINESS_CANCEL_REASONS)

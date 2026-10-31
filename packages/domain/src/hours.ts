@@ -253,14 +253,26 @@ export function staffScheduleErrors(s: StaffSchedule): string[] {
   return bad
 }
 
-/** Blocked time repeats weekly for at most this long (book Q-204). */
+/** Blocked time repeats for at most this long (book Q-204). */
 export const BLOCK_REPEAT_DAYS = 366
 
-/** The dates a block falls on: its own, and with a weekly repeat every week after it up to `until` (inclusive). */
-export function blockDates(date: string, until?: string | null): string[] {
+/** How blocked time repeats up to its end (design §27.4): "Every day" or "Every week" on that weekday. */
+export const BLOCK_REPEATS = ['daily', 'weekly'] as const
+export type BlockRepeat = (typeof BLOCK_REPEATS)[number]
+
+/**
+ * Why time is blocked, as the form's chips (slice 4 plan, decision 5): stored as keys so a teammate reads it in their
+ * own language; `other` is said in words (`reason`).
+ */
+export const BLOCK_KINDS = ['training', 'break', 'personal', 'other'] as const
+export type BlockKind = (typeof BLOCK_KINDS)[number]
+
+/** The dates a block falls on: its own, and with a repeat every day or every week after it up to `until` (inclusive). */
+export function blockDates(date: string, until?: string | null, repeat: BlockRepeat = 'weekly'): string[] {
   const out = [date]
   if (!until) return out
-  for (let d = addDays(date, 7); d <= until && diffDays(d, date) <= BLOCK_REPEAT_DAYS; d = addDays(d, 7)) out.push(d)
+  const step = repeat === 'daily' ? 1 : 7
+  for (let d = addDays(date, step); d <= until && diffDays(d, date) <= BLOCK_REPEAT_DAYS; d = addDays(d, step)) out.push(d)
   return out
 }
 
