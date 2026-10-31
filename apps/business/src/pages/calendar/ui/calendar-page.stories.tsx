@@ -214,6 +214,7 @@ const fakeApi =
       open = true,
       arrives = false,
       moveFits = true,
+      internal = false,
     }: {
       /** false: the business is closed every day (a late request). */
       open?: boolean
@@ -221,11 +222,23 @@ const fakeApi =
       arrives?: boolean
       /** The client's move fits now (B-21's fit line). */
       moveFits?: boolean
+      /** Internal statuses switched on, «Arrived» set on Gözel A.'s booking (book B-29). */
+      internal?: boolean
     } = {},
   ): (() => typeof fetch) =>
   () => {
     // the requests confirmed in this story
     const answered = new Set<string>()
+    const arrived: CalendarView['internalStatuses'][number] = {
+      id: id(6),
+      preset: 'arrived',
+      name: 'Arrived',
+      icon: 'user-check',
+      color: '#066a41',
+      enabled: true,
+    }
+    const marked = (b: CalendarView['bookings'][number]) =>
+      internal && b.code === dayBookings[0]!.code ? { ...b, internalStatusId: arrived.id } : b
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const url = new URL(request.url)
@@ -235,10 +248,22 @@ const fakeApi =
       if (route === 'GET /me/workspaces') return json({ items: [w], current: w.slug })
       if (route === 'GET /me/invites') return json({ items: [] })
       if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
-      if (route === 'GET /w/glow-studio/calendar')
-        return json(
-          viewOf(url.searchParams.get('date')!, url.searchParams.get('cancelled') === 'true', level === 'specialist' ? id(2) : undefined),
+      if (route === 'GET /w/glow-studio/calendar') {
+        const view = viewOf(
+          url.searchParams.get('date')!,
+          url.searchParams.get('cancelled') === 'true',
+          level === 'specialist' ? id(2) : undefined,
         )
+        return json({ ...view, bookings: view.bookings.map(marked), internalStatuses: internal ? [arrived] : [] })
+      }
+      // one booking on its own (the booking drawer), the team's note and marker on it
+      const one = /^(GET|PUT) \/w\/glow-studio\/bookings\/([^/]+)(\/note|\/internal-status)?$/.exec(route)
+      if (one) {
+        const found = [...dayBookings, ...tomorrowBookings, cancelledOne].find((b) => b.code === one[2])
+        if (!found) return json({ error: { code: 'not_found' } }, 404)
+        return one[1] === 'GET' ? json(marked(found)) : new Response(null, { status: 204 })
+      }
+      if (route === 'GET /w/glow-studio/settings/statuses') return json({ items: internal ? [arrived] : [], max: 5 })
       if (route === 'GET /w/glow-studio/settings/hours')
         return json({
           hours: Array.from({ length: 7 }, () => (open ? { open: 0, close: 1440, break: null } : null)),
@@ -591,5 +616,35 @@ export const DeclineMove: Story = {
     await userEvent.click(decline)
     const declined = await page.findByText('New time declined · the booking stays at its time · the client sees the reason')
     await waitFor(() => expect(declined).toBeVisible())
+  },
+}
+
+/** A booking block opens its drawer (`?booking=`): the status, the client, the details; Close puts the block's ring away. */
+export const OpenBooking: Story = {
+  play: async ({ canvas }) => {
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    const block = within(grid.getByRole('group', { name: 'Aýna' })).getByRole('button', { name: /^10:00 Gözel A\./ })
+    await userEvent.click(block)
+    const d = within(await page.findByRole('dialog', { name: 'Booking' }))
+    await expect(d.getByText('Confirmed')).toBeVisible()
+    await expect(d.getByText('Gözel A.')).toBeVisible()
+    await expect(d.getByText('Women’s haircut', { selector: 'dd' })).toBeVisible()
+    await expect(d.getByRole('textbox', { name: 'Internal note' })).toBeVisible()
+    await expect(block).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(d.getByRole('button', { name: 'Close' }))
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await expect(block).not.toHaveAttribute('aria-pressed')
+  },
+}
+
+/** Internal statuses switched on (book B-29): «Arrived» as a chip on Gözel A.'s block and in its name; the select in her drawer. */
+export const InternalStatuses: Story = {
+  args: { server: fakeApi('owner', { internal: true }) },
+  play: async ({ canvas }) => {
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    const block = within(grid.getByRole('group', { name: 'Aýna' })).getByRole('button', { name: /^10:00 Gözel A\..*Confirmed, Arrived$/ })
+    await userEvent.click(block)
+    const d = within(await page.findByRole('dialog', { name: 'Booking' }))
+    await expect(await d.findByRole('combobox', { name: 'Internal status' })).toHaveValue(id(6))
   },
 }

@@ -55,7 +55,7 @@ export function RequestDrawer({
   onAnswered: (code: string) => void
   onClose: () => void
 }) {
-  const t = useTranslations('calendar.request')
+  const t = useTranslations('bookingDrawer.request')
   const sdk = useSdk()
   const list = useQuery(sdk.requests.list(slug))
   const queue = list.data?.items ?? []
@@ -198,7 +198,7 @@ function RequestBody({
   business: BusinessHours | null
   onShow: (date: string, staff?: string) => void
 }) {
-  const t = useTranslations('calendar.request')
+  const t = useTranslations('bookingDrawer.request')
   const s = useTranslations('status')
   const fmt = useFmt()
   const join = useJoin()

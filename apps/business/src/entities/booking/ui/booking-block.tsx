@@ -1,10 +1,12 @@
 import type { CalendarView } from '@yeral/contract/calendar'
+import type { InternalStatus } from '@yeral/contract/settings'
 import { useFmt } from '@yeral/i18n'
 import { cn } from '@yeral/ui/cn'
 import { Phone, TriangleAlert, User, type LucideIcon } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useJoin } from './affected-bookings-list'
+import { InternalStatusChip, useInternalStatusName } from './internal-status-chip'
 import { BOOKING_STATUS_ICON } from './status-icons'
 
 export type CalendarBooking = CalendarView['bookings'][number]
@@ -139,9 +141,12 @@ export function BookingBlock({
   items = b.items,
   height,
   timerText,
+  internalStatus,
   ...shared
 }: Shared & {
   booking: CalendarBooking
+  /** The team's marker on it (book B-29), when the workspace has it switched on: the chip on the right, its name in words. */
+  internalStatus?: InternalStatus
   /** The part of it in this column: a booking shared with a colleague shows each one's part in their column. */
   items?: CalendarBooking['items']
 }) {
@@ -149,6 +154,7 @@ export function BookingBlock({
   const s = useTranslations('status')
   const fmt = useFmt()
   const join = useJoin()
+  const statusName = useInternalStatusName()
   const services = join(
     items.map((i) => i.service),
     'plus',
@@ -167,6 +173,7 @@ export function BookingBlock({
       phone ? t('byPhone') : '',
       walkIn ? t('walkIn') : '',
       b.alert ? t('alert') : '',
+      internalStatus ? statusName(internalStatus) : '',
       // the asked time, unless its line shows it
       asked && height < TIMES_FROM ? t('moveAsked', { when: asked }) : '',
       timerText ?? '',
@@ -193,9 +200,10 @@ export function BookingBlock({
         </>
       }
       icons={{
-        count: (phone || walkIn ? 1 : 0) + (b.alert ? 1 : 0),
+        count: (phone || walkIn ? 1 : 0) + (b.alert ? 1 : 0) + (internalStatus ? 1 : 0),
         nodes: (
           <>
+            {internalStatus && <InternalStatusChip status={internalStatus} />}
             {phone && <Phone strokeWidth={1.75} />}
             {walkIn && <User strokeWidth={1.75} />}
             {b.alert && <TriangleAlert strokeWidth={1.75} className="text-danger-ink" />}
