@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { usePageTitle } from '@/shared/lib'
 import { useWorkspace } from '../model/use-workspace'
 import { InviteNote } from './invite-note'
+import { NotificationPermissionBanner } from './notification-permission-banner'
 import { ShellSwitcher } from './shell-switcher'
 
 /**
@@ -46,14 +47,16 @@ export function WorkspacePage({
       />
       {flush ? (
         <main data-fill className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex-none px-4 pt-4 empty:hidden sm:px-6 sm:pt-6 md:px-8 md:pt-8">
+          <div className="flex flex-none flex-col gap-4 px-4 pt-4 empty:hidden sm:px-6 sm:pt-6 md:px-8 md:pt-8">
             <InviteNote />
+            <NotificationPermissionBanner />
           </div>
           {children}
         </main>
       ) : (
         <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:p-8">
           <InviteNote />
+          <NotificationPermissionBanner />
           {children}
         </main>
       )}

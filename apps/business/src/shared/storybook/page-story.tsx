@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { createApi, SdkProvider, type Api } from '@/shared/api'
 import { appLocale, I18nProvider } from '@/shared/i18n'
+import { BrowserNotificationsProvider, fakeBrowserNotifications, type BrowserNotifications } from '@/shared/lib/browser-notifications'
 
 /** A layout route with the pages (or layouts) inside it. */
 export interface StoryLayout {
@@ -35,6 +36,7 @@ export function PageStory({
   layouts = {},
   path = '/',
   server = offline,
+  browser,
 }: {
   routes: Record<string, RouteComponent>
   /**
@@ -44,7 +46,13 @@ export function PageStory({
   layouts?: Record<string, StoryLayout>
   path?: string
   server?: () => typeof fetch
+  /**
+   * The browser's notifications and sound as the story wants them (`fakeBrowserNotifications`); by default a browser
+   * that allowed them already, so no page story shows the permission banner or plays a sound unless it asks to.
+   */
+  browser?: BrowserNotifications
 }) {
+  const [notifications] = useState(() => browser ?? fakeBrowserNotifications({ permission: 'granted' }))
   const [{ api, router }] = useState(() => {
     const api = createApi({ baseUrl: 'http://api.test', fetch: server() })
     // a story fails at once instead of retrying
@@ -74,8 +82,10 @@ export function PageStory({
       <SdkProvider sdk={api.sdk}>
         <I18nProvider locale={appLocale()}>
           <UIProvider>
-            <RouterProvider router={router} />
-            <StoryToaster />
+            <BrowserNotificationsProvider value={notifications}>
+              <RouterProvider router={router} />
+              <StoryToaster />
+            </BrowserNotificationsProvider>
           </UIProvider>
         </I18nProvider>
       </SdkProvider>
