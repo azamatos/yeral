@@ -5,8 +5,9 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { expect, fn, userEvent } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { Field } from '../field'
+import { Modal, ModalContent, ModalHeader } from '../modal'
 import { TagInput, type TagInputProps } from './tag-input'
 
 const onChange = fn()
@@ -80,6 +81,46 @@ export const Cancel: Story = {
     await expect(canvas.queryByRole('textbox')).not.toBeInTheDocument()
     await expect(canvas.queryByRole('button', { name: 'Nobody' })).not.toBeInTheDocument()
     await expect(canvas.getByRole('button', { name: 'tag' })).toHaveFocus()
+  },
+}
+
+/**
+ * Inside a Modal (B10's add-client, B11's edit): Esc closes the tag field only; the dialog and the form stay. Radix
+ * hears Esc on `document` in the capture phase, so the component claims it on `window` first.
+ */
+export const InModal: Story = {
+  render: (args) => (
+    <Modal defaultOpen>
+      <ModalContent size={480}>
+        <ModalHeader title="New client" closeLabel="Close" />
+        <Demo {...args} />
+      </ModalContent>
+    </Modal>
+  ),
+  play: async () => {
+    const body = within(document.body)
+    const dialog = within(await body.findByRole('dialog', { name: 'New client' }))
+    await userEvent.click(dialog.getByRole('button', { name: 'tag' }))
+    await userEvent.type(dialog.getByRole('textbox', { name: 'New tag' }), 'Nobody{Escape}')
+    await expect(dialog.queryByRole('textbox')).not.toBeInTheDocument()
+    await expect(body.getByRole('dialog', { name: 'New client' })).toBeInTheDocument()
+    await expect(dialog.getByRole('button', { name: 'tag' })).toHaveFocus()
+    // with the field closed, Esc reaches the dialog again
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument())
+  },
+}
+
+/** A value in another case than its option (`vip`) is that option's chip, on; toggling it off removes the value. */
+export const ValueInAnotherCase: Story = {
+  args: { value: ['vip'] },
+  play: async ({ canvas }) => {
+    const vip = canvas.getByRole('button', { name: 'VIP' })
+    await expect(vip).toHaveAttribute('aria-pressed', 'true')
+    await expect(canvas.queryByRole('button', { name: 'vip' })).not.toBeInTheDocument()
+    await userEvent.click(vip)
+    await expect(onChange).toHaveBeenLastCalledWith([])
+    await expect(vip).toHaveAttribute('aria-pressed', 'false')
   },
 }
 

@@ -30,8 +30,9 @@ export type TagInputProps = Omit<ComponentProps<'div'>, 'onChange'> & {
 /**
  * TagInput — DS-Patterns → «Tag input · toggle tags + create» (Storybook Inputs/TagInput), from B-Clients' new-client
  * modal and B-Client's edit modal. Toggle chips (`aria-pressed`) for the known tags, a «+ tag» chip that opens a
- * 36-high pill field with «Add»: Enter adds, Esc cancels, the focus goes back to the chip; a tag that exists already
- * (any case) is switched on instead of added twice; automatic tags are Pill L with a caption, never buttons. Inside
+ * 36-high pill field with «Add»: Enter adds, Esc cancels (only the field, also inside a Modal or Drawer), the focus
+ * goes back to the chip; a tag that exists already (any case) is switched on instead of added twice, and a value in
+ * another case than its option is that option's chip; automatic tags are Pill L with a caption, never buttons. Inside
  * a `Field` the group takes the field's label and `disabled`; elsewhere name it with `aria-label` or
  * `aria-labelledby`. Composed from Chip, Input, Button and Pill (rule 10a: no tag library for this).
  */
@@ -66,7 +67,24 @@ export function TagInput({
     wasAdding.current = adding
   }, [adding])
 
-  const toggle = (tag: string) => onChange(value.includes(tag) ? value.filter((v) => v !== tag) : [...value, tag])
+  // Esc while the field is open closes the field, nothing else. Inside a Modal or Drawer, Radix's DismissableLayer
+  // hears keydown on `document` in the capture phase, before the input's own handler, so a `preventDefault` there
+  // comes too late: claim the key on `window` first (Radix leaves a prevented event alone).
+  useEffect(() => {
+    if (!adding) return
+    const onEsc = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      setAdding(false)
+      setDraft('')
+    }
+    window.addEventListener('keydown', onEsc, { capture: true })
+    return () => window.removeEventListener('keydown', onEsc, { capture: true })
+  }, [adding])
+
+  // a tag in `value` matches an option in any case (`vip` is the `VIP` chip)
+  const isOn = (tag: string) => value.some((v) => same(v, tag))
+  const toggle = (tag: string) => onChange(isOn(tag) ? value.filter((v) => !same(v, tag)) : [...value, tag])
 
   const close = () => {
     setAdding(false)
@@ -78,7 +96,7 @@ export function TagInput({
     if (!tag) return
     const known = chips.find((c) => same(c, tag))
     if (known) {
-      if (!value.includes(known)) onChange([...value, known])
+      if (!isOn(known)) onChange([...value, known])
     } else onChange([...value, tag])
     close()
   }
@@ -87,9 +105,6 @@ export function TagInput({
     if (e.key === 'Enter') {
       e.preventDefault()
       add()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      close()
     }
   }
 
@@ -102,7 +117,7 @@ export function TagInput({
       className={cn('flex flex-wrap items-center gap-2', className)}
     >
       {chips.map((tag) => (
-        <Chip key={tag} selected={value.includes(tag)} disabled={off} onClick={() => toggle(tag)}>
+        <Chip key={tag} selected={isOn(tag)} disabled={off} onClick={() => toggle(tag)}>
           {tag}
         </Chip>
       ))}

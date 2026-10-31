@@ -55,7 +55,11 @@ export function TableToolbar({ className, ...props }: ComponentProps<'div'>) {
   return <div {...props} className={cn('flex flex-wrap items-center gap-3 border-b border-n-200 px-5 py-4', className)} />
 }
 
-/** Bordered box around toolbar + table + bulk bar. */
+/**
+ * Bordered box around toolbar + table + bulk bar. `overflow-clip`, not `hidden`: both clip the children to the
+ * radius, but `hidden` makes the frame a scroll container, and a `sticky` bulk bar then sticks to the frame's foot
+ * instead of the viewport's.
+ */
 export function TableFrame({ className, ...props }: ComponentProps<'div'>) {
-  return <div {...props} className={cn('flex flex-col overflow-hidden rounded-card border border-n-200', className)} />
+  return <div {...props} className={cn('flex flex-col overflow-clip rounded-card border border-n-200', className)} />
 }
