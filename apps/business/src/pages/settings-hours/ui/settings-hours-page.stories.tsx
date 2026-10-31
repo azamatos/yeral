@@ -335,10 +335,12 @@ export const SpecialDayProblems: Story = {
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Late night')
     await userEvent.click(modal.getByRole('button', { name: /^Date / }))
     const grid = await body.findByRole('grid')
-    // yesterday is grey in this month, or this month is the first one that opens
+    // yesterday is grey in this month; on the 1st, and on a month's last day (the picker opens on the first pickable
+    // day's month, which is next month then), it isn't shown and the month before can't be opened: the pager button
+    // is disabled (the `disabled` attribute, as PagerButton renders it)
     const yesterday = grid.querySelector<HTMLButtonElement>(`[data-day="${on(-1)}"] button`)
     if (yesterday) await expect(yesterday).toBeDisabled()
-    else await expect(body.getByRole('button', { name: 'Previous month' })).toHaveAttribute('aria-disabled', 'true')
+    else await expect(body.getByRole('button', { name: 'Previous month' })).toBeDisabled()
     await userEvent.keyboard('{Escape}')
     await pickDate(modal, 'Date', weekdayAhead(12))
     await userEvent.click(modal.getByRole('radio', { name: 'Different hours' }))
