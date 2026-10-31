@@ -38,7 +38,7 @@ export type StatusLegendProps = {
   sections: readonly StatusLegendSection[]
   /** A row the sheet alone shows, under a line: the «Show cancelled» switch. */
   extra?: ReactNode
-  /** Open on mount: the first visit; «Got it» or closing tells `onConfirm`, and the caller remembers it. */
+  /** Open on mount: the first visit; only «Got it» tells `onConfirm` (closing doesn't), and the caller remembers it. */
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
