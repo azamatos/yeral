@@ -16,7 +16,19 @@ const meta = {
   argTypes: {
     variant: {
       control: 'inline-radio',
-      options: ['primary', 'secondary', 'ghost', 'tint', 'danger', 'danger-ghost', 'danger-solid', 'ink'],
+      options: [
+        'primary',
+        'secondary',
+        'ghost',
+        'tint',
+        'danger',
+        'danger-ghost',
+        'danger-solid',
+        'ink',
+        'inverse-solid',
+        'inverse-outline',
+        'inverse-ghost',
+      ],
     },
     size: { control: 'inline-radio', options: ['s', 'm', 'l'] },
   },
@@ -90,6 +102,43 @@ export const IconOnly: Story = {
       </Button>
     </div>
   ),
+}
+
+/**
+ * The on-ink set (DS-Patterns → «On ink · bulk bar, toast, move bar»): inverse-solid for the one main action,
+ * inverse-outline beside it, inverse-ghost for the clear ×. Disabled on ink keeps the transparent fill with an n-600
+ * line and n-500 text, never the n-100 fill.
+ */
+export const OnInk: Story = {
+  args: { size: 's' },
+  render: (args) => (
+    <div className="flex flex-wrap items-center gap-2 rounded-m bg-n-900 p-3">
+      <Button {...args} variant="inverse-solid">
+        Confirm
+      </Button>
+      <Button {...args} variant="inverse-outline">
+        Decline
+      </Button>
+      <Button {...args} variant="inverse-outline">
+        <Share2 />
+        Export CSV
+      </Button>
+      <Button {...args} variant="inverse-outline" disabled>
+        Decline
+      </Button>
+      <Button {...args} variant="inverse-ghost" iconOnly aria-label="Clear selection">
+        <Search />
+      </Button>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    const off = canvas.getAllByRole('button', { name: 'Decline' })[1]!
+    await expect(off).toBeDisabled()
+    const style = getComputedStyle(off)
+    await expect(style.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    await expect(style.borderColor).toBe('rgb(90, 90, 100)')
+    await expect(style.color).toBe('rgb(110, 110, 120)')
+  },
 }
 
 /** DS-Components `.b:disabled`: every variant greys out the same way, the primary's gradient included. */
