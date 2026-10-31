@@ -4,7 +4,7 @@
  * booking's status; the client never sees it, so the change reaches only the team.
  */
 import { canOn, type Actor } from '@yeral/domain/permissions'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { bookings } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
@@ -14,10 +14,11 @@ import { staffOf, type Business } from './repo'
 
 export async function setTeamNote(deps: Deps, business: Business, actor: Actor, code: string, note: string | null): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    // a move request's own code is not a booking anyone opens: the note belongs on the original
     const [b] = await tx
       .select()
       .from(bookings)
-      .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code)))
+      .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code), isNull(bookings.rescheduleOf)))
       .for('update')
     if (!b) throw new ApiError('not_found')
     if (!canOn(actor, 'calendar', staffOf(await itemsOf(tx, b.id)))) throw new ApiError('not_found')

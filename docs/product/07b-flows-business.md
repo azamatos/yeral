@@ -696,7 +696,7 @@ flowchart LR
 
 1. The calendar draws blocked time as a grey block with a lock and a reason, part of the staff schedule (§4: "Ýapyk · Okuw", Jeren 16:30–17:30).
 2. The setup wizard tells instant-confirmation businesses "Boş däl wagtlaryňyzy senenamada ýapyp goýuň." (block your busy times in the calendar).
-3. Clicking an empty slot offers *Täze ýazylyş* (New booking) or *Wagty ýap* (Block time). Block time asks for the person, from–to, a reason and an optional repeat (Q-204, decided 18.10.2026). Whole days off stay personal special days (B-47).
+3. Clicking an empty slot offers *Täze ýazylyş* (New booking) or *Wagty ýap* (Block time). Block time asks for the person, from–to, a reason (a kind: training, break, personal, other, with free text beside it) and an optional repeat, daily or weekly, up to a date (Q-204, decided 18.10.2026; the kinds and the daily repeat 01.11.2026). Whole days off stay personal special days (B-47).
 
 **Edge cases**
 
@@ -706,7 +706,7 @@ flowchart LR
 
 > Open question Q-204: how to block time in the calendar.
 
-**Status** — Design: text only (layer drawn, creation not designed) · Code: api built (20.10.2026): `GET`/`POST /v1/w/{slug}/calendar/blocks`, `DELETE …/blocks/{id}` (one, or the rest of its weekly repeat); a block is busy time for every free-time search, a move onto it is `cannot_move` (`blocked`), one over a booking is `block_over_bookings`.
+**Status** — Design: text only (layer drawn, creation not designed) · Code: api built (20.10.2026): `GET`/`POST /v1/w/{slug}/calendar/blocks`, `DELETE …/blocks/{id}` (one, or the rest of its repeat; a daily or weekly repeat and the reason's `kind` since 01.11.2026); a block is busy time for every free-time search, a move onto it is `cannot_move` (`blocked`), one over a booking is `block_over_bookings`.
 
 ### B-19 · Answer a booking request
 
@@ -1381,7 +1381,7 @@ flowchart TD
 ### B-38 · Services and groups
 
 **Goal** — Keep the service menu: groups, names, durations, prices, buffers, who does what, and what's bookable online.
-**Who** — Owner; Administrator ("change services and prices", on by default).
+**Who** — Owner; Administrator ("change services and prices", on by default). The whole team reads the menu (a specialist books for herself from it and filters the bookings list by it; chapter 9, 01.11.2026).
 
 ```mermaid
 flowchart TD

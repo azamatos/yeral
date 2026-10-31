@@ -108,7 +108,15 @@ describe('blocked time (book B-18)', () => {
 
   it('every day up to a date (design §27.4): each day its own row, checked the same way, and the calendar shows why', async () => {
     const maysa = await as(MAYSA)
-    const made = await block(maysa, { staffId: aynaId, date: THU, start: 540, end: 570, kind: 'personal', repeat: 'daily', repeatUntil: '2026-11-22' })
+    const made = await block(maysa, {
+      staffId: aynaId,
+      date: THU,
+      start: 540,
+      end: 570,
+      kind: 'personal',
+      repeat: 'daily',
+      repeatUntil: '2026-11-22',
+    })
     expect(made.status).toBe(201)
     const items = made.json.items as { id: string; date: string; kind: string; reason: string | null; seriesId: string }[]
     expect(items.map((b) => b.date)).toEqual([THU, FRI, '2026-11-21', '2026-11-22'])
@@ -118,7 +126,15 @@ describe('blocked time (book B-18)', () => {
     expect(day.find((b) => b.id === items[1]!.id)).toMatchObject({ kind: 'personal' })
     // a daily one that meets a booking on one of its days is refused whole
     const booked = await maysa.req(`${W}/bookings`, {
-      body: { source: 'phone', phone: '+99365800606', serviceIds: [manicure], staffId: maralId, date: FRI, start: 960, notifyClient: false },
+      body: {
+        source: 'phone',
+        phone: '+99365800606',
+        serviceIds: [manicure],
+        staffId: maralId,
+        date: FRI,
+        start: 960,
+        notifyClient: false,
+      },
     })
     expect(booked.status).toBe(201)
     const over = await block(maysa, { staffId: maralId, date: THU, start: 960, end: 990, repeat: 'daily', repeatUntil: '2026-11-21' })

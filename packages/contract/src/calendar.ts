@@ -268,9 +268,7 @@ export const calendarBookingSchema = z
     /** A request's answer time ("18 min"). */
     holdUntil: epochSchema.nullable(),
     /** "Arz et" filed (B-28): what happened, in words for "other", by whom and when (taken back within 7 days). */
-    complaint: z
-      .object({ type: z.enum(COMPLAINT_TYPES), text: z.string().nullable(), by: complaintBySchema, at: epochSchema })
-      .nullable(),
+    complaint: z.object({ type: z.enum(COMPLAINT_TYPES), text: z.string().nullable(), by: complaintBySchema, at: epochSchema }).nullable(),
     /** The client's move waiting for an answer (B-21): the asked time for the line under the block; its ghost is in `moves`. */
     move: z
       .object({ code: bookingCodeSchema, date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() })

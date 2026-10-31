@@ -91,7 +91,9 @@ function bookingBlock(
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
     complaint: complaintOf(row, ctx.authors),
     // the asked time for the line under the block; its ghost is in `moves` when that time is in view
-    move: move ? { code: move.code, date: move.date, start: move.start, end: move.end, holdUntil: move.holdUntil?.getTime() ?? null } : null,
+    move: move
+      ? { code: move.code, date: move.date, start: move.start, end: move.end, holdUntil: move.holdUntil?.getTime() ?? null }
+      : null,
   }
 }
 

@@ -1,8 +1,9 @@
 # 2026-10-31 · Slice 4, PR A1: the five api gaps
 
 The plan's "API gaps" (`log/2026-10-31-slice-4-plan.md`), as one small contract + api PR ahead of the screen PRs
-(B1–B13). Everything is additive on `/v1`: new endpoints, optional inputs, nullable new fields. Migration 0045 adds the
-`block_kind` enum and `staff_blocks.kind` (nullable; old rows stay null).
+(B1–B13). Additive on `/v1` but for one shape: new endpoints, optional inputs, nullable new fields; `clientReportSchema.by`
+(the client card's `reports[].by`) changes from the filer's name to `{ staffId, name } | null` (gap 5; no app read it
+yet). Migration 0045 adds the `block_kind` enum and `staff_blocks.kind` (nullable; old rows stay null).
 
 ## 1. The internal note's write — `PUT /v1/w/{slug}/bookings/{code}/note`
 
@@ -55,7 +56,7 @@ The plan's "API gaps" (`log/2026-10-31-slice-4-plan.md`), as one small contract 
 - The api builds both from one helper (`complaintOf`, `complaintAuthors` in `modules/calendar/view.ts`); the filer is
   the staff id (`bookings.complaintBy`), and the removal rule is unchanged: owner and administrators any, a specialist
   their own, which the ReportBox (**B2**, **B9**) decides with `by.staffId === me.staffId`.
-- The apps' fixtures: the client card's `by` was a string; no fixture in the apps built it yet (typecheck green).
+- The apps' fixtures: the client card's `by` was a string; no fixture in the apps built it yet.
 
 ## Choices made here (object to any)
 

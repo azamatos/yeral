@@ -10,7 +10,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, rateLimits, services, staff } from '../../db/schema'
+import { bookings, businesses, rateLimits, services, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
@@ -103,8 +103,13 @@ describe('one booking by its code, its note and its complaint’s author', () =>
     const cursor = (await maysa.req('/v1/events?after=0')).json.cursor as string
     expect((await note(maysa, code, '  Allergic to acetone  ')).status).toBe(204)
     expect((await one(maysa, code)).json.internalNote).toBe('Allergic to acetone')
-    // the team's screens refresh; the client's don't hear it
-    expect((await eventsAfter(maysa, cursor)).json.items).toEqual([expect.objectContaining({ type: 'booking.updated', bookingCode: code })])
+    // the team's screens refresh; the client's don't hear it (the booking's own creation event may settle after the
+    // cursor was taken when other test files hold older transactions open, so the note's event is picked, not counted)
+    const updated = (items: { type: string; bookingCode: string | null }[]) =>
+      items.some((e) => e.type === 'booking.updated' && e.bookingCode === code)
+    expect((await eventsAfter(maysa, cursor, updated)).json.items).toContainEqual(
+      expect.objectContaining({ type: 'booking.updated', bookingCode: code }),
+    )
     expect(JSON.stringify((await client.req(`/v1/me/bookings/${code}`)).json)).not.toMatch(/acetone/)
     // Maral writes on her own booking; Aýna can't find it
     const maral = await as(MARAL)
@@ -119,6 +124,27 @@ describe('one booking by its code, its note and its complaint’s author', () =>
     expect((await one(maysa, code)).json.internalNote).toBeNull()
     expect((await note(maysa, code, 'x'.repeat(TEAM_NOTE_MAX + 1))).status).toBe(400)
     expect((await note(maysa, 'YR-99530302', 'x')).status).toBe(404)
+  })
+
+  it('a move request’s own code takes no note: 404, as the calendar never opens it; the original still does', async () => {
+    const maysa = await as(MAYSA)
+    const client = await as('+99365801003', 'Mover')
+    const free = (await client.req(`/v1/businesses/glow-studio/availability?services=${manicure}&staff=${maralId}&date=${DAY}`)).json
+      .slots as { start: number }[]
+    const sent = (
+      await client.req('/v1/bookings', {
+        body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: maralId, date: DAY, start: free[0]!.start },
+      })
+    ).json.code as string
+    expect((await maysa.req(`${W}/requests/${sent}/confirm`, { body: {} })).status).toBe(204)
+    expect((await client.req(`/v1/me/bookings/${sent}/reschedule`, { body: { date: DAY, start: free.at(-1)!.start } })).status).toBe(200)
+    const [original] = await db.select().from(bookings).where(eq(bookings.code, sent))
+    const [move] = await db.select().from(bookings).where(eq(bookings.rescheduleOf, original!.id))
+    expect(move).toBeDefined()
+    expect((await one(maysa, move!.code)).status).toBe(404)
+    expect((await note(maysa, move!.code, 'Lost note')).status).toBe(404)
+    expect((await note(maysa, sent, 'Kept note')).status).toBe(204)
+    expect((await one(maysa, sent)).json).toMatchObject({ internalNote: 'Kept note', move: { date: DAY } })
   })
 
   it('a complaint says who filed it, by id and name, on the block and the client card alike', async () => {
