@@ -1556,7 +1556,7 @@
       "boxTitle": "Report",
       "remove": "Remove report",
       "removeAria": "Remove report: {type}",
-      "boxCaption": "The client isn’t told. You can remove it until {date}.",
+      "boxCaption": "The client isn’t told. You can remove it until {date}, {time}.",
       "boxCaptionLocked": "The client isn’t told."
     },
     "cancel": {

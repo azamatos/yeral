@@ -18,9 +18,10 @@ export const stateOf = (b: CalendarBooking): BookingState => ({
  * What the Report menu offers now (book B-28, design §28 round 3.1: one report per booking), in the menu's order: a
  * no-show from the visit's start until 24 hours after its end, «Came late» from the start, the rest any time on a
  * confirmed or completed booking; with a report of another kind already there, only a no-show, which replaces it.
- * Empty: no Report button.
+ * Appointments only (a class marks its no-shows in the class drawer, B-67; tables come later). Empty: no Report button.
  */
 export const reportKinds = (b: CalendarBooking, now: number): ComplaintType[] => {
+  if (b.type !== 'appointment') return []
   const state = stateOf(b)
   return COMPLAINT_TYPES.filter((type) => canComplain(state, type, now) === null)
 }

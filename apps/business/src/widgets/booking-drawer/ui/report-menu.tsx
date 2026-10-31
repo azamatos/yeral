@@ -5,7 +5,7 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@yeral/ui/menu'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { useReportActions } from '../model/use-report-actions'
+import type { ReportActions } from '../model/use-report-actions'
 import { ReportOtherForm } from './report-other-form'
 
 /**
@@ -14,22 +14,20 @@ import { ReportOtherForm } from './report-other-form'
  * once with a toast and Undo, «Other…» asks «What happened?» first. With an earlier report, No-show says it replaces it.
  */
 export function ReportMenu({
-  slug,
   booking: b,
-  now,
   kinds,
   context,
+  report,
 }: {
-  slug: string
   booking: CalendarBooking
-  now: number
   /** What may be reported now, in the menu's order (empty: the menu isn't shown). */
   kinds: ComplaintType[]
   /** The booking in one line for the form («Gözel Annaýewa · Women’s haircut · Wednesday, 14 October · 10:00–11:00»). */
   context: string
+  /** The drawer's one set of report actions (shared with the report box, so the two never race). */
+  report: ReportActions
 }) {
   const t = useTranslations('bookingDrawer.report')
-  const report = useReportActions(slug, now)
   const [other, setOther] = useState(false)
   if (!kinds.length) return null
   const pick = (type: ComplaintType) => {

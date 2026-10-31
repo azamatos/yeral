@@ -1,6 +1,6 @@
 import type { CalendarBooking } from '@yeral/contract/calendar'
 import { COMPLAINT_UNDO_DAYS } from '@yeral/domain/lifecycle'
-import { addDays, localOf } from '@yeral/domain/time'
+import { localOf } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { useTranslations } from 'use-intl'
@@ -30,6 +30,9 @@ export function ReportBox({
   const c = b.complaint
   if (!c) return null
   const filed = localOf(c.at)
+  // the last moment it may be taken back (`canRemoveComplaint`: 7 days from the filing's instant)
+  const last = localOf(c.at + COMPLAINT_UNDO_DAYS * 86_400_000)
+  const until = { date: fmt.dayMonth(last.date), time: fmt.time(last.min) }
   const type = t(`types.${c.type}`)
   const line = join(
     [type, ...(c.text ? [c.text] : []), fmt.relativeDay(filed.date, localOf(now).date), fmt.time(filed.min), ...(c.by ? [c.by.name] : [])],
@@ -46,9 +49,7 @@ export function ReportBox({
           </Button>
         )}
       </div>
-      <span className="text-dense text-n-600">
-        {canRemove ? t('boxCaption', { date: fmt.dayMonth(addDays(filed.date, COMPLAINT_UNDO_DAYS)) }) : t('boxCaptionLocked')}
-      </span>
+      <span className="text-dense text-n-600">{canRemove ? t('boxCaption', until) : t('boxCaptionLocked')}</span>
     </div>
   )
 }

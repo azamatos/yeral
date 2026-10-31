@@ -26,7 +26,7 @@ import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { canCancelBooking, canRemoveReport, reportKinds } from '../model/report-rules'
 import { useNoteAutosave } from '../model/use-note-autosave'
-import { useReportActions } from '../model/use-report-actions'
+import { useReportActions, type ReportActions } from '../model/use-report-actions'
 import { CancelBookingModal } from './cancel-booking-modal'
 import { AlertNotes, ClientBlock, RecentVisits, RECENT_VISITS } from './client-block'
 import { ReportBox } from './report-box'
@@ -46,7 +46,6 @@ export function BookingDrawer({
   code,
   now,
   level,
-  staffId,
   placeholder,
   onBookAgain,
   onMove,
@@ -57,8 +56,6 @@ export function BookingDrawer({
   now: number
   /** The reader's level: a specialist reads no prices in the visits (B-Calendar `role=specialist`). */
   level: Level
-  /** The reader's own staff id: a specialist removes only the reports they filed (book Q-207). */
-  staffId?: string
   /** The booking as the page already has it (the day's view): shown at once while it's read on its own. */
   placeholder?: CalendarBooking
   /** «Book again» (B-23): a new booking for this client, with these services and this person. Without it, no button. */
@@ -70,6 +67,8 @@ export function BookingDrawer({
   const t = useTranslations('bookingDrawer.booking')
   const sdk = useSdk()
   const locale = useLocale()
+  // one set of report actions for the menu and the box: they share the pending state and never race
+  const report = useReportActions(slug, now)
   const errorText = useErrorText()
   const read = useQuery({ ...sdk.calendar.booking(slug, code, locale), placeholderData: placeholder })
   // a booking read once stays through a failed read-back (a note or status saved refreshes it); a failed first read
@@ -95,7 +94,7 @@ export function BookingDrawer({
             booking={booking}
             now={now}
             level={level}
-            staffId={staffId}
+            report={report}
             statuses={statuses}
             card={card}
             onBookAgain={onBookAgain && (() => onBookAgain(booking))}
@@ -112,7 +111,17 @@ export function BookingDrawer({
             </Callout>
           </DrawerBody>
         )}
-        {booking && <Footer slug={slug} booking={booking} now={now} onMove={onMove && (() => onMove(booking))} onClose={onClose} />}
+        {booking && (
+          <Footer
+            key={booking.code}
+            slug={slug}
+            booking={booking}
+            now={now}
+            report={report}
+            onMove={onMove && (() => onMove(booking))}
+            onClose={onClose}
+          />
+        )}
       </DrawerContent>
     </Drawer>
   )
@@ -127,7 +136,7 @@ function Body({
   booking: b,
   now,
   level,
-  staffId,
+  report,
   statuses,
   card,
   onBookAgain,
@@ -136,7 +145,7 @@ function Body({
   booking: CalendarBooking
   now: number
   level: Level
-  staffId?: string
+  report: ReportActions
   statuses: InternalStatus[]
   card: Parameters<typeof ClientBlock>[0]['card']
   onBookAgain?: () => void
@@ -146,7 +155,6 @@ function Body({
   const fmt = useFmt()
   const join = useJoin()
   const errorText = useErrorText()
-  const report = useReportActions(slug, now)
   const Icon = BOOKING_STATUS_ICON[b.status]
   const staff = join([...new Set(b.items.map((i) => i.staff).filter((n): n is string => !!n))], 'list')
   const note = useNoteAutosave({ slug, code: b.code, saved: b.internalNote })
@@ -181,7 +189,8 @@ function Body({
         <ReportBox
           booking={b}
           now={now}
-          canRemove={canRemoveReport(b, now, { level, staffId })}
+          // a specialist's booking is all theirs (the api shows them no other): the items' person is the reader
+          canRemove={canRemoveReport(b, now, { level, staffId: b.items.find((i) => i.staffId)?.staffId ?? undefined })}
           removing={report.removing}
           onRemove={() => report.remove(b)}
         />
@@ -298,12 +307,14 @@ function Footer({
   slug,
   booking: b,
   now,
+  report,
   onMove,
   onClose,
 }: {
   slug: string
   booking: CalendarBooking
   now: number
+  report: ReportActions
   onMove?: () => void
   onClose: () => void
 }) {
@@ -337,7 +348,7 @@ function Footer({
           {t('move')}
         </Button>
       )}
-      <ReportMenu slug={slug} booking={b} now={now} kinds={kinds} context={context} />
+      <ReportMenu booking={b} kinds={kinds} context={context} report={report} />
       {canCancel && (
         <Button variant="danger-ghost" className="sm:ml-auto" onClick={() => setCancelling(true)}>
           {c('button')}

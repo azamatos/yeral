@@ -30,9 +30,12 @@ B-Mobile 4b; book B-27, B-28, Q-206, Q-207, Q-254; design §28 round 3.1 (one re
   goes at once) and the drawer closes.
 - `ui/booking-drawer.tsx` — the footer: Move (B4) · Report · Cancel booking (`sm:ml-auto`, so with the three in a
   longer language it goes to its own line on the right, as the round-3 copy log says); none when nothing applies (a
-  cancelled booking, a report past its window). `BookingDrawer` takes `staffId?` (the reader's own): the calendar
-  page passes a specialist's column id (`view.columns[0].staffId`), since the session and the workspace list don't
-  carry the member's staff id yet.
+  cancelled booking, a report past its window). The footer is keyed by the booking's code like the body, so an open
+  cancel modal never survives a change of `?booking=`. A specialist's own staff id is the booking's items' person (the
+  api shows a specialist no booking but their own), since the session and the workspace list don't carry the member's
+  staff id yet. One `useReportActions` per drawer, shared by the menu and the box (no race between a file and a
+  removal). A removal's Undo files the same kind again under the name of whoever presses it, now (the api has no
+  restore), and only while the rules take that kind: a no-show removed more than 24 h after the visit has no Undo.
 - `ui/booking-drawer.fixtures.ts` — the stories' world, moved out of `booking-drawer.stories.tsx` and shared with
   `report-and-cancel.stories.tsx`: a fixed clock (Wednesday, 14 October 2026, 11:30 business time: nothing depends on
   the day the stories run), the booking, the card, the fake api that keeps a report filed or removed and a cancel.

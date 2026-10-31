@@ -43,9 +43,10 @@ describe('reportKinds (one report per booking, design §28 round 3.1)', () => {
     expect(reportKinds(booking({ complaint: late(at(605)) }), at(700))).toEqual(['noshow'])
     expect(reportKinds(booking({ status: 'completed', complaint: late(at(605)) }), at(700, '2026-10-16'))).toEqual([])
   })
-  it('offers nothing after a no-show, or on a cancelled booking', () => {
+  it('offers nothing after a no-show, on a cancelled booking, or on a class or table', () => {
     expect(reportKinds(booking({ status: 'noshow', complaint: { ...late(at(700)), type: 'noshow' } }), at(720))).toEqual([])
     expect(reportKinds(booking({ status: 'cancelled', cancelledBy: 'client' }), at(540))).toEqual([])
+    expect(reportKinds(booking({ type: 'class' }), at(620))).toEqual([])
   })
 })
 

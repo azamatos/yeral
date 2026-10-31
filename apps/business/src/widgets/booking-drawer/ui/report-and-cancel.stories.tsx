@@ -16,20 +16,10 @@ import { AYNA, booking, card, CODE, DAY, fakeApi, MAYSA, NOW, report, type Call 
 const onClose = fn()
 const onMove = fn()
 
-/** The drawer over an empty page, as the calendar opens it; a specialist's own column is Aýna's. */
+/** The drawer over an empty page, as the calendar opens it; the booking is in Aýna's column. */
 const drawer =
   (level: Level, extra: { move?: boolean } = {}) =>
-  () => (
-    <BookingDrawer
-      slug="glow-studio"
-      code={CODE}
-      now={NOW}
-      level={level}
-      staffId={level === 'specialist' ? AYNA.staffId : undefined}
-      onClose={onClose}
-      onMove={extra.move ? onMove : undefined}
-    />
-  )
+  () => <BookingDrawer slug="glow-studio" code={CODE} now={NOW} level={level} onClose={onClose} onMove={extra.move ? onMove : undefined} />
 
 /** A visit that started at 11:00 today (the clock says 11:30). */
 const started = booking({ date: DAY, start: 660, end: 720 })
@@ -106,7 +96,7 @@ export const NoShow: Story = {
     const saved = await toastWith('Marked as No-show · saved to the client’s card')
     await expect(noShowCalls).toEqual([{ route: `POST /w/glow-studio/bookings/${CODE}/complaint`, body: { type: 'noshow' } }])
     await expect(await d.findByText('No-show · Today · 11:30 · Maýsa Annaýewa')).toBeVisible()
-    await expect(d.getByText('The client isn’t told. You can remove it until 21 October.')).toBeVisible()
+    await expect(d.getByText('The client isn’t told. You can remove it until 21 October, 11:30.')).toBeVisible()
     await expect(d.queryByRole('button', { name: 'Report' })).toBeNull()
     await userEvent.click(within(saved).getByRole('button', { name: 'Undo' }))
     await waitFor(() => expect(d.queryByText('No-show · Today · 11:30 · Maýsa Annaýewa')).toBeNull())
@@ -146,17 +136,32 @@ export const Other: Story = {
   },
 }
 
-/** An earlier «Came late» (`report-added`): the box with «Remove report», and the menu offers only No-show, which replaces it. */
+const addedCalls: Call[] = []
+
+/**
+ * An earlier «Came late» (`report-added`): the box with «Remove report», and the menu offers only No-show, which
+ * replaces it. Removed, the toast's Undo files it again (as the reader, now).
+ */
 export const ReportAdded: Story = {
-  args: { server: fakeApi({ booking: booking({ ...ended, complaint: report('late') }) }) },
+  args: { server: fakeApi({ booking: booking({ ...ended, complaint: report('late') }), calls: addedCalls }) },
   play: async () => {
+    addedCalls.length = 0
     const drawer = await open()
     const d = within(drawer)
     await expect(await d.findByText('Came late · Today · 11:15 · Maýsa Annaýewa')).toBeVisible()
-    await expect(d.getByRole('button', { name: 'Remove report: Came late' })).toBeVisible()
+    await expect(d.getByText('The client isn’t told. You can remove it until 21 October, 11:15.')).toBeVisible()
     const menu = await openMenu(drawer)
     await expect(items(menu)).toEqual(['No-showReplaces the earlier report · the booking becomes No-show'])
     await userEvent.keyboard('{Escape}')
+    await userEvent.click(d.getByRole('button', { name: 'Remove report: Came late' }))
+    const removed = await toastWith('Report removed')
+    await waitFor(() => expect(d.queryByText('Came late · Today · 11:15 · Maýsa Annaýewa')).toBeNull())
+    await userEvent.click(within(removed).getByRole('button', { name: 'Undo' }))
+    await expect(await d.findByText('Came late · Today · 11:30 · Maýsa Annaýewa')).toBeVisible()
+    await expect(addedCalls.map((c) => c.route)).toEqual([
+      `DELETE /w/glow-studio/bookings/${CODE}/complaint`,
+      `POST /w/glow-studio/bookings/${CODE}/complaint`,
+    ])
   },
 }
 
@@ -164,7 +169,7 @@ const removeCalls: Call[] = []
 
 /**
  * A no-show marked yesterday (`reported`, B-Mobile 4b): no Report button, the box alone; «Remove report» puts the
- * booking back to Completed (the toast says so; its Undo marks the no-show again).
+ * booking back to Completed (the toast says so; past the no-show's window it offers no Undo).
  */
 export const Reported: Story = {
   args: {
@@ -179,16 +184,15 @@ export const Reported: Story = {
     const drawer = await open()
     const d = within(drawer)
     await expect(await d.findByText('No-show · 13 October · 11:05 · Maýsa Annaýewa')).toBeVisible()
-    await expect(d.getByText('The client isn’t told. You can remove it until 20 October.')).toBeVisible()
+    await expect(d.getByText('The client isn’t told. You can remove it until 20 October, 11:05.')).toBeVisible()
     await expect(d.queryByRole('button', { name: 'Report' })).toBeNull()
     await userEvent.click(d.getByRole('button', { name: 'Remove report: No-show' }))
     const removed = await toastWith('Report removed · the booking is Completed again')
     await expect(removeCalls).toEqual([{ route: `DELETE /w/glow-studio/bookings/${CODE}/complaint`, body: null }])
     // the badge says Completed («Completed» is also in the visits' rows, which are list items)
     await waitFor(() => expect(d.getAllByText('Completed').filter((n) => !n.closest('li'))).toHaveLength(1))
-    await userEvent.click(within(removed).getByRole('button', { name: 'Undo' }))
-    await expect(await d.findByText('No-show · Today · 11:30 · Maýsa Annaýewa')).toBeVisible()
-    await expect(removeCalls[1]).toEqual({ route: `POST /w/glow-studio/bookings/${CODE}/complaint`, body: { type: 'noshow' } })
+    // more than 24 hours after the visit a no-show can't be marked again: the toast offers no Undo
+    await expect(within(removed).queryByRole('button', { name: 'Undo' })).toBeNull()
   },
 }
 

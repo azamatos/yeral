@@ -8,6 +8,7 @@ import type { CalendarBooking } from '@yeral/contract/calendar'
 import type { ClientCard } from '@yeral/contract/clients'
 import type { InternalStatus } from '@yeral/contract/settings'
 import type { ComplaintType } from '@yeral/domain/model'
+import { canBusinessCancel, canComplain, canRemoveComplaint } from '@yeral/domain/lifecycle'
 import { addDays, epochOf } from '@yeral/domain/time'
 
 export const DAY = '2026-10-14'
@@ -100,7 +101,7 @@ const json = (body: unknown, status = 200) =>
 
 export type Call = { route: string; body: unknown }
 
-/** The api as the drawer asks it; `calls` collects what it was sent. */
+/** The api as the drawer asks it, refusing what the lifecycle rules refuse (a 409 with the code); `calls` collects what it was sent. */
 export const fakeApi =
   ({
     booking: b = booking(),
@@ -151,20 +152,28 @@ export const fakeApi =
         internalStatusId = ((await sent()) as { statusId: string | null }).statusId
         return new Response(null, { status: 204 })
       }
+      const state = () => ({ ...b, status, cancelledBy, complaintType: complaint?.type ?? null })
+      const refused = (code: string | null) => (code ? json({ error: { code } }, 409) : null)
       if (route === `POST ${one}/complaint`) {
         const input = (await sent()) as { type: ComplaintType; text?: string }
+        const no = refused(canComplain(state(), input.type, NOW))
+        if (no) return no
         complaint = { type: input.type, text: input.text ?? null, by, at: NOW }
         if (input.type === 'noshow') status = 'noshow'
         return new Response(null, { status: 204 })
       }
       if (route === `DELETE ${one}/complaint`) {
         calls.push({ route, body: null })
+        const no = refused(canRemoveComplaint({ complaintType: complaint?.type ?? null, complaintAt: complaint?.at ?? null }, NOW))
+        if (no) return no
         complaint = null
         if (status === 'noshow') status = NOW >= epochOf(b.date, b.end) ? 'completed' : 'confirmed'
         return new Response(null, { status: 204 })
       }
       if (route === `POST ${one}/cancel`) {
         const input = (await sent()) as { reason: string }
+        const no = refused(canBusinessCancel(state(), NOW))
+        if (no) return no
         status = 'cancelled'
         cancelledBy = input.reason === 'client_called' ? 'client' : 'business'
         return new Response(null, { status: 204 })
