@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import type { BusinessHours } from '@yeral/domain/hours'
+import type { Level } from '@yeral/domain/permissions'
 import { addDays, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
@@ -17,7 +18,7 @@ import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useDatePickerWords } from '@/shared/i18n'
-import { RequestDrawer } from '@/widgets/booking-drawer'
+import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import type { CalendarSearch } from '../model/search'
 import { DayGrid } from './day-grid'
@@ -31,10 +32,11 @@ import { DayGrid } from './day-grid'
 export function CalendarPage() {
   const { workspace } = useWorkspace()
   if (!workspace) return null
-  return <Calendar key={workspace.slug} slug={workspace.slug} specialist={workspace.level === 'specialist'} />
+  return <Calendar key={workspace.slug} slug={workspace.slug} level={workspace.level} />
 }
 
-function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
+function Calendar({ slug, level }: { slug: string; level: Level }) {
+  const specialist = level === 'specialist'
   const t = useTranslations('calendar')
   const sections = useTranslations('shell.sections')
   const fmt = useFmt()
@@ -253,6 +255,17 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
             })
           }
           onClose={() => go({ request: undefined }, true)}
+        />
+      )}
+      {/* the booking picked (`?booking=`), one drawer at a time: a request open wins */}
+      {search.booking && !search.request && (
+        <BookingDrawer
+          slug={slug}
+          code={search.booking}
+          now={now}
+          level={level}
+          placeholder={view.data?.bookings.find((b) => b.code === search.booking)}
+          onClose={() => go({ booking: undefined }, true)}
         />
       )}
     </WorkspacePage>

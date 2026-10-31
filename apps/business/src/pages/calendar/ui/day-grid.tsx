@@ -332,6 +332,10 @@ function DayColumn({
             linked={!!b.move && linked === b.code}
             timer={hold?.node}
             timerText={hold?.text}
+            // the team's marker, on a confirmed booking (book B-29); the view carries only the statuses switched on
+            internalStatus={
+              b.status === 'confirmed' && b.internalStatusId ? view.internalStatuses.find((s) => s.id === b.internalStatusId) : undefined
+            }
             onOpen={() => onOpen(b.status === 'pending' ? { request: b.code } : b.move ? { request: b.move.code } : { booking: b.code })}
             onLink={b.move ? link(b.code) : undefined}
           />
