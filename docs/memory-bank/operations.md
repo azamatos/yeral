@@ -14,7 +14,7 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 |---|---|---|---|
 | local | `localhost:3001–3005` (`PORT_BASE` + offset; +0 is free) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through Caddy | Postgres container | `pnpm docker:up` |
-| production | the owner's server `yeral-vps`: `api.yeral.app` since 2026-10-22, `business.yeral.app` and the client site on `yeral.app` (noindex until real businesses join; `www` redirects) since 2026-10-25, `cms.` with its app; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
+| production | the owner's server `yeral-vps`: `api.yeral.app` since 2026-10-22, `business.yeral.app` and the client site on `yeral.app` (noindex until real businesses join; `www` redirects) since 2026-10-25, `cms.yeral.app` since 2026-11-01; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
 green CI; production is deployed by hand, when the owner asks, while releases are paused. A risky migration is rehearsed on a production dump restored into

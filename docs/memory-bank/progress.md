@@ -501,6 +501,12 @@
   `ref`; screenshots caught «from from 40 TMT» and a stray icon. 7d stood at 16 % at the end, 13 % of it this run's.
 - **2026-11-01 · Slice 6 planned, the open questions answered:** `log/2026-11-01-slice-6-plan.md`. The owner, shown everything waiting on
   them: "go for all with recommended and continue in accordance with plan" (chapter 9's four rows of that day).
+- **2026-11-01 · Slice 6 closed and live:** #294 the app, its sign-in and setup link, #295 businesses, reported reviews, the team, the stack and
+  `admin.spec.ts`; deployed 5dc0b48 (a backup first). Live check: `cms.yeral.app` answers with its certificate and policy, the api takes
+  admin requests from its Origin alone (401 there, 403 from the client site). Reported reviews have stories and api tests but no e2e;
+  verifying is refused while the code shows, and the button says why. #294 also fixed a calendar story that failed after 19:00
+  Ashgabat time on every branch. The permission check refused a production read and `admin-invite` over SSH, and the first try of
+  the deploy; the owner: "i give u permission go with SSH", after which the deploy went through. `admin-invite` stays the owner's.
 
 ## Roadmap
 

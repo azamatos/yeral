@@ -167,7 +167,7 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 | 3 · Booking loop | business page, appointment booking, answering in the calendar, my bookings with the "How was it?" card (F-243), cancel, move, undo, declines with offered times, expiries (done) |
 | 4 · Daily work | calendar views, bookings list, clients, walk-ins, complaints, internal statuses, *Başga ýerde*, browser notifications, the installable business app (done and live 01.11.2026) |
 | 5 · Discovery | home (with the "How was it?" card, F-243), search, map, categories, the city choice, search-engine pages (done and live 01.11.2026) |
-| 6 · Admin tool | cms.yeral.app with the Ýeral team's own accounts and a second factor (F-178): verification, reported reviews, hiding businesses, adding a business for its owner |
+| 6 · Admin tool | cms.yeral.app with the Ýeral team's own accounts and a second factor (F-178): verification, reported reviews, hiding businesses, adding a business for its owner (done and live 01.11.2026) |
 | 7 · First-launch mode | example businesses, "Try the business app", privacy policy and terms in English (Q-033) |
 
 ### P5 · First launch
