@@ -395,6 +395,7 @@ function DayColumn({
             type="button"
             aria-label={tc(free ? (moving ? 'slotMove' : 'slot') : 'slotElsewhere', { name: c.name, time })}
             aria-haspopup={free ? (moving ? 'dialog' : 'menu') : undefined}
+            data-move-slot={free && moving ? '' : undefined}
             aria-expanded={free ? menuAt === s.start : undefined}
             onClick={(e) => onSlot(s, e.currentTarget)}
             className={cn(
