@@ -73,7 +73,12 @@ test('the team hides a live business and shows it again', async ({ page }) => {
   await page.getByRole('tab', { name: 'Live' }).click()
   await page.getByRole('searchbox').fill(SALON.slug)
   await page.getByRole('searchbox').press('Enter')
-  await page.getByRole('link', { name: SALON.name }).click()
+  // the seed has a second Glow Studio: the address tells them apart
+  await page
+    .getByRole('row')
+    .filter({ has: page.getByText(SALON.slug, { exact: true }) })
+    .getByRole('link')
+    .click()
   await expect(page.getByRole('heading', { level: 1, name: SALON.name })).toBeVisible()
 
   await page.getByRole('button', { name: 'Hide' }).click()
