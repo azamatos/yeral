@@ -478,7 +478,8 @@ type Story = StoryObj<typeof meta>
 /** The owner's day: everyone's column with their count, the bookings by status, the request's timer, the day's line. */
 export const Day: Story = {
   play: async ({ canvas }) => {
-    const region = await canvas.findByRole('region', { name: /^Calendar, / })
+    // the file's first story loads the page cold, seconds on CI: past the default second it failed main on 01.11
+    const region = await canvas.findByRole('region', { name: /^Calendar, / }, { timeout: 15_000 })
     // the page is as tall as the screen and the day scrolls inside it, under the names
     await expect(region.clientHeight).toBeLessThan(region.scrollHeight)
     const grid = within(region)
