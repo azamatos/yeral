@@ -389,6 +389,7 @@ export const bookingRowSchema = z
     complaint: z.object({ type: z.enum(COMPLAINT_TYPES), at: epochSchema }).nullable(),
   })
   .meta({ id: 'BookingRow' })
+export type BookingRow = z.infer<typeof bookingRowSchema>
 
 /** Today's and those ahead the soonest first; the past and the cancelled the newest first. */
 export const bookingListSchema = listOf(bookingRowSchema).meta({ id: 'BookingList' })
