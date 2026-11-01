@@ -1409,7 +1409,9 @@
     },
     "slot": "{name}, {time} — new booking or block time",
     "slotElsewhere": "{name}, {time} — busy elsewhere",
+    "slotMove": "{name}, {time} — move here",
     "slotPlus": "+ {time}",
+    "slotArrow": "→ {time}",
     "slotTitle": "{time} · {name}",
     "slotMenu": {
       "newBooking": "New booking",
@@ -1418,6 +1420,24 @@
     },
     "elsewhereRefused": "{name} is busy elsewhere {time}. Pick another time.",
     "elsewhereSelf": "You’re busy elsewhere {time}. Pick another time."
+  },
+  "moveBooking": {
+    "bar": "<b>{client}</b> · {what} — pick a new time",
+    "unnamed": "Unnamed client",
+    "back": "Back",
+    "close": "Close",
+    "confirm": "Confirm",
+    "confirming": "Moving the booking…",
+    "notify": "Notify the client",
+    "what": "{client} · {services}",
+    "title": "{from} → {to} · {name}",
+    "when": "{date} · {time}",
+    "moved": "Booking moved: {from} → {to}{notified, select, yes { · the client is notified} other {}}",
+    "refused": {
+      "service": "{name} doesn’t do this service — pick a specialist who does",
+      "elsewhere": "{name} is busy elsewhere {time}. Pick another time.",
+      "fit": "Doesn’t fit here — it needs {length}{buffer, select, yes { plus the buffer} other {}}"
+    }
   },
   "blockTime": {
     "title": "Block time",

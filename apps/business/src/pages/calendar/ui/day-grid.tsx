@@ -1,4 +1,4 @@
-import type { CalendarView } from '@yeral/contract/calendar'
+import type { CalendarBooking, CalendarView } from '@yeral/contract/calendar'
 import { openMinutesBetween, type BusinessHours } from '@yeral/domain/hours'
 import { addDays, localOf, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
@@ -11,6 +11,7 @@ import { useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { BookingBlock, MoveBlock } from '@/entities/booking'
 import type { BlockSlot } from '@/features/block-time'
+import { MoveGhost, type MoveTarget } from '@/features/move-booking'
 import {
   besideLive,
   buffersOf,
@@ -44,6 +45,8 @@ type Link = 'hover' | 'focus'
 type Pick = { request: string } | { booking: string }
 /** The address's booking picked and request open. */
 type Picked = { booking?: string; request?: string }
+/** Move mode: the booking on its way, the slot picked for it, and a click on a slot picks. */
+type Moving = { booking: CalendarBooking; target: MoveTarget | null; onPick: (slot: Omit<MoveTarget, 'date'>) => void }
 
 /**
  * The day's grid (B-Calendar `.gwrap`, DS-Business CalendarGrid «DayAllStaff»): a column per person the reader sees,
@@ -60,6 +63,7 @@ export function DayGrid({
   phoneStaff,
   busy,
   specialist,
+  moving,
   onOpen,
   onBlock,
   onBook,
@@ -76,6 +80,8 @@ export function DayGrid({
   busy?: boolean
   /** The reader is a specialist: the refusal under «Busy elsewhere» speaks to them. */
   specialist?: boolean
+  /** Move mode (book B-26): a free slot takes the booking instead of opening the menu. */
+  moving?: Moving
   onOpen: (pick: Pick) => void
   /** «Block time» from a free slot's menu. */
   onBlock: (slot: BlockSlot) => void
@@ -116,7 +122,8 @@ export function DayGrid({
       toast(specialist ? t('elsewhereSelf', { time }) : t('elsewhereRefused', { name: column.name, time }))
       return
     }
-    setMenu({ staffId: column.staffId, start: slot.start, anchor })
+    if (moving) moving.onPick({ staffId: column.staffId, start: slot.start, anchor })
+    else setMenu({ staffId: column.staffId, start: slot.start, anchor })
   }
   const pick = (m: NonNullable<typeof open>, go: (slot: BlockSlot) => void) => () => {
     setMenu(null)
@@ -229,7 +236,16 @@ export function DayGrid({
               picked={picked}
               linked={hovered ?? focused}
               cutoff={cutoff}
-              menuAt={open?.staffId === c.staffId ? open.start : null}
+              moving={moving}
+              menuAt={
+                moving
+                  ? moving.target?.staffId === c.staffId
+                    ? moving.target.start
+                    : null
+                  : open?.staffId === c.staffId
+                    ? open.start
+                    : null
+              }
               onLink={onLink}
               onOpen={onOpen}
               onSlot={(slot, anchor) => onSlot(c, slot, anchor)}
@@ -271,6 +287,7 @@ function DayColumn({
   picked,
   linked,
   cutoff,
+  moving,
   menuAt,
   onLink,
   onOpen,
@@ -287,7 +304,8 @@ function DayColumn({
   linked: string | null
   /** The grid's minute now on this day (`cutoffOn`): no slot ends before it. */
   cutoff: number
-  /** The slot whose menu is open. */
+  moving?: Moving
+  /** The slot whose menu is open, or the one picked for a move. */
   menuAt: number | null
   onLink: (how: Link, code: string | null) => void
   onOpen: (pick: Pick) => void
@@ -306,7 +324,11 @@ function DayColumn({
   const shown = <T extends { start: number; end: number }>(x: T | null): T[] => (x && onGrid(x, from, to) ? [x] : [])
   const busy = view.elsewhere.flatMap((e) => (e.staffId === c.staffId ? shown(stretchOn(date, e)) : []))
   const blocks = view.blocks.flatMap((k) => (k.staffId === c.staffId ? shown(stretchOn(date, k)) : []))
-  const slots = slotsOf({ day, live, moves, blocks, busy, fromHour: from, toHour: to, cutoff })
+  // a booking on its way leaves its own time free for it, and can't start in a quarter already begun
+  const staying = (p: { booking: CalendarBooking }) => p.booking.code !== moving?.booking.code
+  const slots = slotsOf({ day, live: live.filter(staying), moves, blocks, busy, fromHour: from, toHour: to, cutoff }).filter(
+    (s) => !moving || s.start >= cutoff,
+  )
   const at = (start: number, end: number) => placeOf(start, end, from, to)
   const link = (code: string) => (on: boolean, how: Link) => onLink(how, on ? code : null)
   const lock = <Lock aria-hidden strokeWidth={2} className="size-3.5 flex-none" />
@@ -371,8 +393,8 @@ function DayColumn({
           <button
             key={s.start}
             type="button"
-            aria-label={free ? tc('slot', { name: c.name, time }) : tc('slotElsewhere', { name: c.name, time })}
-            aria-haspopup={free ? 'menu' : undefined}
+            aria-label={tc(free ? (moving ? 'slotMove' : 'slot') : 'slotElsewhere', { name: c.name, time })}
+            aria-haspopup={free ? (moving ? 'dialog' : 'menu') : undefined}
             aria-expanded={free ? menuAt === s.start : undefined}
             onClick={(e) => onSlot(s, e.currentTarget)}
             className={cn(
@@ -385,7 +407,7 @@ function DayColumn({
           >
             {free && (
               <span aria-hidden className="invisible group-hover:visible group-focus-visible:visible group-aria-expanded:visible">
-                {tc('slotPlus', { time })}
+                {tc(moving ? 'slotArrow' : 'slotPlus', { time })}
               </span>
             )}
           </button>
@@ -402,7 +424,7 @@ function DayColumn({
           <span className="sr-only">{t('at', { time: fmt.timeRange(l.start, l.end) })}</span>
         </div>
       ))}
-      {buffersOf(placed, day).map((u) => (
+      {buffersOf(placed.filter(staying), day).map((u) => (
         <div
           key={u.code}
           aria-hidden
@@ -427,6 +449,7 @@ function DayColumn({
             // a request, or a booking with a client's move, opens the request; the rest pick the booking
             selected={picked.request ? picked.request === b.code || picked.request === b.move?.code : picked.booking === b.code}
             linked={!!b.move && linked === b.code}
+            source={!staying(p)}
             timer={hold?.node}
             timerText={hold?.text}
             // the team's marker, on a confirmed booking (book B-29); the view carries only the statuses switched on
@@ -473,6 +496,13 @@ function DayColumn({
           />
         )
       })}
+      {moving?.target?.staffId === c.staffId && (
+        <MoveGhost
+          time={fmt.timeRange(moving.target.start, moving.target.start + moving.booking.end - moving.booking.start)}
+          client={moving.booking.client.name ?? tc('block.unnamed')}
+          style={at(moving.target.start, moving.target.start + moving.booking.end - moving.booking.start)}
+        />
+      )}
     </div>
   )
 }

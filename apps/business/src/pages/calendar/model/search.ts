@@ -2,9 +2,10 @@ import { isYmd } from '@yeral/domain/time'
 
 /**
  * The calendar's address (B-Calendar): the day (`YYYY-MM-DD`, today without it), cancelled shown, the booking picked,
- * the request open in its drawer (a new booking's or a client's move's code), the person a phone shows.
+ * the request open in its drawer (a new booking's or a client's move's code), the person a phone shows, the booking
+ * in move mode (B-26).
  */
-export type CalendarSearch = { date?: string; cancelled?: true; booking?: string; request?: string; staff?: string }
+export type CalendarSearch = { date?: string; cancelled?: true; booking?: string; request?: string; staff?: string; move?: string }
 
 const code = (value: unknown) => (typeof value === 'string' && value ? value : null)
 
@@ -13,11 +14,13 @@ export function calendarSearch(search: Record<string, unknown>): CalendarSearch 
   const booking = code(search.booking)
   const request = code(search.request)
   const staff = code(search.staff)
+  const move = code(search.move)
   return {
     ...(typeof search.date === 'string' && isYmd(search.date) ? { date: search.date } : {}),
     ...(search.cancelled === true ? { cancelled: true as const } : {}),
     ...(booking ? { booking } : {}),
     ...(request ? { request } : {}),
     ...(staff ? { staff } : {}),
+    ...(move ? { move } : {}),
   }
 }
