@@ -164,9 +164,12 @@ export function HomePage() {
             <span className="text-label text-n-500 uppercase">{t('businessLabel', { brand: t('brandBusiness') })}</span>
             <h2 className={heading}>{t('businessTitle')}</h2>
             <p className="m-0 text-body text-n-600">{t('businessText')}</p>
-            <div>
+            <div className="flex flex-wrap gap-3">
               <Button asChild variant="primary" size="l">
                 <a href={site.urls.business}>{t('businessAction')}</a>
+              </Button>
+              <Button asChild variant="secondary" size="l">
+                <a href={`${site.urls.business}/try`}>{t('businessTry')}</a>
               </Button>
             </div>
           </div>

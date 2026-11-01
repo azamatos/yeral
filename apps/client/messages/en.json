@@ -113,7 +113,8 @@
     "about": "About",
     "help": "Help",
     "privacy": "Privacy policy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "businessTry": "Try the business app"
   },
   "home": {
     "kicker": "Online booking for any service",
@@ -159,7 +160,8 @@
       "online": "Clients pick a free time and book themselves, without a call.",
       "reminders": "Clients are reminded before they come, so fewer times go empty.",
       "calendar": "Everyone on one screen, on a computer or a phone."
-    }
+    },
+    "businessTry": "Try the business app"
   },
   "location": {
     "title": "Let us show places near you",

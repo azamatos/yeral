@@ -184,6 +184,17 @@ type Story = StoryObj<typeof meta>
 type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
 
 /** Owner, 1440: the 248 sidebar, Bookings with the 6 requests she may answer; the tab title names the workspace. */
+/** The demo (B-Shell `banner: demo`, DemoSidebar, book F-242): the banner, and «Log in» in place of the account menu. */
+export const Demo: Story = {
+  args: { server: fakeApi({ ...MAYSA, me: { ...MAYSA.me, demo: true } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('This is a demo workspace. Changes reset every night.')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Create your business' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Log in' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Account menu' })).toBeNull()
+  },
+}
+
 export const Owner: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Calendar' })).toBeVisible()
