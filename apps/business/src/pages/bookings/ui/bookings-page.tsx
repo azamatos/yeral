@@ -11,7 +11,7 @@ import { EmptyState } from '@yeral/ui/empty-state'
 import { Input } from '@yeral/ui/input'
 import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
-import { Tabs, TabsList, TabsTrigger } from '@yeral/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { CalendarX2, Download, SearchX } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
@@ -90,6 +90,114 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
 
   if (list.isError && !list.data) throw list.error
 
+  const body = (
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          aria-label={t('search')}
+          placeholder={t('search')}
+          className="w-full sm:w-72"
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+        />
+        {!specialist && (
+          <Select
+            size="s"
+            aria-label={t('staffFilter')}
+            className="w-auto max-sm:hidden"
+            value={search.staff ?? ''}
+            onChange={(e) => go({ staff: e.target.value || undefined })}
+          >
+            <option value="">{t('allStaff')}</option>
+            {(people.data?.columns ?? []).map((c) => (
+              <option key={c.staffId} value={c.staffId}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        )}
+        <Select
+          size="s"
+          aria-label={t('serviceFilter')}
+          className="w-auto max-sm:hidden"
+          value={search.service ?? ''}
+          onChange={(e) => go({ service: e.target.value || undefined })}
+        >
+          <option value="">{t('allServices')}</option>
+          {(menu.data?.groups ?? []).flatMap((g) =>
+            g.services.map((s) => (
+              <option key={s.id} value={s.id}>
+                {localized(s.name, locale)}
+              </option>
+            )),
+          )}
+        </Select>
+        <Select
+          size="s"
+          aria-label={t('dateFilter')}
+          className="w-auto max-sm:hidden"
+          value={search.when ?? ''}
+          onChange={(e) => go({ when: (e.target.value as BookingsWhen) || undefined })}
+        >
+          <option value="">{t('allTime')}</option>
+          <option value="today">{t('dateToday')}</option>
+          <option value="week">{t('dateWeek')}</option>
+        </Select>
+        {filtered && (
+          <Button variant="ghost" size="s" onClick={clear}>
+            {t('clear')}
+          </Button>
+        )}
+        <span className="flex-1" />
+        {!specialist && rows.length > 0 && (
+          <Button asChild variant="secondary" size="s" className="max-sm:hidden">
+            <a href={sdk.calendar.exportUrl(slug, filters)} download>
+              <Download aria-hidden />
+              {t('export')}
+            </a>
+          </Button>
+        )}
+      </div>
+      {list.isPending ? (
+        <div className="flex justify-center py-16">
+          <Spinner label={t('loading')} />
+        </div>
+      ) : rows.length === 0 ? (
+        filtered ? (
+          <EmptyState
+            icon={<SearchX aria-hidden />}
+            title={t('nothing')}
+            description={t('nothingHint')}
+            action={
+              <Button variant="secondary" size="s" onClick={clear}>
+                {t('clearFilters')}
+              </Button>
+            }
+          />
+        ) : (
+          <EmptyState icon={<CalendarX2 aria-hidden />} title={t(`empty.${tab}`)} />
+        )
+      ) : (
+        <>
+          <BookingsTable
+            rows={rows}
+            now={now}
+            specialist={specialist}
+            picked={search.booking ?? search.request}
+            onOpen={onOpen}
+            onMove={onMove}
+            onBookAgain={onBookAgain}
+          />
+          {list.hasNextPage && (
+            <Button variant="secondary" className="self-center" loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>
+              {t('showMore')}
+            </Button>
+          )}
+        </>
+      )}
+    </>
+  )
+
   return (
     <WorkspacePage title={sections('bookings')}>
       <div className="flex flex-col gap-4">
@@ -101,115 +209,13 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
               </TabsTrigger>
             ))}
           </TabsList>
+          {/* a panel per tab, as each tab names its own; the rows live in the one on screen */}
+          {BOOKING_TABS.map((value) => (
+            <TabsContent key={value} value={value} className="flex flex-col gap-4 pt-4">
+              {value === tab && body}
+            </TabsContent>
+          ))}
         </Tabs>
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            aria-label={t('search')}
-            placeholder={t('search')}
-            className="w-full sm:w-72"
-            value={typed}
-            onChange={(e) => setTyped(e.target.value)}
-          />
-          {!specialist && (
-            <Select
-              size="s"
-              aria-label={t('staffFilter')}
-              className="w-auto max-sm:hidden"
-              value={search.staff ?? ''}
-              onChange={(e) => go({ staff: e.target.value || undefined })}
-            >
-              <option value="">{t('allStaff')}</option>
-              {(people.data?.columns ?? []).map((c) => (
-                <option key={c.staffId} value={c.staffId}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          )}
-          <Select
-            size="s"
-            aria-label={t('serviceFilter')}
-            className="w-auto max-sm:hidden"
-            value={search.service ?? ''}
-            onChange={(e) => go({ service: e.target.value || undefined })}
-          >
-            <option value="">{t('allServices')}</option>
-            {(menu.data?.groups ?? []).flatMap((g) =>
-              g.services.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {localized(s.name, locale)}
-                </option>
-              )),
-            )}
-          </Select>
-          <Select
-            size="s"
-            aria-label={t('dateFilter')}
-            className="w-auto max-sm:hidden"
-            value={search.when ?? ''}
-            onChange={(e) => go({ when: (e.target.value as BookingsWhen) || undefined })}
-          >
-            <option value="">{t('allTime')}</option>
-            <option value="today">{t('dateToday')}</option>
-            <option value="week">{t('dateWeek')}</option>
-          </Select>
-          {filtered && (
-            <Button variant="ghost" size="s" onClick={clear}>
-              {t('clear')}
-            </Button>
-          )}
-          <span className="flex-1" />
-          {!specialist && rows.length > 0 && (
-            <Button asChild variant="secondary" size="s" className="max-sm:hidden">
-              <a href={sdk.calendar.exportUrl(slug, filters)} download>
-                <Download aria-hidden />
-                {t('export')}
-              </a>
-            </Button>
-          )}
-        </div>
-        {list.isPending ? (
-          <div className="flex justify-center py-16">
-            <Spinner label={t('loading')} />
-          </div>
-        ) : rows.length === 0 ? (
-          filtered ? (
-            <EmptyState
-              icon={<SearchX aria-hidden />}
-              title={t('nothing')}
-              description={t('nothingHint')}
-              action={
-                <Button variant="secondary" size="s" onClick={clear}>
-                  {t('clearFilters')}
-                </Button>
-              }
-            />
-          ) : (
-            <EmptyState icon={<CalendarX2 aria-hidden />} title={t(`empty.${tab}`)} />
-          )
-        ) : (
-          <>
-            <BookingsTable
-              rows={rows}
-              now={now}
-              specialist={specialist}
-              picked={search.booking ?? search.request}
-              onOpen={onOpen}
-              onMove={onMove}
-              onBookAgain={onBookAgain}
-            />
-            {list.hasNextPage && (
-              <Button
-                variant="secondary"
-                className="self-center"
-                loading={list.isFetchingNextPage}
-                onClick={() => void list.fetchNextPage()}
-              >
-                {t('showMore')}
-              </Button>
-            )}
-          </>
-        )}
       </div>
       {search.request && (
         <RequestDrawer
