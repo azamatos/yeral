@@ -5,7 +5,7 @@ import { currentStep, eligibleFor, missingOf, servicesOf, staffOf, totalOf, type
 const service = (id: string, staffIds: string[], patch: Partial<MenuService> = {}): MenuService => ({
   id,
   groupId: 'g',
-  name: { en: id } as never,
+  name: { en: id },
   description: null,
   durationMin: 60,
   priceType: 'fixed',

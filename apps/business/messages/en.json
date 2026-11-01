@@ -1433,7 +1433,6 @@
     "addedToYou": "The booking is added to you",
     "noOneDoesAll": "No one specialist does all the chosen services — make a separate booking for them.",
     "nearest": "Nearest free times",
-    "nearestAria": "{date}, {time}{name, select, other {, {name}}}",
     "anotherTime": "Another date and time",
     "earlierDays": "Earlier days",
     "laterDays": "Later days",

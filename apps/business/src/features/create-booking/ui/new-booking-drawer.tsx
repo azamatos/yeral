@@ -141,7 +141,12 @@ export function NewBookingDrawer({
           toast(t('saved', { walkin: walkin ? 'yes' : 'no', notified: notify ? 'yes' : 'no' }), {
             action: {
               label: t('undo'),
-              onClick: () => undo.mutate(code, { onSuccess: () => toast(t('undone')), onError: (error) => toast(errorText(error)) }),
+              // the drawer's gone by now: `mutate`'s own callbacks wouldn't run
+              onClick: () =>
+                void undo.mutateAsync(code).then(
+                  () => toast(t('undone')),
+                  (error: unknown) => toast(errorText(error)),
+                ),
             },
           })
         },
@@ -268,21 +273,20 @@ export function NewBookingDrawer({
                     <TimeSlot
                       key={`${n.date}|${n.start}|${n.staffId}`}
                       selected={on}
-                      aria-label={t('nearestAria', { date: fmt.weekdayDate(n.date), time: fmt.time(n.start), name: who ?? '' })}
                       onClick={() => {
                         setDate(n.date)
                         setTime(n.start)
                         setStaffId(n.staffId)
                       }}
                     >
-                      <span className="font-normal text-n-600">{dayWord(n.date)}</span> {fmt.time(n.start)}
+                      <span className="font-normal">{dayWord(n.date)}</span> {fmt.time(n.start)}
                       {who && (
-                        <span className="font-normal text-n-600">
-                          {' '}
+                        <span className="font-normal">
                           {t('dot')}
                           {who}
                         </span>
                       )}
+                      <span className="sr-only">{fmt.weekdayDate(n.date)}</span>
                     </TimeSlot>
                   )
                 })}

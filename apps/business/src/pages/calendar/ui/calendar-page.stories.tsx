@@ -204,6 +204,42 @@ const requestsOf = (canAnswer: boolean, moveFits = true): BookingRequest[] => {
   ]
 }
 
+/** The menu (book B-38): Aýna cuts and colours, Maral cuts and does nails; nobody does colouring and nails. */
+const service = (n: number, name: string, durationMin: number, priceAmount: number, staffIds: string[], priceType = 'fixed') => ({
+  id: id(n),
+  groupId: id(0),
+  name: { en: name },
+  description: null,
+  durationMin,
+  priceType,
+  priceAmount,
+  bufferMin: null,
+  online: true,
+  staffIds,
+  futureBookings: 0,
+})
+const menu = {
+  groups: [
+    {
+      id: id(0),
+      name: { en: 'Hair' },
+      services: [service(5, 'Women’s haircut', 45, 120, [id(1), id(2)]), service(6, 'Hair colouring', 120, 300, [id(1)], 'from')],
+    },
+    { id: id(7), name: { en: 'Nails' }, services: [service(8, 'Manicure', 60, 80, [id(2)])] },
+  ],
+}
+/** The business's client with an alert note, whom the drawer finds by number or name. */
+const gozel = {
+  id: id(9),
+  name: 'Gözel Annaýewa',
+  phone: '+99365123456',
+  visits: 12,
+  avgCheck: 145,
+  phoneOnly: false,
+  alerts: ['Allergic to ammonia'],
+  usualServices: [],
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
@@ -245,6 +281,8 @@ const fakeApi =
     }
     // the bookings moved in this story (book B-26): the new day and time, and another specialist's when given
     const movedTo = new Map<string, { date: string; start: number; staffId?: string }>()
+    // the bookings saved in this story (book B-23), gone again with Undo
+    const saved: CalendarView['bookings'] = []
     const marked = (b: CalendarView['bookings'][number]) => {
       const to = movedTo.get(b.code)
       if (to) {
@@ -272,7 +310,7 @@ const fakeApi =
         )
         return json({
           ...view,
-          bookings: view.bookings.map(marked),
+          bookings: [...view.bookings.map(marked), ...saved.filter((b) => b.date === view.from)],
           blocks: [...view.blocks, ...blocked.filter((k) => k.date === view.from)],
           internalStatuses: internal ? [arrived] : [],
         })
@@ -313,6 +351,29 @@ const fakeApi =
         }))
         blocked.push(...items)
         return json({ items })
+      }
+      if (route === 'GET /w/glow-studio/services') return json(menu)
+      if (route === 'GET /w/glow-studio/clients/lookup') {
+        const digits = url.searchParams.get('phone')?.replace(/\D/g, '')
+        const name = url.searchParams.get('name')?.toLowerCase()
+        const hit = digits ? gozel.phone.slice(4).startsWith(digits) : !!name && gozel.name.toLowerCase().startsWith(name)
+        return json({ items: hit ? [gozel] : [] })
+      }
+      if (route === `GET /w/glow-studio/clients/${gozel.id}`) return json(gozel)
+      if (route === 'POST /w/glow-studio/bookings') {
+        const body = (await request.json()) as { staffId: string; date: string; start: number; serviceIds: string[] }
+        const who = staff.findIndex((s) => s.staffId === body.staffId) + 1
+        const code = `YR-4840${saved.length}`
+        saved.push(booking(who, body.date, body.start, body.start + 45, 'confirmed', 'Gözel A.', 'Women’s haircut', { code }))
+        return json({ code, undoUntil: now + 10_000 })
+      }
+      const undo = /^POST \/w\/glow-studio\/bookings\/([^/]+)\/undo$/.exec(route)
+      if (undo) {
+        saved.splice(
+          saved.findIndex((b) => b.code === undo[1]),
+          1,
+        )
+        return new Response(null, { status: 204 })
       }
       const moving = /^POST \/w\/glow-studio\/bookings\/([^/]+)\/move$/.exec(route)
       if (moving) {
@@ -363,9 +424,17 @@ const fakeApi =
             { date: TOMORROW, start: 600, end: 720, staffId: id(1) },
             { date: TOMORROW, start: 660, end: 780, staffId: id(3) },
           ],
-          date: DAY,
-          slots: [],
-          days: [],
+          date: url.searchParams.get('date') ?? DAY,
+          slots: [600, 660, 780, 840, 1080].map((start) => ({
+            start,
+            end: start + 60,
+            staffIds: url.searchParams.has('staff') ? [url.searchParams.get('staff')] : [id(1), id(2)],
+          })),
+          days: Array.from({ length: 14 }, (_, i) => ({
+            date: addDays(DAY, i),
+            state: i === 3 ? 'closed' : 'open',
+            closedReason: null,
+          })),
         })
       return json({ error: { code: 'not_found' } }, 404)
     }
@@ -724,6 +793,8 @@ const openBlockTime = async (canvas: Canvas, name: string, time: string) => {
   })
   await userEvent.click(slot)
   const menu = within(await page.findByRole('menu', { name: `${time} · ${name}` }))
+  await expect(menu.getByRole('menuitem', { name: 'New booking' })).toHaveFocus()
+  await userEvent.keyboard('{ArrowDown}')
   await expect(menu.getByRole('menuitem', { name: 'Block time' })).toHaveFocus()
   await userEvent.click(menu.getByRole('menuitem', { name: 'Block time' }))
   const dialog = await page.findByRole('dialog', { name: 'Block time' })
@@ -992,5 +1063,135 @@ export const MoveRussianLength: Story = {
     const bar = await canvas.findByRole('status')
     await expect(within(bar).getByRole('button', { name: /Back/ })).toBeVisible()
     await expect(bar.scrollWidth).toBeLessThanOrEqual(bar.clientWidth)
+  },
+}
+
+/** The new booking from the toolbar (book B-23). */
+const openNew = async (canvas: Canvas) => {
+  await canvas.findByRole('region', { name: /^Calendar, / })
+  await userEvent.click(canvas.getByRole('button', { name: 'New booking' }))
+  return within(await page.findByRole('dialog', { name: 'New booking' }))
+}
+
+/** A known client by number (their alert note), a service, the specialist, a nearest time, saved; the toast's Undo takes it back. */
+export const NewBooking: Story = {
+  play: async ({ canvas }) => {
+    const d = await openNew(canvas)
+    await expect(d.getByRole('button', { name: 'Save booking' })).toBeDisabled()
+    await expect(d.getByText('Still needed: client’s phone, service, time')).toBeVisible()
+    await userEvent.type(d.getByRole('textbox', { name: 'Phone number' }), '651')
+    await userEvent.click(await d.findByRole('button', { name: /Gözel Annaýewa/ }))
+    await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
+    await expect(d.getByText(/12 visits · average check 145 TMT/)).toBeVisible()
+    await userEvent.click(d.getByRole('checkbox', { name: /Women’s haircut/ }))
+    await expect(d.getByText('Still needed: specialist, time')).toBeVisible()
+    await userEvent.click(await d.findByRole('button', { name: /^Tomorrow 10:00\s*· Aýna/ }))
+    await expect(await d.findByRole('button', { name: /^Tomorrow 10:00/ })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(d.getByRole('button', { name: 'Save booking' }))
+    await page.findByText('Booking saved · the client is notified')
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await userEvent.click(page.getByRole('button', { name: 'Undo' }))
+    await page.findByText('Booking taken back')
+  },
+}
+
+/** A number not saved yet: said so, the name optional. */
+export const NewBookingNewClient: Story = {
+  play: async ({ canvas }) => {
+    const d = await openNew(canvas)
+    const phone = d.getByRole('textbox', { name: 'Phone number' })
+    await userEvent.type(phone, '6123')
+    await userEvent.tab()
+    await expect(await d.findByRole('alert')).toHaveTextContent('The number is incomplete — it needs 8 digits.')
+    await userEvent.type(phone, '4567')
+    await expect(await d.findByText('This number isn’t saved yet — it will be added as a new client.')).toBeVisible()
+    await expect(d.getByRole('textbox', { name: /^Name/ })).toBeVisible()
+  },
+}
+
+/** Search by name finds the client; no match says so and offers a new one. */
+export const NewBookingByName: Story = {
+  play: async ({ canvas }) => {
+    const d = await openNew(canvas)
+    await userEvent.click(d.getByRole('button', { name: 'Search by name' }))
+    const search = d.getByRole('textbox', { name: 'Name or phone number' })
+    await userEvent.type(search, 'Zzz')
+    await expect(await d.findByText('No client found for “Zzz”')).toBeVisible()
+    await userEvent.clear(search)
+    await userEvent.type(search, 'Göz')
+    await userEvent.click(await d.findByRole('button', { name: /Gözel Annaýewa/ }))
+    await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
+    await userEvent.click(d.getByRole('button', { name: 'Change' }))
+    await expect(await d.findByRole('textbox', { name: 'Phone number' })).toHaveValue('')
+  },
+}
+
+/** From a free slot: the person given, only their services unless asked; two services nobody does together say so. */
+export const NewBookingFromSlot: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
+    const maral = within(within(canvas.getByRole('region', { name: /^Calendar, / })).getByRole('group', { name: 'Maral' }))
+    await userEvent.click(await maral.findByRole('button', { name: 'Maral, 13:00 — new booking or block time' }))
+    await userEvent.click(await page.findByRole('menuitem', { name: 'New booking' }))
+    const d = within(await page.findByRole('dialog', { name: 'New booking' }))
+    await expect(await d.findByRole('checkbox', { name: /Manicure/ })).toBeVisible()
+    await expect(d.queryByRole('checkbox', { name: /Hair colouring/ })).toBeNull()
+    await expect(d.getByRole('radio', { name: 'Maral' })).toBeChecked()
+    await userEvent.click(d.getByRole('button', { name: 'Show all services' }))
+    await userEvent.click(await d.findByRole('checkbox', { name: /Hair colouring/ }))
+    await userEvent.click(d.getByRole('checkbox', { name: /Manicure/ }))
+    await expect(await d.findByText(/No one specialist does all the chosen services — make/)).toBeVisible()
+    await expect(d.getByRole('radio', { name: 'Maral' })).toBeDisabled()
+  },
+}
+
+/** A walk-in: today from the first free start, the client not told, the toast says walk-in. */
+export const NewBookingWalkIn: Story = {
+  play: async ({ canvas }) => {
+    const d = await openNew(canvas)
+    await userEvent.click(d.getByRole('radio', { name: 'Walk-in' }))
+    await expect(d.getByText(/The client is here — the booking can start at the current time/)).toBeVisible()
+    await expect(d.getByRole('switch', { name: /Notify the client/ })).not.toBeChecked()
+    await userEvent.type(d.getByRole('textbox', { name: 'Phone number' }), '65123456')
+    await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
+    await userEvent.click(d.getByRole('checkbox', { name: /Women’s haircut/ }))
+    await userEvent.click(d.getByRole('radio', { name: 'Aýna' }))
+    await expect(await d.findByRole('button', { name: '10:00' })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(d.getByRole('button', { name: 'Save booking' }))
+    await page.findByText('Booking saved · walk-in')
+  },
+}
+
+/** A specialist books for themself: their own card, their services, no prices. */
+export const NewBookingSpecialist: Story = {
+  args: { server: fakeApi('specialist') },
+  play: async ({ canvas }) => {
+    const d = await openNew(canvas)
+    await expect(d.getByText('The booking is added to you')).toBeVisible()
+    await expect(await d.findByRole('checkbox', { name: /Manicure/ })).toBeVisible()
+    await expect(d.queryByRole('checkbox', { name: /Hair colouring/ })).toBeNull()
+    await expect(d.queryByText(/TMT/)).toBeNull()
+  },
+}
+
+/** «Book again» opens it from the address: the client's number found, their services ticked. */
+export const NewBookingAgain: Story = {
+  args: { path: `/w/glow-studio/calendar?panel=new&client=${id(9)}&services=${id(5)}` },
+  play: async () => {
+    const d = within(await page.findByRole('dialog', { name: 'New booking' }))
+    await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
+    await expect(await d.findByRole('checkbox', { name: /Women’s haircut/ })).toBeChecked()
+  },
+}
+
+/** The words about a third longer (Russian) at 390: nothing leaves the sheet. */
+export const NewBookingRussianLength: Story = {
+  globals: { viewport: { value: 'xs' }, text: 'longer' },
+  args: { path: `/w/glow-studio/calendar?panel=new&services=${id(5)}` },
+  play: async () => {
+    const dialog = await page.findByRole('dialog')
+    await within(dialog).findByRole('checkbox', { name: /Women/ })
+    await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth)
   },
 }

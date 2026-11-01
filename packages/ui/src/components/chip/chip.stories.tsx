@@ -66,6 +66,23 @@ function PriceTypes() {
 }
 
 /** One choice as chips (B-Services «Price»): a radio group, the chosen one in the tint, arrow keys between them. */
+/** An option that can't be picked now: the arrows pass it over (the new booking's specialists who don't do the services). */
+export const RadioChipDisabled: Story = {
+  render: () => (
+    <ChipRadioGroup
+      aria-label="Specialist"
+      defaultValue="ayna"
+      options={[
+        { value: 'ayna', label: 'Aýna' },
+        { value: 'maral', label: 'Maral', disabled: true },
+      ]}
+    />
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('radio', { name: 'Maral' })).toBeDisabled()
+  },
+}
+
 export const RadioChips: Story = {
   render: () => <PriceTypes />,
   play: async ({ canvas }) => {

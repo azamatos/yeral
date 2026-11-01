@@ -29,11 +29,13 @@ export function ChipRadioGroup({
   options,
   className,
   ...props
-}: Omit<ComponentProps<typeof RadioGroup.Root>, 'children'> & { options: readonly { value: string; label: ReactNode }[] }) {
+}: Omit<ComponentProps<typeof RadioGroup.Root>, 'children'> & {
+  options: readonly { value: string; label: ReactNode; disabled?: boolean }[]
+}) {
   return (
     <RadioGroup.Root {...props} className={cn('flex flex-wrap gap-2', className)}>
       {options.map((o) => (
-        <RadioGroup.Item key={o.value} value={o.value} asChild>
+        <RadioGroup.Item key={o.value} value={o.value} disabled={o.disabled} asChild>
           <Chip className="data-[state=checked]:border-a-line data-[state=checked]:bg-a-50 data-[state=checked]:text-a-600 data-[state=checked]:hover:bg-a-100">
             {o.label}
           </Chip>
