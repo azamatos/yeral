@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SectionPage } from '@/pages/section'
+import { clientsSearch, ClientsPage } from '@/pages/clients'
 
-export const Route = createFileRoute('/w/$slug/clients')({ component: () => <SectionPage section="clients" /> })
+export const Route = createFileRoute('/w/$slug/clients')({ validateSearch: clientsSearch, component: ClientsPage })
