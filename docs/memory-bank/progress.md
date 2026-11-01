@@ -494,6 +494,11 @@
   every map was blank, as MapLibre's unlayered stylesheet beat the `absolute` utility and stories never ran MapLibre.
   The owner also asked why the session had "cleared": auto-compact had run at 70 % on a 1M window, before the 75 % stop could
   fire; `DISABLE_AUTO_COMPACT=1` is in the Mac's global settings since.
+- **2026-11-01 · Slice 5 closed and live:** #288 search, category pages and Home, #289 the results map, #290 location, #291 sitemap,
+  robots, JSON-LD and `discovery.spec.ts`; deployed 3447f4f with its backup. Clicked live at about 500 px: Home with real photos,
+  search, the full-screen map with real tiles, a category page, a time chip opening the booking at that time. The side-by-side
+  layout at desktop width was seen only in Storybook (the test window wouldn't widen). Stories caught `ComboboxInput` dropping a
+  `ref`; screenshots caught «from from 40 TMT» and a stray icon. 7d stood at 16 % at the end, 13 % of it this run's.
 
 ## Roadmap
 

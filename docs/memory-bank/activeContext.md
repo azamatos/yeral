@@ -4,14 +4,15 @@ _Last updated: 2026-11-01_ · the current state only; the history by day is in `
 
 ## Current focus
 
-**2026-11-01: slice 4 done and live, only the main session works now (no agents).** Merged since 31.10: #263 e2e flows, #264
-A1, #265 U1, #266 U2, #268 B12 notifications, #269 B2 booking drawer, #270 B3 report and cancel, #271 B1 block time, #273 B4
-move a booking, #274 B5 new booking drawer, #275 B6 the phone's quick booking and the +, #276 B7 week views, one specialist
-and the legend, #277 `staffId` on the workspace, #278 B8 bookings list, #279 B9 requests tab and bulk answers, #281 B10 clients
-list, #282 B13 installable app, #284 B11 client card, #285 `daily-work.spec.ts` and the lost-toast fix, #286 the blank map.
-Live: main at b398708. Next is slice 5: its plan first (book chapter 10). Each piece's log note (`log/2026-11-01-*.md`) lists
-what's there, its traps and what it left; `log/2026-11-01-slice-4-live.md` says what the live check covered and what it couldn't
-(Claude doesn't sign in or create accounts on production, so the signed-in flows are proved on CI's stack, not live).
+**2026-11-01: slices 4 and 5 done and live, only the main session works now (no agents).** Slice 4 (#263–#286) is daily work;
+slice 5 (#288 search, category pages and Home; #289 the results map; #290 location; #291 sitemap, robots, JSON-LD and
+`discovery.spec.ts`) is discovery. Live: main at 3447f4f. **Next is slice 6, the admin tool: its plan first** (book chapter 10),
+then slice 7, then P5. Each piece's log note (`log/2026-11-01-*.md`) lists what's there, its traps and what it left;
+`log/2026-11-01-slice-4-live.md` says what a live check by Claude can't cover: Claude doesn't sign in or create accounts on
+production, so the signed-in flows are proved on CI's stack and in the owner's review.
+
+**Editing by script (01.11 lesson):** a Python edit script that asserts its anchors must write nothing until every anchor matched:
+twice one failed partway, with Prettier having moved the text, and left some files changed. Collect the files first, write last.
 
 **How to merge (31.10–01.11 lesson):** read a `success` conclusion for the CI run of the PR's exact head commit first. A
 `gh run watch` of a run my next push cancelled once let #273 merge unverified, and a script's own last exit code hid it. After
@@ -102,12 +103,15 @@ the book has had none open since 21.10. Where the pre-book questions (old number
    SSR'd client site before React hydrates is lost, and a request block on the day grid can sit under a neighbour's; home's
    «How was it?» card comes with slice 5 (then the write-review steiger override goes). `make-example <slug>` (#233, deployed)
    opens one of the owner's test businesses once the owner names it.
-3. **Slice 5 next**, then slices 6 + 7, then the first launch (P5), approved in advance (22.10): `EXAMPLE_BUSINESSES` and
+3. **Slice 6 next** (the admin tool), then slice 7, then the first launch (P5), approved in advance (22.10): `EXAMPLE_BUSINESSES` and
    `DEMO_WORKSPACE` on, the cms site joins `yeral.caddy` with its app. The api's `/docs` page needs Scalar's bundle inventoried
    or self-hosted before its CSP tightens; the cms site gets a policy when its app joins. Left from slice 4: «Frequent clients»
    on the new booking's name search (needs a list sorted by visits), the phone bookings list's filters, the clients list's chip
    counts, the card's Visits total and History count (the api sends neither), Report and Cancel on the bookings row menu, Undo
-   when a report is removed on the card, the owner's click test including the install on a real phone, and the page at 390 live.
+   when a report is removed on the card, the owner's click test including the install on a real phone. Left from slice 5: the
+   phone's full-screen search sheet (Mobile 1), suggestions in «What?», the empty state's rows for tomorrow, grouping pins on one
+   spot; slice 7 adds «Try the business app» and the footer's About, Help and legal links. The site stays `noindex` at the edge
+   until the owner opens it.
 4. **Slice 2's follow-ups** (`log/2026-10-2[345]-*.md`): a category changed after the menu was saved keeps that menu;
    a lighter public categories list; one shared rule for which special day applies (app and api); a shared fake api
    for the Settings stories; leaving a section with unsaved changes asks nothing; specialization saves one language
@@ -137,7 +141,7 @@ for error tracking and uptime checks.
 **Server:** `ssh yeral-vps` (Claude's own since 31.10: deploy and SSH need no go); deploy by hand with `infra/server/README.md` →
 "Deploying Ýeral by hand" (`deploy.sh` saves the database first; the backups and config copies kept on the server are
 in `progress.md`'s deploy entries 23.10–26.10, every backup mode 600). Since 2026-11-01 it runs main at
-b398708: migrations 0000–0044 and later, the 6
+3447f4f: migrations 0000–0044 and later, the 6
 cities, the category catalogue with its starter services, the 11 example businesses, the owner's test businesses;
 `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no admin account yet; `SIGN_IN_CODE_ON_SCREEN` and `EXAMPLE_BUSINESSES` on
 (owner, 25.10), `DEMO_WORKSPACE` off (on at the first launch). Public through the edge Caddy (`yeral.caddy` in
