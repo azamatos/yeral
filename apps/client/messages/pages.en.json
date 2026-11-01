@@ -1,0 +1,181 @@
+{
+  "about": {
+    "sections": [
+      {
+        "paragraphs": [
+          "{brand} is online booking for any business that sells its time: salons, dentists, tutors, gyms, mechanics and more. Clients see the free times and book in a minute. Businesses get a calendar, a list of requests and their clients in one place.",
+          "It's free for clients and for businesses. You pay the business at the place, as you always have."
+        ]
+      },
+      {
+        "heading": "Where it stands",
+        "paragraphs": [
+          "{brand} is in development, and this site is a demo. The businesses on it are examples, marked as such, and no booking here is real. You can try the whole loop: book as a client, then open the business app and answer as a business.",
+          "It's being built for Turkmenistan first."
+        ]
+      },
+      {
+        "heading": "Who runs it",
+        "paragraphs": ["{brand} is built and run by {operator}, {country}."]
+      }
+    ]
+  },
+  "help": {
+    "sections": [
+      {
+        "heading": "Booking",
+        "paragraphs": [
+          "Find a place by search, category or the map, pick a service and a free time, and send the booking. You sign in with your phone number; there's no password.",
+          "Some businesses confirm at once. Others answer your request first, and you see the answer in My bookings."
+        ]
+      },
+      {
+        "heading": "Changing or cancelling",
+        "paragraphs": [
+          "Open the booking in My bookings. Each business sets how long before the visit you can change or cancel for free; the booking says so. If it's too late to do it here, call the business."
+        ]
+      },
+      {
+        "heading": "Reviews",
+        "paragraphs": [
+          "After a visit you can write a review, for up to 30 days. You can change it for 7 days after writing it. Businesses can't delete reviews, but they can reply or report one to the {brand} team."
+        ]
+      },
+      {
+        "heading": "Your account",
+        "paragraphs": [
+          "Change your name, phone number and language in your profile. You can delete your account there too: upcoming bookings are cancelled, and your account, favourites and reviews are deleted."
+        ]
+      },
+      {
+        "heading": "For businesses",
+        "paragraphs": [
+          "Set up your business in the {brand} Business app: the services, the hours, the team and how you take bookings. The {brand} team checks each new business before it opens to clients."
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "updated": "Last updated: 1 November 2026",
+    "sections": [
+      {
+        "heading": "Who we are",
+        "paragraphs": ["{brand} is run by {operator}, {country}. In this policy, “we” means {brand}."]
+      },
+      {
+        "heading": "This site is a demo",
+        "paragraphs": [
+          "{brand} is in development. The businesses here are examples, the sign-in code shows on the screen instead of arriving by SMS, and no SMS is sent. Anyone who types a phone number can sign in as that number, so please don't put anything real or private here, and don't use a number you wouldn't want someone else to type.",
+          "This policy will change before {brand} opens for real, and each market gets its own version, checked by a lawyer there."
+        ]
+      },
+      {
+        "heading": "What we keep",
+        "items": [
+          "Your account: your phone number, name, language and photo, if you add one.",
+          "What you do on {brand}: your bookings, notes on them, reviews and favourite places.",
+          "What business teams enter: the business's details and photos, their team, and their client records, which can include names, phone numbers and notes about clients.",
+          "Technical data: your internet address, browser and the pages you ask for, in the server's logs and in the limits that stop abuse."
+        ]
+      },
+      {
+        "heading": "Why we use it",
+        "paragraphs": [
+          "To sign you in, to make and manage bookings, to show a business the bookings made with it, and to keep the service working and safe. We don't sell your data, we don't show advertising, and we don't use analytics or tracking."
+        ]
+      },
+      {
+        "heading": "Who sees it",
+        "items": [
+          "A business you book with sees your name, your phone number and your booking, and keeps its own record of your visits.",
+          "Visitors see your reviews under your first name and initial.",
+          "The {brand} team sees what it needs to check businesses and reported reviews.",
+          "Services that help run {brand}: the company hosting our server, the map and address-search providers, which see your internet address when a map or an address search loads, and Cloudflare, for the domain and e-mail."
+        ]
+      },
+      {
+        "heading": "Where it's kept",
+        "paragraphs": ["On a server in the European Union."]
+      },
+      {
+        "heading": "How long we keep it",
+        "paragraphs": [
+          "Until you delete your account. Then your upcoming bookings are cancelled, and your account, favourites and reviews are deleted. Each business keeps its own visit records, no longer linked to a {brand} account. Copies taken before an update may keep your data a while longer.",
+          "Demo data can be reset at any time."
+        ]
+      },
+      {
+        "heading": "Cookies and storage",
+        "paragraphs": [
+          "We use cookies only to keep you signed in. Your browser also remembers small conveniences, such as the city you chose. Nothing here tracks you across other sites."
+        ]
+      },
+      {
+        "heading": "Your choices",
+        "paragraphs": [
+          "You can change your details and delete your account in your profile. To ask what we hold about you, for a copy of it, or for anything else in this policy, write to us at the address below."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "updated": "Last updated: 1 November 2026",
+    "sections": [
+      {
+        "heading": "What {brand} is",
+        "paragraphs": [
+          "{brand} connects clients with businesses that take bookings. It's run by {operator}, {country}. Using {brand} means you accept these terms. It's free, and no payment goes through it: you pay the business at the place."
+        ]
+      },
+      {
+        "heading": "This site is a demo",
+        "paragraphs": [
+          "{brand} is in development. The businesses here are examples and a booking with one is not real: nobody is expecting you. The service may change, stop or lose data at any time, and we make no promise that it works."
+        ]
+      },
+      {
+        "heading": "Your account",
+        "paragraphs": [
+          "You sign in with your phone number. Use a number that's yours, and keep your details true. You're responsible for what's done from your account."
+        ]
+      },
+      {
+        "heading": "Bookings",
+        "paragraphs": [
+          "A booking is between you and the business. {brand} passes it on but isn't a party to it. The business sets its own rules, such as how long before a visit you can cancel for free, and it can confirm or decline a request. After repeated no-shows, a business can limit you to booking by phone."
+        ]
+      },
+      {
+        "heading": "Reviews",
+        "paragraphs": [
+          "A review must be honest and about a visit you really made. The {brand} team can remove one that's false, insulting, about another business, or spam."
+        ]
+      },
+      {
+        "heading": "Businesses",
+        "paragraphs": [
+          "A business is responsible for what it publishes and for the service it gives. The {brand} team checks a new business before it opens to clients, and can hide or close one, telling its owner why."
+        ]
+      },
+      {
+        "heading": "What's not allowed",
+        "paragraphs": [
+          "Don't make fake bookings, misuse someone else's details, send abuse, copy the site's data in bulk, or try to break or get around how {brand} works. We can limit or close an account that does."
+        ]
+      },
+      {
+        "heading": "Our responsibility",
+        "paragraphs": [
+          "{brand} is provided as it is. As far as the law allows, we aren't responsible for a business's services, for a booking that doesn't go as planned, or for losses from the service being unavailable."
+        ]
+      },
+      {
+        "heading": "Ending and changes",
+        "paragraphs": [
+          "You can delete your account at any time in your profile. We may change these terms, and the date at the top says when we last did.",
+          "These terms are under the law of {country}."
+        ]
+      }
+    ]
+  }
+}

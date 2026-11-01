@@ -16,7 +16,7 @@ import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { parseServiceIds, pickedServices, selectionTotal, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { useErrorText } from '@/shared/i18n'
-import { wrap } from '@/shared/ui'
+import { TermsNote, wrap } from '@/shared/ui'
 import { chosenStaff, currentStep, reachedStep, stepDone, STEPS, type BookingSearch, type Choice, type Step } from '../model/flow'
 import { ConfirmStep, type Alternative } from './confirm-step'
 import { FocusedHeader } from './focused-header'
@@ -175,9 +175,12 @@ export function BookingPage() {
         : t('summary.pickService')
   const cta =
     step === 'confirm' ? (
-      <Button size="l" variant="primary" className="w-full" disabled={!done} loading={send.isPending} onClick={submit}>
-        {t('confirm.send')}
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button size="l" variant="primary" className="w-full" disabled={!done} loading={send.isPending} onClick={submit}>
+          {t('confirm.send')}
+        </Button>
+        <TermsNote word="booking" />
+      </div>
     ) : (
       <Button size="l" variant="primary" className="w-full" disabled={!done} onClick={next}>
         {t('summary.continue')}

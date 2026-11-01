@@ -109,7 +109,11 @@
     "forBusiness": "For business",
     "business": "{brand} Business",
     "businessLogIn": "Business login",
-    "copyright": "© {year} {brand}"
+    "copyright": "© {year} {brand}",
+    "about": "About",
+    "help": "Help",
+    "privacy": "Privacy policy",
+    "terms": "Terms"
   },
   "home": {
     "kicker": "Online booking for any service",
@@ -131,7 +135,11 @@
     "categories": "Not only beauty",
     "categoriesCaption": "Any specialist or place that sells its time, in one app.",
     "how": "How it works",
-    "steps": { "search": "Search", "pick": "Pick a time", "confirmed": "Get confirmed" },
+    "steps": {
+      "search": "Search",
+      "pick": "Pick a time",
+      "confirmed": "Get confirmed"
+    },
     "stepsText": {
       "search": "Type a service or a place and pick a day: you'll see the places with a free time.",
       "pick": "Choose the specialist and the time that suits you.",
@@ -142,7 +150,11 @@
     "businessTitle": "Do you sell your time? Clients will find you here.",
     "businessText": "Your calendar, requests and client list in one place. Free for everyone.",
     "businessAction": "Add your business",
-    "reasons": { "online": "Online booking day and night", "reminders": "Reminders", "calendar": "The team's calendar" },
+    "reasons": {
+      "online": "Online booking day and night",
+      "reminders": "Reminders",
+      "calendar": "The team's calendar"
+    },
     "reasonsText": {
       "online": "Clients pick a free time and book themselves, without a call.",
       "reminders": "Clients are reminded before they come, so fewer times go empty.",
@@ -190,8 +202,17 @@
       "tomorrow": "{n, plural, one {# place} other {# places}} · free time tomorrow",
       "week": "{n, plural, one {# place} other {# places}} · free time this week"
     },
-    "days": { "today": "Today", "tomorrow": "Tomorrow", "week": "This week" },
-    "sorts": { "distance": "Nearest", "popular": "Most popular", "rating": "Rating", "price": "Price" },
+    "days": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "week": "This week"
+    },
+    "sorts": {
+      "distance": "Nearest",
+      "popular": "Most popular",
+      "rating": "Rating",
+      "price": "Price"
+    },
     "nothing": "No free time here",
     "nothingHint": "Widen the area, pick another day or clear the filters.",
     "tryTomorrow": "Try tomorrow",
@@ -718,5 +739,28 @@
     "sending": "Sending…",
     "sent": "Thank you! Your review is published.",
     "changed": "Your review is changed."
+  },
+  "pages": {
+    "about": {
+      "title": "About {brand}",
+      "description": "{brand} is online booking for any business that sells its time."
+    },
+    "help": {
+      "title": "Help",
+      "description": "How booking on {brand} works: booking, changing, cancelling, reviews and your account."
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "What {brand} keeps about you, why, and who sees it."
+    },
+    "terms": {
+      "title": "Terms",
+      "description": "The terms of using {brand}."
+    },
+    "contact": "Questions? Write to <a>{email}</a>.",
+    "agree": {
+      "login": "By continuing, you agree to the <terms>Terms</terms> and the <privacy>Privacy policy</privacy>.",
+      "booking": "By sending, you agree to the <terms>Terms</terms> and the <privacy>Privacy policy</privacy>."
+    }
   }
 }

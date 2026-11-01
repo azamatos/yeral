@@ -39,6 +39,20 @@ export function SiteFooter() {
             <FooterLink href={site.urls.business}>{t('footer.business', { brand })}</FooterLink>
             <FooterLink href={`${site.urls.business}/login`}>{t('footer.businessLogIn')}</FooterLink>
           </FooterColumn>
+          <FooterColumn title={brand}>
+            <Link to="/$lang/about" params={{ lang }} className={footerLink}>
+              {t('footer.about')}
+            </Link>
+            <Link to="/$lang/help" params={{ lang }} className={footerLink}>
+              {t('footer.help')}
+            </Link>
+            <Link to="/$lang/privacy" params={{ lang }} className={footerLink}>
+              {t('footer.privacy')}
+            </Link>
+            <Link to="/$lang/terms" params={{ lang }} className={footerLink}>
+              {t('footer.terms')}
+            </Link>
+          </FooterColumn>
         </div>
         <div className="flex flex-wrap justify-between gap-4 border-t border-n-200 pt-5">
           <span className="text-dense text-n-600">{t('footer.copyright', { year, brand })}</span>

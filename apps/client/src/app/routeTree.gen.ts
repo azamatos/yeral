@@ -16,9 +16,13 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LangSiteRouteImport } from './routes/$lang/_site'
 import { Route as BSlugRouteImport } from './routes/b/$slug'
 import { Route as LangSiteIndexRouteImport } from './routes/$lang/_site/index'
+import { Route as LangSiteAboutRouteImport } from './routes/$lang/_site/about'
 import { Route as LangSiteAccountRouteRouteImport } from './routes/$lang/_site/account/route'
+import { Route as LangSiteHelpRouteImport } from './routes/$lang/_site/help'
 import { Route as LangSiteLoginRouteImport } from './routes/$lang/_site/login'
+import { Route as LangSitePrivacyRouteImport } from './routes/$lang/_site/privacy'
 import { Route as LangSiteSearchRouteImport } from './routes/$lang/_site/search'
+import { Route as LangSiteTermsRouteImport } from './routes/$lang/_site/terms'
 import { Route as LangSiteAccountIndexRouteImport } from './routes/$lang/_site/account/index'
 import { Route as LangSiteAccountBookingsRouteImport } from './routes/$lang/_site/account/bookings'
 import { Route as LangSiteAccountProfileRouteImport } from './routes/$lang/_site/account/profile'
@@ -61,9 +65,19 @@ const LangSiteIndexRoute = LangSiteIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LangSiteRoute,
 } as any)
+const LangSiteAboutRoute = LangSiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LangSiteRoute,
+} as any)
 const LangSiteAccountRouteRoute = LangSiteAccountRouteRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => LangSiteRoute,
+} as any)
+const LangSiteHelpRoute = LangSiteHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => LangSiteRoute,
 } as any)
 const LangSiteLoginRoute = LangSiteLoginRouteImport.update({
@@ -71,9 +85,19 @@ const LangSiteLoginRoute = LangSiteLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => LangSiteRoute,
 } as any)
+const LangSitePrivacyRoute = LangSitePrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => LangSiteRoute,
+} as any)
 const LangSiteSearchRoute = LangSiteSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => LangSiteRoute,
+} as any)
+const LangSiteTermsRoute = LangSiteTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => LangSiteRoute,
 } as any)
 const LangSiteAccountIndexRoute = LangSiteAccountIndexRouteImport.update({
@@ -120,8 +144,12 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/b/$slug': typeof BSlugRoute
   '/$lang/account': typeof LangSiteAccountRouteRouteWithChildren
+  '/$lang/about': typeof LangSiteAboutRoute
+  '/$lang/help': typeof LangSiteHelpRoute
   '/$lang/login': typeof LangSiteLoginRoute
+  '/$lang/privacy': typeof LangSitePrivacyRoute
   '/$lang/search': typeof LangSiteSearchRoute
+  '/$lang/terms': typeof LangSiteTermsRoute
   '/$lang/': typeof LangSiteIndexRoute
   '/$lang/account/bookings': typeof LangSiteAccountBookingsRouteWithChildren
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
@@ -137,8 +165,12 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/b/$slug': typeof BSlugRoute
+  '/$lang/about': typeof LangSiteAboutRoute
+  '/$lang/help': typeof LangSiteHelpRoute
   '/$lang/login': typeof LangSiteLoginRoute
+  '/$lang/privacy': typeof LangSitePrivacyRoute
   '/$lang/search': typeof LangSiteSearchRoute
+  '/$lang/terms': typeof LangSiteTermsRoute
   '/$lang/account/bookings': typeof LangSiteAccountBookingsRouteWithChildren
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/b/$slug': typeof LangSiteBSlugRoute
@@ -156,8 +188,12 @@ export interface FileRoutesById {
   '/$lang/_site': typeof LangSiteRouteWithChildren
   '/b/$slug': typeof BSlugRoute
   '/$lang/_site/account': typeof LangSiteAccountRouteRouteWithChildren
+  '/$lang/_site/about': typeof LangSiteAboutRoute
+  '/$lang/_site/help': typeof LangSiteHelpRoute
   '/$lang/_site/login': typeof LangSiteLoginRoute
+  '/$lang/_site/privacy': typeof LangSitePrivacyRoute
   '/$lang/_site/search': typeof LangSiteSearchRoute
+  '/$lang/_site/terms': typeof LangSiteTermsRoute
   '/$lang/_site/': typeof LangSiteIndexRoute
   '/$lang/_site/account/bookings': typeof LangSiteAccountBookingsRouteWithChildren
   '/$lang/_site/account/profile': typeof LangSiteAccountProfileRoute
@@ -176,8 +212,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/b/$slug'
     | '/$lang/account'
+    | '/$lang/about'
+    | '/$lang/help'
     | '/$lang/login'
+    | '/$lang/privacy'
     | '/$lang/search'
+    | '/$lang/terms'
     | '/$lang/'
     | '/$lang/account/bookings'
     | '/$lang/account/profile'
@@ -193,8 +233,12 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/b/$slug'
+    | '/$lang/about'
+    | '/$lang/help'
     | '/$lang/login'
+    | '/$lang/privacy'
     | '/$lang/search'
+    | '/$lang/terms'
     | '/$lang/account/bookings'
     | '/$lang/account/profile'
     | '/$lang/b/$slug'
@@ -211,8 +255,12 @@ export interface FileRouteTypes {
     | '/$lang/_site'
     | '/b/$slug'
     | '/$lang/_site/account'
+    | '/$lang/_site/about'
+    | '/$lang/_site/help'
     | '/$lang/_site/login'
+    | '/$lang/_site/privacy'
     | '/$lang/_site/search'
+    | '/$lang/_site/terms'
     | '/$lang/_site/'
     | '/$lang/_site/account/bookings'
     | '/$lang/_site/account/profile'
@@ -282,11 +330,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangSiteIndexRouteImport
       parentRoute: typeof LangSiteRoute
     }
+    '/$lang/_site/about': {
+      id: '/$lang/_site/about'
+      path: '/about'
+      fullPath: '/$lang/about'
+      preLoaderRoute: typeof LangSiteAboutRouteImport
+      parentRoute: typeof LangSiteRoute
+    }
     '/$lang/_site/account': {
       id: '/$lang/_site/account'
       path: '/account'
       fullPath: '/$lang/account'
       preLoaderRoute: typeof LangSiteAccountRouteRouteImport
+      parentRoute: typeof LangSiteRoute
+    }
+    '/$lang/_site/help': {
+      id: '/$lang/_site/help'
+      path: '/help'
+      fullPath: '/$lang/help'
+      preLoaderRoute: typeof LangSiteHelpRouteImport
       parentRoute: typeof LangSiteRoute
     }
     '/$lang/_site/login': {
@@ -296,11 +358,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangSiteLoginRouteImport
       parentRoute: typeof LangSiteRoute
     }
+    '/$lang/_site/privacy': {
+      id: '/$lang/_site/privacy'
+      path: '/privacy'
+      fullPath: '/$lang/privacy'
+      preLoaderRoute: typeof LangSitePrivacyRouteImport
+      parentRoute: typeof LangSiteRoute
+    }
     '/$lang/_site/search': {
       id: '/$lang/_site/search'
       path: '/search'
       fullPath: '/$lang/search'
       preLoaderRoute: typeof LangSiteSearchRouteImport
+      parentRoute: typeof LangSiteRoute
+    }
+    '/$lang/_site/terms': {
+      id: '/$lang/_site/terms'
+      path: '/terms'
+      fullPath: '/$lang/terms'
+      preLoaderRoute: typeof LangSiteTermsRouteImport
       parentRoute: typeof LangSiteRoute
     }
     '/$lang/_site/account/': {
@@ -386,8 +462,12 @@ const LangSiteAccountRouteRouteWithChildren =
 
 interface LangSiteRouteChildren {
   LangSiteAccountRouteRoute: typeof LangSiteAccountRouteRouteWithChildren
+  LangSiteAboutRoute: typeof LangSiteAboutRoute
+  LangSiteHelpRoute: typeof LangSiteHelpRoute
   LangSiteLoginRoute: typeof LangSiteLoginRoute
+  LangSitePrivacyRoute: typeof LangSitePrivacyRoute
   LangSiteSearchRoute: typeof LangSiteSearchRoute
+  LangSiteTermsRoute: typeof LangSiteTermsRoute
   LangSiteIndexRoute: typeof LangSiteIndexRoute
   LangSiteBSlugRoute: typeof LangSiteBSlugRoute
   LangSiteCCategoryRoute: typeof LangSiteCCategoryRoute
@@ -395,8 +475,12 @@ interface LangSiteRouteChildren {
 
 const LangSiteRouteChildren: LangSiteRouteChildren = {
   LangSiteAccountRouteRoute: LangSiteAccountRouteRouteWithChildren,
+  LangSiteAboutRoute: LangSiteAboutRoute,
+  LangSiteHelpRoute: LangSiteHelpRoute,
   LangSiteLoginRoute: LangSiteLoginRoute,
+  LangSitePrivacyRoute: LangSitePrivacyRoute,
   LangSiteSearchRoute: LangSiteSearchRoute,
+  LangSiteTermsRoute: LangSiteTermsRoute,
   LangSiteIndexRoute: LangSiteIndexRoute,
   LangSiteBSlugRoute: LangSiteBSlugRoute,
   LangSiteCCategoryRoute: LangSiteCCategoryRoute,

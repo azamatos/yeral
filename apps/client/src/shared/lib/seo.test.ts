@@ -11,11 +11,12 @@ describe('sitemapXml', () => {
     expect(xml).toContain('<loc>https://yeral.app/en</loc>')
     expect(xml).toContain('<loc>https://yeral.app/en/search</loc>')
     expect(xml).toContain('<loc>https://yeral.app/en/c/barber</loc>')
+    expect(xml).toContain('<loc>https://yeral.app/en/privacy</loc>')
     expect(xml).toContain('<loc>https://yeral.app/en/b/barber-loft</loc><lastmod>2026-10-20</lastmod>')
   })
 
   it('repeats them per language', () => {
-    expect(sitemapXml('https://x.test', ['en', 'tk'], { businesses: [], categories: [] }).match(/<url>/g)).toHaveLength(4)
+    expect(sitemapXml('https://x.test', ['en', 'tk'], { businesses: [], categories: [] }).match(/<url>/g)).toHaveLength(12)
   })
 })
 

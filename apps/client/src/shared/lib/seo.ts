@@ -9,10 +9,13 @@ const url = (loc: string, lastmod?: number) =>
   `<url><loc>${escapeXml(loc)}</loc>${lastmod === undefined ? '' : `<lastmod>${new Date(lastmod).toISOString().slice(0, 10)}</lastmod>`}</url>`
 
 /** The public pages for search engines (book F-197), in every language the site has: home, search, categories, businesses. */
+const STATIC_PAGES = ['about', 'help', 'privacy', 'terms']
+
 export function sitemapXml(origin: string, locales: readonly string[], data: SitemapData): string {
   const pages = locales.flatMap((lang) => [
     url(`${origin}/${lang}`),
     url(`${origin}/${lang}/search`),
+    ...STATIC_PAGES.map((page) => url(`${origin}/${lang}/${page}`)),
     ...data.categories.map((category) => url(`${origin}/${lang}/c/${category}`)),
     ...data.businesses.map((b) => url(`${origin}/${lang}/b/${b.slug}`, b.changedAt)),
   ])

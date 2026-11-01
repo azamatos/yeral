@@ -213,7 +213,8 @@
       },
       "continue": "Continue"
     },
-    "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers."
+    "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers.",
+    "terms": "By continuing, you agree to the <terms>Terms</terms> and the <privacy>Privacy policy</privacy>."
   },
   "notFound": {
     "title": "Page not found",
@@ -1476,7 +1477,13 @@
   },
   "bookings": {
     "tabsLabel": "Which bookings",
-    "tabs": { "requests": "Requests", "today": "Today", "upcoming": "Upcoming", "past": "Past", "cancelled": "Cancelled" },
+    "tabs": {
+      "requests": "Requests",
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "cancelled": "Cancelled"
+    },
     "search": "Client, phone or booking code",
     "staffFilter": "Specialist",
     "allStaff": "All specialists",
@@ -1538,8 +1545,18 @@
       "status": "Status",
       "actions": "Actions"
     },
-    "source": { "web": "Online", "app": "Online", "ai": "Online", "phone": "Phone", "walkin": "Walk-in" },
-    "cancelledBy": { "client": "The client cancelled", "business": "The business cancelled", "system": "No answer in time" },
+    "source": {
+      "web": "Online",
+      "app": "Online",
+      "ai": "Online",
+      "phone": "Phone",
+      "walkin": "Walk-in"
+    },
+    "cancelledBy": {
+      "client": "The client cancelled",
+      "business": "The business cancelled",
+      "system": "No answer in time"
+    },
     "unnamed": "Unnamed client",
     "new": "New",
     "comma": ", ",
@@ -1557,7 +1574,12 @@
     "search": "Name or phone number",
     "segmentsLabel": "Which clients",
     "all": "All",
-    "segments": { "regular": "Regular", "new": "New", "lapsed": "Lapsed", "flagged": "Reported" },
+    "segments": {
+      "regular": "Regular",
+      "new": "New",
+      "lapsed": "Lapsed",
+      "flagged": "Reported"
+    },
     "phoneOnly": "Phone only",
     "unnamed": "Unnamed client",
     "noNumber": "No number",

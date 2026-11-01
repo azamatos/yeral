@@ -3,7 +3,8 @@ import { PHONE_RULES, useCodeOnScreen, type useSignIn } from '@yeral/features/au
 import { cn } from '@yeral/ui/cn'
 import { SignInCodeStep } from '@yeral/ui/sign-in-code-step'
 import { useEffect, useRef } from 'react'
-import { useTranslations } from 'use-intl'
+import { useLocale, useTranslations } from 'use-intl'
+import { site } from '@/shared/config'
 import { useCodeStepWords } from '@/shared/i18n'
 import { textLink } from '@/shared/ui'
 import { SignInDemoNote } from './sign-in-demo-note'
@@ -21,6 +22,7 @@ export function SignInForm({ signIn, labelledBy }: { signIn: SignIn; labelledBy:
   const { state, view } = signIn
   const said = useCodeStepWords(signIn)
   const codeOnScreen = useCodeOnScreen()
+  const lang = useLocale()
 
   // «Change number» goes away with the code step: the number takes the focus instead of the page (B-Login focusStep)
   const { changedNumber } = state
@@ -57,6 +59,22 @@ export function SignInForm({ signIn, labelledBy }: { signIn: SignIn; labelledBy:
         resent={state.resent}
         onResend={signIn.resend}
       />
+      {state.step !== 'code' && (
+        <p className="m-0 text-dense text-n-600">
+          {t.rich('login.terms', {
+            terms: (chunks) => (
+              <a href={`${site.urls.client}/${lang}/terms`} target="_blank" rel="noreferrer" className={textLink}>
+                {chunks}
+              </a>
+            ),
+            privacy: (chunks) => (
+              <a href={`${site.urls.client}/${lang}/privacy`} target="_blank" rel="noreferrer" className={textLink}>
+                {chunks}
+              </a>
+            ),
+          })}
+        </p>
+      )}
     </>
   )
 }
