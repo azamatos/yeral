@@ -16,6 +16,9 @@ const DAY_MS = 86_400_000
 
 export const pad2 = (n: number) => String(n).padStart(2, '0')
 
+/** A quarter hour in minutes: the step of the calendar's slots and of the block-time form (the api takes 5). */
+export const QUARTER_HOUR = 15
+
 /** Business-local date and minute of an instant. */
 export function localOf(epoch: number): { date: string; min: number } {
   const d = new Date(epoch + OFFSET_MIN * 60_000)

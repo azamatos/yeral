@@ -145,7 +145,8 @@ const viewOf = (date: string, cancelled: boolean, only?: string): CalendarView =
             { id: id(9), staffId: id(3), date, start: 990, end: 1050, kind: 'training' as const, reason: 'Training', seriesId: null },
           ].filter(mine)
         : [],
-    elsewhere: date === DAY ? [{ staffId: id(1), date, start: 1140, end: 1200 }].filter(mine) : [],
+    // Aýna busy elsewhere 19:00–20:00 today and tomorrow (tomorrow's is clicked: today's may be gone by)
+    elsewhere: date === DAY || date === TOMORROW ? [{ staffId: id(1), date, start: 1140, end: 1200 }].filter(mine) : [],
     summary: [
       {
         date,
@@ -229,6 +230,8 @@ const fakeApi =
   () => {
     // the requests confirmed in this story
     const answered = new Set<string>()
+    // the time blocked in this story (book B-18); over a booking the api refuses, naming it
+    const blocked: CalendarView['blocks'] = []
     const arrived: CalendarView['internalStatuses'][number] = {
       id: id(6),
       preset: 'arrived',
@@ -254,7 +257,49 @@ const fakeApi =
           url.searchParams.get('cancelled') === 'true',
           level === 'specialist' ? id(2) : undefined,
         )
-        return json({ ...view, bookings: view.bookings.map(marked), internalStatuses: internal ? [arrived] : [] })
+        return json({
+          ...view,
+          bookings: view.bookings.map(marked),
+          blocks: [...view.blocks, ...blocked.filter((k) => k.date === view.from)],
+          internalStatuses: internal ? [arrived] : [],
+        })
+      }
+      if (route === 'POST /w/glow-studio/calendar/blocks') {
+        const body = (await request.json()) as {
+          staffId: string
+          date: string
+          start: number
+          end: number
+          kind?: 'training'
+          reason?: string
+          repeat?: string
+        }
+        const dates = body.repeat ? [body.date, addDays(body.date, body.repeat === 'daily' ? 1 : 7)] : [body.date]
+        const hits = [...dayBookings, ...tomorrowBookings].filter(
+          (b) => dates.includes(b.date) && b.items.some((i) => i.staffId === body.staffId) && b.start < body.end && body.start < b.end,
+        )
+        if (hits.length)
+          return json(
+            {
+              error: {
+                code: 'block_over_bookings',
+                details: { bookings: hits.map(({ code, date, start, end }) => ({ code, date, start, end })) },
+              },
+            },
+            409,
+          )
+        const items = dates.map((date, i) => ({
+          id: id(7 + i),
+          staffId: body.staffId,
+          date,
+          start: body.start,
+          end: body.end,
+          kind: body.kind ?? null,
+          reason: body.reason ?? null,
+          seriesId: null,
+        }))
+        blocked.push(...items)
+        return json({ items })
       }
       // one booking on its own (the booking drawer), the team's note and marker on it
       const one = /^(GET|PUT) \/w\/glow-studio\/bookings\/([^/]+)(\/note|\/internal-status)?$/.exec(route)
@@ -646,5 +691,113 @@ export const InternalStatuses: Story = {
     await userEvent.click(block)
     const d = within(await page.findByRole('dialog', { name: 'Booking' }))
     await expect(await d.findByRole('combobox', { name: 'Internal status' })).toHaveValue(id(6))
+  },
+}
+
+type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
+/** Tomorrow's grid (today's slots may be gone by): the free slot's menu and «Block time» from it. */
+const openBlockTime = async (canvas: Canvas, name: string, time: string) => {
+  await canvas.findByRole('region', { name: /^Calendar, / })
+  await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
+  const grid = within(canvas.getByRole('region', { name: /^Calendar, / }))
+  const slot = await within(grid.getByRole('group', { name })).findByRole('button', {
+    name: `${name}, ${time} — new booking or block time`,
+  })
+  await userEvent.click(slot)
+  const menu = within(await page.findByRole('menu', { name: `${time} · ${name}` }))
+  await expect(menu.getByRole('menuitem', { name: 'Block time' })).toHaveFocus()
+  await userEvent.click(menu.getByRole('menuitem', { name: 'Block time' }))
+  const dialog = await page.findByRole('dialog', { name: 'Block time' })
+  // its first frame is transparent
+  await waitFor(() => expect(dialog).toBeVisible())
+  return within(dialog)
+}
+
+/**
+ * A free slot (book B-18): its menu «15:00 · Maral», Block time prefilled with her and the hour, a reason chip, every
+ * week with its caption; saved: the toast and the block drawn as «Closed · Training» on the day.
+ */
+export const BlockTime: Story = {
+  play: async ({ canvas }) => {
+    const d = await openBlockTime(canvas, 'Maral', '15:00')
+    await expect(d.getByRole('combobox', { name: 'Person' })).toHaveValue(id(2))
+    await expect(d.getByRole('combobox', { name: 'From' })).toHaveValue('900')
+    await expect(d.getByRole('combobox', { name: 'To' })).toHaveValue('960')
+    const submit = d.getByRole('button', { name: 'Block time' })
+    await expect(submit).toBeDisabled()
+    await userEvent.click(d.getByRole('radio', { name: 'Training' }))
+    await expect(submit).toBeEnabled()
+    await userEvent.click(d.getByRole('radio', { name: 'Every week' }))
+    await expect(d.getByText(/^Every \w+ from .+ to .+ · 5 times$/)).toBeVisible()
+    await userEvent.click(submit)
+    await expect(await canvas.findByText(/^Time blocked: Maral · 15:00–16:00 · Training · every week until /)).toBeInTheDocument()
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    const maral = within(within(canvas.getByRole('region', { name: /^Calendar, / })).getByRole('group', { name: 'Maral' }))
+    await expect(await maral.findByText('Closed · Training')).toBeVisible()
+    // the slot it took is no longer offered; the one after it is
+    await expect(maral.queryByRole('button', { name: 'Maral, 15:00 — new booking or block time' })).toBeNull()
+    await expect(maral.getByRole('button', { name: 'Maral, 16:00 — new booking or block time' })).toBeVisible()
+  },
+}
+
+/** Over a booking the api refuses: the booking in the way named under the times, «Open the booking» opens its drawer. */
+export const BlockOverBooking: Story = {
+  play: async ({ canvas }) => {
+    const d = await openBlockTime(canvas, 'Maral', '15:00')
+    await userEvent.selectOptions(d.getByRole('combobox', { name: 'From' }), '600')
+    await userEvent.click(d.getByRole('radio', { name: 'Personal' }))
+    await userEvent.click(d.getByRole('button', { name: 'Block time' }))
+    const alert = await d.findByRole('alert')
+    await expect(alert).toHaveTextContent(
+      'This time has a booking: 10:00–11:00 Jemal B. · Pedicure. Pick another time or move the booking first.',
+    )
+    await expect(d.getByRole('button', { name: 'Block time' })).toBeDisabled()
+    await userEvent.click(within(alert).getByRole('button', { name: 'Open the booking' }))
+    await expect(await page.findByRole('dialog', { name: 'Booking' })).toBeVisible()
+    await expect(page.queryByRole('dialog', { name: 'Block time' })).toBeNull()
+  },
+}
+
+/** A click under «Busy elsewhere» (book B-14 step 4): refused with when she's busy; a specialist is told «You’re». */
+export const ElsewhereRefused: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
+    const ayna = within(within(canvas.getByRole('region', { name: /^Calendar, / })).getByRole('group', { name: 'Aýna' }))
+    await userEvent.click(await ayna.findByRole('button', { name: 'Aýna, 19:00 — busy elsewhere' }))
+    await expect(await canvas.findByText('Aýna is busy elsewhere 19:00–20:00. Pick another time.')).toBeInTheDocument()
+    await expect(page.queryByRole('menu')).toBeNull()
+  },
+}
+
+/** A specialist blocks only their own time: the person read-only, with the hint. */
+export const BlockOwnTime: Story = {
+  args: { server: fakeApi('specialist') },
+  play: async ({ canvas }) => {
+    const d = await openBlockTime(canvas, 'Maral', '15:00')
+    await expect(d.queryByRole('combobox', { name: 'Person' })).toBeNull()
+    await expect(d.getByRole('textbox', { name: 'Person' })).toHaveValue('Maral')
+    await expect(d.getByText('You can block only your own time.')).toBeVisible()
+  },
+}
+
+/** On a phone (B-Mobile 2b–2c): the slot's sheet, then Block time as a sheet; Esc closes it and the slot keeps the focus. */
+export const BlockTimeSheet: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
+    const ayna = within(within(canvas.getByRole('region', { name: /^Calendar, / })).getByRole('group', { name: 'Aýna' }))
+    const slot = await ayna.findByRole('button', { name: 'Aýna, 15:00 — new booking or block time' })
+    await userEvent.click(slot)
+    const sheet = within(await page.findByRole('dialog', { name: '15:00 · Aýna' }))
+    await expect(sheet.getByRole('menuitem', { name: 'Block time' })).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(slot).toHaveFocus())
+    await userEvent.click(slot)
+    await userEvent.click(within(await page.findByRole('dialog', { name: '15:00 · Aýna' })).getByRole('menuitem', { name: 'Block time' }))
+    const d = within(await page.findByRole('dialog', { name: 'Block time' }))
+    await expect(d.getByRole('radio', { name: 'Doesn’t repeat' })).toBeVisible()
+    await expect(d.getByRole('button', { name: 'Block time' })).toBeDisabled()
   },
 }

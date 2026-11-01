@@ -1,5 +1,5 @@
 import type { CalendarView } from '@yeral/contract/calendar'
-import { addDays } from '@yeral/domain/time'
+import { addDays, diffDays, localOf, QUARTER_HOUR } from '@yeral/domain/time'
 
 /** B-Calendar's day grid: an hour is 80 px, a quarter 20 (the rows a click lands on). */
 export const HOUR_PX = 80
@@ -136,6 +136,62 @@ export const onGrid = (x: Stretch, fromHour: number, toHour: number) => x.end > 
 
 /** Whether a stretch overlaps any of these. */
 export const overlaps = (x: Stretch, list: readonly Stretch[]) => list.some((o) => o.start < x.end && x.start < o.end)
+
+/** A quarter hour of the day: free, or under time busy elsewhere (with when). */
+export type Slot = Stretch & ({ state: 'free' } | { state: 'elsewhere'; busy: Stretch })
+
+/** The grid's minute now on this day: negative on a day ahead, past the grid on a day gone, today's minute otherwise. */
+export const cutoffOn = (date: string, now: number): number => {
+  const at = localOf(now)
+  return diffDays(at.date, date) * DAY_MINUTES + at.min
+}
+
+/**
+ * The quarter hours a click can land on (B-Calendar `.qs`, book B-18 step 3 and B-14 step 4): `free` opens the slot
+ * menu; `elsewhere` (the person busy in another workspace) is refused with a toast. The rest aren't offered: under a
+ * booking with its buffer, a client's waiting move, a break, blocked time, the hours off, or ended by `cutoff`.
+ */
+export function slotsOf({
+  day,
+  live,
+  moves,
+  blocks,
+  busy,
+  fromHour,
+  toHour,
+  cutoff,
+}: {
+  day: Day | undefined
+  /** The person's bookings on the day but the cancelled. */
+  live: readonly Placed[]
+  moves: readonly Stretch[]
+  blocks: readonly Stretch[]
+  busy: readonly Stretch[]
+  fromHour: number
+  toHour: number
+  cutoff: number
+}): Slot[] {
+  const taken: Stretch[] = [
+    ...shadesOf(day, fromHour, toHour),
+    ...(day?.breaks ?? []),
+    ...blocks,
+    ...live,
+    ...buffersOf(live, day),
+    ...moves,
+  ]
+  const slots: Slot[] = []
+  for (
+    let start = Math.max(fromHour * 60, Math.floor(cutoff / QUARTER_HOUR) * QUARTER_HOUR);
+    start + QUARTER_HOUR <= toHour * 60;
+    start += QUARTER_HOUR
+  ) {
+    const slot = { start, end: start + QUARTER_HOUR }
+    if (slot.end <= cutoff || overlaps(slot, taken)) continue
+    const at = busy.find((b) => b.start < slot.end && slot.start < b.end)
+    slots.push(at ? { ...slot, state: 'elsewhere', busy: at } : { ...slot, state: 'free' })
+  }
+  return slots
+}
 
 /** A cancelled booking at the time of a live one (shown with «Show cancelled») takes the right half (B-Calendar `half`). */
 export function besideLive(p: Placed, column: readonly Placed[]): boolean {

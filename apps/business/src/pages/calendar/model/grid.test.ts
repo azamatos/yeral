@@ -1,6 +1,6 @@
 import type { CalendarView } from '@yeral/contract/calendar'
 import { describe, expect, it } from 'vitest'
-import { besideLive, buffersOf, gridHours, movesIn, onGrid, placedIn, placeOf, pxOf, shadesOf, stretchOn } from './grid'
+import { besideLive, buffersOf, cutoffOn, gridHours, movesIn, onGrid, placedIn, placeOf, pxOf, shadesOf, slotsOf, stretchOn } from './grid'
 
 const DAY = '2026-10-14'
 const BEFORE = '2026-10-13'
@@ -118,5 +118,35 @@ describe('the calendar day’s grid', () => {
     expect(onGrid({ start: 840, end: 1080 }, 8, 14)).toBe(false)
     expect(onGrid({ start: 420, end: 480 }, 8, 14)).toBe(false)
     expect(onGrid({ start: 780, end: 900 }, 8, 14)).toBe(true)
+  })
+
+  it('offers the free quarter hours, none under a booking, its buffer, a move, a break, a block, the hours off or gone by', () => {
+    const day = { ...column(600, 720).days[0]!, breaks: [{ start: 660, end: 675 }] }
+    const live = placedIn([booking('a', 615, 630, 'confirmed', DAY, [{ staffId: 's', start: 615, end: 630, bufferAfter: 10 }])], 's', DAY)
+    const at = (slots: readonly { start: number }[]) => slots.map((s) => s.start)
+    // 09:00 off (before 10:00); 10:15 the booking, 10:30 its buffer to 10:40; 11:00 the break; 11:30 blocked; 12:00 off
+    const args = { day, live, moves: [], blocks: [{ start: 690, end: 705 }], busy: [], fromHour: 9, toHour: 13, cutoff: -800 }
+    expect(at(slotsOf(args))).toEqual([600, 645, 675, 705])
+    // the minutes gone by on today: a slot has to end after now (the api's rule)
+    expect(at(slotsOf({ ...args, cutoff: 650 }))).toEqual([645, 675, 705])
+    expect(at(slotsOf({ ...args, cutoff: 660 }))).toEqual([675, 705])
+    expect(slotsOf({ ...args, cutoff: 2000 })).toEqual([])
+    // a client's move waiting at 10:45 holds its time
+    expect(at(slotsOf({ ...args, moves: [{ start: 645, end: 660 }] }))).toEqual([600, 675, 705])
+    // busy elsewhere stays a slot, refused on a click with when they're busy
+    expect(slotsOf({ ...args, busy: [{ start: 700, end: 760 }] }).map((s) => s.state)).toEqual(['free', 'free', 'free', 'elsewhere'])
+    expect(slotsOf({ ...args, busy: [{ start: 700, end: 760 }] })[3]).toEqual({
+      start: 705,
+      end: 720,
+      state: 'elsewhere',
+      busy: { start: 700, end: 760 },
+    })
+  })
+
+  it('counts the grid’s minute now from the day on screen', () => {
+    const now = Date.UTC(2026, 9, 14, 5, 30) // 10:30 in Ashgabat (UTC+5)
+    expect(cutoffOn(DAY, now)).toBe(630)
+    expect(cutoffOn(BEFORE, now)).toBe(630 + 1440)
+    expect(cutoffOn('2026-10-15', now)).toBe(630 - 1440)
   })
 })

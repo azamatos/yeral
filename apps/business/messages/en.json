@@ -1406,7 +1406,57 @@
       "elsewhere": "Busy elsewhere",
       "buffer": "Buffer · {length}",
       "at": ", {time}"
-    }
+    },
+    "slot": "{name}, {time} — new booking or block time",
+    "slotElsewhere": "{name}, {time} — busy elsewhere",
+    "slotPlus": "+ {time}",
+    "slotTitle": "{time} · {name}",
+    "slotMenu": {
+      "newBooking": "New booking",
+      "blockTime": "Block time",
+      "close": "Close"
+    },
+    "elsewhereRefused": "{name} is busy elsewhere {time}. Pick another time.",
+    "elsewhereSelf": "You’re busy elsewhere {time}. Pick another time."
+  },
+  "blockTime": {
+    "title": "Block time",
+    "close": "Close",
+    "person": "Person",
+    "ownOnly": "You can block only your own time.",
+    "when": "Date and time",
+    "date": "Date",
+    "from": "From",
+    "to": "To",
+    "dash": "–",
+    "reason": "Reason",
+    "kinds": {
+      "training": "Training",
+      "break": "Break",
+      "personal": "Personal",
+      "other": "Other"
+    },
+    "otherLabel": "Reason in a few words",
+    "otherPlaceholder": "For example: Doctor’s appointment",
+    "repeat": "Repeat",
+    "repeats": {
+      "none": "Doesn’t repeat",
+      "daily": "Every day",
+      "weekly": "Every week"
+    },
+    "until": "Until",
+    "untilBad": "Pick an end date after the first day.",
+    "caption": "{repeat, select, daily {Every day} other {Every {weekday}}} from {from} to {to} · {n, plural, one {# time} other {# times}}",
+    "order": "The end must be after the start.",
+    "past": "This time has passed — pick a time from {time}.",
+    "hit": "This time has a booking: {what}. Pick another time or move the booking first.",
+    "hitOn": "{date} · {what}",
+    "hitWho": "{time} {client} · {service}",
+    "client": "Client",
+    "openBooking": "Open the booking",
+    "cancel": "Cancel",
+    "submit": "Block time",
+    "blocked": "Time blocked: {person} · {time} · {reason}{repeat, select, none {} daily { · every day until {until}} other { · every week until {until}}}"
   },
   "bookingDrawer": {
     "request": {
