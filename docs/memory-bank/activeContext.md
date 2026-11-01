@@ -4,15 +4,14 @@ _Last updated: 2026-11-01_ · the current state only; the history by day is in `
 
 ## Current focus
 
-**2026-11-01: slice 4 nearly done, only the main session works now (no agents).** Merged since 31.10: #263 e2e flows, #264
+**2026-11-01: slice 4 done and live, only the main session works now (no agents).** Merged since 31.10: #263 e2e flows, #264
 A1, #265 U1, #266 U2, #268 B12 notifications, #269 B2 booking drawer, #270 B3 report and cancel, #271 B1 block time, #273 B4
 move a booking, #274 B5 new booking drawer, #275 B6 the phone's quick booking and the +, #276 B7 week views, one specialist
 and the legend, #277 `staffId` on the workspace, #278 B8 bookings list, #279 B9 requests tab and bulk answers, #281 B10 clients
-list, #282 B13 installable app. Left in slice 4, in order: B11 client card (`log/2026-11-01-b10-clients-list.md` → "For B11"),
-`e2e/tests/daily-work.spec.ts` (the plan's "Done when"), then the deploy and the click test at 1440 and 390 (skill
-`qa-flows`). The live server runs main at 808b640 (31.10), so nothing from #263 on is live; the next deploy also checks a
-business page's map and photos for CSP violations. Each piece's log note (`log/2026-11-01-*.md`) lists what's there, its
-traps and what it left.
+list, #282 B13 installable app, #284 B11 client card, #285 `daily-work.spec.ts` and the lost-toast fix, #286 the blank map.
+Live: main at b398708. Next is slice 5: its plan first (book chapter 10). Each piece's log note (`log/2026-11-01-*.md`) lists
+what's there, its traps and what it left; `log/2026-11-01-slice-4-live.md` says what the live check covered and what it couldn't
+(Claude doesn't sign in or create accounts on production, so the signed-in flows are proved on CI's stack, not live).
 
 **How to merge (31.10–01.11 lesson):** read a `success` conclusion for the CI run of the PR's exact head commit first. A
 `gh run watch` of a run my next push cancelled once let #273 merge unverified, and a script's own last exit code hid it. After
@@ -99,17 +98,16 @@ the book has had none open since 21.10. Where the pre-book questions (old number
 
 1. **Deploys:** at each slice's end, `infra/server/README.md` → "Deploying Ýeral by hand" (a backup first) with
    `git archive origin/main`. The support lines are in `/srv/yeral/.env` since 31.10.
-2. **Slice 3's remainder:** the live click test with skill `qa-flows` after the deploy; two bugs #258 found: a click on the
+2. **Slice 3's remainder:** two bugs #258 found: a click on the
    SSR'd client site before React hydrates is lost, and a request block on the day grid can sit under a neighbour's; home's
    «How was it?» card comes with slice 5 (then the write-review steiger override goes). `make-example <slug>` (#233, deployed)
    opens one of the owner's test businesses once the owner names it.
-3. **Slice 4, daily work** (`log/2026-10-31-slice-4-plan.md`): finish B11 and `daily-work.spec.ts` (see Current focus), deploy,
-   click-test. Left from the built pieces: «Frequent clients» on the new booking's name search (needs a list
-   sorted by visits), the phone bookings list's filters, «Open the client's card» on the row menu and drawer (B11), the
-   drawer's own staff-id trick can use the workspace's `staffId` now. Then slice 5; then slices 6 + 7, then the first launch
-   (P5), approved in advance (22.10): `EXAMPLE_BUSINESSES` and `DEMO_WORKSPACE` on, the cms site joins `yeral.caddy` with its
-   app. The api's `/docs` page needs Scalar's bundle inventoried or self-hosted before its CSP tightens; the cms site gets
-   a policy when its app joins.
+3. **Slice 5 next**, then slices 6 + 7, then the first launch (P5), approved in advance (22.10): `EXAMPLE_BUSINESSES` and
+   `DEMO_WORKSPACE` on, the cms site joins `yeral.caddy` with its app. The api's `/docs` page needs Scalar's bundle inventoried
+   or self-hosted before its CSP tightens; the cms site gets a policy when its app joins. Left from slice 4: «Frequent clients»
+   on the new booking's name search (needs a list sorted by visits), the phone bookings list's filters, the clients list's chip
+   counts, the card's Visits total and History count (the api sends neither), Report and Cancel on the bookings row menu, Undo
+   when a report is removed on the card, the owner's click test including the install on a real phone, and the page at 390 live.
 4. **Slice 2's follow-ups** (`log/2026-10-2[345]-*.md`): a category changed after the menu was saved keeps that menu;
    a lighter public categories list; one shared rule for which special day applies (app and api); a shared fake api
    for the Settings stories; leaving a section with unsaved changes asks nothing; specialization saves one language
@@ -138,8 +136,8 @@ for error tracking and uptime checks.
 
 **Server:** `ssh yeral-vps` (Claude's own since 31.10: deploy and SSH need no go); deploy by hand with `infra/server/README.md` →
 "Deploying Ýeral by hand" (`deploy.sh` saves the database first; the backups and config copies kept on the server are
-in `progress.md`'s deploy entries 23.10–26.10, every backup mode 600). Since 2026-10-31 23:47 it runs main at
-808b640: migrations 0000–0044 and later, the 6
+in `progress.md`'s deploy entries 23.10–26.10, every backup mode 600). Since 2026-11-01 it runs main at
+b398708: migrations 0000–0044 and later, the 6
 cities, the category catalogue with its starter services, the 11 example businesses, the owner's test businesses;
 `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no admin account yet; `SIGN_IN_CODE_ON_SCREEN` and `EXAMPLE_BUSINESSES` on
 (owner, 25.10), `DEMO_WORKSPACE` off (on at the first launch). Public through the edge Caddy (`yeral.caddy` in

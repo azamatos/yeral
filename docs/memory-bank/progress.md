@@ -487,6 +487,13 @@
   much credit limits. I give u permission for pr merge" (ADR 0014 amended, #272), and every session stops at 75 % context,
   summarizes and waits (a global hook, `~/.claude/hooks/context-limit.sh`, on this Mac). Slips: #273 merged before its CI
   finished (it came back green); the first-visit legend hid «Got it» at 1280×720 (#276 fixed, CI's e2e caught it).
+- **2026-11-01 · Slice 4 closed and live:** #284 B11 client card, #285 `daily-work.spec.ts`, #286; deployed b398708 with its
+  backup. `daily-work.spec.ts` caught a real bug: the cancel's toast and the drawer's closing were lost when the push channel
+  beat the request's answer, as React Query drops `mutate`'s callbacks on unmount; the same shape was fixed in Remove report,
+  deleting a booking status or a service group, and leaving a business (`systemPatterns.md`). The live check caught another:
+  every map was blank, as MapLibre's unlayered stylesheet beat the `absolute` utility and stories never ran MapLibre.
+  The owner also asked why the session had "cleared": auto-compact had run at 70 % on a 1M window, before the 75 % stop could
+  fire; `DISABLE_AUTO_COMPACT=1` is in the Mac's global settings since.
 
 ## Roadmap
 
