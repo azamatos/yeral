@@ -1,5 +1,6 @@
 export { CodeStep } from './code-step'
 export { wrap } from './layout'
 export { PersonMark } from './person-mark'
+export { TermsNote } from './terms-note'
 export { ContactYeralLink } from './contact-yeral'
 export { DirectionsButton, PlaceMap } from './place-map'

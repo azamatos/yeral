@@ -47,6 +47,8 @@ export interface Market {
   timeZone: string
   utcOffsetMin: number
   phone: PhoneRules
+  /** Who the legal pages name as running Ýeral in this market, and the country whose law applies (owner, 2026-11-01). */
+  legal: { operator: string; country: string }
   /** The city a visitor starts in until they allow their location or pick another (book Q-107): a `cities` id. */
   mainCity: string
 }
@@ -74,6 +76,7 @@ export const TURKMENISTAN: Market = {
   defaultLanguage: 'en',
   currency: 'TMT',
   timeZone: 'Asia/Ashgabat',
+  legal: { operator: 'Azamat Jorayev', country: 'Turkmenistan' },
   utcOffsetMin: 5 * 60,
   phone: phoneRules({
     countryCode: '993',
