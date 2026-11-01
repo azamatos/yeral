@@ -3,17 +3,23 @@ import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { Check, Clock } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 
 export type AffectedBooking = BookingsAffectedDetails['bookings'][number]
 
 const JOIN = { dot: 'joinDot', list: 'joinList', plus: 'joinPlus' } as const
 
-/** Words joined as the language joins them: «a · b · c» (`dot`), «a, b» (`list`) or a booking's services «a + b» (`plus`). */
+/**
+ * Words joined as the language joins them: «a · b · c» (`dot`), «a, b» (`list`) or a booking's services «a + b»
+ * (`plus`). The same function while the words stay: an effect may depend on it.
+ */
 export function useJoin() {
   const t = useTranslations('affected')
-  return (parts: readonly string[], how: keyof typeof JOIN) => parts.filter(Boolean).reduce((a, b) => (a ? t(JOIN[how], { a, b }) : b), '')
+  return useCallback(
+    (parts: readonly string[], how: keyof typeof JOIN) => parts.filter(Boolean).reduce((a, b) => (a ? t(JOIN[how], { a, b }) : b), ''),
+    [t],
+  )
 }
 
 /** «5 bookings and 1 request» (`and`) or «5 bookings · 1 request» (the list's label). */

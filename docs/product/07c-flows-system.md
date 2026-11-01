@@ -689,7 +689,7 @@ flowchart TD
 - Requests for *Programmasyz* staff go to the owner and admin (business spec §2).
 - Before the app exists, new-request SMS to staff are off by default. Each person can switch them on, and they never go at night or to someone who has the workspace open (Q-297, decided 18.10.2026).
 
-**Status.** Design: decided and drawn (business spec §2, §16; B-Shell, B-Calendar, B-Bookings) · Code: the api's part built: every new request and move is an event the team's open screens hear, and each request says when its 5-minute warning is due (`warnAt`: 5 minutes of open time before its answer time ends, none for 10 minutes or less; 21.10.2026), so the app's own timer warns even in a background tab; the toasts, sound and browser notifications are the business app's, and quiet hours (S-18) aren't built.
+**Status.** Design: decided and drawn (business spec §2, §16; B-Shell, B-Calendar, B-Bookings) · Code: the api's part built: every new request and move is an event the team's open screens hear, and each request says when its 5-minute warning is due (`warnAt`: 5 minutes of open time before its answer time ends, none for 10 minutes or less; 21.10.2026), so the app's own timer warns even in a background tab; the business app's part built (01.11.2026): the toast with the soft sound in front, the browser notification with the sound in the background (its click opens the request), the 5-minute warning for those who may answer, and the shell's permission banner, only while a tab of the workspace is open (no web push; chapter 9, 01.11.2026); quiet hours (S-18) aren't built.
 
 ### S-17 · A new business is verified
 
