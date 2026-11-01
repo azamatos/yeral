@@ -49,16 +49,15 @@ export function CancelBookingModal({
   const submit = () => {
     if (!reason || !ready) return
     setFailed(null)
-    cancel.mutate(
-      { code: b.code, reason, ...(reason === 'other' ? { text: words } : {}) },
-      {
-        onSuccess: () => {
-          toast(t('done'))
-          onCancelled()
-        },
-        // already started, or changed meanwhile: said here, the booking reads back
-        onError: (error) => setFailed(errorText(error)),
+    // the push channel can bring the cancelled booking before this answer, and that takes the modal away: `mutate`'s own
+    // callbacks would go with it
+    void cancel.mutateAsync({ code: b.code, reason, ...(reason === 'other' ? { text: words } : {}) }).then(
+      () => {
+        toast(t('done'))
+        onCancelled()
       },
+      // already started, or changed meanwhile: said here, the booking reads back
+      (error: unknown) => setFailed(errorText(error)),
     )
   }
   const reasons = TEAM_CANCEL_REASONS.map((value) => ({ value, label: t(`reasons.${value}`) }))

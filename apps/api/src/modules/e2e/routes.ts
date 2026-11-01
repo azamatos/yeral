@@ -24,7 +24,7 @@ const elapseRoute = createRoute({
   hide: true,
   tags: ['e2e'],
   summary:
-    'Test hook (`E2E_HOOKS`): time passes for one booking — a waiting request’s hold ends now and the expiry job runs; a confirmed visit becomes a day earlier and the completion job runs',
+    'Test hook (`E2E_HOOKS`): time passes for one booking — a waiting request’s hold ends now and the expiry job runs; a confirmed visit moves to the latest day it has ended by now and the completion job runs',
   request: { params: z.object({ code: z.string() }) },
   responses: { 200: json(z.object({ status: z.enum(BOOKING_STATUSES) })), 404: errors[404], 409: errors[409] },
 })
@@ -50,15 +50,17 @@ const statusOf = async (db: Db, id: string) =>
   (await db.select({ status: bookings.status }).from(bookings).where(eq(bookings.id, id)))[0]!.status
 
 /**
- * A visit that has ended: the same time on an earlier day, the first one back where its specialist's day has room
- * and the completion job then takes it. Counted back from today or the visit's own day, whichever is earlier: a
- * visit booked days ahead stepped back from its own day would still be ahead. One day back isn't always enough
- * (a visit past midnight, book Q-105, ends into the next day), so the job runs after each step until it did.
+ * A visit that has ended: the same time on the latest day that makes it so, where its specialist's day has room and
+ * the completion job then takes it. Counted back from today or the visit's own day, whichever is earlier: a visit
+ * booked days ahead stepped back from its own day would still be ahead. Today comes first: a visit whose time of day
+ * has passed ended just now, and one a day back could be past the 24 hours a no-show may be reported in (book B-28).
+ * One day back isn't always enough (a visit past midnight, book Q-105, ends into the next day), so the job runs after
+ * each step until it did.
  */
 async function endVisit(deps: Deps, b: { id: string; date: string }): Promise<void> {
   const todayDate = today(deps.now())
   const from = b.date < todayDate ? b.date : todayDate
-  for (let back = 1; back <= DAYS_BACK; back++) {
+  for (let back = 0; back <= DAYS_BACK; back++) {
     if (!(await moveTo(deps.db, b.id, addDays(from, -back)))) continue
     await completeVisits(deps)
     if ((await statusOf(deps.db, b.id)) !== 'confirmed') return
