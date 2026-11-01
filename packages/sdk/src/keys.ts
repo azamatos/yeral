@@ -10,6 +10,14 @@ export type BookingTab = z.output<typeof myBookingsQuerySchema>['tab']
 
 export const keys = {
   me: () => ['me'] as const,
+  admin: () => ['admin'] as const,
+  adminMe: () => ['admin', 'me'] as const,
+  adminSetup: (token: string) => ['admin', 'setup', token] as const,
+  adminTeam: () => ['admin', 'team'] as const,
+  adminBusinesses: (params?: { view: string; q?: string | undefined }) =>
+    params ? (['admin', 'businesses', params] as const) : (['admin', 'businesses'] as const),
+  adminBusiness: (id: string) => ['admin', 'business', id] as const,
+  adminReviews: (view?: string) => (view ? (['admin', 'reviews', view] as const) : (['admin', 'reviews'] as const)),
   authMode: () => ['authMode'] as const,
   favorites: (lang: Locale) => ['favorites', lang] as const,
   favoritesAll: () => ['favorites'] as const,

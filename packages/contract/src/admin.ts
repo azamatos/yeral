@@ -228,6 +228,7 @@ export const adminReviewSchema = z
 export type AdminMe = z.infer<typeof adminMeSchema>
 export type AdminMember = z.infer<typeof adminMemberSchema>
 export type AdminSetupLink = z.infer<typeof adminSetupLinkSchema>
+export type AdminSetupSecret = z.infer<typeof adminSetupSecretSchema>
 export type AdminBusinessItem = z.infer<typeof adminBusinessItemSchema>
 export type AdminBusiness = z.infer<typeof adminBusinessSchema>
 export type AdminReview = z.infer<typeof adminReviewSchema>

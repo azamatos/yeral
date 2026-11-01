@@ -23,6 +23,7 @@ const config: StorybookConfig = {
     '../src/**/*.mdx',
     '../../../packages/ui/src/**/*.stories.@(ts|tsx)',
     '../../business/src/**/*.stories.@(ts|tsx)',
+    '../../cms/src/**/*.stories.@(ts|tsx)',
     '../../client/src/**/*.stories.@(ts|tsx)',
   ],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y', '@storybook/addon-vitest'],
