@@ -6,7 +6,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { expect, fn, userEvent } from 'storybook/test'
+import { expect, fn, userEvent, waitFor } from 'storybook/test'
 import { MapDot, MapFrame, MapMarker, MapPin, MapPinHandle, MapTiles, OPENFREEMAP_STYLE } from './map-frame'
 import type { LatLng } from './projection'
 
@@ -124,4 +124,30 @@ export const WithTiles: Story = {
   tags: ['!test'],
   decorators: [(Story) => <MapTiles style={OPENFREEMAP_STYLE}>{Story()}</MapTiles>],
   render: () => <Draggable onMove={fn()} />,
+}
+
+/** A style with one colour and no address to reach, so the test needs no network. */
+const ONE_COLOUR = `data:application/json,${encodeURIComponent(
+  JSON.stringify({ version: 8, sources: {}, layers: [{ id: 'ground', type: 'background', paint: { 'background-color': '#dfe7dc' } }] }),
+)}`
+
+/**
+ * MapLibre's map fills the frame. Its own stylesheet makes the box `position: relative`, unlayered, so it beats any
+ * utility: with `absolute` alone the box had no height and clipped the drawn map away, leaving the frame's plain ground.
+ */
+export const MapFillsTheFrame: Story = {
+  args: { interactive: false },
+  render: (args) => (
+    <MapTiles style={ONE_COLOUR}>
+      <MapFrame {...args} />
+    </MapTiles>
+  ),
+  play: async ({ canvasElement }) => {
+    const map = await waitFor(() => {
+      const found = canvasElement.querySelector<HTMLElement>('.maplibregl-map:has(canvas)')
+      if (!found) throw new Error('MapLibre has not made its map yet')
+      return found
+    })
+    await expect(map.clientHeight).toBe(map.parentElement!.clientHeight)
+  },
 }
