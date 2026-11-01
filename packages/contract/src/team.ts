@@ -44,6 +44,8 @@ export const workspaceSchema = z
     /** The business's logo, the switcher's picture (B-10); null: a letter tile. */
     logo: photoSchema.nullable(),
     level: levelSchema,
+    /** Who this person is on the team: their column in the calendar, the reports they filed. */
+    staffId: idSchema,
     /**
      * The page's state, the shell's banner (B-Shell BusinessStatusBanner, Q-012, Q-274): `live`, `in_review` (only the
      * team sees it), `not_approved` (sent back by the Ýeral team), `hidden` (by the Ýeral team) or `demo` (the shared

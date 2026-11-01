@@ -50,6 +50,9 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const ayna = await as(AYNA)
     const [glow] = (await ayna.req('/v1/me/workspaces')).json.items
     expect(glow).toMatchObject({ slug: 'glow-studio', level: 'specialist' })
+    // who they are on this team: the same id as their column, one per workspace
+    const columns = (await ayna.req('/v1/w/glow-studio/calendar?date=2026-10-14')).json.columns as { staffId: string }[]
+    expect(columns.map((c) => c.staffId)).toEqual([glow.staffId])
     expect(glow.requestsToAnswer).toBeLessThanOrEqual(ownerCount)
     // the business app opens the one opened last
     expect(list.current).toBeNull()

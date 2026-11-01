@@ -37,6 +37,7 @@ const glow = (level: Workspace['level']): Workspace => ({
   statusReason: null,
   specialization: null,
   reviewsToAnswer: 0,
+  staffId: '00000000-0000-4000-8000-0000000000aa',
   requestsToAnswer: 0,
   lastOpenedAt: 1,
 })

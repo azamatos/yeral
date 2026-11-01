@@ -323,6 +323,7 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     city: cityRefOf(cities, business.cityId, user.lang),
     logo: logoOf(deps, business, user.lang),
     level: member.level,
+    staffId: member.id,
     ...workspaceState(business, member.level),
     specialization: text(member.specialization, user.lang) || null,
     reviewsToAnswer: reviewCounts.get(business.id) ?? 0,
