@@ -1,0 +1,254 @@
+/**
+ * Bookings — B-Bookings (v0.6 rounds 2–3, English), in the app's shell over a `fetch` that answers like the api: the
+ * tabs, who cancelled, the search and the filters, nothing found, empty tabs, «Show more», a row opening the same drawer
+ * as the calendar, the row menu going to the calendar, a specialist's own rows, a phone.
+ */
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { Me } from '@yeral/contract/account'
+import type { BookingRow, CalendarBooking } from '@yeral/contract/calendar'
+import type { Workspace } from '@yeral/contract/team'
+import { addDays, today } from '@yeral/domain/time'
+import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
+import { PageStory } from '@/shared/storybook'
+import { WorkspaceShell } from '@/widgets/workspace-shell'
+import { BookingsPage } from './bookings-page'
+
+const me: Me = {
+  id: 'u-maysa',
+  name: 'Maýsa Annaýewa',
+  firstName: 'Maýsa',
+  surname: 'Annaýewa',
+  phone: '+99365102030',
+  lang: 'en',
+  notifications: { confirmation: true, reminderDay: true, reminder2h: true, reviewAsk: false },
+  hasBusiness: true,
+  canChangePhone: true,
+  demo: false,
+  photo: null,
+}
+const glow = (level: Workspace['level']): Workspace => ({
+  slug: 'glow-studio',
+  name: 'Glow Studio',
+  address: 'Bitarap Türkmenistan şaýoly 12',
+  city: { id: 'ashgabat', name: 'Ashgabat' },
+  logo: null,
+  level,
+  staffId: '00000000-0000-4000-8000-000000000002',
+  status: 'live',
+  statusReason: null,
+  specialization: null,
+  reviewsToAnswer: 0,
+  requestsToAnswer: 0,
+  lastOpenedAt: null,
+})
+const DAY = today(Date.now())
+const LATER = addDays(DAY, 5)
+const id = (n: number) => `00000000-0000-4000-8000-00000000000${n}`
+let n = 0
+const row = (
+  date: string,
+  start: number,
+  status: BookingRow['status'],
+  name: string,
+  service: string,
+  patch: Partial<BookingRow> = {},
+): BookingRow => ({
+  code: `YR-${48500 + n++}`,
+  type: 'appointment',
+  date,
+  start,
+  end: start + 60,
+  status,
+  cancelledBy: null,
+  source: 'web',
+  client: { id: null, name, phone: '+99365000000', isNew: false },
+  items: [{ serviceId: id(5), service, staffId: id(2), staff: 'Maral', start, end: start + 60 }],
+  price: { type: 'fixed', amount: 120 },
+  holdUntil: null,
+  complaint: null,
+  ...patch,
+})
+const rows = {
+  today: [
+    row(DAY, 600, 'confirmed', 'Gözel A.', 'Women’s haircut', { source: 'phone' }),
+    row(DAY, 720, 'completed', 'Bahar N.', 'Manicure', { client: { id: null, name: 'Bahar N.', phone: null, isNew: true } }),
+  ],
+  upcoming: [row(LATER, 660, 'confirmed', 'Jemal B.', 'Pedicure')],
+  past: [] as BookingRow[],
+  cancelled: [
+    row(DAY, 900, 'cancelled', 'Şemşat K.', 'Hair styling', { cancelledBy: 'client' }),
+    row(LATER, 900, 'cancelled', 'Aýgül T.', 'Brows', { cancelledBy: 'system' }),
+  ],
+}
+const asBooking = (r: BookingRow): CalendarBooking => ({
+  ...r,
+  client: { id: null, name: r.client.name, phone: r.client.phone },
+  items: r.items.map((i) => ({ ...i, bufferAfter: 0 })),
+  internalStatusId: null,
+  alert: false,
+  clientNote: null,
+  internalNote: null,
+  complaint: null,
+  move: null,
+})
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+
+/** The api as the shell and the list ask it. */
+const answer = (request: Request, level: Workspace['level'], more: boolean): Response => {
+  const url = new URL(request.url)
+  const route = `${request.method} ${url.pathname.replace(/^\/v1/, '')}`
+  const w = glow(level)
+  if (route === 'GET /me') return json(me)
+  if (route === 'GET /me/workspaces') return json({ items: [w], current: w.slug })
+  if (route === 'GET /me/invites') return json({ items: [] })
+  if (route === 'GET /w/glow-studio/requests') return json({ items: [] })
+  if (route === 'GET /w/glow-studio/services')
+    return json({
+      groups: [{ id: id(1), name: { en: 'Hair' }, services: [{ id: id(5), name: { en: 'Women’s haircut' }, staffIds: [id(2)] }] }],
+    })
+  if (route === 'GET /w/glow-studio/settings/hours') return json({ hours: [], specialDays: [] })
+  if (route === 'GET /w/glow-studio/settings/statuses') return json({ items: [], max: 5 })
+  if (route === 'GET /w/glow-studio/calendar')
+    return json({
+      columns: [
+        { staffId: id(2), name: 'Maral' },
+        { staffId: id(3), name: 'Jeren' },
+      ],
+    })
+  if (route === 'GET /w/glow-studio/bookings') {
+    const tab = url.searchParams.get('tab') as keyof typeof rows
+    const q = url.searchParams.get('q')?.toLowerCase()
+    const items = rows[tab].filter((r) => !q || r.client.name?.toLowerCase().includes(q) || r.code.toLowerCase().includes(q))
+    if (more && !url.searchParams.get('cursor')) return json({ items: items.slice(0, 1), cursor: 'next' })
+    return json({ items: more ? items.slice(1) : items, cursor: null })
+  }
+  const one = /^GET \/w\/glow-studio\/bookings\/([^/]+)$/.exec(route)
+  if (one) {
+    const found = Object.values(rows)
+      .flat()
+      .find((r) => r.code === one[1])
+    return found ? json(asBooking(found)) : json({ error: { code: 'not_found' } }, 404)
+  }
+  return json({ error: { code: 'not_found' } }, 404)
+}
+
+const fakeApi =
+  (level: Workspace['level'], { more = false }: { more?: boolean } = {}): (() => typeof fetch) =>
+  () =>
+  (input: RequestInfo | URL, init?: RequestInit) =>
+    Promise.resolve(answer(new Request(input, init), level, more))
+
+const meta = {
+  title: 'Business/Bookings/List',
+  component: PageStory,
+  parameters: { layout: 'fullscreen' },
+  globals: { viewport: { value: 'xl' } },
+  args: {
+    routes: {},
+    layouts: { '/w/$slug': { component: WorkspaceShell, children: { bookings: BookingsPage, calendar: () => <p>The calendar</p> } } },
+    path: '/w/glow-studio/bookings',
+    server: fakeApi('owner'),
+  },
+} satisfies Meta<typeof PageStory>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+/** Today: the client, «New» on a first visit, the source, the status. */
+export const Today: Story = {
+  play: async ({ canvas }) => {
+    const table = await canvas.findByRole('table', { name: 'Bookings' })
+    await expect(within(table).getByRole('button', { name: 'Gözel A.' })).toBeVisible()
+    await expect(within(table).getByText('New')).toBeVisible()
+    await expect(within(table).getByText('Phone')).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Export CSV' })).toHaveAttribute('href', expect.stringContaining('tab=today'))
+  },
+}
+
+/** Cancelled says who cancelled, a request that ran out too. */
+export const Cancelled: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('table', { name: 'Bookings' })
+    await userEvent.click(canvas.getByRole('tab', { name: 'Cancelled' }))
+    await expect(await canvas.findByText('The client cancelled')).toBeVisible()
+    await expect(canvas.getByText('No answer in time')).toBeVisible()
+  },
+}
+
+/** An empty tab says so. */
+export const EmptyTab: Story = {
+  args: { path: '/w/glow-studio/bookings?tab=past' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('No past bookings yet')).toBeVisible()
+  },
+}
+
+/** The search finds a client; nothing found clears the filters from a button. */
+export const Search: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('table', { name: 'Bookings' })
+    const box = canvas.getByRole('textbox', { name: 'Client, phone or booking code' })
+    await userEvent.type(box, 'bahar')
+    await waitFor(() => expect(canvas.queryByRole('button', { name: 'Gözel A.' })).toBeNull())
+    await expect(canvas.getByRole('button', { name: 'Bahar N.' })).toBeVisible()
+    await userEvent.type(box, 'zzz')
+    await expect(await canvas.findByText('Nothing found')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear filters' }))
+    await expect(await canvas.findByRole('button', { name: 'Gözel A.' })).toBeVisible()
+    await expect(box).toHaveValue('')
+  },
+}
+
+/** «Show more» adds the next page. */
+export const ShowMore: Story = {
+  args: { server: fakeApi('owner', { more: true }) },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: 'Gözel A.' })
+    await expect(canvas.queryByRole('button', { name: 'Bahar N.' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Show more' }))
+    await expect(await canvas.findByRole('button', { name: 'Bahar N.' })).toBeVisible()
+  },
+}
+
+/** A row opens the same drawer as the calendar. */
+export const OpenRow: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Gözel A.' }))
+    const d = within(await page.findByRole('dialog', { name: 'Booking' }))
+    await expect(await d.findByText('Women’s haircut', { selector: 'dd' })).toBeVisible()
+  },
+}
+
+/** The menu moves a booking on the calendar, by the address. */
+export const MoveFromMenu: Story = {
+  args: { path: '/w/glow-studio/bookings?tab=upcoming' },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Actions for Jemal B.' }))
+    await userEvent.click(await page.findByRole('menuitem', { name: 'Move to another time' }))
+    await expect(await canvas.findByText('The calendar')).toBeVisible()
+  },
+}
+
+/** A specialist: no specialist column, filter or export. */
+export const Specialist: Story = {
+  args: { server: fakeApi('specialist') },
+  play: async ({ canvas }) => {
+    const table = await canvas.findByRole('table', { name: 'Bookings' })
+    await expect(within(table).queryByRole('columnheader', { name: 'Specialist' })).toBeNull()
+    await expect(canvas.queryByRole('combobox', { name: 'Specialist' })).toBeNull()
+    await expect(canvas.queryByRole('link', { name: 'Export CSV' })).toBeNull()
+  },
+}
+
+/** On a phone the rows are a list, and one opens the same drawer. */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: /Gözel A\./ }))
+    await expect(await page.findByRole('dialog', { name: 'Booking' })).toBeVisible()
+  },
+}
+
+/** The words about a third longer (Russian). */
+export const RussianLength: Story = { globals: { text: 'longer' } }

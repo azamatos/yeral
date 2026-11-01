@@ -1,0 +1,245 @@
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { BOOKING_TABS, type BookingRow as Row } from '@yeral/contract/calendar'
+import type { BusinessHours } from '@yeral/domain/hours'
+import { localized } from '@yeral/domain/model'
+import type { Level } from '@yeral/domain/permissions'
+import { today } from '@yeral/domain/time'
+import { Button } from '@yeral/ui/button'
+import { useClock } from '@yeral/ui/clock'
+import { EmptyState } from '@yeral/ui/empty-state'
+import { Input } from '@yeral/ui/input'
+import { Select } from '@yeral/ui/select'
+import { Spinner } from '@yeral/ui/spinner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
+import { CalendarX2, Download, SearchX } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useLocale, useTranslations } from 'use-intl'
+import { useSdk } from '@/shared/api'
+import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
+import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
+import { rangeOf, type BookingsSearch, type BookingsTab, type BookingsWhen } from '../model/search'
+import { BookingsTable } from './bookings-table'
+
+/**
+ * The bookings list (B-Bookings, book B-30): the tabs Today · Upcoming · Past · Cancelled, the filters (search by client,
+ * number or code; specialist; service; date), «Show more», Export CSV, the same drawers as the calendar by `?booking=`
+ * and `?request=`. Everything on the page is in its address. A specialist reads their own rows.
+ */
+export function BookingsPage() {
+  const { workspace } = useWorkspace()
+  if (!workspace) return null
+  return <Bookings key={workspace.slug} slug={workspace.slug} level={workspace.level} />
+}
+
+function Bookings({ slug, level }: { slug: string; level: Level }) {
+  const specialist = level === 'specialist'
+  const t = useTranslations('bookings')
+  const sections = useTranslations('shell.sections')
+  const locale = useLocale()
+  const sdk = useSdk()
+  const now = useClock()
+  const navigate = useNavigate()
+  const search: BookingsSearch = useSearch({ strict: false })
+  const tab: BookingsTab = search.tab ?? 'today'
+  const todayDate = today(now)
+  const go = (patch: Partial<BookingsSearch>, replace = true) =>
+    void navigate({ to: '.', search: (prev: BookingsSearch) => ({ ...prev, ...patch }), replace })
+
+  // the search box writes to the address after a pause in the typing
+  const [typed, setTyped] = useState(search.q ?? '')
+  useEffect(() => {
+    const q = typed.trim() || undefined
+    if (q === search.q) return
+    const timer = setTimeout(() => go({ q }), 250)
+    return () => clearTimeout(timer)
+  })
+
+  const filters = {
+    tab,
+    q: search.q,
+    staff: search.staff,
+    service: search.service,
+    ...rangeOf(search.when, todayDate),
+    lang: locale,
+  }
+  const list = useInfiniteQuery({ ...sdk.calendar.bookings(slug, filters), placeholderData: keepPreviousData })
+  const rows = list.data?.pages.flatMap((p) => p.items) ?? []
+  const filtered = !!(search.q || search.staff || search.service || search.when)
+
+  // who and what the filters offer: the calendar's people, the menu
+  const people = useQuery({ ...sdk.calendar.view(slug, { date: todayDate, days: 1, lang: locale }), enabled: !specialist })
+  const menu = useQuery(sdk.settings.menu(slug))
+  const hours = useQuery({ ...sdk.settings.hours(slug), enabled: !specialist, retry: false })
+  const business: BusinessHours | null = hours.data ? { hours: hours.data.hours, exceptions: hours.data.specialDays } : null
+
+  const toCalendar = (to: Record<string, unknown>) => void navigate({ to: '/w/$slug/calendar', params: { slug }, search: to })
+  const onOpen = (r: Row) => go(r.status === 'pending' ? { request: r.code, booking: undefined } : { booking: r.code, request: undefined })
+  const onMove = (r: { code: string; date: string }) => toCalendar({ move: r.code, ...(r.date === todayDate ? {} : { date: r.date }) })
+  const onBookAgain = (r: { client: { id: string | null }; items: readonly { serviceId: string | null; staffId: string | null }[] }) =>
+    toCalendar({
+      panel: 'new',
+      ...(r.client.id ? { client: r.client.id } : {}),
+      services: r.items.flatMap((i) => i.serviceId ?? []).join(',') || undefined,
+      staff: r.items[0]?.staffId ?? undefined,
+    })
+  const clear = () => {
+    setTyped('')
+    go({ q: undefined, staff: undefined, service: undefined, when: undefined })
+  }
+
+  if (list.isError && !list.data) throw list.error
+
+  const body = (
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          aria-label={t('search')}
+          placeholder={t('search')}
+          className="w-full sm:w-72"
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+        />
+        {!specialist && (
+          <Select
+            size="s"
+            aria-label={t('staffFilter')}
+            className="w-auto max-sm:hidden"
+            value={search.staff ?? ''}
+            onChange={(e) => go({ staff: e.target.value || undefined })}
+          >
+            <option value="">{t('allStaff')}</option>
+            {(people.data?.columns ?? []).map((c) => (
+              <option key={c.staffId} value={c.staffId}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        )}
+        <Select
+          size="s"
+          aria-label={t('serviceFilter')}
+          className="w-auto max-sm:hidden"
+          value={search.service ?? ''}
+          onChange={(e) => go({ service: e.target.value || undefined })}
+        >
+          <option value="">{t('allServices')}</option>
+          {(menu.data?.groups ?? []).flatMap((g) =>
+            g.services.map((s) => (
+              <option key={s.id} value={s.id}>
+                {localized(s.name, locale)}
+              </option>
+            )),
+          )}
+        </Select>
+        <Select
+          size="s"
+          aria-label={t('dateFilter')}
+          className="w-auto max-sm:hidden"
+          value={search.when ?? ''}
+          onChange={(e) => go({ when: (e.target.value as BookingsWhen) || undefined })}
+        >
+          <option value="">{t('allTime')}</option>
+          <option value="today">{t('dateToday')}</option>
+          <option value="week">{t('dateWeek')}</option>
+        </Select>
+        {filtered && (
+          <Button variant="ghost" size="s" onClick={clear}>
+            {t('clear')}
+          </Button>
+        )}
+        <span className="flex-1" />
+        {!specialist && rows.length > 0 && (
+          <Button asChild variant="secondary" size="s" className="max-sm:hidden">
+            <a href={sdk.calendar.exportUrl(slug, filters)} download>
+              <Download aria-hidden />
+              {t('export')}
+            </a>
+          </Button>
+        )}
+      </div>
+      {list.isPending ? (
+        <div className="flex justify-center py-16">
+          <Spinner label={t('loading')} />
+        </div>
+      ) : rows.length === 0 ? (
+        filtered ? (
+          <EmptyState
+            icon={<SearchX aria-hidden />}
+            title={t('nothing')}
+            description={t('nothingHint')}
+            action={
+              <Button variant="secondary" size="s" onClick={clear}>
+                {t('clearFilters')}
+              </Button>
+            }
+          />
+        ) : (
+          <EmptyState icon={<CalendarX2 aria-hidden />} title={t(`empty.${tab}`)} />
+        )
+      ) : (
+        <>
+          <BookingsTable
+            rows={rows}
+            now={now}
+            specialist={specialist}
+            picked={search.booking ?? search.request}
+            onOpen={onOpen}
+            onMove={onMove}
+            onBookAgain={onBookAgain}
+          />
+          {list.hasNextPage && (
+            <Button variant="secondary" className="self-center" loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>
+              {t('showMore')}
+            </Button>
+          )}
+        </>
+      )}
+    </>
+  )
+
+  return (
+    <WorkspacePage title={sections('bookings')}>
+      <div className="flex flex-col gap-4">
+        <Tabs value={tab} onValueChange={(next) => go({ tab: next === 'today' ? undefined : (next as BookingsTab) })}>
+          <TabsList aria-label={t('tabsLabel')}>
+            {BOOKING_TABS.map((value) => (
+              <TabsTrigger key={value} value={value}>
+                {t(`tabs.${value}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {/* a panel per tab, as each tab names its own; the rows live in the one on screen */}
+          {BOOKING_TABS.map((value) => (
+            <TabsContent key={value} value={value} className="flex flex-col gap-4 pt-4">
+              {value === tab && body}
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+      {search.request && (
+        <RequestDrawer
+          slug={slug}
+          code={search.request}
+          now={now}
+          business={business}
+          onGo={(r) => go({ request: r.code })}
+          onAnswered={() => go({ request: undefined })}
+          onShow={(date, staff) => toCalendar({ ...(date === todayDate ? {} : { date }), ...(staff ? { staff } : {}) })}
+          onClose={() => go({ request: undefined })}
+        />
+      )}
+      {search.booking && !search.request && (
+        <BookingDrawer
+          slug={slug}
+          code={search.booking}
+          now={now}
+          level={level}
+          onMove={onMove}
+          onBookAgain={onBookAgain}
+          onClose={() => go({ booking: undefined })}
+        />
+      )}
+    </WorkspacePage>
+  )
+}

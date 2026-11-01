@@ -1473,6 +1473,55 @@
     "elsewhereRefused": "{name} is busy elsewhere {time}. Pick another time.",
     "elsewhereSelf": "You’re busy elsewhere {time}. Pick another time."
   },
+  "bookings": {
+    "tabsLabel": "Which bookings",
+    "tabs": { "today": "Today", "upcoming": "Upcoming", "past": "Past", "cancelled": "Cancelled" },
+    "search": "Client, phone or booking code",
+    "staffFilter": "Specialist",
+    "allStaff": "All specialists",
+    "serviceFilter": "Service",
+    "allServices": "All services",
+    "dateFilter": "Date",
+    "allTime": "All time",
+    "dateToday": "Today",
+    "dateWeek": "This week",
+    "clear": "Clear",
+    "clearFilters": "Clear filters",
+    "export": "Export CSV",
+    "loading": "Loading the bookings",
+    "showMore": "Show more",
+    "nothing": "Nothing found",
+    "nothingHint": "Try changing the search or the filters.",
+    "empty": {
+      "today": "No bookings today",
+      "upcoming": "No bookings ahead",
+      "past": "No past bookings yet",
+      "cancelled": "No cancelled bookings"
+    },
+    "table": "Bookings",
+    "columns": {
+      "client": "Client",
+      "service": "Service",
+      "specialist": "Specialist",
+      "time": "Time",
+      "source": "Source",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "source": { "web": "Online", "app": "Online", "ai": "Online", "phone": "Phone", "walkin": "Walk-in" },
+    "cancelledBy": { "client": "The client cancelled", "business": "The business cancelled", "system": "No answer in time" },
+    "unnamed": "Unnamed client",
+    "new": "New",
+    "comma": ", ",
+    "when": "{day} · {time}",
+    "menu": {
+      "label": "Actions for {name}",
+      "openBooking": "Open booking",
+      "openRequest": "Open request",
+      "move": "Move to another time",
+      "bookAgain": "Book again"
+    }
+  },
   "newBooking": {
     "title": "New booking",
     "close": "Close",
