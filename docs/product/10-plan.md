@@ -168,12 +168,12 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 | 4 · Daily work | calendar views, bookings list, clients, walk-ins, complaints, internal statuses, *Başga ýerde*, browser notifications, the installable business app (done and live 01.11.2026) |
 | 5 · Discovery | home (with the "How was it?" card, F-243), search, map, categories, the city choice, search-engine pages (done and live 01.11.2026) |
 | 6 · Admin tool | cms.yeral.app with the Ýeral team's own accounts and a second factor (F-178): verification, reported reviews, hiding businesses, adding a business for its owner (done and live 01.11.2026) |
-| 7 · First-launch mode | example businesses, "Try the business app", privacy policy and terms in English (Q-033) |
+| 7 · First-launch mode | example businesses, "Try the business app", privacy policy and terms in English (Q-033) (done and live 01.11.2026) |
 
 ### P5 · First launch
 
 The client site, the business app, the admin tool and the api go to production on the owner's server (a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB)) in Docker, with Cloudflare for DNS (ADR 0007, ADR 0023), by hand (owner, 01.11.2026: releases and deploys from GitHub come after it). The server, its shared HTTPS front door and the api's stack are set up (19.10.2026, `infra/server`);
-no backups or error tracking for this demo (owner, 22.10.2026). The owner
+no backups or error tracking for this demo (owner, 22.10.2026). **Live since 01.11.2026, main at 956e640:** the client site, the business app, the admin tool and the api, `DEMO_WORKSPACE` on. The owner
 approved the launch in advance (22.10.2026): it goes out once P4's slices are built and checked locally, and Claude
 deploys. DNS (`infra/server/README.md`, "DNS records"): `yeral.app`, `www`, `api`, `business` and `cms` point at the
 server from 22.10.2026. The old site is retired (owner, 22.10.2026; its code left the repo on 23.10.2026): since
