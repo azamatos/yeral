@@ -45,6 +45,10 @@ test('search engines get a sitemap, robots and a business’s structured data', 
   const robots = await request.get(`${CLIENT_URL}/robots.txt`)
   expect(await robots.text()).toContain('/sitemap.xml')
 
+  // in the page the server sends, as a crawler reads it, and still there once the app has taken over
+  const html = await (await request.get(`${CLIENT_URL}/en/b/${SALON.slug}`)).text()
+  expect(html).toMatch(/<script[^>]*application\/ld\+json[^>]*>[^<]*LocalBusiness/)
   await page.goto(`${CLIENT_URL}/en/b/${SALON.slug}`)
-  await expect(page.locator('script[type="application/ld+json"]')).toContainText('LocalBusiness')
+  await expect(page.getByRole('heading', { level: 1, name: SALON.name })).toBeVisible()
+  expect(await page.locator('script[type="application/ld+json"]').textContent()).toContain('LocalBusiness')
 })
