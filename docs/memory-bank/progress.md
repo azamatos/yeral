@@ -507,6 +507,11 @@
   verifying is refused while the code shows, and the button says why. #294 also fixed a calendar story that failed after 19:00
   Ashgabat time on every branch. The permission check refused a production read and `admin-invite` over SSH, and the first try of
   the deploy; the owner: "i give u permission go with SSH", after which the deploy went through. `admin-invite` stays the owner's.
+  CI on `main` at 5dc0b48 had failed and I deployed without reading it, and told the owner CI had passed on `main`: only the PR's head had.
+  The owner: "CI is broken, why u continue on changes? Or this will be fixed on future PR?" Cause: the calendar's first story, whose
+  one-second wait was shorter than its cold start on CI; a re-run across Ashgabat's midnight failed 24 «tomorrow» stories on top. The
+  clock itself was ruled out (55 of 55 at a faked 23:52, three runs). #297 fixed the wait; `main` green at 66c2006, which differs from
+  production only in that test file.
 
 ## Roadmap
 

@@ -18,6 +18,9 @@ twice one failed partway, with Prettier having moved the text, and left some fil
 `gh run watch` of a run my next push cancelled once let #273 merge unverified, and a script's own last exit code hid it. After
 a push, wait on that commit's run; don't reuse a run id from before it. Rebase on `main` and let CI run on the result when
 something merged meanwhile. Only CI's Docker e2e runs at 1280×720: stories run wider and missed a popover off the screen.
+**After a merge (owner, 01.11):** read `main`'s own run for the merged commit before deploying or starting anything; a green PR
+run doesn't prove `main`, and a red run stops new work until it's understood and green. A run across Ashgabat's midnight (19:00 UTC)
+fails the calendar's «tomorrow» stories, which read the day before the app does: run it again.
 
 Where things stand: M0–M2 released as tags (#20, 16.10); releases paused until the MVP works (ADR 0009 amended, #133),
 production goes by hand with the owner's go. The api, the business app and the client site run on the own server
