@@ -4,11 +4,19 @@ _Last updated: 2026-11-01_ · the current state only; the history by day is in `
 
 ## Current focus
 
-**2026-11-01: slice 3 closed in CI, slice 4 under way, only the main session works now.** Merged since 31.10: #263 e2e
-flows, #264 A1, #265 U1, #266 U2, #268 B12 notifications, #269 B2 booking drawer, #270 B3 report and cancel. Left in
-slice 4, in order: B1 (#271), B4, B5, B6, B7, a small PR putting the member's `staffId` on the workspace schema, B8, B9,
-B10, B11, B13, `daily-work.spec.ts`, then the fold and the deploy. The live server runs main at 808b640 (31.10), so
-nothing from #263 on is live; the deploy after slice 4 also checks a business page's map and photos for CSP violations.
+**2026-11-01: slice 4 well along, only the main session works now (no agents).** Merged since 31.10: #263 e2e flows, #264
+A1, #265 U1, #266 U2, #268 B12 notifications, #269 B2 booking drawer, #270 B3 report and cancel, #271 B1 block time, #273 B4
+move a booking, #274 B5 new booking drawer, #275 B6 the phone's quick booking and the +, #276 B7 week views, one specialist
+and the legend, #277 `staffId` on the workspace, #278 B8 bookings list; #279 B9 requests tab and bulk answers (check it
+merged). Left in slice 4, in order: B10 clients list, B11 client card, B13 installable app, `e2e/tests/daily-work.spec.ts`,
+then the deploy and the click test at 1440 and 390 (skill `qa-flows`). The live server runs main at 808b640 (31.10), so
+nothing from #263 on is live; the next deploy also checks a business page's map and photos for CSP violations. Each
+piece's log note (`log/2026-11-01-*.md`) lists what's there, its traps and what it left.
+
+**How to merge (31.10–01.11 lesson):** read a `success` conclusion for the CI run of the PR's exact head commit first. A
+`gh run watch` of a run my next push cancelled once let #273 merge unverified, and a script's own last exit code hid it. After
+a push, wait on that commit's run; don't reuse a run id from before it. Rebase on `main` and let CI run on the result when
+something merged meanwhile. Only CI's Docker e2e runs at 1280×720: stories run wider and missed a popover off the screen.
 
 Where things stand: M0–M2 released as tags (#20, 16.10); releases paused until the MVP works (ADR 0009 amended, #133),
 production goes by hand with the owner's go. The api, the business app and the client site run on the own server
@@ -90,18 +98,17 @@ the book has had none open since 21.10. Where the pre-book questions (old number
 
 1. **Deploys:** at each slice's end, `infra/server/README.md` → "Deploying Ýeral by hand" (a backup first) with
    `git archive origin/main`. The support lines are in `/srv/yeral/.env` since 31.10.
-2. **Close P4 slice 3:** finish draft **#263** (expiry with offers, cancel + Undo, a move, the review, 390 px: the
-   env-gated api test hook must stay off in production); the live click test with skill `qa-flows` after the deploy;
-   two bugs #258 found: a click on the SSR'd client site before React hydrates is lost, and a request block on the day
-   grid can sit under a neighbour's; home's «How was it?» card comes with slice 5 (then the write-review steiger
-   override goes); an axe `label-content-name-mismatch` on «Call» links under Russian length was fixed in #260.
-   `make-example <slug>` (#233, deployed) opens one of the owner's test businesses once the owner names it.
-3. **Slice 4, daily work** (`log/2026-10-31-slice-4-plan.md`: 16 PRs in three lanes, five api gaps, the owner's three
-   decisions above): finish the drafts **#264** (A1), **#265** (U1), **#266** (U2) one at a time, then B1–B13 in the
-   plan's order (B4 move mode, B12 notifications and B13 the installable app follow the three decisions). Then slice
-   5; then slices 6 + 7, then the first launch (P5), approved in advance (22.10): `EXAMPLE_BUSINESSES` and
-   `DEMO_WORKSPACE` on, the cms site joins `yeral.caddy` with its app. The api's `/docs` page needs Scalar's bundle
-   inventoried or self-hosted before its CSP tightens; the cms site gets a policy when its app joins.
+2. **Slice 3's remainder:** the live click test with skill `qa-flows` after the deploy; two bugs #258 found: a click on the
+   SSR'd client site before React hydrates is lost, and a request block on the day grid can sit under a neighbour's; home's
+   «How was it?» card comes with slice 5 (then the write-review steiger override goes). `make-example <slug>` (#233, deployed)
+   opens one of the owner's test businesses once the owner names it.
+3. **Slice 4, daily work** (`log/2026-10-31-slice-4-plan.md`): finish B10, B11, B13 and `daily-work.spec.ts` (see Current
+   focus), deploy, click-test. Left from the built pieces: «Frequent clients» on the new booking's name search (needs a list
+   sorted by visits), the phone bookings list's filters, «Open the client's card» on the row menu and drawer (B11), the
+   drawer's own staff-id trick can use the workspace's `staffId` now. Then slice 5; then slices 6 + 7, then the first launch
+   (P5), approved in advance (22.10): `EXAMPLE_BUSINESSES` and `DEMO_WORKSPACE` on, the cms site joins `yeral.caddy` with its
+   app. The api's `/docs` page needs Scalar's bundle inventoried or self-hosted before its CSP tightens; the cms site gets
+   a policy when its app joins.
 4. **Slice 2's follow-ups** (`log/2026-10-2[345]-*.md`): a category changed after the menu was saved keeps that menu;
    a lighter public categories list; one shared rule for which special day applies (app and api); a shared fake api
    for the Settings stories; leaving a section with unsaved changes asks nothing; specialization saves one language
