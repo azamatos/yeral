@@ -4,9 +4,9 @@ _Last updated: 2026-11-01_ · the current state only; the history by day is in `
 
 ## Current focus
 
-**2026-11-01: slices 4 and 5 done and live, only the main session works now (no agents).** Slice 4 (#263–#286) is daily work;
+**2026-11-01: slices 4 and 5 done and live, slice 6 being built, only the main session works now (no agents).** Slice 4 (#263–#286) is daily work;
 slice 5 (#288 search, category pages and Home; #289 the results map; #290 location; #291 sitemap, robots, JSON-LD and
-`discovery.spec.ts`) is discovery. Live: main at 3447f4f. **Next is slice 6, the admin tool: its plan first** (book chapter 10),
+`discovery.spec.ts`) is discovery. Live: main at 3447f4f. **Now slice 6, the admin tool:** `log/2026-11-01-slice-6-plan.md` (book chapter 10),
 then slice 7, then P5. Each piece's log note (`log/2026-11-01-*.md`) lists what's there, its traps and what it left;
 `log/2026-11-01-slice-4-live.md` says what a live check by Claude can't cover: Claude doesn't sign in or create accounts on
 production, so the signed-in flows are proved on CI's stack and in the owner's review.
@@ -21,10 +21,10 @@ something merged meanwhile. Only CI's Docker e2e runs at 1280×720: stories run 
 
 Where things stand: M0–M2 released as tags (#20, 16.10); releases paused until the MVP works (ADR 0009 amended, #133),
 production goes by hand with the owner's go. The api, the business app and the client site run on the own server
-(ADR 0024; `api.yeral.app` since 22.10, `business.yeral.app` and `yeral.app` since 25.10, `noindex` until the launch).
-P2: steps 0–6 done; step 7 keeps releases and deploys from GitHub and the code-SMS cap (backups and error tracking
-moved to P6, owner 22.10). P4: slices 1 and 2 done; slice 3 built, closed but for Next steps 2; slice 4 planned, its
-first PRs parked; slices 5–7 ahead (book chapter 10). The design redraw stopped (ADR 0021 amended 20.10): the apps are
+(ADR 0024; `api.yeral.app` since 22.10, `business.yeral.app` and `yeral.app` since 25.10, `noindex` until real businesses join).
+P2: steps 0–6 done; step 7 keeps releases and deploys from GitHub (after the first launch, owner 01.11) and the code-SMS cap
+(backups and error tracking moved to P6, owner 22.10). P4: slices 1–5 done and live, slice 3's remainder in Next steps 2;
+slices 6 and 7 ahead (book chapter 10). The design redraw stopped (ADR 0021 amended 20.10): the apps are
 built from the book and the drawn boards, components in Storybook first.
 
 ## Owner's direction
@@ -44,12 +44,14 @@ activeContext" rows now point):
 - 30.10: `hello@yeral.app` works and is configured (the owner tested it); the order of work: hygiene → close slice 3
   with e2e → slice 4, 5 → slices 6 + 7, the first launch. Agents run on Fable at high effort (Claude Code specific).
 - 01.11: no agents on this project, only the main session (ADR 0014 amended, AGENTS.md). PR merges are Claude's own.
+- 01.11: the owner took the recommended option on everything open: chapter 9's four rows of that day (slice 4's three choices
+  stand, who the legal pages name, no search engines through the demo, the first launch by hand).
 - 31.10: Ýeral takes at most 30 % of the week; deploys and SSH are Claude's own, at each slice's end. Finish the plan
   to a working MVP with demo settings, take the recommended option, ask nothing small; the owner reviews the whole
   platform afterwards. `gh pr merge` is allowed in `.claude/settings.json`: a reviewed PR on green CI merges without a prompt. Slice 4's
   three decisions (browser notifications: three events, in front and in the background, no web push; the installable
   app: manifest, icons and a small offline-page service worker; no dragging in slice 4) were put to the owner on 31.10
-  with the recommended option; no answer yet — they stand as "Claude (delegated)" until the owner says otherwise.
+  with the recommended option; the owner confirmed them on 01.11.
 
 ## Decisions
 
@@ -111,7 +113,7 @@ the book has had none open since 21.10. Where the pre-book questions (old number
    when a report is removed on the card, the owner's click test including the install on a real phone. Left from slice 5: the
    phone's full-screen search sheet (Mobile 1), suggestions in «What?», the empty state's rows for tomorrow, grouping pins on one
    spot; slice 7 adds «Try the business app» and the footer's About, Help and legal links. The site stays `noindex` at the edge
-   until the owner opens it.
+   until real businesses join (owner, 01.11).
 4. **Slice 2's follow-ups** (`log/2026-10-2[345]-*.md`): a category changed after the menu was saved keeps that menu;
    a lighter public categories list; one shared rule for which special day applies (app and api); a shared fake api
    for the Settings stories; leaving a section with unsaved changes asks nothing; specialization saves one language
@@ -129,13 +131,13 @@ the book has had none open since 21.10. Where the pre-book questions (old number
    too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
-**Waiting on the owner:** the `make-example` slug (which test business opens to clients); an objection, if any, to slice 4's three decisions. Branch protection on `main`
-when the demo app is done (27.10). The admin account once the admin tool (slice 6) is deployed, nothing secret
+**Waiting on the owner:** the `make-example` page address (which test business opens to clients). The admin account once the admin tool (slice 6) is deployed, nothing secret
 through the chat: Claude runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite
 <login> "<name>"` (login 3–32 of a-z 0-9 . -) and the owner opens the setup link (24 hours,
 `cms.<domain>/setup/<token>`), picks the password, adds the authenticator app and keeps the 10 recovery codes. The old
 Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an early Ýeral prototype) stays until all the web apps are
-live, then goes (21.10); the owner's other Pages projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts
+live, then Claude deletes it, and branch protection on `main` goes on when the demo app is done: both approved 01.11. The
+owner's other Pages projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts
 for error tracking and uptime checks.
 
 **Server:** `ssh yeral-vps` (Claude's own since 31.10: deploy and SSH need no go); deploy by hand with `infra/server/README.md` →
