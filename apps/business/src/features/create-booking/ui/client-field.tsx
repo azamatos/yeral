@@ -10,7 +10,7 @@ import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { Pill } from '@yeral/ui/pill'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { useState } from 'react'
+import { useState, type Ref } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 
@@ -49,6 +49,8 @@ export function ClientField({
   client,
   name,
   showAverage,
+  quick,
+  phoneRef,
   onDigits,
   onClient,
   onName,
@@ -60,6 +62,10 @@ export function ClientField({
   name: string
   /** The reader sees revenue: the average check on the card. */
   showAverage: boolean
+  /** The phone's sheet (B-Mobile 5a): the field's own wording. */
+  quick?: boolean
+  /** The number field, focused first on a phone: the keypad opens with the sheet. */
+  phoneRef?: Ref<HTMLInputElement>
   onDigits: (digits: string) => void
   onClient: (client: ClientMatch | null) => void
   onName: (name: string) => void
@@ -182,12 +188,13 @@ export function ClientField({
       ) : (
         <>
           <Field
-            label={t('phone')}
+            label={t(quick ? 'phoneQuick' : 'phone')}
             hint={incomplete ? undefined : hint}
             error={incomplete ? t('incomplete', { n: PHONE_RULES.maxDigits }) : undefined}
           >
             <PhoneInput
               {...PHONE_RULES}
+              ref={phoneRef}
               size={44}
               value={digits}
               onValueChange={(next) => {

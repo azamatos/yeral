@@ -1,6 +1,6 @@
 import { epochOf } from '@yeral/domain/time'
 import { describe, expect, it } from 'vitest'
-import { currentStep, eligibleFor, missingOf, servicesOf, staffOf, totalOf, type MenuService } from './new-booking'
+import { currentStep, eligibleFor, missingOf, quickServices, servicesOf, staffOf, totalOf, type MenuService } from './new-booking'
 
 const service = (id: string, staffIds: string[], patch: Partial<MenuService> = {}): MenuService => ({
   id,
@@ -25,6 +25,15 @@ describe('the new booking', () => {
   it('keeps the services in the order they were picked', () => {
     const menu = { groups: [{ id: 'g', name: {} as never, order: 0, services: [cut, colour] }] } as never
     expect(servicesOf(menu, ['colour', 'cut', 'gone']).map((s) => s.id)).toEqual(['colour', 'cut'])
+  })
+
+  it('puts the usual services first on the phone, keeping what was picked', () => {
+    const extra = ['a', 'b', 'c', 'd'].map((id) => service(id, ['a']))
+    const menu = { groups: [{ id: 'g', name: {}, services: [cut, colour, nails, ...extra] }] }
+    const ids = (usual: string[], picked: string[], staff: string | null) => quickServices(menu, usual, picked, staff).map((s) => s.id)
+    expect(ids(['nails'], [], null)).toEqual(['nails', 'cut', 'colour', 'a'])
+    expect(ids([], [], 'b')).toEqual(['cut', 'colour'])
+    expect(ids([], ['d'], null)).toEqual(['cut', 'colour', 'nails', 'a', 'd'])
   })
 
   it('offers only who does all the services', () => {

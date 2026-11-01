@@ -227,6 +227,17 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
         )}
       </div>
       {moving.booking && <MoveBar booking={moving.booking} onBack={leaveMove} />}
+      {/* the phone's way in (B-Mobile 2, 5c): over the tab bar, the toast taking its place while it shows */}
+      {!moving.booking && (
+        <Button
+          iconOnly
+          aria-label={t('newBooking')}
+          className="fixed right-4 bottom-[calc(var(--tab-bar)+16px)] z-8 size-14 rounded-pill shadow-[0_8px_24px_rgba(68,41,214,.32)] sm:hidden [body:has([data-sonner-toast])_&]:bottom-[calc(var(--tab-bar)+88px)]"
+          onClick={() => go({ panel: 'new', staff: phoneStaff, booking: undefined }, true)}
+        >
+          <Plus aria-hidden />
+        </Button>
+      )}
       {view.data ? (
         <DayGrid
           view={view.data}

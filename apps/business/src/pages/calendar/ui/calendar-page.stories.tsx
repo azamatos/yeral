@@ -237,7 +237,7 @@ const gozel = {
   avgCheck: 145,
   phoneOnly: false,
   alerts: ['Allergic to ammonia'],
-  usualServices: [],
+  usualServices: [id(8)],
 }
 
 const json = (body: unknown, status = 200) =>
@@ -1191,7 +1191,48 @@ export const NewBookingRussianLength: Story = {
   args: { path: `/w/glow-studio/calendar?panel=new&services=${id(5)}` },
   play: async () => {
     const dialog = await page.findByRole('dialog')
-    await within(dialog).findByRole('checkbox', { name: /Women/ })
+    await within(dialog).findByRole('button', { name: /Women/ })
     await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth)
+  },
+}
+
+/** The phone's quick booking (book B-24, B-Mobile 5a–5c): the +, the keypad up, the usual service first, the grid, saved with Undo. */
+export const QuickBooking: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'New booking' }))
+    const d = within(await page.findByRole('dialog', { name: 'New booking' }))
+    const phone = d.getByRole('textbox', { name: 'Client’s phone' })
+    await waitFor(() => expect(phone).toHaveFocus())
+    await userEvent.keyboard('65123456')
+    await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
+    const chips = within(d.getByRole('group', { name: 'Service' }))
+    await expect(chips.getAllByRole('button')[0]).toHaveTextContent('Manicure')
+    await userEvent.click(chips.getByRole('button', { name: 'Women’s haircut' }))
+    await userEvent.click(d.getByRole('radio', { name: 'Any specialist' }))
+    await userEvent.click(await d.findByRole('button', { name: /^10:00\s*Tomorrow · Aýna/ }))
+    await userEvent.click(d.getByRole('button', { name: 'Add an internal note' }))
+    await userEvent.type(await d.findByRole('textbox', { name: 'Internal note' }), 'Prefers mornings')
+    await userEvent.click(d.getByRole('button', { name: 'Save booking' }))
+    await page.findByText('Booking saved: Gözel Annaýewa · tomorrow · 10:00, Aýna')
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    // the toast waits above the tab bar, the + moved up out of its way
+    await expect(page.getAllByRole('button', { name: 'Undo' }).at(-1)).toBeDefined()
+  },
+}
+
+/** «Another service» opens the whole menu, and «Another date and time» the days and their starts. */
+export const QuickBookingMore: Story = {
+  globals: { viewport: { value: 'xs' } },
+  args: { path: `/w/glow-studio/calendar?panel=new&staff=${id(1)}` },
+  play: async () => {
+    const d = within(await page.findByRole('dialog', { name: 'New booking' }))
+    await userEvent.click(await d.findByRole('button', { name: 'Women’s haircut' }))
+    await expect(d.queryByRole('group', { name: 'Morning' })).toBeNull()
+    await userEvent.click(await d.findByRole('button', { name: 'Another date and time' }))
+    await expect(await d.findByRole('group', { name: 'Morning' })).toBeVisible()
+    await userEvent.click(d.getByRole('button', { name: 'Another service' }))
+    await expect(await d.findByRole('checkbox', { name: /Women’s haircut/ })).toBeChecked()
   },
 }
