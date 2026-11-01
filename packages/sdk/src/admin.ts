@@ -140,9 +140,7 @@ export function createAdmin(client: Client, queryClient: QueryClient) {
     verify: (id: string) =>
       mutationOptions({
         mutationFn: (moved?: number) =>
-          ask(
-            admin.businesses[':id'].verify.$post({ param: { id }, query: (moved === undefined ? {} : { moved: String(moved) }) as never }),
-          ),
+          ask(admin.businesses[':id'].verify.$post({ param: { id }, query: moved === undefined ? {} : { moved: String(moved) } })),
         onSuccess: () => businessChanged(id),
       }),
     /** Sent back with a reason the owner reads. */
