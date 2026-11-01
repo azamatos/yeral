@@ -480,6 +480,14 @@
   Parked as drafts when the limit cut the agents off: #263 (e2e flows), #264 (A1), #265 (U1), #266 (U2). Not
   deployed: the server stays at 74fae7d until the owner's go (the three `.env` lines first).
 
+- **2026-11-01 · Slice 4's daily work, most of it:** #263–#266 (e2e flows, A1, U1, U2), #268 B12, #269 B2, #270 B3, #271 B1,
+  #273 B4, #274 B5, #275 B6, #276 B7, #277 staff id, #278 B8, #279 B9: the calendar's drawers, block time, move mode, the new
+  booking and the phone's quick sheet, week views and the legend, the bookings list and requests with bulk answers. The owner:
+  "from now on we are not working with agents for this project. Only your session works under the project. It takes too
+  much credit limits. I give u permission for pr merge" (ADR 0014 amended, #272), and every session stops at 75 % context,
+  summarizes and waits (a global hook, `~/.claude/hooks/context-limit.sh`, on this Mac). Slips: #273 merged before its CI
+  finished (it came back green); the first-visit legend hid «Got it» at 1280×720 (#276 fixed, CI's e2e caught it).
+
 ## Roadmap
 
 **Re-planned 2026-10-18:** the product book is closed and its chapter 10 (`docs/product/10-plan.md`) is the build plan:
