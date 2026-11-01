@@ -99,13 +99,14 @@ function Row({
   const reported = t('reported', { date: fmt.shortDate(at.date), time: fmt.time(at.min) })
 
   const remove = () =>
-    takeBack.mutate(r.code, {
-      onSuccess: () => {
+    // the report reads back gone and takes this row with it: `mutate`'s own callbacks would go too
+    void takeBack.mutateAsync(r.code).then(
+      () => {
         const wasNoShow = r.type === 'noshow' && booking?.status === 'noshow'
         toast(wasNoShow ? drawer('removedNoShow', { status: statusWithoutNoShow(booking, now) }) : drawer('removed'))
       },
-      onError: (error) => toast(errorText(error)),
-    })
+      (error: unknown) => toast(errorText(error)),
+    )
 
   return (
     <li className="grid grid-cols-[32px_minmax(0,1fr)] items-start gap-3 border-b border-n-200 py-3.5 text-small sm:grid-cols-[32px_minmax(0,1fr)_auto]">

@@ -40,14 +40,12 @@ export function LeaveConfirm({ workspace, onLeft, children }: { workspace: Works
             variant="danger-solid"
             loading={leave.isPending}
             onClick={() =>
-              leave.mutate(workspace.slug, {
-                onSuccess: left,
-                onError: (error) => {
-                  // not on that team any more (removed meanwhile, or left on another device): done already (the sdk
-                  // forgets it as for a leave)
-                  if (isApiError(error, 'not_found')) left()
-                  else toast(errorText(error))
-                },
+              // the workspace reads back gone, which can take this modal away: `mutate`'s own callbacks would go with it
+              void leave.mutateAsync(workspace.slug).then(left, (error: unknown) => {
+                // not on that team any more (removed meanwhile, or left on another device): done already (the sdk
+                // forgets it as for a leave)
+                if (isApiError(error, 'not_found')) left()
+                else toast(errorText(error))
               })
             }
           >

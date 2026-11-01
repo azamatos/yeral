@@ -70,7 +70,7 @@ test('the owner books a client by phone from the calendar and the client’s My 
   await expect(drawer.getByText(/^This number isn’t saved yet/)).toBeVisible()
   await drawer.getByRole('checkbox').first().check()
   await drawer
-    .getByRole('button', { name: /\d{1,2}:\d{2}\s*·/ })
+    .getByRole('button', { name: /\d{1,2}:\d{2}/ })
     .first()
     .click()
   await drawer.getByRole('button', { name: 'Save booking' }).click()

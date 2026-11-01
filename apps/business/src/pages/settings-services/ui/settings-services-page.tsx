@@ -412,13 +412,14 @@ function Group({
               <MenuItem
                 className="text-danger-ink [&_svg]:text-danger-ink"
                 onSelect={() =>
-                  removeGroup.mutate(groupId, {
-                    onSuccess: () => {
+                  // the menu reads back without this group: `mutate`'s own callbacks would go with it
+                  void removeGroup.mutateAsync(groupId).then(
+                    () => {
                       onGroupDeleted()
                       toast(t('groupDeleted', { name }))
                     },
-                    onError: (error) => toast(errorText(error)),
-                  })
+                    (error: unknown) => toast(errorText(error)),
+                  )
                 }
               >
                 <Trash2 aria-hidden />

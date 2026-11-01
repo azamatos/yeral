@@ -117,6 +117,9 @@ component ─► useQuery(sdk.businesses.detail(slug)) ─► hc client ─► G
 
 - Components never call `fetch` or the client directly: they use `queryOptions` / mutation options from `@yeral/sdk`
   (or a slice's `api/` segment that wraps them).
+- A step that must run after a mutation (a toast, closing a drawer) goes on `mutateAsync().then`, not `mutate`'s callbacks, when
+  the new data can take the component away (a row that goes, a modal in a footer): React Query drops those callbacks once the
+  component unmounts, and the push channel can bring the new data before the request's own answer.
 - Mutations invalidate by query keys defined in `@yeral/sdk`; optimistic updates only where instant feedback matters:
   the sdk's `instant` (the services' online switch, a group's rename, the photos' order and removal) writes the change
   into the cache before the request and puts the old data back, and asks again, when the api refuses; the screen toasts

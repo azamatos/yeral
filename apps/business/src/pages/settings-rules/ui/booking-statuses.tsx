@@ -179,13 +179,14 @@ function StatusRow({
           loadingLabel={t('deleting')}
           className="size-9 flex-none"
           onClick={() =>
-            remove.mutate(status.id, {
-              onSuccess: () => {
+            // the list reads back without this row: `mutate`'s own callbacks would go with it
+            void remove.mutateAsync(status.id).then(
+              () => {
                 toast(t('deleted', { name }))
                 onDeleted()
               },
-              onError: (error) => toast(errorText(error)),
-            })
+              (error: unknown) => toast(errorText(error)),
+            )
           }
         >
           <Trash2 />
