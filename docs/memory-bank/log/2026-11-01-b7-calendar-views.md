@@ -18,6 +18,9 @@ Slice 4's B7 (`log/2026-10-31-slice-4-plan.md` → "PRs, three lanes", decisions
 - axe's `label-content-name-mismatch` only runs on what a story ends on. A story that clicks through a screen never
   checks it: `WeekLoad` passed with a broken name until `WeekLoadAddress` stopped on the matrix. A button with visible
   words keeps them as its name, and adds context in `sr-only`, not in `aria-label`.
+- The legend's popover ran off the bottom at 1280×720 on a first visit, «Got it» out of reach, and only «Got it»
+  remembers the visit. Its height is now capped by Radix's available height too. No story reproduces it (the stories'
+  viewport keeps it on screen): `e2e/tests/owner.setup.ts` at 1280×720 is the test, it clicks «Got it».
 - The stories' `beforeEach` marks the legend as seen: on a phone viewport it opens as a modal sheet and blocks the page.
 
 ## Seen, not done here
