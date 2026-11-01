@@ -10,4 +10,7 @@ export default [
   // «Block time» opens from the day's slot menu alone until the phone's calendar (slice 4's B5) and the week views
   // open it too: drop this then.
   { files: ['./src/features/block-time/**'], rules: { 'fsd/insignificant-slice': 'off' } },
+  // move mode lives on the calendar's grid alone: the bookings list reaches it by the address (`?move=`), and the week
+  // views (slice 4's B7) move from their day. Drop this if a second page ever draws it.
+  { files: ['./src/features/move-booking/**'], rules: { 'fsd/insignificant-slice': 'off' } },
 ]

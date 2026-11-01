@@ -216,6 +216,7 @@ const fakeApi =
       arrives = false,
       moveFits = true,
       internal = false,
+      refuseMove,
     }: {
       /** false: the business is closed every day (a late request). */
       open?: boolean
@@ -225,6 +226,8 @@ const fakeApi =
       moveFits?: boolean
       /** Internal statuses switched on, «Arrived» set on Gözel A.'s booking (book B-29). */
       internal?: boolean
+      /** The team's move is refused with this `cannot_move` (book B-26). */
+      refuseMove?: { problem: string; staffId: string; busy?: { start: number; end: number } }
     } = {},
   ): (() => typeof fetch) =>
   () => {
@@ -240,8 +243,18 @@ const fakeApi =
       color: '#066a41',
       enabled: true,
     }
-    const marked = (b: CalendarView['bookings'][number]) =>
-      internal && b.code === dayBookings[0]!.code ? { ...b, internalStatusId: arrived.id } : b
+    // the bookings moved in this story (book B-26): the new day and time, and another specialist's when given
+    const movedTo = new Map<string, { date: string; start: number; staffId?: string }>()
+    const marked = (b: CalendarView['bookings'][number]) => {
+      const to = movedTo.get(b.code)
+      if (to) {
+        const end = to.start + b.end - b.start
+        const who = staff.find((s) => s.staffId === to.staffId)
+        const items = b.items.map((i) => ({ ...i, start: to.start, end, ...(who ? { staffId: who.staffId, staff: who.name } : {}) }))
+        return { ...b, date: to.date, start: to.start, end, items }
+      }
+      return internal && b.code === dayBookings[0]!.code ? { ...b, internalStatusId: arrived.id } : b
+    }
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const url = new URL(request.url)
@@ -300,6 +313,12 @@ const fakeApi =
         }))
         blocked.push(...items)
         return json({ items })
+      }
+      const moving = /^POST \/w\/glow-studio\/bookings\/([^/]+)\/move$/.exec(route)
+      if (moving) {
+        if (refuseMove) return json({ error: { code: 'cannot_move', details: refuseMove } }, 409)
+        movedTo.set(moving[1]!, (await request.json()) as { date: string; start: number; staffId?: string })
+        return new Response(null, { status: 204 })
       }
       // one booking on its own (the booking drawer), the team's note and marker on it
       const one = /^(GET|PUT) \/w\/glow-studio\/bookings\/([^/]+)(\/note|\/internal-status)?$/.exec(route)
@@ -799,5 +818,179 @@ export const BlockTimeSheet: Story = {
     const d = within(await page.findByRole('dialog', { name: 'Block time' }))
     await expect(d.getByRole('radio', { name: 'Doesn’t repeat' })).toBeVisible()
     await expect(d.getByRole('button', { name: 'Block time' })).toBeDisabled()
+  },
+}
+
+/** Move mode on Jemal B.'s booking tomorrow: from her drawer, the bar over the grid, the block faded (book B-26). */
+const startMove = async (canvas: Canvas) => {
+  await canvas.findByRole('region', { name: /^Calendar, / })
+  await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
+  await userEvent.click(await canvas.findByRole('button', { name: /^10:00 Jemal B\./ }))
+  await userEvent.click(
+    await within(await page.findByRole('dialog', { name: 'Booking' })).findByRole('button', { name: 'Move to another time' }),
+  )
+  await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+  await expect(await canvas.findByRole('status')).toHaveTextContent('Jemal B. · Pedicure · 60 min — pick a new time')
+  return within(canvas.getByRole('region', { name: /^Calendar, / }))
+}
+
+/** Move it (book B-26): the slot says «move here», the ghost and the popover ask, the block goes to the new time and the toast says so. */
+export const MoveBooking: Story = {
+  play: async ({ canvas }) => {
+    const grid = await startMove(canvas)
+    const maral = within(grid.getByRole('group', { name: 'Maral' }))
+    // its own time is free for it: a quarter later is a target, the faded block lets the click through
+    await expect(maral.getByRole('button', { name: 'Maral, 10:15 — move here' })).toBeVisible()
+    await userEvent.click(maral.getByRole('button', { name: 'Maral, 14:30 — move here' }))
+    const d = within(await page.findByRole('dialog', { name: '10:00 → 14:30 · Maral' }))
+    await waitFor(() => expect(d.getByText('Jemal B. · Pedicure')).toBeVisible())
+    await expect(d.getByRole('checkbox', { name: 'Notify the client' })).toBeChecked()
+    await expect(within(canvas.getByRole('region', { name: /^Calendar, / })).getByTestId('move-ghost')).toHaveTextContent(
+      '14:30–15:30Jemal B.',
+    )
+    await userEvent.click(d.getByRole('button', { name: 'Confirm' }))
+    await page.findByText('Booking moved: 10:00 → 14:30 · the client is notified')
+    await waitFor(() => expect(canvas.queryByRole('status')).toBeNull())
+    await expect(await maral.findByRole('button', { name: /^14:30 Jemal B\./ })).toBeVisible()
+    await expect(maral.getByRole('button', { name: 'Maral, 11:00 — new booking or block time' })).toBeVisible()
+  },
+}
+
+/** Another column hands it to that specialist; the box off, the client isn't told and the toast doesn't say so. */
+export const MoveToAnotherSpecialist: Story = {
+  play: async ({ canvas }) => {
+    const grid = await startMove(canvas)
+    await userEvent.click(within(grid.getByRole('group', { name: 'Aýna' })).getByRole('button', { name: 'Aýna, 16:00 — move here' }))
+    const d = within(await page.findByRole('dialog', { name: '10:00 → 16:00 · Aýna' }))
+    await userEvent.click(d.getByRole('checkbox', { name: 'Notify the client' }))
+    await userEvent.click(d.getByRole('button', { name: 'Confirm' }))
+    await page.findByText('Booking moved: 10:00 → 16:00')
+    await expect(await within(grid.getByRole('group', { name: 'Aýna' })).findByRole('button', { name: /^16:00 Jemal B\./ })).toBeVisible()
+  },
+}
+
+/** Another day is one of the toolbar's buttons away, and then the popover and the toast name both days. */
+export const MoveToAnotherDay: Story = {
+  args: { server: fakeApi('owner', { open: true }) },
+  play: async ({ canvas }) => {
+    await startMove(canvas)
+    await userEvent.click(canvas.getByRole('button', { name: 'Previous day' }))
+    await expect(canvas.getByRole('status')).toHaveTextContent('Jemal B.')
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    await userEvent.click(
+      await within(grid.getByRole('group', { name: 'Maral' })).findByRole('button', { name: 'Maral, 19:00 — move here' }),
+    )
+    await page.findByRole('dialog', { name: /^.+ · 10:00 → .+ · 19:00 · Maral$/ })
+  },
+}
+
+/** Refused (book B-26): the reason in a toast, the ghost gone, the grid still in move mode for another slot. */
+export const MoveNotHisService: Story = {
+  args: { server: fakeApi('owner', { refuseMove: { problem: 'staff_cannot_do', staffId: id(3) } }) },
+  play: async ({ canvas }) => {
+    const grid = await startMove(canvas)
+    await userEvent.click(within(grid.getByRole('group', { name: 'Jeren' })).getByRole('button', { name: 'Jeren, 12:00 — move here' }))
+    await userEvent.click(
+      within(await page.findByRole('dialog', { name: '10:00 → 12:00 · Jeren' })).getByRole('button', { name: 'Confirm' }),
+    )
+    await page.findByText('Jeren doesn’t do this service — pick a specialist who does')
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await expect(canvas.getByRole('status')).toBeVisible()
+    await expect(grid.queryByTestId('move-ghost')).toBeNull()
+  },
+}
+
+export const MoveDoesntFitHere: Story = {
+  args: { server: fakeApi('owner', { refuseMove: { problem: 'buffer', staffId: id(2) } }) },
+  play: async ({ canvas }) => {
+    const grid = await startMove(canvas)
+    await userEvent.click(within(grid.getByRole('group', { name: 'Maral' })).getByRole('button', { name: 'Maral, 14:30 — move here' }))
+    await userEvent.click(
+      within(await page.findByRole('dialog', { name: '10:00 → 14:30 · Maral' })).getByRole('button', { name: 'Confirm' }),
+    )
+    await page.findByText('Doesn’t fit here — it needs 60 min plus the buffer')
+  },
+}
+
+export const MoveBusyElsewhere: Story = {
+  args: { server: fakeApi('owner', { refuseMove: { problem: 'elsewhere', staffId: id(2), busy: { start: 900, end: 960 } } }) },
+  play: async ({ canvas }) => {
+    const grid = await startMove(canvas)
+    await userEvent.click(within(grid.getByRole('group', { name: 'Maral' })).getByRole('button', { name: 'Maral, 14:30 — move here' }))
+    await userEvent.click(
+      within(await page.findByRole('dialog', { name: '10:00 → 14:30 · Maral' })).getByRole('button', { name: 'Confirm' }),
+    )
+    await page.findByText('Maral is busy elsewhere 15:00–16:00. Pick another time.')
+  },
+}
+
+/** Back, Esc and a click on another slot, one step each: the popover goes first, then move mode. */
+export const MoveBackAndEsc: Story = {
+  play: async ({ canvas }) => {
+    const grid = await startMove(canvas)
+    const maral = within(grid.getByRole('group', { name: 'Maral' }))
+    await userEvent.click(maral.getByRole('button', { name: 'Maral, 14:30 — move here' }))
+    await userEvent.click(within(await page.findByRole('dialog', { name: '10:00 → 14:30 · Maral' })).getByRole('button', { name: 'Back' }))
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await expect(canvas.getByRole('status')).toBeVisible()
+    // a click on another slot, the popover open, picks that one
+    await userEvent.click(maral.getByRole('button', { name: 'Maral, 14:30 — move here' }))
+    await page.findByRole('dialog', { name: '10:00 → 14:30 · Maral' })
+    await userEvent.click(maral.getByRole('button', { name: 'Maral, 16:00 — move here' }))
+    await page.findByRole('dialog', { name: '10:00 → 16:00 · Maral' })
+    await expect(grid.getByTestId('move-ghost')).toHaveTextContent('16:00–17:00Jemal B.')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await expect(canvas.getByRole('status')).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(canvas.queryByRole('status')).toBeNull())
+    await expect(maral.getByRole('button', { name: /^Maral, 14:30 — new booking or block time/ })).toBeVisible()
+  },
+}
+
+/** Another booking clicked leaves move mode and opens it, as in the board. */
+export const MoveLeftForABooking: Story = {
+  args: { server: fakeApi('owner') },
+  play: async ({ canvas }) => {
+    await startMove(canvas)
+    await userEvent.click(canvas.getByRole('button', { name: 'Today' }))
+    await userEvent.click(await canvas.findByRole('button', { name: /Gözel A\./ }))
+    await expect(await page.findByRole('dialog', { name: 'Booking' })).toBeVisible()
+    await expect(canvas.queryByRole('status')).toBeNull()
+  },
+}
+
+/** On a phone the confirm is a sheet, and the chips change the person. */
+export const MoveSheet: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
+    await userEvent.click(within(canvas.getByRole('radiogroup', { name: 'Specialist' })).getByRole('radio', { name: 'Maral' }))
+    await userEvent.click(await canvas.findByRole('button', { name: /^10:00 Jemal B\./ }))
+    await userEvent.click(
+      await within(await page.findByRole('dialog', { name: 'Booking' })).findByRole('button', { name: 'Move to another time' }),
+    )
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await expect(await canvas.findByRole('status')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Maral, 15:15 — move here' }))
+    const sheet = within(await page.findByRole('dialog', { name: '10:00 → 15:15 · Maral' }))
+    await userEvent.click(sheet.getByRole('button', { name: 'Confirm' }))
+    await page.findByText('Booking moved: 10:00 → 15:15 · the client is notified')
+  },
+}
+
+/** The words about a third longer (Russian): the bar wraps at 390 and keeps its way out on the same line. */
+export const MoveRussianLength: Story = {
+  globals: { viewport: { value: 'xs' }, text: 'longer' },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: /^Next day/ }))
+    await userEvent.click(within(canvas.getByRole('radiogroup')).getByRole('radio', { name: /Maral/ }))
+    await userEvent.click(await canvas.findByRole('button', { name: /Jemal B\./ }))
+    await userEvent.click(await within(await page.findByRole('dialog')).findByRole('button', { name: /Move to another time/ }))
+    const bar = await canvas.findByRole('status')
+    await expect(within(bar).getByRole('button', { name: /Back/ })).toBeVisible()
+    await expect(bar.scrollWidth).toBeLessThanOrEqual(bar.clientWidth)
   },
 }

@@ -44,6 +44,8 @@ type Shared = {
   selected?: boolean
   /** A move's two blocks, the booking and its asked time, ringed together while either is pointed at (`.lk`). */
   linked?: boolean
+  /** The booking on its way in move mode (`.src`): faded, and a click goes through to the slots under it. */
+  source?: boolean
   /** A request's time left to answer (TimerPill S). */
   timer?: ReactNode
   /** The same as words, for the block's name: «18 min left to answer». */
@@ -71,6 +73,7 @@ function Frame({
   half,
   selected,
   linked,
+  source,
   timer,
   onOpen,
   onLink,
@@ -97,6 +100,7 @@ function Frame({
     <button
       type="button"
       aria-pressed={selected || undefined}
+      tabIndex={source ? -1 : undefined}
       onClick={onOpen}
       {...link}
       style={{ ...style, paddingRight: 8 + icons.count * 18 + (timer ? 60 : 0) }}
@@ -108,6 +112,7 @@ function Frame({
         half === 'left' && 'right-[calc(50%+2px)]',
         linked && 'z-5 shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-n-500)]',
         selected && 'z-5 shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-n-900)]',
+        source && 'pointer-events-none opacity-40',
       )}
     >
       <span className="flex min-w-0 items-center gap-1.25 overflow-hidden whitespace-nowrap">

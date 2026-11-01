@@ -999,6 +999,7 @@ flowchart TD
 - Only confirmed bookings that haven't started can be moved (B-Calendar).
 - A booking with an open move request can't be dragged (B-21).
 - Bookings move one at a time; there is no bulk move on MVP (Q-209, decided 18.10.2026; B-31).
+- Built without dragging for now (chapter 9, 01.11.2026): *Move to another time*, then a click on the new slot. The api refuses at Confirm with the reasons above, and the grid stays in move mode for another slot.
 - Table bookings move between tables (B-62); classes move as a whole session (B-69).
 
 **Status** — Design: drawn (B-Calendar · `panel=move`) · Code: api built (`POST /v1/w/{slug}/bookings/{code}/move`, 20.10.2026): a confirmed booking before its start, to a new time and another specialist's column; a refusal is `cannot_move` with the reason the toast names (`staff_cannot_do`, `staff_off`, `outside_hours`, `elsewhere` with the busy time, `overlap`, `buffer`); a booking with the client's move waiting is `move_waiting`; the SMS unless the team unticks it.

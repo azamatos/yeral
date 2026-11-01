@@ -4,7 +4,6 @@ import type { InternalStatus } from '@yeral/contract/settings'
 import { TEAM_NOTE_MAX } from '@yeral/domain/clients'
 import { isOnlineSource } from '@yeral/domain/model'
 import type { Level } from '@yeral/domain/permissions'
-import { localOf } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
@@ -21,7 +20,7 @@ import { toast } from '@yeral/ui/toast'
 import { Globe, Phone, User, X } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BOOKING_STATUS_ICON, useInternalStatusName, useJoin } from '@/entities/booking'
+import { BOOKING_STATUS_ICON, canMoveBooking, useInternalStatusName, useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { canCancelBooking, canRemoveReport, reportKinds } from '../model/report-rules'
@@ -323,9 +322,7 @@ function Footer({
   const fmt = useFmt()
   const join = useJoin()
   const [cancelling, setCancelling] = useState(false)
-  const at = localOf(now)
-  const ahead = b.date > at.date || (b.date === at.date && b.start >= at.min)
-  const canMove = b.status === 'confirmed' && ahead && !b.move
+  const canMove = canMoveBooking(b, now)
   const kinds = reportKinds(b, now)
   const canCancel = canCancelBooking(b, now)
   if (!((canMove && onMove) || kinds.length || canCancel)) return null

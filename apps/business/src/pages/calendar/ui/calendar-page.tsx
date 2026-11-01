@@ -16,7 +16,9 @@ import { Spinner } from '@yeral/ui/spinner'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { useJoin } from '@/entities/booking'
 import { BlockTimeModal, type BlockSlot } from '@/features/block-time'
+import { MoveBar, MoveConfirm, useMoveBooking } from '@/features/move-booking'
 import { useSdk } from '@/shared/api'
 import { useDatePickerWords } from '@/shared/i18n'
 import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
@@ -40,6 +42,8 @@ export function CalendarPage() {
 function Calendar({ slug, level }: { slug: string; level: Level }) {
   const specialist = level === 'specialist'
   const t = useTranslations('calendar')
+  const moveWords = useTranslations('moveBooking')
+  const join = useJoin()
   const sections = useTranslations('shell.sections')
   const fmt = useFmt()
   const locale = useLocale()
@@ -98,6 +102,8 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
   const requests = (summary?.requests ?? 0) + moves
   const first = queue[0]
   const columns = view.data?.columns ?? []
+  const leaveMove = () => go({ move: undefined }, true)
+  const moving = useMoveBooking({ slug, code: search.move, date: shown, now, people: columns, onLeave: leaveMove })
   // the person a phone shows: the address's, else the first
   const phoneStaff = columns.find((c) => c.staffId === search.staff)?.staffId ?? columns[0]?.staffId
   const bold = (chunks: ReactNode) => <b className="font-semibold text-n-900 tabular-nums">{chunks}</b>
@@ -215,6 +221,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           />
         )}
       </div>
+      {moving.booking && <MoveBar booking={moving.booking} onBack={leaveMove} />}
       {view.data ? (
         <DayGrid
           view={view.data}
@@ -225,10 +232,11 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           phoneStaff={phoneStaff}
           busy={view.isPlaceholderData}
           specialist={specialist}
+          moving={moving.booking ? { booking: moving.booking, target: moving.target, onPick: moving.pick } : undefined}
           onOpen={(pick) =>
             'request' in pick
               ? openRequest({ code: pick.request })
-              : go({ booking: search.booking === pick.booking ? undefined : pick.booking, request: undefined }, true)
+              : go({ booking: search.booking === pick.booking ? undefined : pick.booking, request: undefined, move: undefined }, true)
           }
           onBlock={setBlocking}
         />
@@ -236,6 +244,24 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
         <div className="flex flex-1 items-center justify-center py-20">
           <Spinner label={t('loading')} />
         </div>
+      )}
+      {moving.booking && moving.target && moving.summary && (
+        <MoveConfirm
+          anchor={moving.target.anchor}
+          what={moveWords('what', {
+            client: moving.booking.client.name ?? moveWords('unnamed'),
+            services: join(
+              moving.booking.items.map((i) => i.service),
+              'plus',
+            ),
+          })}
+          title={moveWords('title', moving.summary)}
+          notify={moving.notify}
+          pending={moving.pending}
+          onNotify={moving.setNotify}
+          onBack={moving.back}
+          onConfirm={moving.confirm}
+        />
       )}
       {/* «Block time» from a free slot (book B-18); the booking in its way opens in the drawer */}
       {blocking && view.data && (
@@ -286,6 +312,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           now={now}
           level={level}
           placeholder={view.data?.bookings.find((b) => b.code === search.booking)}
+          onMove={(b) => go({ move: b.code, booking: undefined }, true)}
           onClose={() => go({ booking: undefined }, true)}
         />
       )}
