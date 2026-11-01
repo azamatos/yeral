@@ -43,12 +43,14 @@ function RowMenu({
   onOpen,
   onMove,
   onBookAgain,
+  onOpenClient,
 }: {
   row: Row
   now: number
   onOpen: (r: Row) => void
   onMove: (r: Row) => void
   onBookAgain: (r: Row) => void
+  onOpenClient: (r: Row) => void
 }) {
   const t = useTranslations('bookings.menu')
   const words = useRowWords()
@@ -66,6 +68,7 @@ function RowMenu({
         {(r.status === 'cancelled' || r.status === 'noshow') && r.client.id && (
           <MenuItem onSelect={() => onBookAgain(r)}>{t('bookAgain')}</MenuItem>
         )}
+        {r.client.id && <MenuItem onSelect={() => onOpenClient(r)}>{t('openClient')}</MenuItem>}
       </MenuContent>
     </Menu>
   )
@@ -84,6 +87,7 @@ export function BookingsTable({
   onOpen,
   onMove,
   onBookAgain,
+  onOpenClient,
 }: {
   rows: readonly Row[]
   now: number
@@ -92,6 +96,7 @@ export function BookingsTable({
   onOpen: (r: Row) => void
   onMove: (r: Row) => void
   onBookAgain: (r: Row) => void
+  onOpenClient: (r: Row) => void
 }) {
   const t = useTranslations('bookings')
   const s = useTranslations('status')
@@ -163,7 +168,7 @@ export function BookingsTable({
             {who(r) && <CellNote>{who(r)}</CellNote>}
           </TableCell>
           <TableCell>
-            <RowMenu row={r} now={now} onOpen={onOpen} onMove={onMove} onBookAgain={onBookAgain} />
+            <RowMenu row={r} now={now} onOpen={onOpen} onMove={onMove} onBookAgain={onBookAgain} onOpenClient={onOpenClient} />
           </TableCell>
         </TableRow>
       ))}

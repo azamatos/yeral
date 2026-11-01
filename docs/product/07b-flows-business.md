@@ -1272,7 +1272,7 @@ flowchart TD
 - Alert notes show in the request drawer, booking drawer, new-booking client card, and as an icon on the calendar block (§4).
 - The client never sees notes or complaints.
 
-**Status** — Design: drawn (B-Client · `edit`, `composer`) · Code: api built (`GET /v1/w/{slug}/clients/{id}` the card, `PATCH` its edit and switches, `POST …/notes` a note; 21.10.2026).
+**Status** — Design: drawn (B-Client · `edit`, `composer`) · Code: built (`pages/client`, 01.11.2026); api built (`GET /v1/w/{slug}/clients/{id}` the card, `PATCH` its edit and switches, `POST …/notes` a note; 21.10.2026).
 
 ### B-35 · Phone-only clients after no-shows
 
@@ -1305,7 +1305,7 @@ flowchart TD
 
 > Open question Q-127: what counts as a no-show and how the limit ends.
 
-**Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: built (api `modules/clients/online.ts`; the card's switch `PATCH /v1/w/{slug}/clients/{id}` with `phoneOnly`, 21.10.2026).
+**Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: built (the card `pages/client`, 01.11.2026; api `modules/clients/online.ts`; the card's switch `PATCH /v1/w/{slug}/clients/{id}` with `phoneOnly`, 21.10.2026).
 
 ### B-36 · Delete a client
 
@@ -1334,7 +1334,7 @@ flowchart LR
 
 > Open question Q-208: deleting a client with upcoming bookings.
 
-**Status** — Design: drawn (B-Client · delete modal) · Code: api built (`DELETE /v1/w/{slug}/clients/{id}`: `client_has_bookings` lists the bookings ahead and requests; 21.10.2026).
+**Status** — Design: drawn (B-Client · delete modal) · Code: built (`pages/client`, 01.11.2026); api built (`DELETE /v1/w/{slug}/clients/{id}`: `client_has_bookings` lists the bookings ahead and requests; 21.10.2026).
 
 ## 6. Business settings
 

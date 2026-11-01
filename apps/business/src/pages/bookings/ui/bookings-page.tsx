@@ -190,6 +190,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
             onOpen={onOpen}
             onMove={onMove}
             onBookAgain={onBookAgain}
+            onOpenClient={(r) => r.client.id && void navigate({ to: '/w/$slug/clients/$id', params: { slug, id: r.client.id } })}
           />
           {list.hasNextPage && (
             <Button variant="secondary" className="self-center" loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>

@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { nationalDigits, toE164 } from '@yeral/domain/phone'
 import { CLIENT_SOURCES, type ClientSource } from '@yeral/domain/model'
 import { PHONE_RULES } from '@yeral/features/auth-by-phone'
@@ -71,7 +72,20 @@ export function AddClientModal({
     <Modal open onOpenChange={(open) => !open && onClose()}>
       <ModalContent size={480} aria-describedby={undefined} className="gap-4">
         <ModalHeader title={t('heading')} closeLabel={t('close')} />
-        <Field label={t('phone')} error={taken ? t('taken', { name: taken.name ?? t('unnamed') }) : undefined}>
+        <Field
+          label={t('phone')}
+          error={
+            taken ? (
+              <>
+                {t('taken', { name: taken.name ?? t('unnamed') })}
+                {t('takenJoin')}
+                <Link to="/w/$slug/clients/$id" params={{ slug, id: taken.id }}>
+                  {t('openCard')}
+                </Link>
+              </>
+            ) : undefined
+          }
+        >
           <PhoneInput {...PHONE_RULES} size={44} value={digits} onValueChange={setDigits} />
         </Field>
         <Field label={t('name')}>

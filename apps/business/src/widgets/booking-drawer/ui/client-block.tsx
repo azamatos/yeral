@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import type { CalendarBooking } from '@yeral/contract/calendar'
 import type { ClientCard } from '@yeral/contract/clients'
 import { useFmt } from '@yeral/i18n'
@@ -6,7 +7,7 @@ import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
 import { Pill } from '@yeral/ui/pill'
-import { Phone, TriangleAlert } from 'lucide-react'
+import { ChevronRight, Phone, TriangleAlert } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
@@ -23,10 +24,12 @@ const hidden = (chunks: ReactNode) => <span className="sr-only">{chunks}</span>
  * the card. The card comes from the page's cache (`sdk.clients.card`), so a booking opens before it's read.
  */
 export function ClientBlock({
+  slug,
   client,
   card,
   onBookAgain,
 }: {
+  slug: string
   client: CalendarBooking['client']
   card: ClientCard | undefined
   onBookAgain?: () => void
@@ -70,8 +73,16 @@ export function ClientBlock({
           </span>
         </span>
       </div>
-      {/* «Open the client's card →» (book B-34, `/w/{slug}/clients/{id}`) joins with the card's route (slice 4's B11): a
-          router `Link`, so an unsent note still goes */}
+      {client.id && (
+        <Link
+          to="/w/$slug/clients/$id"
+          params={{ slug, id: client.id }}
+          className="inline-flex items-center gap-1 self-start pl-13 text-small font-semibold text-a-600 no-underline hover:underline focus-visible:shadow-focus focus-visible:outline-none"
+        >
+          {t('openCard')}
+          <ChevronRight aria-hidden className="size-4" />
+        </Link>
+      )}
     </div>
   )
 }

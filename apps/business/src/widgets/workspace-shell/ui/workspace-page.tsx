@@ -20,6 +20,7 @@ export function WorkspacePage({
   title,
   tabTitle,
   focusKey,
+  back,
   actions,
   switcherOnPhone = false,
   flush = false,
@@ -28,6 +29,7 @@ export function WorkspacePage({
   title: string
   tabTitle?: string[]
   focusKey?: string
+  back?: ReactNode
   actions?: ReactNode
   switcherOnPhone?: boolean
   flush?: boolean
@@ -41,6 +43,7 @@ export function WorkspacePage({
     <>
       <AppTopBar
         title={title}
+        back={back}
         actions={actions}
         focusKey={focusKey ?? pathname}
         leading={switcherOnPhone ? <ShellSwitcher variant="strip" /> : undefined}
