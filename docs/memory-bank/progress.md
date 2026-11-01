@@ -499,6 +499,8 @@
   search, the full-screen map with real tiles, a category page, a time chip opening the booking at that time. The side-by-side
   layout at desktop width was seen only in Storybook (the test window wouldn't widen). Stories caught `ComboboxInput` dropping a
   `ref`; screenshots caught «from from 40 TMT» and a stray icon. 7d stood at 16 % at the end, 13 % of it this run's.
+- **2026-11-01 · Slice 6 planned, the open questions answered:** `log/2026-11-01-slice-6-plan.md`. The owner, shown everything waiting on
+  them: "go for all with recommended and continue in accordance with plan" (chapter 9's four rows of that day).
 
 ## Roadmap
 

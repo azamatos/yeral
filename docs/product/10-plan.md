@@ -132,7 +132,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    lists and search until tables and classes ship. It doesn't wait for the design: the seed's example businesses already
    have English texts; the demo workspace follows the business boards' demo (`docs/design/business/demo-data.json`
    and the v0.6 boards), while `docs/design/demo-data.json` stays the v0.5 client data in Turkmen.
-7. **Before the first launch:** releases back (paused 21.10.2026, ADR 0009) and deploys from GitHub over SSH after the owner approves a release (ADR 0020), sitemap data
+7. **Around the first launch:** releases back (paused 21.10.2026, ADR 0009) and deploys from GitHub over SSH after the owner approves a release (ADR 0020; after the first launch, owner 01.11.2026), sitemap data
    (F-197; done 21.10.2026). Backups to Cloudflare R2 with a restore drill (F-211) and error tracking with uptime alerts (F-209; it alerts on the
    `job gave up` line) aren't for the first launch, a demo: they come with the real working MVP, before any real business's data (P6; owner,
    22.10.2026). Before SMS go out: a daily cap and a rate limit per business on the SMS its team's bookings and cancels (done 21.10.2026)
@@ -163,24 +163,24 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 | Slice | What works at the end |
 |---|---|
 | 1 · Accounts | sign in with the code on screen, profile, the workspace switcher, invites (built 21.10.2026: the business app, its login, shell and My account, #99, #102, #107, #113, #115, #119, #121; the client site, its login and profile, #108, #110, #111, #114, #118) |
-| 2 · Business setup | the wizard, profile, services, hours, team, booking rules, link and QR |
-| 3 · Booking loop | business page, appointment booking, answering in the calendar, my bookings with the "How was it?" card (F-243), cancel, move, undo, declines with offered times, expiries |
-| 4 · Daily work | calendar views, bookings list, clients, walk-ins, complaints, internal statuses, *Başga ýerde*, browser notifications, the installable business app |
-| 5 · Discovery | home (with the "How was it?" card, F-243), search, map, categories, the city choice, search-engine pages |
+| 2 · Business setup | the wizard, profile, services, hours, team, booking rules, link and QR (done) |
+| 3 · Booking loop | business page, appointment booking, answering in the calendar, my bookings with the "How was it?" card (F-243), cancel, move, undo, declines with offered times, expiries (done) |
+| 4 · Daily work | calendar views, bookings list, clients, walk-ins, complaints, internal statuses, *Başga ýerde*, browser notifications, the installable business app (done and live 01.11.2026) |
+| 5 · Discovery | home (with the "How was it?" card, F-243), search, map, categories, the city choice, search-engine pages (done and live 01.11.2026) |
 | 6 · Admin tool | cms.yeral.app with the Ýeral team's own accounts and a second factor (F-178): verification, reported reviews, hiding businesses, adding a business for its owner |
 | 7 · First-launch mode | example businesses, "Try the business app", privacy policy and terms in English (Q-033) |
 
 ### P5 · First launch
 
-The client site, the business app, the admin tool and the api go to production on the owner's server (a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB)) in Docker, with Cloudflare for DNS (ADR 0007, ADR 0023), from a release the owner approves
-(ADR 0020). The server, its shared HTTPS front door and the api's stack are set up (19.10.2026, `infra/server`);
-deploys from GitHub come with P2 step 7; no backups or error tracking for this demo (owner, 22.10.2026). The owner
+The client site, the business app, the admin tool and the api go to production on the owner's server (a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB)) in Docker, with Cloudflare for DNS (ADR 0007, ADR 0023), by hand (owner, 01.11.2026: releases and deploys from GitHub come after it). The server, its shared HTTPS front door and the api's stack are set up (19.10.2026, `infra/server`);
+no backups or error tracking for this demo (owner, 22.10.2026). The owner
 approved the launch in advance (22.10.2026): it goes out once P4's slices are built and checked locally, and Claude
 deploys. DNS (`infra/server/README.md`, "DNS records"): `yeral.app`, `www`, `api`, `business` and `cms` point at the
 server from 22.10.2026. The old site is retired (owner, 22.10.2026; its code left the repo on 23.10.2026): since
 23.10.2026 the apex shows a coming-soon page from the server and the api answers at `api.yeral.app`, until the new
 client site takes the apex over, with no DNS change then. No real businesses yet: it's a demo with the example businesses and the demo workspace, and nothing is
-verified while the sign-in code shows on the screen (Q-036, owner 21.10.2026).
+verified while the sign-in code shows on the screen (Q-036, owner 21.10.2026). The site stays out of search engines until real
+businesses join (owner, 01.11.2026).
 
 ### P6 · Turkmenistan launch
 

@@ -62,7 +62,7 @@ business.yeral.app {
 }
 
 # the client site (since 25.10.2026, the owner: replacing the coming-soon page so slice 3's booking can be tried live):
-# its image renders the pages (client.Dockerfile). Kept out of search engines until the first launch opens. Its
+# its image renders the pages (client.Dockerfile). Kept out of search engines until real businesses join. Its
 # Content-Security-Policy comes from the app itself (apps/client/src/app/entrypoint/csp.ts): every page gets a nonce
 # for the scripts TanStack Start writes inline, which no fixed header here could name.
 yeral.app {

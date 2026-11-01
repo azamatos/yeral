@@ -1,7 +1,7 @@
 # Operations: environments, hosting, Docker, CI/CD, versioning, parallel work
 
 Status 2026-10-25: production = the owner's server (`yeral-vps`): the api, its jobs and Postgres, the client site and
-the business app, and Caddy serving `api.yeral.app`, `yeral.app` (the client site, noindex until the first launch;
+the business app, and Caddy serving `api.yeral.app`, `yeral.app` (the client site, noindex until real businesses join;
 `www` redirects to it) and `business.yeral.app`; the old Next.js site (`apps/legacy`, the
 Worker `yeral-web`) was retired on 2026-10-22/23. Storybook is the only Cloudflare deploy left (`deploy.yml`, on every
 push to `main`). Releases are paused until the MVP works (ADR 0009, amended 2026-10-21: `release.yml` and Changesets
@@ -14,7 +14,7 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 |---|---|---|---|
 | local | `localhost:3001–3005` (`PORT_BASE` + offset; +0 is free) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through Caddy | Postgres container | `pnpm docker:up` |
-| production | the owner's server `yeral-vps`: `api.yeral.app` since 2026-10-22, `business.yeral.app` and the client site on `yeral.app` (noindex until the launch; `www` redirects) since 2026-10-25, `cms.` with its app; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
+| production | the owner's server `yeral-vps`: `api.yeral.app` since 2026-10-22, `business.yeral.app` and the client site on `yeral.app` (noindex until real businesses join; `www` redirects) since 2026-10-25, `cms.` with its app; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
 green CI; production is deployed by hand, when the owner asks, while releases are paused. A risky migration is rehearsed on a production dump restored into
