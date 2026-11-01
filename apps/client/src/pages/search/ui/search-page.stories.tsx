@@ -5,6 +5,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BusinessCard, Category } from '@yeral/contract/catalog'
 import { addDays, today } from '@yeral/domain/time'
+import { MapTiles } from '@yeral/ui/map-frame'
 import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
 import { SearchPage } from './search-page'
@@ -29,7 +30,12 @@ const card = (slug: string, name: string, patch: Partial<BusinessCard> = {}): Bu
   availability: { type: 'appointment', date: DAY, starts: [660, 690, 720, 750], more: 3 },
   ...patch,
 })
-const CARDS = [card('barber-loft', 'Barber Loft', { example: true }), card('glow-studio', 'Glow Studio', { rating: null, reviewsCount: 0 })]
+const CARDS = [
+  card('barber-loft', 'Barber Loft', { example: true }),
+  card('glow-studio', 'Glow Studio', { rating: null, reviewsCount: 0, geo: { lat: 37.953, lng: 58.385, approximate: false } }),
+]
+const CITIES = { items: [{ id: 'ashgabat', name: 'Ashgabat', lat: 37.95, lng: 58.39 }], main: 'ashgabat', nearest: null }
+const ONE_COLOUR = `data:application/json,${encodeURIComponent(JSON.stringify({ version: 8, sources: {}, layers: [] }))}`
 const barber = {
   id: 'barber',
   icon: 'scissors',
@@ -55,6 +61,7 @@ const fakeApi =
     const signIn = authApi()()
     const mine = fakeFetch(({ route, query }) => {
       if (route === 'GET /categories') return json({ items: CATEGORIES })
+      if (route === 'GET /cities') return json(CITIES)
       if (route === 'GET /search') {
         last = query
         const at = Number(query.get('cursor') ?? 0)
@@ -72,7 +79,7 @@ const fakeApi =
     })
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const path = new URL(new Request(input, init).url).pathname
-      return /\/(categories|search)$/.test(path) ? mine(input, init) : signIn(input, init)
+      return /\/(categories|cities|search)$/.test(path) ? mine(input, init) : signIn(input, init)
     }
   }
 
@@ -80,9 +87,15 @@ const meta = {
   title: 'Client/Pages/Search',
   component: PageStory,
   parameters: { layout: 'fullscreen' },
+  globals: { viewport: { value: 'xl' } },
   args: {
     routes: {
       '/$lang/search': () => <SearchPage />,
+      '/$lang/area': () => (
+        <MapTiles style={ONE_COLOUR}>
+          <SearchPage />
+        </MapTiles>
+      ),
       '/$lang/c/$category': () => <SearchPage category={barber} />,
       '/$lang/b/$slug': () => <p>A business</p>,
       '/$lang/b/$slug/book': () => <p>The booking</p>,
@@ -178,6 +191,49 @@ export const ShowMore: Story = {
     await expect(await canvas.findByRole('link', { name: 'Glow Studio' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Barber Loft' })).toBeVisible()
     await waitFor(() => expect(canvas.queryByRole('button', { name: 'Show more' })).toBeNull())
+  },
+}
+
+/** The map beside the list: a row lights its pin, a pin lights its row. */
+export const MapBesideTheList: Story = {
+  play: async ({ canvas }) => {
+    const pin = await canvas.findByRole('button', { name: 'Barber Loft, 11:00' })
+    await expect(pin).toHaveTextContent('11:00')
+    const row = canvas.getByRole('link', { name: 'Glow Studio' }).closest<HTMLElement>('[id^=row-]')!
+    await userEvent.hover(row)
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Glow Studio, 11:00' }).className).toContain('bg-n-900'))
+    await userEvent.unhover(row)
+    await userEvent.click(pin)
+    await waitFor(() => expect(canvas.getByRole('link', { name: 'Barber Loft' }).closest('[id^=row-]')!.className).toContain('bg-a-50'))
+  },
+}
+
+/** The person moves the map: «Search this area» asks for what it shows, and goes until the next move. */
+export const SearchThisArea: Story = {
+  args: { path: '/en/area' },
+  play: async ({ canvas, canvasElement }) => {
+    await canvas.findByRole('link', { name: 'Barber Loft' })
+    await waitFor(() => expect(canvasElement.querySelector('canvas')).not.toBeNull())
+    await expect(canvas.queryByRole('button', { name: 'Search this area' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Zoom in' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Search this area' }))
+    await waitFor(() => expect(last.get('bbox')).toMatch(/^[\d.]+,[\d.]+,[\d.]+,[\d.]+$/))
+    await expect(canvas.queryByRole('button', { name: 'Search this area' })).toBeNull()
+  },
+}
+
+/** Under 1024 the list comes first: Map opens over it with the places as cards, and List goes back. */
+export const PhoneMap: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('link', { name: 'Barber Loft' })
+    await expect(canvas.queryByRole('button', { name: 'Barber Loft, 11:00' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Map' }))
+    const map = within(await canvas.findByRole('dialog', { name: 'Map' }))
+    await expect(await map.findByRole('button', { name: 'Glow Studio, 11:00' })).toBeVisible()
+    await expect(map.getByRole('link', { name: 'Glow Studio' })).toBeInTheDocument()
+    await userEvent.click(map.getByRole('button', { name: 'List' }))
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull())
   },
 }
 

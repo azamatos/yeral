@@ -10,7 +10,10 @@ export const Route = createFileRoute('/$lang/_site/c/$category')({
   loaderDeps: ({ search }) => search,
   loader: async ({ context, params, deps }) => {
     const lang = siteLocale(params.lang)
-    const { items } = await context.queryClient.ensureQueryData(context.sdk.catalog.categories(lang))
+    const [{ items }] = await Promise.all([
+      context.queryClient.ensureQueryData(context.sdk.catalog.categories(lang)),
+      context.queryClient.prefetchQuery(context.sdk.catalog.cities(lang)),
+    ])
     const category = items.find((c) => c.id === params.category)
     if (!category) notFound({ throw: true })
     await context.queryClient.prefetchInfiniteQuery({

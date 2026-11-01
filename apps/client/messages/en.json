@@ -179,6 +179,14 @@
     "tryTomorrow": "Try tomorrow",
     "clearFilters": "Clear filters",
     "showMore": "Show more",
+    "map": {
+      "title": "Map",
+      "list": "List",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "pin": "{name}, {time}",
+      "here": "Search this area"
+    },
     "filters": {
       "title": "Filters",
       "close": "Close",
