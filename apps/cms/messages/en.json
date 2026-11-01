@@ -13,7 +13,8 @@
   "failed": {
     "title": "Something went wrong",
     "lead": "Try again. If it keeps happening, reload the page.",
-    "action": "Try again"
+    "action": "Try again",
+    "changed": "This has already changed. Look again."
   },
   "login": {
     "tabTitle": "Log in",
@@ -59,7 +60,6 @@
       "reviews": "Reported reviews",
       "team": "Team"
     },
-    "soon": "This section comes next.",
     "account": {
       "menu": "Your account",
       "trigger": "Open your account menu",
@@ -67,7 +67,8 @@
       "password": "Change password",
       "recovery": "New recovery codes",
       "logout": "Log out"
-    }
+    },
+    "waiting": "{count} waiting"
   },
   "account": {
     "cancel": "Cancel",
@@ -83,5 +84,214 @@
     "code": "Authenticator code",
     "make": "Make new codes",
     "recoveryDone": "Save these codes. They won't be shown again."
+  },
+  "businesses": {
+    "title": "Businesses",
+    "add": "Add a business",
+    "search": "Name, page address or phone",
+    "views": {
+      "label": "Which businesses",
+      "review": "In review",
+      "moved": "Moved",
+      "rejected": "Sent back",
+      "hidden": "Hidden",
+      "verified": "Live",
+      "closed": "Closed",
+      "setup": "Drafts",
+      "all": "All"
+    },
+    "columns": {
+      "business": "Business",
+      "category": "Category",
+      "city": "City",
+      "owner": "Owner",
+      "since": "Since",
+      "state": "State"
+    },
+    "state": {
+      "draft": "Draft",
+      "closed": "Closed",
+      "hidden": "Hidden",
+      "rejected": "Sent back",
+      "review": "In review",
+      "moved": "Moved",
+      "verified": "Live"
+    },
+    "noOwnerName": "No name yet",
+    "emptySearch": "Nothing matches this search.",
+    "empty": {
+      "review": "Nothing is waiting for review.",
+      "moved": "No business has moved.",
+      "rejected": "No business is sent back.",
+      "hidden": "No business is hidden.",
+      "verified": "No business is live yet.",
+      "closed": "No business is closed.",
+      "setup": "No drafts.",
+      "all": "No businesses yet."
+    }
+  },
+  "business": {
+    "title": "Business",
+    "back": "Businesses",
+    "category": "Category",
+    "address": "Address",
+    "floor": "Floor and room",
+    "entrance": "Entrance",
+    "phone": "Phone",
+    "owner": "Owner",
+    "page": "Page",
+    "menu": "Menu and team",
+    "counts": "{services, plural, one {# service} other {# services}} · {team, plural, one {# person} other {# people}}",
+    "about": "About ({lang})",
+    "nothing": "Not given",
+    "pictures": "Logo and photos",
+    "noPictures": "No logo or photos yet.",
+    "history": "What happened",
+    "noHistory": "Nothing yet.",
+    "status": {
+      "pending": "Sent for review",
+      "verified": "Verified",
+      "rejected": "Sent back"
+    },
+    "action": {
+      "business": {
+        "added": "Added by the team",
+        "verified": "Verified",
+        "rejected": "Sent back",
+        "unverified": "Taken off the site",
+        "hidden": "Hidden",
+        "shown": "Shown again",
+        "closed": "Closed",
+        "reopened": "Opened again",
+        "move_checked": "New address checked"
+      }
+    },
+    "noteRejected": "Sent back: {reason}",
+    "noteHidden": "Hidden: {reason}",
+    "noteClosed": "Closed: {reason}",
+    "noteMoved": "It moved on {when}. Check the new address.",
+    "draft": "Its owner is still setting it up, so there's nothing to decide yet.",
+    "noVerify": "Nothing is verified while the sign-in code shows on the screen.",
+    "verify": "Verify",
+    "verified": "{name} is verified",
+    "moveCheck": "The new address is right",
+    "moveChecked": "The new address of {name} is checked",
+    "reject": "Send back",
+    "rejected": "{name} is sent back",
+    "rejectTitle": "Send {name} back?",
+    "rejectLead": "Its owner reads your reason and can fix it and send it again.",
+    "rejectLiveLead": "It leaves the site. Its owner reads your reason and can fix it and send it again.",
+    "reasonHint": "Its owner reads this as you write it.",
+    "hide": "Hide",
+    "hidden": "{name} is hidden",
+    "hideTitle": "Hide {name}?",
+    "hideLead": "It leaves search and its page closes to visitors. Its owner reads your reason.",
+    "show": "Show again",
+    "shown": "{name} is shown again",
+    "close": "Close the workspace",
+    "closed": "{name} is closed. {cancelled, plural, =0 {No bookings were ahead.} one {# booking was cancelled.} other {# bookings were cancelled.}}",
+    "closeTitle": "Close {name}?",
+    "closeLead": "Only when its owner asks. Bookings ahead are cancelled with an SMS to each client, the page closes and the data stays.",
+    "reopen": "Open it again",
+    "reopened": "{name} is open again"
+  },
+  "addBusiness": {
+    "title": "Add a business",
+    "back": "Businesses",
+    "lead": "For an owner you've met. It's a draft on their phone: when they sign in, they carry on from the next step.",
+    "name": "Business name",
+    "category": "Category",
+    "pick": "Pick a category",
+    "ownerName": "Owner's name",
+    "ownerPhone": "Owner's mobile",
+    "ownerPhoneHint": "They sign in with this number.",
+    "badPhone": "Type a mobile number.",
+    "submit": "Add the business",
+    "added": "{name} is added"
+  },
+  "reason": {
+    "label": "Reason",
+    "cancel": "Cancel"
+  },
+  "reviews": {
+    "title": "Reported reviews",
+    "views": {
+      "label": "Which reviews",
+      "reported": "Waiting",
+      "cleared": "Kept",
+      "removed": "Removed"
+    },
+    "empty": {
+      "reported": "No review is waiting.",
+      "cleared": "No review was kept yet.",
+      "removed": "No review was removed yet."
+    },
+    "about": "About {what}",
+    "rating": "{rating} out of 5",
+    "reply": "The business replied: {reply}",
+    "reportedBy": "Reported on {when} by {by}",
+    "reportedByNobody": "Reported on {when}",
+    "reasons": {
+      "fake": "False, or the person didn't come",
+      "insulting": "Insulting",
+      "other_business": "About another business",
+      "spam": "Spam",
+      "other": "Other"
+    },
+    "tags": {
+      "on_time": "On time",
+      "clean": "Clean",
+      "skilled": "Skilled",
+      "friendly": "Friendly",
+      "good_value": "Good value"
+    },
+    "countsAgain": "Decide by {when}: after that it counts in the rating again.",
+    "countedAgain": "Past 48 hours: it counts in the rating again until you decide.",
+    "keep": "Keep it",
+    "kept": "Kept: it counts in the rating, and it can't be reported again",
+    "remove": "Remove",
+    "removed": "The review is removed",
+    "removeTitle": "Remove this review?",
+    "removeLead": "It leaves the page and every count. The business hears the result; the author isn't told.",
+    "reasonHint": "Kept with the review for the team.",
+    "removedBecause": "Removed on {when}: {reason}",
+    "clearedOn": "Kept on {when}"
+  },
+  "team": {
+    "title": "Team",
+    "invite": "Add a teammate",
+    "you": "You",
+    "columns": {
+      "person": "Person",
+      "status": "Status",
+      "lastSignIn": "Last sign-in",
+      "actions": "Actions"
+    },
+    "status": {
+      "invited": "Invited",
+      "active": "Active",
+      "disabled": "Turned off"
+    },
+    "never": "Never",
+    "linkUntil": "Setup link until {when}",
+    "reset": "New setup link",
+    "disable": "Turn off",
+    "resetTitle": "Start {name} again?",
+    "resetLead": "Their password, authenticator, recovery codes and sessions go, and they set up again from a new link.",
+    "disableTitle": "Turn off {name}?",
+    "disableLead": "They can't sign in and their sessions end. A new setup link brings them back.",
+    "cancel": "Cancel",
+    "close": "Close",
+    "turnedOff": "{name} is turned off",
+    "inviteTitle": "Add a teammate",
+    "login": "Login",
+    "loginHint": "3–32 characters: lowercase letters, digits, dots and dashes.",
+    "name": "Name",
+    "add": "Add",
+    "linkTitle": "Setup link",
+    "linkLead": "Hand this over in person or in a private message. It works for 24 hours and won't be shown again.",
+    "link": "The setup link",
+    "copy": "Copy",
+    "copied": "Copied"
   }
 }

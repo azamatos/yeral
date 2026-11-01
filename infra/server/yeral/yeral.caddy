@@ -1,6 +1,5 @@
 # Ýeral's sites on the shared Caddy. deploy.sh copies this file to /srv/edge/sites/ once the DNS records exist
-# (DNS only, not proxied), so Caddy can get the certificates. The cms host joins with its app; until then cms.
-# resolves here and gets a certificate error. The records: infra/server/README.md, "DNS records".
+# (DNS only, not proxied), so Caddy can get the certificates. The records: infra/server/README.md, "DNS records".
 # Only A records for now: Docker's edge network has no IPv6, so a visitor over IPv6 would reach Caddy as the Docker
 # gateway and every such visitor would share one rate-limit bucket (infra/server/README.md, "Still to do").
 # The hosts are written here because Caddy needs them; the apps read theirs from config (@yeral/lib/site).
@@ -59,6 +58,14 @@ business.yeral.app {
 	# MapLibre's worker is the bundled file under /assets/. The inventory: docs/memory-bank/log/2026-10-30-hsts-csp.md
 	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	reverse_proxy yeral-business:80
+}
+
+# the admin tool (slice 6): its image serves the files (static.Caddyfile, noindex); this door adds TLS and the headers.
+# The same policy as the business app's above: no inline script, the api's photos, the map's tiles
+cms.yeral.app {
+	import yeral_site
+	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.yeral.app; font-src 'self'; connect-src 'self' https://api.yeral.app https://tiles.openfreemap.org; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+	reverse_proxy yeral-cms:80
 }
 
 # the client site (since 25.10.2026, the owner: replacing the coming-soon page so slice 3's booking can be tried live):

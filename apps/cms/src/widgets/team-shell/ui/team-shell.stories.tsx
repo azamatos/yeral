@@ -16,6 +16,8 @@ const working = (): typeof fetch => {
     }
     if (path === '/v1/admin/me/recovery-codes') return Promise.resolve(json(200, { codes: ['abcd-efgh', 'ijkl-mnop'] }))
     if (path === '/v1/admin/me/password') return Promise.resolve(new Response(null, { status: 204 }))
+    if (path === '/v1/admin/businesses') return Promise.resolve(json(200, { items: [{ id: 'b1' }, { id: 'b2' }] }))
+    if (path === '/v1/admin/reviews') return Promise.resolve(json(200, { items: [] }))
     return Promise.resolve(signedIn ? json(200, ME) : json(401, { error: { code: 'unauthorized' } }))
   }
 }
@@ -48,6 +50,7 @@ const menu = async (canvas: Parameters<NonNullable<Story['play']>>[0]['canvas'])
 export const Default: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Businesses' })).toBeVisible()
+    await expect(await canvas.findByRole('link', { name: 'Businesses 2 waiting' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Reported reviews' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Team' })).toBeVisible()
   },

@@ -74,7 +74,7 @@ jobs:
 
   docker:
     name: Docker stack and end-to-end flows
-    # the own server's stack (ADR 0024): build the api, business and client images, start Postgres + api + business + client + Caddy,
+    # the own server's stack (ADR 0024): build the api, business, cms and client images, start Postgres + api + the apps + Caddy,
     # ask for health through Caddy, then run the Playwright flows (e2e/) against it on *.yeral.localhost
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -111,6 +111,9 @@ jobs:
           # the business app: its build stamp, and an app address answered with the app
           curl -fsS -H 'Host: business.yeral.localhost' http://localhost/version.json
           curl -fsS -H 'Host: business.yeral.localhost' http://localhost/login | grep -q 'id="root"'
+          # the admin tool, the same
+          curl -fsS -H 'Host: cms.yeral.localhost' http://localhost/version.json
+          curl -fsS -H 'Host: cms.yeral.localhost' http://localhost/login | grep -q 'id="root"'
           # the client site: its build stamp, `/` sent to a language, a page rendered on the server, an unknown address a 404
           curl -fsS -H 'Host: yeral.localhost' http://localhost/version.json
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: yeral.localhost' http://localhost/)" = 307
@@ -131,6 +134,7 @@ jobs:
           check api.yeral.localhost /v1/health "$hsts" "content-security-policy: default-src 'none'; frame-ancestors 'none'"
           check api.yeral.localhost /docs "$hsts" "content-security-policy: frame-ancestors 'none'"
           check business.yeral.localhost /login "$hsts" "content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+          check cms.yeral.localhost /login "$hsts" "content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
           # the client site's policy comes from the app: one nonce per page, on the header and on every script it writes
           page=$(curl -sS -D - -H 'Host: yeral.localhost' http://localhost/en)
           echo "$page" | grep -qiF "$hsts"

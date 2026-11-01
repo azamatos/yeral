@@ -70,6 +70,14 @@ http://business.yeral.localhost {
 	reverse_proxy business:80
 }
 
+# the admin tool: its image serves the files (static.Caddyfile); the same policy as the business app's, which it
+# shares its map and the api's photos with
+http://cms.yeral.localhost {
+	import yeral_site
+	header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://api.yeral.localhost; font-src 'self'; connect-src 'self' http://api.yeral.localhost https://tiles.openfreemap.org; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+	reverse_proxy cms:80
+}
+
 # unknown hosts get nothing
 :80 {
 	respond 404
