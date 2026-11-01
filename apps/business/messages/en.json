@@ -37,6 +37,7 @@
       "settings": "Settings"
     },
     "more": "More",
+    "offline": "You’re offline. What you see may be out of date until the connection is back.",
     "requests": "{count, plural, one {# request} other {# requests}}",
     "reviewsToAnswer": "{count, plural, other {# unanswered}}",
     "where": "{level} · {city}",
