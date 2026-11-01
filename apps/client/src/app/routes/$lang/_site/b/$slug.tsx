@@ -4,7 +4,8 @@ import { z } from 'zod'
 import { BusinessPage } from '@/pages/business'
 import { NOT_OPEN } from '@/pages/not-found'
 import { siteLocale } from '@/shared/i18n'
-import { pageHead } from '@/shared/lib'
+import { site } from '@/shared/config'
+import { businessJsonLd, pageHead } from '@/shared/lib'
 
 // The business page (book C-06, C-08–C-11), rendered on the server with the visitor's cookie (the owner's preview, a
 // phone-only client). An unknown, closed or hidden business is the 404 page; one still in review is the friendly
@@ -27,15 +28,22 @@ export const Route = createFileRoute('/$lang/_site/b/$slug')({
     ])
     if (detail.slug !== params.slug)
       redirect({ to: '/$lang/b/$slug', params: { lang, slug: detail.slug }, search: true, statusCode: 301, throw: true })
-    return { name: detail.name, category: detail.category.name, preview: detail.preview !== null }
+    return {
+      name: detail.name,
+      category: detail.category.name,
+      preview: detail.preview !== null,
+      jsonLd: businessJsonLd(detail, `${site.urls.client}/${lang}/b/${detail.slug}`),
+    }
   },
-  head: ({ params, loaderData }) =>
-    pageHead(siteLocale(params.lang), {
+  head: ({ params, loaderData }) => ({
+    ...pageHead(siteLocale(params.lang), {
       path: `/b/${params.slug}`,
       title: loaderData ? () => loaderData.name : undefined,
       description: loaderData ? (t) => t('business.description', { name: loaderData.name, category: loaderData.category }) : undefined,
       // the owner's own page in review is theirs alone
       noindex: loaderData?.preview ?? false,
     }),
+    scripts: loaderData && !loaderData.preview ? [{ type: 'application/ld+json', children: loaderData.jsonLd }] : [],
+  }),
   component: BusinessPage,
 })

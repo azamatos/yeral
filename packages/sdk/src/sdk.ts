@@ -376,6 +376,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         getNextPageParam: (last) => last.cursor ?? undefined,
       })
     },
+    /** What the client site's sitemap lists (book F-197). */
+    sitemap: () =>
+      queryOptions({
+        queryKey: keys.sitemap(),
+        queryFn: ({ signal }) => call(v1.sitemap.$get({}, abortWith(signal))),
+      }),
     suggest: (q: string, lang: Locale) =>
       queryOptions({
         queryKey: keys.suggest(q, lang),
