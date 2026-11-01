@@ -965,7 +965,9 @@ export const MoveToAnotherDay: Story = {
   args: { server: fakeApi('owner', { open: true }) },
   play: async ({ canvas }) => {
     await startMove(canvas)
-    await userEvent.click(canvas.getByRole('button', { name: 'Previous day' }))
+    // ahead, past the holiday: back is today, whose 19:00 has gone by in the evening
+    await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
     await expect(canvas.getByRole('status')).toHaveTextContent('Jemal B.')
     const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
     await userEvent.click(
