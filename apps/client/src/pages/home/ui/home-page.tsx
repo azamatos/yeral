@@ -3,8 +3,10 @@ import { Link } from '@tanstack/react-router'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Check } from 'lucide-react'
+import { useRef } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BusinessTile } from '@/entities/business'
+import { LocationBanner, placeAddress, usePlace, type Place } from '@/features/pick-place'
 import { HowWasItCard } from '@/features/write-review'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
@@ -19,16 +21,26 @@ const heading = 'm-0 text-[32px] leading-[38px] font-bold tracking-[-0.025em] te
 const STEPS = ['search', 'pick', 'confirmed'] as const
 const REASONS = ['online', 'reminders', 'calendar'] as const
 
+/** The place as the api takes it. */
+const nearParams = (place: Place | null) => {
+  if (!place) return {}
+  return place.kind === 'city' ? { city: place.id } : { lat: place.lat, lng: place.lng }
+}
+
 /**
  * Home (book C-02, board Home): the hero with the search card, the «How was it?» card for a visit waiting for its review
- * (F-243), the places, the categories that take appointments, how it works and the block for businesses. Until the
- * visitor shares where they are (slice 5's D4) the places are the popular ones.
+ * (F-243), the offer to use the client's location, the places, the categories that take appointments, how it works and the
+ * block for businesses. Until the site knows where the client is, the places are the popular ones (C-01).
  */
 export function HomePage() {
   const t = useTranslations('home')
   const lang = useLocale()
   const sdk = useSdk()
-  const places = useInfiniteQuery(sdk.catalog.search({ lang })).data?.pages[0]?.items ?? []
+  const located = usePlace()
+  const whereInput = useRef<HTMLInputElement>(null)
+  const list = useInfiniteQuery(sdk.catalog.search({ lang, ...nearParams(located.place) })).data?.pages[0]
+  const places = list?.items ?? []
+  const nearby = list?.located ?? false
   const categories = useQuery(sdk.catalog.categories(lang)).data?.items.filter((c) => c.bookingTypes.includes('appointment')) ?? []
   const photos = places.filter((p) => p.photo).slice(0, MOSAIC)
 
@@ -42,7 +54,7 @@ export function HomePage() {
               {t('title')}
             </h1>
             <p className="m-0 max-w-120 text-body-l text-n-600">{t('lead')}</p>
-            <SearchCard />
+            <SearchCard located={located} whereInput={whereInput} />
           </div>
           {photos.length === MOSAIC && (
             <div className="grid grid-cols-[1.15fr_1fr] grid-rows-[200px_200px_180px] gap-3 max-sm:grid-rows-[140px_140px_120px]">
@@ -66,6 +78,14 @@ export function HomePage() {
 
       <div className={wrap}>
         <HowWasItCard className="mb-10" />
+        <LocationBanner
+          className="mb-10"
+          unknown={located.unknown}
+          denied={located.denied}
+          locating={located.locating}
+          onAllow={() => void located.askBrowser()}
+          onType={() => whereInput.current?.focus()}
+        />
       </div>
 
       {places.length > 0 && (
@@ -73,10 +93,15 @@ export function HomePage() {
           <div className={`${wrap} flex flex-col gap-6`}>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <h2 className={heading}>{t('popular')}</h2>
-                <span className="text-small text-n-600">{t('popularCaption')}</span>
+                <h2 className={heading}>{nearby ? t('nearby') : t('popular')}</h2>
+                <span className="text-small text-n-600">{nearby ? t('nearbyCaption') : t('popularCaption')}</span>
               </div>
-              <Link to="/$lang/search" params={{ lang }} className="text-small font-semibold text-a-600 no-underline hover:underline">
+              <Link
+                to="/$lang/search"
+                params={{ lang }}
+                search={placeAddress(located.place)}
+                className="text-small font-semibold text-a-600 no-underline hover:underline"
+              >
                 {t('seeAll')}
               </Link>
             </div>

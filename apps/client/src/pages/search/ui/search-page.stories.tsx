@@ -71,7 +71,7 @@ const fakeApi =
           items,
           total: pages.flat().length,
           cursor: at + 1 < pages.length ? String(at + 1) : null,
-          located: false,
+          located: query.has('lat'),
           city: 'ashgabat',
         })
       }
@@ -79,7 +79,7 @@ const fakeApi =
     })
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const path = new URL(new Request(input, init).url).pathname
-      return /\/(categories|cities|search)$/.test(path) ? mine(input, init) : signIn(input, init)
+      return /\/(categories|cities|search|places\/suggest)$/.test(path) ? mine(input, init) : signIn(input, init)
     }
   }
 
@@ -87,6 +87,7 @@ const meta = {
   title: 'Client/Pages/Search',
   component: PageStory,
   parameters: { layout: 'fullscreen' },
+  beforeEach: () => localStorage.removeItem('yeral.place'),
   globals: { viewport: { value: 'xl' } },
   args: {
     routes: {
@@ -191,6 +192,39 @@ export const ShowMore: Story = {
     await expect(await canvas.findByRole('link', { name: 'Glow Studio' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Barber Loft' })).toBeVisible()
     await waitFor(() => expect(canvas.queryByRole('button', { name: 'Show more' })).toBeNull())
+  },
+}
+
+/** Around a position: near you, how far, and no offer to share a location already given. */
+export const NearAPosition: Story = {
+  args: { path: '/en/search?near=37.95,58.39' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Places near you' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull()
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'How far' }), '10')
+    await waitFor(() => expect(last.get('r')).toBe('10'))
+    await expect(last.get('lat')).toBe('37.95')
+  },
+}
+
+/** Nothing near: one step wider. */
+export const WiderArea: Story = {
+  args: { path: '/en/search?near=37.95,58.39', server: fakeApi({ none: true }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Make it 10 km' }))
+    await waitFor(() => expect(last.get('r')).toBe('10'))
+    await expect(await canvas.findByRole('button', { name: 'Make it 25 km' })).toBeVisible()
+  },
+}
+
+/** Where? keeps to a city, and the offer to share a location goes. */
+export const PickACity: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: 'Show my location' })
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Where?' }))
+    await userEvent.click(await canvas.findByRole('option', { name: 'Ashgabat' }))
+    await waitFor(() => expect(last.get('city')).toBe('ashgabat'))
+    await waitFor(() => expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull())
   },
 }
 

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BusinessCard, Category } from '@yeral/contract/catalog'
 import { today } from '@yeral/domain/time'
 import { useSearch } from '@tanstack/react-router'
-import { expect, userEvent } from 'storybook/test'
+import { expect, screen as page, userEvent, waitFor } from 'storybook/test'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
 import { SiteLayout } from '@/widgets/site-layout'
 import { HomePage } from './home-page'
@@ -60,24 +60,38 @@ const fakeApi =
   ({ none = false }: { none?: boolean } = {}) =>
   () => {
     const signIn = authApi()()
-    const mine = fakeFetch(({ route }) => {
+    const mine = fakeFetch(({ route, query }) => {
       if (route === 'GET /categories')
         return json({ items: [barber, { ...barber, id: 'tables', name: 'Restaurant', bookingTypes: ['table'] }] })
       if (route === 'GET /cities') return json(cities)
+      if (route === 'GET /places/suggest') return json({ items: [{ label: 'Bitarap park', lat: 37.94, lng: 58.38 }] })
       if (route === 'GET /search')
-        return json({ items: none ? [] : [1, 2, 3, 4, 5].map((n) => card(n)), cursor: null, located: false, city: 'ashgabat' })
+        return json({ items: none ? [] : [1, 2, 3, 4, 5].map((n) => card(n)), cursor: null, located: query.has('lat'), city: 'ashgabat' })
       return undefined
     })
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const path = new URL(new Request(input, init).url).pathname
-      return /\/(categories|cities|search)$/.test(path) ? mine(input, init) : signIn(input, init)
+      return /\/(categories|cities|search|places\/suggest)$/.test(path) ? mine(input, init) : signIn(input, init)
     }
   }
+
+/** The browser's answer to «Show my location». */
+const browserLocation = (allowed: boolean) =>
+  Object.defineProperty(navigator, 'geolocation', {
+    configurable: true,
+    value: {
+      getCurrentPosition: (done: PositionCallback, fail: PositionErrorCallback) =>
+        allowed
+          ? done({ coords: { latitude: 37.95, longitude: 58.39 } } as GeolocationPosition)
+          : fail({ code: 1 } as GeolocationPositionError),
+    },
+  })
 
 const meta = {
   title: 'Client/Pages/Home',
   component: PageStory,
   parameters: { layout: 'fullscreen' },
+  beforeEach: () => localStorage.removeItem('yeral.place'),
   args: {
     routes: {
       '/$lang': Home,
@@ -110,10 +124,48 @@ export const Page: Story = {
 export const SearchFromHome: Story = {
   play: async ({ canvas }) => {
     await userEvent.type(await canvas.findByRole('textbox', { name: 'What?' }), 'haircut')
-    await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Where?' }), 'Mary')
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Where?' }))
+    await userEvent.click(await canvas.findByRole('option', { name: 'Mary' }))
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'When?' }), 'Tomorrow')
     await userEvent.click(canvas.getByRole('button', { name: 'Show free times' }))
     await expect(await canvas.findByText('Search: {"what":"haircut","city":"mary","day":"tomorrow"}')).toBeVisible()
+  },
+}
+
+/** Nothing asks until the button: allowed, the places are the near ones and the offer goes. */
+export const ShareLocation: Story = {
+  play: async ({ canvas }) => {
+    browserLocation(true)
+    await userEvent.click(await canvas.findByRole('button', { name: 'Show my location' }))
+    await expect(await canvas.findByRole('heading', { name: 'Free today near you' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull()
+    await expect(canvas.getByRole('combobox', { name: 'Where?' })).toHaveValue('Near me')
+  },
+}
+
+/** Refused: the list stays by city, it says so, and the help sheet says how to allow it. */
+export const LocationRefused: Story = {
+  play: async ({ canvas }) => {
+    browserLocation(false)
+    await userEvent.click(await canvas.findByRole('button', { name: 'Show my location' }))
+    await expect(await canvas.findByText('Location off — showing by city')).toBeVisible()
+    await expect(canvas.getByRole('heading', { name: 'Popular places' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Open settings' }))
+    await expect(await page.findByRole('dialog', { name: 'Allow your location' })).toBeInTheDocument()
+  },
+}
+
+/** «I'll type an address» goes to the field; a suggestion picked is the place, and it's kept for the next visit. */
+export const TypeAnAddress: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: "I'll type an address" }))
+    const where = canvas.getByRole('combobox', { name: 'Where?' })
+    await expect(where).toHaveFocus()
+    await userEvent.keyboard('Bit')
+    await userEvent.click(await canvas.findByRole('option', { name: 'Bitarap park' }))
+    await waitFor(() => expect(where).toHaveValue('Bitarap park'))
+    await expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull()
+    await expect(JSON.parse(localStorage.getItem('yeral.place')!)).toMatchObject({ kind: 'point', label: 'Bitarap park' })
   },
 }
 

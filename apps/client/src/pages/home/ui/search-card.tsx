@@ -1,10 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Select } from '@yeral/ui/select'
-import { useId, useState, type FormEvent, type ReactNode } from 'react'
+import { useId, useState, type FormEvent, type ReactNode, type Ref } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { placeAddress, WhereField, type usePlace } from '@/features/pick-place'
 
 type When = '' | 'tomorrow' | 'week'
 
@@ -22,17 +21,14 @@ function CardField({ label, children }: { label: string; children: (id: string) 
 }
 
 /**
- * The hero's search card (Home, book C-02): What?, Where? and When? open the search. «Where?» lists the cities for now; near
- * me and typed places come with slice 5's D4.
+ * The hero's search card (Home, book C-02): What?, Where? and When? open the search. The page holds the place, as its list
+ * and banner read it too.
  */
-export function SearchCard() {
+export function SearchCard({ located, whereInput }: { located: ReturnType<typeof usePlace>; whereInput: Ref<HTMLInputElement> }) {
   const t = useTranslations('home')
   const lang = useLocale()
-  const sdk = useSdk()
   const navigate = useNavigate()
-  const cities = useQuery(sdk.catalog.cities(lang)).data
   const [what, setWhat] = useState('')
-  const [city, setCity] = useState('')
   const [when, setWhen] = useState<When>('')
 
   const submit = (e: FormEvent) => {
@@ -40,7 +36,7 @@ export function SearchCard() {
     void navigate({
       to: '/$lang/search',
       params: { lang },
-      search: { what: what.trim() || undefined, city: city || undefined, day: when || undefined },
+      search: { what: what.trim() || undefined, ...placeAddress(located.place), day: when || undefined },
     })
   }
 
@@ -63,13 +59,15 @@ export function SearchCard() {
       <div className="flex max-sm:flex-col">
         <CardField label={t('where')}>
           {(id) => (
-            <Select id={id} size="s" className={bareSelect} value={city} onChange={(e) => setCity(e.target.value)}>
-              {(cities?.items ?? []).map((c) => (
-                <option key={c.id} value={c.id === cities?.main ? '' : c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
+            <WhereField
+              id={id}
+              inputRef={whereInput}
+              place={located.place}
+              size="m"
+              className="[&_input]:h-6 [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:text-body [&_input]:shadow-none [&_svg.pointer-events-none]:hidden"
+              onPick={located.pick}
+              onNearMe={() => void located.askBrowser()}
+            />
           )}
         </CardField>
         <CardField label={t('when')}>
