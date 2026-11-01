@@ -40,6 +40,7 @@ const workspace = (slug: string, name: string, level: Workspace['level'], reques
   city,
   logo: null,
   level,
+  staffId: '00000000-0000-4000-8000-0000000000aa',
   status: 'live',
   statusReason: null,
   specialization: null,
