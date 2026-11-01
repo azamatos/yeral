@@ -1,9 +1,12 @@
+import { Link } from '@tanstack/react-router'
 import { today } from '@yeral/domain/time'
 import { Logo } from '@yeral/ui/brand'
 import type { ReactNode } from 'react'
-import { useTranslations } from 'use-intl'
+import { useLocale, useTranslations } from 'use-intl'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
+
+const footerLink = 'self-start rounded-xs text-small text-n-600 hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none'
 
 /**
  * The footer (Home, Account-Profile): the logo and the line under it, then columns of links, then the copyright. The
@@ -13,6 +16,7 @@ import { wrap } from '@/shared/ui'
  */
 export function SiteFooter() {
   const t = useTranslations()
+  const lang = useLocale()
   const brand = t('common.brand')
   const year = today().slice(0, 4)
   return (
@@ -23,6 +27,14 @@ export function SiteFooter() {
             <Logo alt={brand} height={26} className="self-start" />
             <span className="max-w-55 text-dense text-n-600">{t('site.tagline')}</span>
           </div>
+          <FooterColumn title={t('footer.forClients')}>
+            <Link to="/$lang/search" params={{ lang }} className={footerLink}>
+              {t('footer.search')}
+            </Link>
+            <Link to="/$lang/account/bookings" params={{ lang }} className={footerLink}>
+              {t('footer.myBookings')}
+            </Link>
+          </FooterColumn>
           <FooterColumn title={t('footer.forBusiness')}>
             <FooterLink href={site.urls.business}>{t('footer.business', { brand })}</FooterLink>
             <FooterLink href={`${site.urls.business}/login`}>{t('footer.businessLogIn')}</FooterLink>
@@ -47,10 +59,7 @@ function FooterColumn({ title, children }: { title: string; children: ReactNode 
 
 function FooterLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a
-      href={href}
-      className="self-start rounded-xs text-small text-n-600 hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
-    >
+    <a href={href} className={footerLink}>
       {children}
     </a>
   )
