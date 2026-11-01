@@ -11,6 +11,10 @@ describe('the bookings list’s address', () => {
     })
   })
 
+  it('knows the requests tab', () => {
+    expect(bookingsSearch({ tab: 'requests' })).toEqual({ tab: 'requests' })
+  })
+
   it('drops what it doesn’t', () => {
     expect(bookingsSearch({ tab: 'nope', when: 'year', q: '', booking: 5 })).toEqual({})
   })

@@ -6,6 +6,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { BookingRow, CalendarBooking } from '@yeral/contract/calendar'
+import type { BookingRequest } from '@yeral/contract/requests'
 import type { Workspace } from '@yeral/contract/team'
 import { addDays, today } from '@yeral/domain/time'
 import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
@@ -91,18 +92,46 @@ const asBooking = (r: BookingRow): CalendarBooking => ({
   complaint: null,
   move: null,
 })
+/** Waiting: a new request, a client's move, and one the reader may not answer. */
+const request = (code: string, name: string, patch: Partial<BookingRequest> = {}): BookingRequest => ({
+  code,
+  kind: 'new',
+  type: 'appointment',
+  date: LATER,
+  start: 660,
+  end: 720,
+  holdUntil: Date.now() + 25 * 60_000,
+  warnAt: null,
+  sentAt: Date.now(),
+  items: [{ serviceId: id(5), service: 'Women’s haircut', staffId: id(2), staff: 'Maral', start: 660, end: 720 }],
+  price: null,
+  note: null,
+  from: null,
+  fits: null,
+  client: { id: null, name, phone: '+99365000000', visits: 2, noShows: 0, alerts: [] },
+  canAnswer: true,
+  answeredBy: 'desk',
+  ...patch,
+})
+const waiting = [
+  request('YR-49101', 'Mähri G.'),
+  request('YR-49102', 'Ogulgerek M.', { kind: 'move', from: { date: DAY, start: 600, end: 660 }, fits: true }),
+  request('YR-49103', 'Selbi H.', { canAnswer: false, answeredBy: 'specialist' }),
+]
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
 /** The api as the shell and the list ask it. */
-const answer = (request: Request, level: Workspace['level'], more: boolean): Response => {
+const answer = (request: Request, level: Workspace['level'], more: boolean, none: boolean): Response => {
   const url = new URL(request.url)
   const route = `${request.method} ${url.pathname.replace(/^\/v1/, '')}`
   const w = glow(level)
   if (route === 'GET /me') return json(me)
   if (route === 'GET /me/workspaces') return json({ items: [w], current: w.slug })
   if (route === 'GET /me/invites') return json({ items: [] })
-  if (route === 'GET /w/glow-studio/requests') return json({ items: [] })
+  if (route === 'GET /w/glow-studio/requests') return json({ items: none ? [] : waiting.slice() })
+  if (/^POST \/w\/glow-studio\/requests\/[^/]+\/(confirm|decline)$/.test(route)) return json({})
   if (route === 'GET /w/glow-studio/services')
     return json({
       groups: [{ id: id(1), name: { en: 'Hair' }, services: [{ id: id(5), name: { en: 'Women’s haircut' }, staffIds: [id(2)] }] }],
@@ -134,10 +163,10 @@ const answer = (request: Request, level: Workspace['level'], more: boolean): Res
 }
 
 const fakeApi =
-  (level: Workspace['level'], { more = false }: { more?: boolean } = {}): (() => typeof fetch) =>
+  (level: Workspace['level'], { more = false, none = false }: { more?: boolean; none?: boolean } = {}): (() => typeof fetch) =>
   () =>
   (input: RequestInfo | URL, init?: RequestInit) =>
-    Promise.resolve(answer(new Request(input, init), level, more))
+    Promise.resolve(answer(new Request(input, init), level, more, none))
 
 const meta = {
   title: 'Business/Bookings/List',
@@ -147,7 +176,7 @@ const meta = {
   args: {
     routes: {},
     layouts: { '/w/$slug': { component: WorkspaceShell, children: { bookings: BookingsPage, calendar: () => <p>The calendar</p> } } },
-    path: '/w/glow-studio/bookings',
+    path: '/w/glow-studio/bookings?tab=today',
     server: fakeApi('owner'),
   },
 } satisfies Meta<typeof PageStory>
@@ -247,6 +276,69 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: /Gözel A\./ }))
     await expect(await page.findByRole('dialog', { name: 'Booking' })).toBeVisible()
+  },
+}
+
+/** Requests open the page: the timer, confirm and decline, a move's two times, who answers the one the reader can't. */
+export const Requests: Story = {
+  args: { path: '/w/glow-studio/bookings' },
+  play: async ({ canvas }) => {
+    const table = await canvas.findByRole('table', { name: 'Requests' })
+    await expect(canvas.getByRole('tab', { name: /^Requests/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(within(table).getByRole('button', { name: 'Confirm Mähri G.' })).toBeVisible()
+    await expect(within(table).getByText(/→/)).toBeVisible()
+    await expect(within(table).getByText('Answers: Maral')).toBeVisible()
+    await expect(within(table).queryByRole('checkbox', { name: 'Select Selbi H.' })).toBeNull()
+    await userEvent.click(within(table).getByRole('button', { name: 'Confirm Mähri G.' }))
+    await page.findByText('Booking confirmed · the client is notified')
+  },
+}
+
+/** Ticked rows get the bar; confirm says how many landed (book B-31). */
+export const BulkConfirm: Story = {
+  args: { path: '/w/glow-studio/bookings' },
+  play: async ({ canvas }) => {
+    const table = await canvas.findByRole('table', { name: 'Requests' })
+    await userEvent.click(within(table).getByRole('checkbox', { name: 'Select all' }))
+    const bar = within(await canvas.findByRole('region', { name: 'Selected requests' }))
+    await expect(bar.getByText('2 selected')).toBeVisible()
+    await userEvent.click(bar.getByRole('button', { name: 'Confirm' }))
+    await page.findByText('2 of 2 confirmed · the clients are notified')
+  },
+}
+
+/** Decline them together: one reason, words for another. */
+export const BulkDecline: Story = {
+  args: { path: '/w/glow-studio/bookings' },
+  play: async ({ canvas }) => {
+    const table = await canvas.findByRole('table', { name: 'Requests' })
+    await userEvent.click(within(table).getByRole('checkbox', { name: 'Select Mähri G.' }))
+    await userEvent.click(within(await canvas.findByRole('region', { name: 'Selected requests' })).getByRole('button', { name: 'Decline' }))
+    const d = within(await page.findByRole('dialog', { name: 'Decline 1 request' }))
+    await expect(d.getByRole('button', { name: 'Decline' })).toBeDisabled()
+    await userEvent.click(d.getByRole('radio', { name: 'Another reason' }))
+    await userEvent.type(d.getByRole('textbox', { name: 'Another reason' }), 'We’re closed that day')
+    await userEvent.click(d.getByRole('button', { name: 'Decline' }))
+    await page.findByText('1 of 1 declined · the clients see the reason')
+  },
+}
+
+/** No requests: said so, with the way to the calendar. */
+export const NoRequests: Story = {
+  args: { path: '/w/glow-studio/bookings', server: fakeApi('owner', { none: true }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('No new requests')).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Open the calendar' })).toBeVisible()
+  },
+}
+
+/** A phone: the requests as a list, the timer on each. */
+export const RequestsPhone: Story = {
+  args: { path: '/w/glow-studio/bookings' },
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('button', { name: /Mähri G\./ })).toBeVisible()
+    await expect(canvas.getAllByRole('timer').length).toBe(3)
   },
 }
 

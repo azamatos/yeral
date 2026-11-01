@@ -11,7 +11,7 @@ import { EmptyState } from '@yeral/ui/empty-state'
 import { Input } from '@yeral/ui/input'
 import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
+import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { CalendarX2, Download, SearchX } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
@@ -20,6 +20,7 @@ import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import { rangeOf, type BookingsSearch, type BookingsTab, type BookingsWhen } from '../model/search'
 import { BookingsTable } from './bookings-table'
+import { RequestsTab } from './requests-tab'
 
 /**
  * The bookings list (B-Bookings, book B-30): the tabs Today · Upcoming · Past · Cancelled, the filters (search by client,
@@ -41,7 +42,8 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
   const now = useClock()
   const navigate = useNavigate()
   const search: BookingsSearch = useSearch({ strict: false })
-  const tab: BookingsTab = search.tab ?? 'today'
+  const tab: BookingsTab = search.tab ?? 'requests'
+  const requests = tab === 'requests'
   const todayDate = today(now)
   const go = (patch: Partial<BookingsSearch>, replace = true) =>
     void navigate({ to: '.', search: (prev: BookingsSearch) => ({ ...prev, ...patch }), replace })
@@ -56,14 +58,15 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
   })
 
   const filters = {
-    tab,
+    tab: requests ? ('today' as const) : tab,
     q: search.q,
     staff: search.staff,
     service: search.service,
     ...rangeOf(search.when, todayDate),
     lang: locale,
   }
-  const list = useInfiniteQuery({ ...sdk.calendar.bookings(slug, filters), placeholderData: keepPreviousData })
+  const list = useInfiniteQuery({ ...sdk.calendar.bookings(slug, filters), placeholderData: keepPreviousData, enabled: !requests })
+  const waiting = useQuery(sdk.requests.list(slug)).data?.items.length ?? 0
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
   const filtered = !!(search.q || search.staff || search.service || search.when)
 
@@ -175,7 +178,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
             }
           />
         ) : (
-          <EmptyState icon={<CalendarX2 aria-hidden />} title={t(`empty.${tab}`)} />
+          <EmptyState icon={<CalendarX2 aria-hidden />} title={t(`empty.${filters.tab}`)} />
         )
       ) : (
         <>
@@ -201,14 +204,29 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
   return (
     <WorkspacePage title={sections('bookings')}>
       <div className="flex flex-col gap-4">
-        <Tabs value={tab} onValueChange={(next) => go({ tab: next === 'today' ? undefined : (next as BookingsTab) })}>
+        <Tabs value={tab} onValueChange={(next) => go({ tab: next === 'requests' ? undefined : (next as BookingsTab) })}>
           <TabsList aria-label={t('tabsLabel')}>
+            <TabsTrigger value="requests">
+              {t('tabs.requests')}
+              {waiting > 0 && <TabCount>{waiting}</TabCount>}
+            </TabsTrigger>
             {BOOKING_TABS.map((value) => (
               <TabsTrigger key={value} value={value}>
                 {t(`tabs.${value}`)}
               </TabsTrigger>
             ))}
           </TabsList>
+          <TabsContent value="requests" className="pt-4">
+            {requests && (
+              <RequestsTab
+                slug={slug}
+                business={business}
+                specialist={specialist}
+                picked={search.request}
+                onOpen={(code) => go({ request: code, booking: undefined })}
+              />
+            )}
+          </TabsContent>
           {/* a panel per tab, as each tab names its own; the rows live in the one on screen */}
           {BOOKING_TABS.map((value) => (
             <TabsContent key={value} value={value} className="flex flex-col gap-4 pt-4">

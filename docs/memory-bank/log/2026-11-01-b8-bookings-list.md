@@ -10,11 +10,14 @@ Slice 4's B8 (`log/2026-10-31-slice-4-plan.md` → "PRs, three lanes"): book B-3
 - «Move to another time» and «Book again» go to the calendar by its address (`?move=`, `?panel=new`).
 - `BookingRow` type exported from `@yeral/contract/calendar`.
 
-## For B9, B11
+## B9, the Requests tab (same page)
 
-- B9 adds the Requests tab (it reads `/requests`, not this list), the Answer column, the checkboxes and the BulkBar.
-  `search.tab`'s default moves to `requests` then.
-- B11 adds «Open the client's card» to `RowMenu` and the drawer, and the row's name can link it.
+`ui/requests-tab.tsx`: reads `/requests`, the Answer column, a move's two times, ticks and the BulkBar, `BulkDecline`
+(one reason, no offers), a list under 768. The tab is first and the page's default; `filters.tab` stays a real list tab.
+
+## For B11
+
+B11 adds «Open the client's card» to `RowMenu` and the drawer, and the row's name can link it.
 
 ## Traps
 
