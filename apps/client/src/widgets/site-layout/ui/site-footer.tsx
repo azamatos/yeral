@@ -38,6 +38,7 @@ export function SiteFooter() {
           <FooterColumn title={t('footer.forBusiness')}>
             <FooterLink href={site.urls.business}>{t('footer.business', { brand })}</FooterLink>
             <FooterLink href={`${site.urls.business}/login`}>{t('footer.businessLogIn')}</FooterLink>
+            <FooterLink href={`${site.urls.business}/try`}>{t('footer.businessTry')}</FooterLink>
           </FooterColumn>
           <FooterColumn title={brand}>
             <Link to="/$lang/about" params={{ lang }} className={footerLink}>
