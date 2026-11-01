@@ -210,7 +210,8 @@ export function MapFrame({
         className,
       )}
     >
-      <div ref={host} className="absolute inset-0" />
+      {/* `!`: MapLibre's stylesheet sets `position: relative` on this box, unlayered, which beats a plain utility */}
+      <div ref={host} className="absolute! inset-0" />
       <div
         aria-hidden
         onClick={tapGround}

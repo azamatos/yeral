@@ -114,7 +114,7 @@ export function Section({
       aria-labelledby={titleId}
       tabIndex={-1}
       className={cn(
-        'flex scroll-mt-15 flex-col gap-5 py-12 outline-none max-sm:py-10',
+        'flex scroll-mt-15 flex-col gap-5 py-12 outline-none focus:shadow-none max-sm:py-10',
         first ? 'pt-8 max-sm:pt-6' : 'border-t border-n-200',
         className,
       )}
