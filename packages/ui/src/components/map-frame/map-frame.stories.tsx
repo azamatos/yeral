@@ -131,6 +131,27 @@ const ONE_COLOUR = `data:application/json,${encodeURIComponent(
   JSON.stringify({ version: 8, sources: {}, layers: [{ id: 'ground', type: 'background', paint: { 'background-color': '#dfe7dc' } }] }),
 )}`
 
+/** The person zooms: the frame says what the map shows now, for «Search this area». */
+export const AreaAfterAMove: Story = {
+  args: { controls, onAreaChange: fn() },
+  render: (args) => (
+    <MapTiles style={ONE_COLOUR}>
+      <MapFrame {...args} />
+    </MapTiles>
+  ),
+  play: async ({ args, canvas, canvasElement }) => {
+    await waitFor(() => expect(canvasElement.querySelector('canvas')).not.toBeNull())
+    await expect(args.onAreaChange).not.toHaveBeenCalled()
+    await userEvent.click(canvas.getByRole('button', { name: 'Zoom in' }))
+    await waitFor(() => expect(args.onAreaChange).toHaveBeenCalledOnce())
+    const [south, west, north, east] = (args.onAreaChange as ReturnType<typeof fn>).mock.calls[0]![0] as number[]
+    await expect(south!).toBeLessThan(ashgabat.lat)
+    await expect(north!).toBeGreaterThan(ashgabat.lat)
+    await expect(west!).toBeLessThan(ashgabat.lng)
+    await expect(east!).toBeGreaterThan(ashgabat.lng)
+  },
+}
+
 /**
  * MapLibre's map fills the frame. Its own stylesheet makes the box `position: relative`, unlayered, so it beats any
  * utility: with `absolute` alone the box had no height and clipped the drawn map away, leaving the frame's plain ground.

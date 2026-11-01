@@ -12,6 +12,7 @@ export const Route = createFileRoute('/$lang/_site/search')({
     const lang = siteLocale(params.lang)
     await Promise.all([
       context.queryClient.prefetchQuery(context.sdk.catalog.categories(lang)),
+      context.queryClient.prefetchQuery(context.sdk.catalog.cities(lang)),
       context.queryClient.prefetchInfiniteQuery({ ...context.sdk.catalog.search(apiSearch(deps, lang, today())), retry: false }),
     ])
   },

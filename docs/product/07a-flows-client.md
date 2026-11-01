@@ -215,7 +215,7 @@ flowchart TD
 - A business that hides its address shows only an approximate point (C-08).
 - No places in the visible area: the search empty state (States tile 01).
 
-**Status:** Design: drawn (Search; Mobile 3) · Code: built (api) — search by map area (`bbox`).
+**Status:** Design: drawn (Search; Mobile 3) · Code: built (`pages/search`, 01.11.2026; the address says `area=`) (api) — search by map area (`bbox`).
 
 ### C-05 · Open a category page
 

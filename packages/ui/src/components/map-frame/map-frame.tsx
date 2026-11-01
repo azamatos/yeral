@@ -58,6 +58,8 @@ function hasWebGL() {
 
 const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
+export type MapArea = [south: number, west: number, north: number, east: number]
+
 export type MapFrameProps = Omit<ComponentProps<'div'>, 'children' | 'onClick'> & {
   /** Where the map looks; a new centre moves it there (a picked address). */
   center: LatLng
@@ -66,6 +68,8 @@ export type MapFrameProps = Omit<ComponentProps<'div'>, 'children' | 'onClick'> 
   children?: ReactNode
   /** A tap on the map, not a drag: the address step moves its pin there. */
   onMapClick?: (at: LatLng) => void
+  /** The person moved or zoomed the map: what it shows now, `[south, west, north, east]`; a move from `center` doesn't count. */
+  onAreaChange?: (area: MapArea) => void
   /** Zoom buttons with their labels; none for a still preview. */
   controls?: { zoomIn: string; zoomOut: string }
   /** The veil and its prompt over a map that waits for something («Pick the address first»): no pins, no taps. */
@@ -85,6 +89,7 @@ export function MapFrame({
   zoom = 16,
   children,
   onMapClick,
+  onAreaChange,
   controls,
   overlay,
   interactive = true,
@@ -112,8 +117,12 @@ export function MapFrame({
     setCamera((c) => ({ ...c, center }))
   }
   const clickRef = useRef(onMapClick)
+  const areaRef = useRef(onAreaChange)
+  // the zoom buttons' move comes from code, as a move from `center` does: this tells them apart
+  const zoomed = useRef(false)
   useEffect(() => {
     clickRef.current = overlay ? undefined : onMapClick
+    areaRef.current = onAreaChange
   })
 
   useEffect(() => {
@@ -168,6 +177,12 @@ export function MapFrame({
         const c = m.getCenter()
         flushSync(() => setCamera({ center: { lat: c.lat, lng: c.lng }, zoom: m.getZoom() }))
       })
+      m.on('moveend', (e) => {
+        if (!e.originalEvent && !zoomed.current) return
+        zoomed.current = false
+        const b = m.getBounds()
+        areaRef.current?.([b.getSouth(), b.getWest(), b.getNorth(), b.getEast()])
+      })
       m.on('click', (e) => clickRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }))
       m.once('load', () => setLoaded(true))
       map.current = m
@@ -188,8 +203,10 @@ export function MapFrame({
   }, [shown])
 
   const zoomBy = (delta: number) => {
-    if (map.current) map.current.easeTo({ zoom: map.current.getZoom() + delta, duration: reducedMotion() ? 0 : 200 })
-    else setCamera((c) => ({ ...c, zoom: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.zoom + delta)) }))
+    if (map.current) {
+      zoomed.current = true
+      map.current.easeTo({ zoom: map.current.getZoom() + delta, duration: reducedMotion() ? 0 : 200 })
+    } else setCamera((c) => ({ ...c, zoom: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.zoom + delta)) }))
   }
 
   // without tiles a tap on the drawn ground places the pin

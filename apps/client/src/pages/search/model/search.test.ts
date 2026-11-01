@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apiSearch, filterCount, filtered, searchAddress } from './search'
+import { apiSearch, areaOf, filterCount, filtered, searchAddress } from './search'
 
 describe('searchAddress', () => {
   it('reads what it knows and leaves the rest out', () => {
@@ -27,6 +27,21 @@ describe('apiSearch', () => {
 
   it('leaves an empty «what» out', () => {
     expect(apiSearch({ what: '' }, 'en', day).q).toBeUndefined()
+  })
+})
+
+describe('areaOf', () => {
+  it('reads an area the api can take', () => {
+    expect(areaOf('37.9,58.3,38,58.5')).toEqual([37.9, 58.3, 38, 58.5])
+  })
+
+  it('leaves out anything else', () => {
+    expect(areaOf(undefined)).toBeUndefined()
+    expect(areaOf('37.9,58.3,38')).toBeUndefined()
+    expect(areaOf('37.9,58.3,38,58.5,1')).toBeUndefined()
+    expect(areaOf('a,b,c,d')).toBeUndefined()
+    expect(areaOf('38,58.3,37.9,58.5')).toBeUndefined()
+    expect(areaOf('95,58.3,96,58.5')).toBeUndefined()
   })
 })
 
