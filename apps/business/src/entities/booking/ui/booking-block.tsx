@@ -13,7 +13,7 @@ export type CalendarBooking = CalendarView['bookings'][number]
 export type CalendarMove = CalendarView['moves'][number]
 
 /** A block's fill, line and ink by status (B-Calendar `.k-*`): a request dashed on the warning tint, cancelled dashed white. */
-const LOOK = {
+export const BLOCK_LOOK = {
   pending: 'border-[1.5px] border-dashed border-st-pending-dot bg-st-pending-bg',
   confirmed: 'border border-st-confirmed-line bg-st-confirmed-bg',
   completed: 'border border-st-completed-line bg-st-completed-bg',
@@ -147,6 +147,7 @@ export function BookingBlock({
   height,
   timerText,
   internalStatus,
+  wide,
   ...shared
 }: Shared & {
   booking: CalendarBooking
@@ -154,6 +155,8 @@ export function BookingBlock({
   internalStatus?: InternalStatus
   /** The part of it in this column: a booking shared with a colleague shows each one's part in their column. */
   items?: CalendarBooking['items']
+  /** One person's wide column (B-Calendar `dayOne`): the phone, the length and price, the note. */
+  wide?: boolean
 }) {
   const t = useTranslations('calendar.block')
   const s = useTranslations('status')
@@ -169,6 +172,7 @@ export function BookingBlock({
   const time = fmt.timeRange(start, end)
   const phone = b.source === 'phone'
   const walkIn = b.source === 'walkin'
+  const note = b.internalNote ?? b.clientNote
   const asked = b.move && t('when', { date: fmt.shortWeekdayDate(b.move.date), time: fmt.time(b.move.start) })
   // read after what the block shows (its name holds its text): the whole time, the status, the markers, the timer
   const more = join(
@@ -188,16 +192,21 @@ export function BookingBlock({
   return (
     <Frame
       {...shared}
-      look={LOOK[b.status]}
+      look={BLOCK_LOOK[b.status]}
       Icon={BOOKING_STATUS_ICON[b.status]}
       iconInk={ICON_INK[b.status]}
       start={fmt.time(start)}
-      name={b.client.name ?? t('unnamed')}
+      name={wide ? join([b.client.name ?? t('unnamed'), b.client.phone ?? ''], 'dot') : (b.client.name ?? t('unnamed'))}
       strike={b.status === 'cancelled'}
       lines={
         <>
-          {height >= SERVICES_FROM && <span className={line}>{services}</span>}
-          {height >= TIMES_FROM && (
+          {height >= SERVICES_FROM && (
+            <span className={line}>
+              {wide ? join([services, fmt.duration(end - start), b.price ? fmt.price(b.price) : ''], 'dot') : services}
+            </span>
+          )}
+          {wide && height >= TIMES_FROM && note && <span className={line}>{note}</span>}
+          {!wide && height >= TIMES_FROM && (
             <span className={cn(line, 'tabular-nums')}>
               {asked ? t('moveTo', { when: asked }) : t('timeLength', { time, length: fmt.duration(end - start) })}
             </span>
@@ -259,7 +268,7 @@ export function MoveBlock({
   return (
     <Frame
       {...shared}
-      look={LOOK.pending}
+      look={BLOCK_LOOK.pending}
       Icon={BOOKING_STATUS_ICON.pending}
       iconInk={ICON_INK.pending}
       start={fmt.time(start)}

@@ -1,6 +1,21 @@
 import type { CalendarView } from '@yeral/contract/calendar'
 import { describe, expect, it } from 'vitest'
-import { besideLive, buffersOf, cutoffOn, gridHours, movesIn, onGrid, placedIn, placeOf, pxOf, shadesOf, slotsOf, stretchOn } from './grid'
+import {
+  besideLive,
+  buffersOf,
+  cutoffOn,
+  gridHours,
+  mondayOf,
+  movesIn,
+  onGrid,
+  placedIn,
+  placeOf,
+  pxOf,
+  shadesOf,
+  slotsOf,
+  stretchOn,
+  weekCell,
+} from './grid'
 
 const DAY = '2026-10-14'
 const BEFORE = '2026-10-13'
@@ -23,6 +38,30 @@ const booking = (
   date = DAY,
   items: Item[] = [{ staffId: 's', start, end }],
 ) => ({ code, date, start, end, status, items }) as unknown as CalendarView['bookings'][number]
+
+describe('the week', () => {
+  it('runs from Monday', () => {
+    expect(mondayOf('2026-10-14')).toBe('2026-10-12')
+    expect(mondayOf('2026-10-12')).toBe('2026-10-12')
+    expect(mondayOf('2026-10-18')).toBe('2026-10-12')
+  })
+
+  it('counts a person’s day: booked minutes over working minutes, breaks left out, requests apart', () => {
+    const c = column(600, 1200)
+    c.days[0]!.breaks = [{ start: 720, end: 780 }]
+    const bookings = [booking('a', 600, 690), booking('b', 780, 870, 'pending'), booking('c', 900, 960, 'cancelled')]
+    const cell = weekCell({ bookings, moves: [] }, c, DAY)
+    expect(cell).toEqual({ date: DAY, off: null, bookings: 2, requests: 1, percent: 33 })
+  })
+
+  it('caps a day booked past its hours, and names a day off', () => {
+    expect(weekCell({ bookings: [booking('a', 480, 800)], moves: [] }, column(600, 720), DAY).percent).toBe(100)
+    const off = column(600, 720)
+    off.days = [{ date: DAY, working: null, breaks: [], off: { kind: 'dayoff', name: null } }]
+    expect(weekCell({ bookings: [], moves: [] }, off, DAY).off).toEqual({ kind: 'dayoff', name: null })
+    expect(weekCell({ bookings: [], moves: [] }, { ...off, days: [] }, DAY).off).toBe('none')
+  })
+})
 
 describe('the calendar day’s grid', () => {
   it('shows an hour around the day’s working hours and bookings, 08:00–21:00 when nobody works', () => {

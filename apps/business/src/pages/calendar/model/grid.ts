@@ -1,5 +1,5 @@
 import type { CalendarView } from '@yeral/contract/calendar'
-import { addDays, diffDays, localOf, QUARTER_HOUR } from '@yeral/domain/time'
+import { addDays, diffDays, dow, localOf, QUARTER_HOUR } from '@yeral/domain/time'
 
 /** B-Calendar's day grid: an hour is 80 px, a quarter 20 (the rows a click lands on). */
 export const HOUR_PX = 80
@@ -197,4 +197,32 @@ export function slotsOf({
 export function besideLive(p: Placed, column: readonly Placed[]): boolean {
   if (p.booking.status !== 'cancelled') return false
   return column.some((o) => o.booking.status !== 'cancelled' && o.booking.code !== p.booking.code && o.start < p.end && p.start < o.end)
+}
+
+/** The Monday of a day's week: the week on screen runs from it. */
+export const mondayOf = (date: string): string => addDays(date, -dow(date))
+
+/** A person's day in the week's load matrix (B-Calendar `.wkc`). */
+export type WeekCell = {
+  date: string
+  /** Not working, and why. */
+  off: NonNullable<Shade['off']> | 'none' | null
+  bookings: number
+  requests: number
+  /** Booked minutes over working minutes (book B-17 step 3), 100 at most. */
+  percent: number
+}
+
+/** How full a person's day is: live bookings and requests over their working minutes, breaks left out. */
+export function weekCell(view: Pick<CalendarView, 'bookings' | 'moves'>, column: CalendarView['columns'][number], date: string): WeekCell {
+  const day = column.days.find((d) => d.date === date)
+  const live = placedIn(view.bookings, column.staffId, date).filter((p) => p.booking.status !== 'cancelled')
+  const asked = movesIn(view.moves, column.staffId, date).length
+  const bookings = live.length
+  const requests = live.filter((p) => p.booking.status === 'pending').length + asked
+  if (!day?.working) return { date, off: shadesOf(day, 0, 24)[0]?.off ?? 'none', bookings, requests, percent: 0 }
+  const breaks = day.breaks.reduce((sum, b) => sum + b.end - b.start, 0)
+  const working = day.working.close - day.working.open - breaks
+  const booked = live.reduce((sum, p) => sum + p.end - p.start, 0)
+  return { date, off: null, bookings, requests, percent: working > 0 ? Math.min(100, Math.round((booked / working) * 100)) : 0 }
 }

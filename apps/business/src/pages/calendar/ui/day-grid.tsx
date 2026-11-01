@@ -63,6 +63,7 @@ export function DayGrid({
   phoneStaff,
   busy,
   specialist,
+  only,
   moving,
   onOpen,
   onBlock,
@@ -80,6 +81,8 @@ export function DayGrid({
   busy?: boolean
   /** The reader is a specialist: the refusal under «Busy elsewhere» speaks to them. */
   specialist?: boolean
+  /** One person's wide column (B-Calendar `dayOne`, book B-17). */
+  only?: string
   /** Move mode (book B-26): a free slot takes the booking instead of opening the menu. */
   moving?: Moving
   onOpen: (pick: Pick) => void
@@ -153,7 +156,8 @@ export function DayGrid({
     }
   }
 
-  if (view.columns.length === 0) return <p className="m-0 px-4 py-10 text-small text-n-600 sm:px-8">{t('nobody')}</p>
+  const columns = only ? view.columns.filter((c) => c.staffId === only) : view.columns
+  if (columns.length === 0) return <p className="m-0 px-4 py-10 text-small text-n-600 sm:px-8">{t('nobody')}</p>
 
   return (
     <div
@@ -169,7 +173,7 @@ export function DayGrid({
         {/* the names stay on top while the day scrolls */}
         <div className="sticky top-0 z-12 flex border-b border-n-200 bg-n-0">
           <div className={`${GUTTER} sticky left-0 z-8 bg-n-0`} />
-          {view.columns.map((c) => {
+          {columns.map((c) => {
             // the day's own, as the day's line counts them (requests among the bookings)
             const mine = view.bookings.filter(
               (b) => b.date === date && b.status !== 'cancelled' && b.items.some((i) => i.staffId === c.staffId),
@@ -223,10 +227,11 @@ export function DayGrid({
               </span>
             )}
           </div>
-          {view.columns.map((c) => (
+          {columns.map((c) => (
             <DayColumn
               key={c.staffId}
               className={phone(c)}
+              wide={!!only}
               view={view}
               column={c}
               date={date}
@@ -278,6 +283,7 @@ export function DayGrid({
  */
 function DayColumn({
   className,
+  wide,
   view,
   column: c,
   date,
@@ -300,6 +306,7 @@ function DayColumn({
   to: number
   timer: Timer
   className: string
+  wide: boolean
   picked: Picked
   linked: string | null
   /** The grid's minute now on this day (`cutoffOn`): no slot ends before it. */
@@ -451,6 +458,7 @@ function DayColumn({
             selected={picked.request ? picked.request === b.code || picked.request === b.move?.code : picked.booking === b.code}
             linked={!!b.move && linked === b.code}
             source={!staying(p)}
+            wide={wide}
             timer={hold?.node}
             timerText={hold?.text}
             // the team's marker, on a confirmed booking (book B-29); the view carries only the statuses switched on
