@@ -5,6 +5,8 @@
  */
 export const CLIENT_URL = (process.env.E2E_CLIENT_URL ?? 'http://yeral.localhost').replace(/\/$/, '')
 export const BUSINESS_URL = (process.env.E2E_BUSINESS_URL ?? 'http://business.yeral.localhost').replace(/\/$/, '')
+/** The admin tool (`http://localhost:3503` for `PORT_BASE=3500`). */
+export const CMS_URL = (process.env.E2E_CMS_URL ?? 'http://cms.yeral.localhost').replace(/\/$/, '')
 /** The api, for the test hook that lets a booking's time pass (`E2E_HOOKS`; `http://localhost:3504` for `PORT_BASE=3500`). */
 export const API_URL = (process.env.E2E_API_URL ?? 'http://api.yeral.localhost').replace(/\/$/, '')
 

@@ -1,4 +1,4 @@
-# Ýeral on the owner's server (ADR 0023): Postgres, the api, the client site and the business app, behind the shared
+# Ýeral on the owner's server (ADR 0023): Postgres, the api, the client site, the business app and the admin tool, behind the shared
 # Caddy (../edge).
 # Lives at /srv/yeral with its .env (secrets, never in git: .env.example). Deploy: infra/server/README.md.
 name: yeral
@@ -105,6 +105,15 @@ services:
     networks:
       edge:
         aliases: [yeral-business]
+    mem_limit: 128m
+
+  # the admin tool's static build (cms.Dockerfile, its own Caddy), as the business app's
+  cms:
+    image: ${YERAL_CMS_IMAGE:?set by deploy.sh}
+    restart: unless-stopped
+    networks:
+      edge:
+        aliases: [yeral-cms]
     mem_limit: 128m
 
 networks:

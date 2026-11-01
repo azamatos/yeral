@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SectionPage } from '@/pages/section'
+import { TeamMembersPage } from '@/pages/team'
 
-export const Route = createFileRoute('/_team/team')({ component: () => <SectionPage section="team" /> })
+export const Route = createFileRoute('/_team/team')({ component: TeamMembersPage })

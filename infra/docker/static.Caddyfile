@@ -1,4 +1,4 @@
-# Serves a single-page app's static build from /srv inside its image (business, later cms). The stack's front door
+# Serves a single-page app's static build from /srv inside its image (business, cms). The stack's front door
 # (Caddyfile here, infra/server/edge on the server) adds TLS and the security headers and proxies to it.
 {
 	admin off

@@ -175,8 +175,7 @@ another certificate authority when Let's Encrypt fails, and the proxied records 
 ## Still to do
 
 - Deploys from GitHub Actions over SSH with the `deploy` user, after the owner approves a release (ADR 0020).
-- The cms site joins `yeral.caddy` with its app (the business app and the client site joined 25.10.2026); the
-  apex's `noindex` goes when real businesses join (owner, 01.11.2026).
+- The apex's `noindex` goes when real businesses join (owner, 01.11.2026).
 - With the real working MVP, before any real business's data (book chapter 10, P6; not for the demo launch, owner
   22.10.2026): a nightly database backup to Cloudflare R2 with the `media` volume and `.env`, which needs an R2 token
   the owner creates and puts in the server's `.env` (never in chat or git); error tracking and uptime alerts.

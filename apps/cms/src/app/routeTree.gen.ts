@@ -16,6 +16,8 @@ import { Route as TeamBusinessesRouteImport } from './routes/_team/businesses'
 import { Route as TeamReviewsRouteImport } from './routes/_team/reviews'
 import { Route as TeamTeamRouteImport } from './routes/_team/team'
 import { Route as SetupTokenRouteImport } from './routes/setup.$token'
+import { Route as TeamBusinessesIdRouteImport } from './routes/_team/businesses_.$id'
+import { Route as TeamBusinessesNewRouteImport } from './routes/_team/businesses_.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +53,16 @@ const SetupTokenRoute = SetupTokenRouteImport.update({
   path: '/setup/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamBusinessesIdRoute = TeamBusinessesIdRouteImport.update({
+  id: '/businesses_/$id',
+  path: '/businesses/$id',
+  getParentRoute: () => TeamRouteRoute,
+} as any)
+const TeamBusinessesNewRoute = TeamBusinessesNewRouteImport.update({
+  id: '/businesses_/new',
+  path: '/businesses/new',
+  getParentRoute: () => TeamRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +71,8 @@ export interface FileRoutesByFullPath {
   '/reviews': typeof TeamReviewsRoute
   '/team': typeof TeamTeamRoute
   '/setup/$token': typeof SetupTokenRoute
+  '/businesses/$id': typeof TeamBusinessesIdRoute
+  '/businesses/new': typeof TeamBusinessesNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +81,8 @@ export interface FileRoutesByTo {
   '/reviews': typeof TeamReviewsRoute
   '/team': typeof TeamTeamRoute
   '/setup/$token': typeof SetupTokenRoute
+  '/businesses/$id': typeof TeamBusinessesIdRoute
+  '/businesses/new': typeof TeamBusinessesNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,13 +93,30 @@ export interface FileRoutesById {
   '/_team/reviews': typeof TeamReviewsRoute
   '/_team/team': typeof TeamTeamRoute
   '/setup/$token': typeof SetupTokenRoute
+  '/_team/businesses_/$id': typeof TeamBusinessesIdRoute
+  '/_team/businesses_/new': typeof TeamBusinessesNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/businesses' | '/reviews' | '/team' | '/setup/$token'
+    | '/'
+    | '/login'
+    | '/businesses'
+    | '/reviews'
+    | '/team'
+    | '/setup/$token'
+    | '/businesses/$id'
+    | '/businesses/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/businesses' | '/reviews' | '/team' | '/setup/$token'
+  to:
+    | '/'
+    | '/login'
+    | '/businesses'
+    | '/reviews'
+    | '/team'
+    | '/setup/$token'
+    | '/businesses/$id'
+    | '/businesses/new'
   id:
     | '__root__'
     | '/'
@@ -93,6 +126,8 @@ export interface FileRouteTypes {
     | '/_team/reviews'
     | '/_team/team'
     | '/setup/$token'
+    | '/_team/businesses_/$id'
+    | '/_team/businesses_/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,6 +188,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SetupTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_team/businesses_/$id': {
+      id: '/_team/businesses_/$id'
+      path: '/businesses/$id'
+      fullPath: '/businesses/$id'
+      preLoaderRoute: typeof TeamBusinessesIdRouteImport
+      parentRoute: typeof TeamRouteRoute
+    }
+    '/_team/businesses_/new': {
+      id: '/_team/businesses_/new'
+      path: '/businesses/new'
+      fullPath: '/businesses/new'
+      preLoaderRoute: typeof TeamBusinessesNewRouteImport
+      parentRoute: typeof TeamRouteRoute
+    }
   }
 }
 
@@ -160,12 +209,16 @@ interface TeamRouteRouteChildren {
   TeamBusinessesRoute: typeof TeamBusinessesRoute
   TeamReviewsRoute: typeof TeamReviewsRoute
   TeamTeamRoute: typeof TeamTeamRoute
+  TeamBusinessesIdRoute: typeof TeamBusinessesIdRoute
+  TeamBusinessesNewRoute: typeof TeamBusinessesNewRoute
 }
 
 const TeamRouteRouteChildren: TeamRouteRouteChildren = {
   TeamBusinessesRoute: TeamBusinessesRoute,
   TeamReviewsRoute: TeamReviewsRoute,
   TeamTeamRoute: TeamTeamRoute,
+  TeamBusinessesIdRoute: TeamBusinessesIdRoute,
+  TeamBusinessesNewRoute: TeamBusinessesNewRoute,
 }
 
 const TeamRouteRouteWithChildren = TeamRouteRoute._addFileChildren(

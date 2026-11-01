@@ -1,4 +1,4 @@
-# Production-like stack on this machine: `pnpm docker:up` → http://yeral.localhost, http://business.yeral.localhost,
+# Production-like stack on this machine: `pnpm docker:up` → http://yeral.localhost, http://business.yeral.localhost, http://cms.yeral.localhost,
 # http://api.yeral.localhost/docs (operations.md).
 # The same api image runs on the own server (infra/server/yeral), behind the same kind of Caddy with TLS and real hosts.
 name: yeral
@@ -64,6 +64,16 @@ services:
         GITHUB_SHA: ${GITHUB_SHA:-local}
         YERAL_ENV: docker
 
+  # the admin tool: its static build, served by its own small Caddy (cms.Dockerfile)
+  cms:
+    image: yeral-cms:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/cms.Dockerfile
+      args:
+        GITHUB_SHA: ${GITHUB_SHA:-local}
+        YERAL_ENV: docker
+
   # the client site: its server-side renderer on Node (client.Dockerfile); it asks the api inside the stack
   client:
     image: yeral-client:local
@@ -89,6 +99,8 @@ services:
       api:
         condition: service_healthy
       business:
+        condition: service_healthy
+      cms:
         condition: service_healthy
       client:
         condition: service_healthy

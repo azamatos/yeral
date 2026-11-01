@@ -5,6 +5,7 @@
  * then show is what they show in production. Off, the route doesn't exist (404).
  */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
+import { adminInviteSchema, adminSetupLinkSchema } from '@yeral/contract/admin'
 import { BOOKING_STATUSES } from '@yeral/domain/model'
 import { addDays, today } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
@@ -13,7 +14,8 @@ import { bookingItems, bookings } from '../../db/schema'
 import type { Deps } from '../../deps'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
-import { errors, json } from '../../http/openapi'
+import { errors, json, jsonBody } from '../../http/openapi'
+import { inviteAdmin } from '../admin/accounts'
 import { isSlotConflict } from '../bookings/repo'
 import { completeVisits, expireRequests } from '../jobs/run'
 
@@ -72,22 +74,38 @@ async function endVisit(deps: Deps, b: { id: string; date: string }): Promise<vo
   )
 }
 
-export const e2eRoutes = new OpenAPIHono<AppEnv>().openapi(elapseRoute, async (c) => {
-  const { deps } = c.var
-  if (!deps.e2eHooks) throw new ApiError('not_found')
-  const { code } = c.req.valid('param')
-  const [b] = await deps.db.select().from(bookings).where(eq(bookings.code, code))
-  if (!b) throw new ApiError('not_found')
-  if (b.status === 'pending') {
-    await deps.db
-      .update(bookings)
-      .set({ holdUntil: new Date(deps.now()) })
-      .where(eq(bookings.id, b.id))
-    await expireRequests(deps)
-  } else if (b.status === 'confirmed') {
-    // moving a class or table booking's day would part it from its session or table: the flows book appointments
-    if (b.type !== 'appointment') throw new ApiError('invalid_status', { type: b.type }, 'only an appointment can end here')
-    await endVisit(deps, b)
-  } else throw new ApiError('invalid_status')
-  return c.json({ status: await statusOf(deps.db, b.id) }, 200)
+const adminInviteRoute = createRoute({
+  method: 'post',
+  path: '/e2e/admin-invite',
+  hide: true,
+  tags: ['e2e'],
+  summary: 'Test hook (`E2E_HOOKS`): a new team account and its setup link, as the server command makes them',
+  request: jsonBody(adminInviteSchema),
+  responses: { 200: json(adminSetupLinkSchema), 404: errors[404], 409: errors[409] },
 })
+
+export const e2eRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(elapseRoute, async (c) => {
+    const { deps } = c.var
+    if (!deps.e2eHooks) throw new ApiError('not_found')
+    const { code } = c.req.valid('param')
+    const [b] = await deps.db.select().from(bookings).where(eq(bookings.code, code))
+    if (!b) throw new ApiError('not_found')
+    if (b.status === 'pending') {
+      await deps.db
+        .update(bookings)
+        .set({ holdUntil: new Date(deps.now()) })
+        .where(eq(bookings.id, b.id))
+      await expireRequests(deps)
+    } else if (b.status === 'confirmed') {
+      // moving a class or table booking's day would part it from its session or table: the flows book appointments
+      if (b.type !== 'appointment') throw new ApiError('invalid_status', { type: b.type }, 'only an appointment can end here')
+      await endVisit(deps, b)
+    } else throw new ApiError('invalid_status')
+    return c.json({ status: await statusOf(deps.db, b.id) }, 200)
+  })
+  .openapi(adminInviteRoute, async (c) => {
+    const { deps } = c.var
+    if (!deps.e2eHooks) throw new ApiError('not_found')
+    return c.json(await inviteAdmin(deps, null, c.req.valid('json')), 200)
+  })

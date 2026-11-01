@@ -60,6 +60,12 @@ function Sidebar({
   const t = useTranslations('shell')
   const sdk = useSdk()
   const signOut = useMutation(sdk.admin.signOut())
+  // what's waiting for the team, the same answers the sections show
+  const waiting = {
+    businesses: useQuery(sdk.admin.businesses({ view: 'review' })).data?.items.length ?? 0,
+    reviews: useQuery(sdk.admin.reviews('reported')).data?.items.length ?? 0,
+    team: 0,
+  }
   return (
     <aside
       className={cn(
@@ -70,8 +76,15 @@ function Sidebar({
       <SideNav aria-label={t('menu')} collapsed={collapsed}>
         {SECTIONS.map((section) => {
           const Icon = SECTION_ICONS[section]
+          const count = waiting[section]
           return (
-            <SideNavItem key={section} asChild icon={<Icon />} label={t(`sections.${section}`)}>
+            <SideNavItem
+              key={section}
+              asChild
+              icon={<Icon />}
+              label={t(`sections.${section}`)}
+              count={count > 0 ? { count, tone: 'attention', label: t('waiting', { count }) } : null}
+            >
               <Link to={`/${section}`} />
             </SideNavItem>
           )
