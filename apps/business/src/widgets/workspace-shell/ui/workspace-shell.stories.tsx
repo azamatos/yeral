@@ -503,3 +503,17 @@ export const MyProfilePhone: Story = {
     await waitFor(() => expect(canvas.getByRole('button', { name: 'More' })).toHaveFocus())
   },
 }
+
+/** With no connection the shell says so (book F-096), and takes it back when the connection returns. */
+export const Offline: Story = {
+  play: async ({ canvas }) => {
+    const online = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine')!
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+    window.dispatchEvent(new Event('offline'))
+    await expect(await canvas.findByText(/You’re offline/)).toBeVisible()
+    delete (navigator as unknown as Record<string, unknown>).onLine
+    Object.defineProperty(Navigator.prototype, 'onLine', online)
+    window.dispatchEvent(new Event('online'))
+    await waitFor(() => expect(canvas.queryByText(/You’re offline/)).toBeNull())
+  },
+}

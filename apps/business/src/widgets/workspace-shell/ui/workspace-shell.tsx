@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSdk } from '@/shared/api'
 import { placeFor, targetRoute } from '../model/sections'
 import { useWorkspace } from '../model/use-workspace'
+import { OfflineBanner } from './offline-banner'
 import { ProfileDrawer } from './profile-drawer'
 import { RequestArrivals } from './request-arrivals'
 import { ShellSidebar } from './shell-sidebar'
@@ -66,6 +67,7 @@ export function WorkspaceShell() {
         className="flex min-w-0 flex-1 flex-col pb-(--tab-bar) sm:pb-0 [&:has(>main[data-fill])]:h-dvh"
         style={{ '--tab-bar': TAB_BAR_HEIGHT } as CSSProperties}
       >
+        <OfflineBanner />
         <Outlet />
       </div>
       <ShellTabBar onProfile={openProfile} />
