@@ -13,11 +13,12 @@ import { DatePicker } from '@yeral/ui/date-picker'
 import { cn } from '@yeral/ui/cn'
 import { Pill, pillVariants } from '@yeral/ui/pill'
 import { Spinner } from '@yeral/ui/spinner'
-import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, Plus } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useJoin } from '@/entities/booking'
 import { BlockTimeModal, type BlockSlot } from '@/features/block-time'
+import { NewBookingDrawer } from '@/features/create-booking'
 import { MoveBar, MoveConfirm, useMoveBooking } from '@/features/move-booking'
 import { useSdk } from '@/shared/api'
 import { useDatePickerWords } from '@/shared/i18n'
@@ -180,6 +181,10 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
             onChange={(e) => go({ cancelled: e.target.checked ? true : undefined })}
             className="min-h-11 font-medium"
           />
+          <Button size="s" className="max-sm:hidden" onClick={() => go({ panel: 'new', booking: undefined, move: undefined }, true)}>
+            <Plus aria-hidden />
+            {t('newBooking')}
+          </Button>
         </div>
         {summary && (
           <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-small text-n-600">
@@ -239,6 +244,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
               : go({ booking: search.booking === pick.booking ? undefined : pick.booking, request: undefined, move: undefined }, true)
           }
           onBlock={setBlocking}
+          onBook={(slot) => go({ panel: 'new', staff: slot.staffId, start: slot.start }, true)}
         />
       ) : (
         <div className="flex flex-1 items-center justify-center py-20">
@@ -304,6 +310,22 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           onClose={() => go({ request: undefined }, true)}
         />
       )}
+      {search.panel === 'new' && view.data && (
+        <NewBookingDrawer
+          slug={slug}
+          start={{
+            date,
+            staffId: search.staff,
+            start: search.start,
+            clientId: search.client,
+            serviceIds: search.services?.split(','),
+          }}
+          people={columns.filter((c) => !c.removed)}
+          specialist={specialist}
+          now={now}
+          onClose={() => go({ panel: undefined, start: undefined, client: undefined, services: undefined }, true)}
+        />
+      )}
       {/* the booking picked (`?booking=`), one drawer at a time: a request open wins */}
       {search.booking && !search.request && (
         <BookingDrawer
@@ -313,6 +335,18 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           level={level}
           placeholder={view.data?.bookings.find((b) => b.code === search.booking)}
           onMove={(b) => go({ move: b.code, booking: undefined }, true)}
+          onBookAgain={(b) =>
+            go(
+              {
+                panel: 'new',
+                booking: undefined,
+                client: b.client.id ?? undefined,
+                services: b.items.flatMap((i) => i.serviceId ?? []).join(',') || undefined,
+                staff: b.items[0]?.staffId ?? undefined,
+              },
+              true,
+            )
+          }
           onClose={() => go({ booking: undefined }, true)}
         />
       )}
