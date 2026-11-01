@@ -279,7 +279,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
 | F-139 | Client list and segments | Search by name/phone; chips Regular, New, Lapsed, Reported; visits, last visit, total, next booking. | MVP | drawn (B-Clients) | api built (`GET /v1/w/{slug}/clients`, 21.10.2026) |  |
-| F-140 | Client card | Stats (visits, average bill, last visit, no-shows), upcoming, history, complaints. | MVP | drawn (B-Client) | api built (`GET /v1/w/{slug}/clients/{id}`, 21.10.2026) | Money figures: Q-134. |
+| F-140 | Client card | Stats (visits, average bill, last visit, no-shows), upcoming, history, complaints. | MVP | drawn (B-Client) | built (`pages/client`, 01.11.2026); api built (`GET /v1/w/{slug}/clients/{id}`, 21.10.2026) | Money figures: Q-134. |
 | F-141 | Team notes and alert notes | Notes with author and date; "show when booking" notes appear on blocks and drawers. | MVP | drawn (B-Client · composer) | api built (read in the card, drawer lookup, requests, calendar; `POST /v1/w/{slug}/clients/{id}/notes`; 21.10.2026) |  |
 | F-142 | Add a client by hand | Only the phone is required; name, birthday, source, tags, note; "save and book". | MVP | drawn (B-Clients · modal) | api built (`POST /v1/w/{slug}/clients`, 21.10.2026) |  |
 | F-143 | No reminder SMS for a client | Switch when the client asked not to get reminders. | MVP | drawn (B-Client) | built (jobs honour `noRemindersSms`; the card's switch 21.10.2026) |  |

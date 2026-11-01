@@ -62,7 +62,7 @@ const row = (
   status,
   cancelledBy: null,
   source: 'web',
-  client: { id: null, name, phone: '+99365000000', isNew: false },
+  client: { id: '00000000-0000-4000-8000-000000000009', name, phone: '+99365000000', isNew: false },
   items: [{ serviceId: id(5), service, staffId: id(2), staff: 'Maral', start, end: start + 60 }],
   price: { type: 'fixed', amount: 120 },
   holdUntil: null,
@@ -254,6 +254,7 @@ export const MoveFromMenu: Story = {
   args: { path: '/w/glow-studio/bookings?tab=upcoming' },
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: 'Actions for Jemal B.' }))
+    await page.findByRole('menuitem', { name: 'Open the client’s card' })
     await userEvent.click(await page.findByRole('menuitem', { name: 'Move to another time' }))
     await expect(await canvas.findByText('The calendar')).toBeVisible()
   },

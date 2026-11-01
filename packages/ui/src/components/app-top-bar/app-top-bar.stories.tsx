@@ -9,6 +9,7 @@ import { expect, waitFor } from 'storybook/test'
 import { brand } from '../../brand'
 import { Button } from '../button'
 import { WorkspaceSwitcher } from '../workspace-switcher'
+import { BackLink } from '../back-link'
 import { AppTopBar } from './app-top-bar'
 
 const meta = {
@@ -107,6 +108,23 @@ export const PhoneTitle: Story = {
         </Button>
       </>
     ),
+  },
+}
+
+/** A page under a list (B-Client): the way back, a thin line, the title. On a phone the line goes and the words hide. */
+export const WithBack: Story = {
+  globals: { viewport: { value: 'xl' } },
+  args: {
+    title: 'Aýjemal Gurbanowa',
+    back: (
+      <BackLink asChild>
+        <a href="#clients">Clients</a>
+      </BackLink>
+    ),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('link', { name: 'Clients' })).toBeVisible()
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Aýjemal Gurbanowa' })).toBeVisible()
   },
 }
 

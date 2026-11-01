@@ -10,12 +10,15 @@ import { cn } from '../../lib/cn'
 export function AppTopBar({
   title,
   leading,
+  back,
   actions,
   focusKey,
   className,
 }: {
   title: ReactNode
   leading?: ReactNode
+  /** The way back to the list a page came from (B-Client `.back`, a BackLink), a thin line after it from 640. */
+  back?: ReactNode
   actions?: ReactNode
   /**
    * The page on screen (its address). When it changes, the title takes focus, so a screen reader starts at the new
@@ -37,11 +40,17 @@ export function AppTopBar({
       )}
     >
       {leading && <div className="mr-auto flex min-w-0 sm:hidden">{leading}</div>}
+      {back && (
+        <>
+          <div className="-ml-2 flex flex-none items-center">{back}</div>
+          <span aria-hidden className="h-5 w-px flex-none bg-n-200 max-sm:hidden" />
+        </>
+      )}
       <h1
         ref={titleRef}
         tabIndex={focusKey !== undefined ? -1 : undefined}
         className={cn(
-          'm-0 mr-auto min-w-0 truncate text-[22px] leading-7 font-bold tracking-[-0.015em] text-n-900 focus:outline-none sm:text-[19px] sm:leading-6 md:text-[22px] md:leading-7',
+          'm-0 mr-auto min-w-0 truncate text-[22px] leading-7 font-bold tracking-[-0.015em] text-n-900 focus:shadow-none focus:outline-none sm:text-[19px] sm:leading-6 md:text-[22px] md:leading-7',
           leading && 'max-sm:sr-only',
         )}
       >

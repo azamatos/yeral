@@ -168,7 +168,7 @@ function Body({
       </div>
       {b.status === 'confirmed' && <InternalStatusField slug={slug} booking={b} statuses={statuses} />}
       <AlertNotes card={card} />
-      <ClientBlock client={b.client} card={card} onBookAgain={onBookAgain} />
+      <ClientBlock slug={slug} client={b.client} card={card} onBookAgain={onBookAgain} />
       <KeyValueList
         items={[
           {

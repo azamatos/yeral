@@ -1,5 +1,5 @@
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import type { ClientRow } from '@yeral/contract/clients'
 import { CLIENT_SEGMENTS, type ClientSegment } from '@yeral/domain/clients'
 import { today } from '@yeral/domain/time'
@@ -7,17 +7,18 @@ import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { ChipRadioGroup } from '@yeral/ui/chip'
 import { useClock } from '@yeral/ui/clock'
+import { cn } from '@yeral/ui/cn'
 import { EmptyState } from '@yeral/ui/empty-state'
 import { Input } from '@yeral/ui/input'
 import { useMediaQuery } from '@yeral/ui/media-query'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@yeral/ui/menu'
-import { Pill } from '@yeral/ui/pill'
 import { Spinner } from '@yeral/ui/spinner'
 import { CellNote, Table, TableCell, TableColumnHeader, TableHeader, TableRow } from '@yeral/ui/table'
 import { toast } from '@yeral/ui/toast'
 import { Ellipsis, Plus, SearchX, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { ClientTags } from '@/entities/client'
 import { useSdk } from '@/shared/api'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import type { ClientsSearch } from '../model/search'
@@ -34,10 +35,10 @@ const NO_TOTAL = 'minmax(200px,1.5fr) minmax(130px,1fr) 80px minmax(110px,.8fr) 
 export function ClientsPage() {
   const { workspace } = useWorkspace()
   if (!workspace) return null
-  return <Clients key={workspace.slug} slug={workspace.slug} />
+  return <Clients key={workspace.slug} slug={workspace.slug} manage={workspace.level !== 'specialist'} />
 }
 
-function Clients({ slug }: { slug: string }) {
+function Clients({ slug, manage }: { slug: string; manage: boolean }) {
   const t = useTranslations('clients')
   const sections = useTranslations('shell.sections')
   const fmt = useFmt()
@@ -81,24 +82,21 @@ function Clients({ slug }: { slug: string }) {
 
   const tags = (r: ClientRow) => (
     <span className="flex flex-wrap gap-1">
-      {r.phoneOnly && (
-        <Pill tone="warning" size="s">
-          {t('phoneOnly')}
-        </Pill>
-      )}
-      {r.segments.map((s) => (
-        <Pill key={s} tone={s === 'flagged' ? 'danger' : 'neutral'} size="s">
-          {t(`segments.${s}`)}
-        </Pill>
-      ))}
-      {r.tags.map((tag) => (
-        <Pill key={tag} tone="neutral" size="s">
-          {tag}
-        </Pill>
-      ))}
+      <ClientTags phoneOnly={r.phoneOnly} segments={r.segments} tags={r.tags} />
     </span>
   )
   const name = (r: ClientRow) => r.name ?? t('unnamed')
+  const open = (r: ClientRow, search: { remove?: true } = {}) =>
+    void navigate({ to: '/w/$slug/clients/$id', params: { slug, id: r.id }, search })
+  const nameLink = (r: ClientRow, className: string) => (
+    <Link
+      to="/w/$slug/clients/$id"
+      params={{ slug, id: r.id }}
+      className={cn('text-n-900 no-underline hover:underline focus-visible:shadow-focus focus-visible:outline-none', className)}
+    >
+      {name(r)}
+    </Link>
+  )
   const next = (r: ClientRow) =>
     r.next ? t('next', { day: fmt.relativeShortDate(r.next.date, todayDate), time: fmt.time(r.next.start) }) : ''
   const menu = (r: ClientRow) => (
@@ -109,8 +107,14 @@ function Clients({ slug }: { slug: string }) {
         </Button>
       </MenuTrigger>
       <MenuContent align="end">
+        <MenuItem onSelect={() => open(r)}>{t('openCard')}</MenuItem>
         <MenuItem onSelect={() => book(r.id)}>{t('book')}</MenuItem>
         {r.phone && <MenuItem onSelect={() => copy(r)}>{t('copy')}</MenuItem>}
+        {manage && (
+          <MenuItem className="text-danger-ink" onSelect={() => open(r, { remove: true })}>
+            {t('delete')}
+          </MenuItem>
+        )}
       </MenuContent>
     </Menu>
   )
@@ -171,7 +175,7 @@ function Clients({ slug }: { slug: string }) {
             {rows.map((r) => (
               <li key={r.id} className="flex items-center gap-2 rounded-m border border-n-200 bg-n-0 p-3">
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="truncate text-small font-semibold text-n-900">{name(r)}</span>
+                  {nameLink(r, 'truncate text-small font-semibold')}
                   {r.phone && <span className="text-dense text-n-600 tabular-nums">{r.phone}</span>}
                   {tags(r)}
                 </span>
@@ -195,7 +199,7 @@ function Clients({ slug }: { slug: string }) {
             {rows.map((r) => (
               <TableRow key={r.id}>
                 <TableCell className="flex-col items-start gap-1">
-                  <span className="font-semibold text-n-900">{name(r)}</span>
+                  {nameLink(r, 'font-semibold')}
                   {tags(r)}
                 </TableCell>
                 <TableCell className="tabular-nums">{r.phone ?? <CellNote>{t('noNumber')}</CellNote>}</TableCell>

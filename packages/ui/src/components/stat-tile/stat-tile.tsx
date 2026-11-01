@@ -52,7 +52,7 @@ export function StatTile({ label, value, delta, caption, size, className, ...pro
             {caption && <span className="text-dense text-n-600">{caption}</span>}
           </span>
         ) : (
-          <span className="min-w-0 truncate text-dense text-n-600">{caption}</span>
+          <span className="min-w-0 text-dense text-n-600">{caption}</span>
         ))}
     </div>
   )

@@ -30,7 +30,11 @@ export const reportKinds = (b: CalendarBooking, now: number): ComplaintType[] =>
  * «Remove report» (book Q-207): within 7 days of filing; the owner and administrators remove any, a specialist the
  * ones they filed (`by.staffId`; a specialist whose id isn't known removes none).
  */
-export const canRemoveReport = (b: CalendarBooking, now: number, viewer: { level: Level; staffId?: string }): boolean => {
+export const canRemoveReport = (
+  b: { complaint: Pick<NonNullable<CalendarBooking['complaint']>, 'type' | 'by' | 'at'> | null },
+  now: number,
+  viewer: { level: Level; staffId?: string },
+): boolean => {
   const c = b.complaint
   if (!c || canRemoveComplaint({ complaintType: c.type, complaintAt: c.at }, now) !== null) return false
   return viewer.level !== 'specialist' || (!!viewer.staffId && c.by?.staffId === viewer.staffId)

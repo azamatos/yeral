@@ -19,6 +19,7 @@ import { Route as WSlugCalendarRouteImport } from './routes/w/$slug/calendar'
 import { Route as WSlugClientsRouteImport } from './routes/w/$slug/clients'
 import { Route as WSlugReviewsRouteImport } from './routes/w/$slug/reviews'
 import { Route as WSlugSettingsRouteRouteImport } from './routes/w/$slug/settings/route'
+import { Route as WSlugClientsIdRouteImport } from './routes/w/$slug/clients_.$id'
 import { Route as WSlugSettingsIndexRouteImport } from './routes/w/$slug/settings/index'
 import { Route as WSlugSettingsHoursRouteImport } from './routes/w/$slug/settings/hours'
 import { Route as WSlugSettingsLinkRouteImport } from './routes/w/$slug/settings/link'
@@ -78,6 +79,11 @@ const WSlugSettingsRouteRoute = WSlugSettingsRouteRouteImport.update({
   path: '/settings',
   getParentRoute: () => WSlugRouteRoute,
 } as any)
+const WSlugClientsIdRoute = WSlugClientsIdRouteImport.update({
+  id: '/clients_/$id',
+  path: '/clients/$id',
+  getParentRoute: () => WSlugRouteRoute,
+} as any)
 const WSlugSettingsIndexRoute = WSlugSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/w/$slug/clients': typeof WSlugClientsRoute
   '/w/$slug/reviews': typeof WSlugReviewsRoute
   '/w/$slug/': typeof WSlugIndexRoute
+  '/w/$slug/clients/$id': typeof WSlugClientsIdRoute
   '/w/$slug/settings/hours': typeof WSlugSettingsHoursRoute
   '/w/$slug/settings/link': typeof WSlugSettingsLinkRoute
   '/w/$slug/settings/permissions': typeof WSlugSettingsPermissionsRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/w/$slug/clients': typeof WSlugClientsRoute
   '/w/$slug/reviews': typeof WSlugReviewsRoute
   '/w/$slug': typeof WSlugIndexRoute
+  '/w/$slug/clients/$id': typeof WSlugClientsIdRoute
   '/w/$slug/settings/hours': typeof WSlugSettingsHoursRoute
   '/w/$slug/settings/link': typeof WSlugSettingsLinkRoute
   '/w/$slug/settings/permissions': typeof WSlugSettingsPermissionsRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/w/$slug/clients': typeof WSlugClientsRoute
   '/w/$slug/reviews': typeof WSlugReviewsRoute
   '/w/$slug/': typeof WSlugIndexRoute
+  '/w/$slug/clients_/$id': typeof WSlugClientsIdRoute
   '/w/$slug/settings/hours': typeof WSlugSettingsHoursRoute
   '/w/$slug/settings/link': typeof WSlugSettingsLinkRoute
   '/w/$slug/settings/permissions': typeof WSlugSettingsPermissionsRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/w/$slug/clients'
     | '/w/$slug/reviews'
     | '/w/$slug/'
+    | '/w/$slug/clients/$id'
     | '/w/$slug/settings/hours'
     | '/w/$slug/settings/link'
     | '/w/$slug/settings/permissions'
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/w/$slug/clients'
     | '/w/$slug/reviews'
     | '/w/$slug'
+    | '/w/$slug/clients/$id'
     | '/w/$slug/settings/hours'
     | '/w/$slug/settings/link'
     | '/w/$slug/settings/permissions'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/w/$slug/clients'
     | '/w/$slug/reviews'
     | '/w/$slug/'
+    | '/w/$slug/clients_/$id'
     | '/w/$slug/settings/hours'
     | '/w/$slug/settings/link'
     | '/w/$slug/settings/permissions'
@@ -317,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/w/$slug/settings'
       preLoaderRoute: typeof WSlugSettingsRouteRouteImport
+      parentRoute: typeof WSlugRouteRoute
+    }
+    '/w/$slug/clients_/$id': {
+      id: '/w/$slug/clients_/$id'
+      path: '/clients/$id'
+      fullPath: '/w/$slug/clients/$id'
+      preLoaderRoute: typeof WSlugClientsIdRouteImport
       parentRoute: typeof WSlugRouteRoute
     }
     '/w/$slug/settings/': {
@@ -410,6 +429,7 @@ interface WSlugRouteRouteChildren {
   WSlugClientsRoute: typeof WSlugClientsRoute
   WSlugReviewsRoute: typeof WSlugReviewsRoute
   WSlugIndexRoute: typeof WSlugIndexRoute
+  WSlugClientsIdRoute: typeof WSlugClientsIdRoute
 }
 
 const WSlugRouteRouteChildren: WSlugRouteRouteChildren = {
@@ -419,6 +439,7 @@ const WSlugRouteRouteChildren: WSlugRouteRouteChildren = {
   WSlugClientsRoute: WSlugClientsRoute,
   WSlugReviewsRoute: WSlugReviewsRoute,
   WSlugIndexRoute: WSlugIndexRoute,
+  WSlugClientsIdRoute: WSlugClientsIdRoute,
 }
 
 const WSlugRouteRouteWithChildren = WSlugRouteRoute._addFileChildren(
