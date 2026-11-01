@@ -4,10 +4,10 @@ _Last updated: 2026-11-01_ · the current state only; the history by day is in `
 
 ## Current focus
 
-**2026-11-01: slices 4–6 done and live, slice 7 being built, only the main session works now (no agents).** Slice 4 (#263–#286) is daily work;
+**2026-11-01: P4 done, the first launch (P5) is live, only the main session works now (no agents).** Slice 4 (#263–#286) is daily work;
 slice 5 (#288 search, category pages and Home; #289 the results map; #290 location; #291 sitemap, robots, JSON-LD and
-`discovery.spec.ts`) is discovery; slice 6 (#294, #295) is the admin tool, `apps/cms`. Live: main at 5dc0b48. **Now slice 7:** `log/2026-11-01-slice-7-plan.md`
-(book chapter 10), then P5. Each piece's log note (`log/2026-11-01-*.md`) lists what's there, its traps and what it left;
+`discovery.spec.ts`) is discovery; slice 6 (#294, #295) is the admin tool, `apps/cms`; slice 7 (#298, #299) is the static and legal pages and «Try the business app». Live: main at 956e640,
+`DEMO_WORKSPACE` on. **Next is the owner's review of the whole platform:** bugs and improvements wait for it (`finish-mvp-first`, owner 31.10). Each piece's log note (`log/2026-11-01-*.md`) lists what's there, its traps and what it left;
 `log/2026-11-01-slice-4-live.md` says what a live check by Claude can't cover: Claude doesn't sign in or create accounts on
 production, so the signed-in flows are proved on CI's stack and in the owner's review.
 
@@ -27,8 +27,7 @@ production goes by hand with the owner's go. The api, the business app and the c
 (ADR 0024; `api.yeral.app` since 22.10, `business.yeral.app` and `yeral.app` since 25.10, `noindex` until real businesses join;
 `cms.yeral.app` since 01.11).
 P2: steps 0–6 done; step 7 keeps releases and deploys from GitHub (after the first launch, owner 01.11) and the code-SMS cap
-(backups and error tracking moved to P6, owner 22.10). P4: slices 1–6 done and live, slice 3's remainder in Next steps 2;
-slice 7 ahead (book chapter 10). The design redraw stopped (ADR 0021 amended 20.10): the apps are
+(backups and error tracking moved to P6, owner 22.10). P4: all seven slices done and live, slice 3's remainder in Next steps 2. P5 live 01.11; P6 after investment (book chapter 10). The design redraw stopped (ADR 0021 amended 20.10): the apps are
 built from the book and the drawn boards, components in Storybook first.
 
 ## Owner's direction
@@ -109,13 +108,13 @@ the book has had none open since 21.10. Where the pre-book questions (old number
    SSR'd client site before React hydrates is lost, and a request block on the day grid can sit under a neighbour's; home's
    «How was it?» card comes with slice 5 (then the write-review steiger override goes). `make-example <slug>` (#233, deployed)
    opens one of the owner's test businesses once the owner names it.
-3. **Slice 7 now**, then the first launch (P5), approved in advance (22.10): `DEMO_WORKSPACE` on. The api's `/docs` page needs Scalar's bundle inventoried
-   or self-hosted before its CSP tightens. Left from slice 4: «Frequent clients»
+3. **Left after the first launch:** the api's `/docs` page needs Scalar's bundle inventoried
+   or self-hosted before its CSP tightens; the business landing page (B-Landing); the ExampleBadge beside the demo workspace's name. Left from slice 4: «Frequent clients»
    on the new booking's name search (needs a list sorted by visits), the phone bookings list's filters, the clients list's chip
    counts, the card's Visits total and History count (the api sends neither), Report and Cancel on the bookings row menu, Undo
    when a report is removed on the card, the owner's click test including the install on a real phone. Left from slice 5: the
    phone's full-screen search sheet (Mobile 1), suggestions in «What?», the empty state's rows for tomorrow, grouping pins on one
-   spot; slice 7 adds «Try the business app» and the footer's About, Help and legal links. The site stays `noindex` at the edge
+   spot; The site stays `noindex` at the edge
    until real businesses join (owner, 01.11).
 4. **Slice 2's follow-ups** (`log/2026-10-2[345]-*.md`): a category changed after the menu was saved keeps that menu;
    a lighter public categories list; one shared rule for which special day applies (app and api); a shared fake api
@@ -139,17 +138,18 @@ through the chat: the owner runs `docker compose -f /srv/yeral/compose.yml run -
 <login> "<name>"` over SSH (login 3–32 of a-z 0-9 . -; the permission check refused it for Claude on 01.11), opens the setup link (24 hours,
 `cms.<domain>/setup/<token>`), picks the password, adds the authenticator app and keeps the 10 recovery codes. The old
 Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an early Ýeral prototype) stays until all the web apps are
-live, then Claude deletes it, and branch protection on `main` goes on when the demo app is done: both approved 01.11. The
-owner's other Pages projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts
+live, then goes (approved 01.11): Cloudflare refuses until its custom domain `yeral.azamatos.com` is removed, which wrangler can't do, so that and the
+CNAME are the owner's in the dashboard; delete the project after. The owner's other Pages projects aren't Ýeral's and stay. Branch protection on
+`main` is on since 01.11: a PR on a branch up to date with `main`, CI's two jobs green, no force push. Later (P6): an R2 token, accounts
 for error tracking and uptime checks.
 
 **Server:** `ssh yeral-vps` (Claude's own since 31.10: deploy and SSH need no go); deploy by hand with `infra/server/README.md` →
 "Deploying Ýeral by hand" (`deploy.sh` saves the database first; the backups and config copies kept on the server are
 in `progress.md`'s deploy entries 23.10–26.10, every backup mode 600). Since 2026-11-01 it runs main at
-5dc0b48: migrations 0000–0044 and later, the 6
+956e640: migrations 0000–0044 and later, the 6
 cities, the category catalogue with its starter services, the 11 example businesses, the owner's test businesses;
 `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no admin account yet; `SIGN_IN_CODE_ON_SCREEN` and `EXAMPLE_BUSINESSES` on
-(owner, 25.10), `DEMO_WORKSPACE` off (on at the first launch). Public through the edge Caddy (`yeral.caddy` in
+(owner, 25.10), `DEMO_WORKSPACE` on (first launch, 01.11). Public through the edge Caddy (`yeral.caddy` in
 `/srv/edge/sites/`): `api.yeral.app`, `business.yeral.app`, `yeral.app` (`noindex`), `cms.yeral.app` (`noindex`), `www` → the apex, Let's Encrypt
 certificates. Firewall SSH/80/443, fail2ban, keys only; no backups
 off the disk (P6); the `deploy` user has no key yet (P2 step 7).

@@ -512,6 +512,10 @@
   one-second wait was shorter than its cold start on CI; a re-run across Ashgabat's midnight failed 24 «tomorrow» stories on top. The
   clock itself was ruled out (55 of 55 at a faked 23:52, three runs). #297 fixed the wait; `main` green at 66c2006, which differs from
   production only in that test file.
+- **2026-11-01 · Slice 7 and the first launch:** #298 About, Help, Privacy, Terms, the footer's links, the terms line; #299 `/try`, the Demo banner, «Log in»,
+  `DEMO_WORKSPACE` on, `demo.spec.ts`. Deployed 956e640 after `main`'s own run went green (a backup first). Live check: all three sites on that
+  commit, the four pages and `/try` answer, the policy names the operator with no placeholder left, `noindex` stays, a demo session opens. Branch
+  protection on `main` is on. `yeral-proto` not deleted: Cloudflare wants its custom domain gone first, which is the owner's step.
 
 ## Roadmap
 
