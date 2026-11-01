@@ -106,6 +106,7 @@ export const clientMatchSchema = z
     usualServices: z.array(idSchema),
   })
   .meta({ id: 'ClientMatch' })
+export type ClientMatch = z.infer<typeof clientMatchSchema>
 export const clientLookupSchema = z.object({ items: z.array(clientMatchSchema) }).meta({ id: 'ClientLookup' })
 
 /** One booking on the card: upcoming (requests with their answer time) or in the history. */
