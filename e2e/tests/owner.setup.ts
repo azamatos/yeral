@@ -11,5 +11,7 @@ setup('the owner signs in to the business app', async ({ page }) => {
   await signInWithCode(page, SALON.ownerPhone)
   await page.getByRole('link', { name: 'Open the calendar now' }).click()
   await page.waitForURL(`**/w/${SALON.slug}/calendar**`)
+  // the first visit opens «Colours and symbols» over the grid; «Got it» is kept in the browser, so in the session too
+  await page.getByRole('button', { name: 'Got it' }).click()
   await page.context().storageState({ path: OWNER_STATE })
 })

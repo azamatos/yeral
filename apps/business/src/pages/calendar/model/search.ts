@@ -13,12 +13,15 @@ export type CalendarSearch = {
   request?: string
   staff?: string
   move?: string
+  /** All staff's day without it. */
+  view?: 'dayOne' | 'weekAll' | 'weekOne'
   panel?: 'new'
   start?: number
   client?: string
   services?: string
 }
 
+const VIEWS = ['dayOne', 'weekAll', 'weekOne'] as const
 const code = (value: unknown) => (typeof value === 'string' && value ? value : null)
 
 /** A real day only: «2026-02-30» or anything else leaves the calendar on today. */
@@ -37,6 +40,7 @@ export function calendarSearch(search: Record<string, unknown>): CalendarSearch 
     ...(request ? { request } : {}),
     ...(staff ? { staff } : {}),
     ...(move ? { move } : {}),
+    ...(VIEWS.find((v) => v === search.view) ? { view: search.view as (typeof VIEWS)[number] } : {}),
     ...(search.panel === 'new' ? { panel: 'new' as const } : {}),
     ...(typeof start === 'number' && Number.isInteger(start) && start >= 0 && start < 2880 ? { start } : {}),
     ...(client ? { client } : {}),

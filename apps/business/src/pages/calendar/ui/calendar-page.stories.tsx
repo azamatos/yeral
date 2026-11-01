@@ -160,6 +160,21 @@ const viewOf = (date: string, cancelled: boolean, only?: string): CalendarView =
   }
 }
 
+/** Seven days as the api answers `days=7`: everyone's column across the week, the bookings and summaries of them all. */
+const weekOf = (from: string, cancelled: boolean, only?: string): CalendarView => {
+  const days = Array.from({ length: 7 }, (_, i) => viewOf(addDays(from, i), cancelled, only))
+  return {
+    ...days[0]!,
+    to: addDays(from, 6),
+    columns: days[0]!.columns.map((c, k) => ({ ...c, days: days.flatMap((d) => d.columns[k]!.days) })),
+    bookings: days.flatMap((d) => d.bookings),
+    moves: days.flatMap((d) => d.moves),
+    blocks: days.flatMap((d) => d.blocks),
+    elsewhere: days.flatMap((d) => d.elsewhere),
+    summary: days.flatMap((d) => d.summary),
+  }
+}
+
 /** The waiting requests, most urgent first: Mähri G.'s (18 min) and Ogulgerek M.'s move (25 min). */
 const requestsOf = (canAnswer: boolean, moveFits = true): BookingRequest[] => {
   const asking = dayBookings[1]!
@@ -304,7 +319,7 @@ const fakeApi =
       if (route === 'GET /me/invites') return json({ items: [] })
       if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
       if (route === 'GET /w/glow-studio/calendar') {
-        const view = viewOf(
+        const view = (url.searchParams.get('days') === '7' ? weekOf : viewOf)(
           url.searchParams.get('date')!,
           url.searchParams.get('cancelled') === 'true',
           level === 'specialist' ? id(2) : undefined,
@@ -451,6 +466,10 @@ const meta = {
     layouts: { '/w/$slug': { component: WorkspaceShell, children: { calendar: CalendarPage } } },
     path: '/w/glow-studio/calendar',
     server: fakeApi('owner'),
+  },
+  // the legend opens by itself on a first visit: every story but its own has been here before
+  beforeEach: () => {
+    localStorage.setItem('yeral.calendar.legend-seen', '1')
   },
 } satisfies Meta<typeof PageStory>
 export default meta
@@ -1235,5 +1254,91 @@ export const QuickBookingMore: Story = {
     await expect(await d.findByRole('group', { name: 'Morning' })).toBeVisible()
     await userEvent.click(d.getByRole('button', { name: 'Another service' }))
     await expect(await d.findByRole('checkbox', { name: /Women’s haircut/ })).toBeChecked()
+  },
+}
+
+/** One specialist (book B-17 step 1): one wide column with the phone and the length and price, a select for the person. */
+export const OneSpecialist: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('radio', { name: 'One specialist' }))
+    const grid = within(canvas.getByRole('region', { name: /^Calendar, / }))
+    await expect(await grid.findByRole('group', { name: 'Aýna' })).toBeVisible()
+    await expect(grid.queryByRole('group', { name: 'Maral' })).toBeNull()
+    await expect(grid.getByRole('button', { name: /Gözel A\. · \+99365000000/ })).toBeVisible()
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Specialist' }), 'Maral')
+    await expect(await grid.findByRole('group', { name: 'Maral' })).toBeVisible()
+  },
+}
+
+/** The week's load (book B-17 step 3): a row per person, a bar and a count a day; a cell opens that day for everyone. */
+export const WeekLoad: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('radio', { name: 'Week' }))
+    const table = await canvas.findByRole('table', { name: 'The week’s load' })
+    await expect(canvas.getByRole('button', { name: 'Previous week' })).toBeVisible()
+    const cell = within(table).getByRole('button', { name: /^Aýna, .*: 2 bookings\s*27%\s*1 request/ })
+    await userEvent.click(cell)
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    await expect(grid.getByRole('group', { name: 'Maral' })).toBeVisible()
+    await expect(canvas.getByRole('radio', { name: 'Day' })).toHaveAttribute('aria-checked', 'true')
+  },
+}
+
+/** One person's week (book B-17 step 4): textless blocks; a day's head opens that day, one person's. */
+export const WeekOfOne: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('radio', { name: 'Week' }))
+    await canvas.findByRole('table', { name: 'The week’s load' })
+    await userEvent.click(canvas.getByRole('radio', { name: 'One specialist' }))
+    const head = await canvas.findByRole('button', { name: /2 bookings.*Aýna, / })
+    await expect((await canvas.findAllByTestId('week-block')).length).toBe(2)
+    await userEvent.click(head)
+    await expect(await canvas.findByRole('group', { name: 'Aýna' })).toBeVisible()
+    await expect(canvas.queryByRole('group', { name: 'Maral' })).toBeNull()
+  },
+}
+
+/** A specialist has their own week, and no «All staff». */
+export const SpecialistWeek: Story = {
+  args: { server: fakeApi('specialist') },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await expect(canvas.queryByRole('radio', { name: 'All staff' })).toBeNull()
+    await userEvent.click(canvas.getByRole('radio', { name: 'Week' }))
+    await expect(await canvas.findAllByRole('button', { name: /Maral, .*open the day$/ })).toHaveLength(7)
+  },
+}
+
+/** The week's matrix from the address, stopping on it: the page's axe check reads it as it stands. */
+export const WeekLoadAddress: Story = {
+  args: { path: '/w/glow-studio/calendar?view=weekAll' },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('table', { name: 'The week’s load' })
+  },
+}
+
+/** One person's week from the address, stopping on it. */
+export const WeekOfOneAddress: Story = {
+  args: { path: '/w/glow-studio/calendar?view=weekOne' },
+  play: async ({ canvas }) => {
+    await expect((await canvas.findAllByTestId('week-block')).length).toBe(2)
+  },
+}
+
+/** The legend (F-134): by itself on a first visit, «Got it» remembers it; the ? opens it any time. */
+export const LegendFirstVisit: Story = {
+  beforeEach: () => {
+    localStorage.removeItem('yeral.calendar.legend-seen')
+  },
+  play: async () => {
+    const d = within(await page.findByRole('dialog', { name: 'Colours and symbols' }))
+    await waitFor(() => expect(d.getByText('New request — waiting for an answer')).toBeVisible())
+    await expect(d.getByText('Phone — booked during a call')).toBeVisible()
+    await userEvent.click(d.getByRole('button', { name: 'Got it' }))
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await expect(localStorage.getItem('yeral.calendar.legend-seen')).toBe('1')
   },
 }

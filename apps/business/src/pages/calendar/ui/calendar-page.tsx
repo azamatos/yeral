@@ -12,6 +12,8 @@ import { useClock } from '@yeral/ui/clock'
 import { DatePicker } from '@yeral/ui/date-picker'
 import { cn } from '@yeral/ui/cn'
 import { Pill, pillVariants } from '@yeral/ui/pill'
+import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { ChevronLeft, ChevronRight, Clock, Plus } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
@@ -24,9 +26,12 @@ import { useSdk } from '@/shared/api'
 import { useDatePickerWords } from '@/shared/i18n'
 import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
-import { gridHours } from '../model/grid'
+import { gridHours, mondayOf } from '../model/grid'
 import type { CalendarSearch } from '../model/search'
+import { CalendarLegend } from './calendar-legend'
 import { DayGrid } from './day-grid'
+import { WeekAll } from './week-all'
+import { WeekOne } from './week-one'
 
 /**
  * The calendar's day (B-Calendar, design §4 and §27.4, book B-16): `?date=` (today without it), the toolbar (Today,
@@ -56,8 +61,13 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
   const todayDate = today(now)
   const date = search.date ?? todayDate
   const cancelled = !!search.cancelled
+  // a specialist has only their own column: the day and week of one person
+  const shape = specialist ? (search.view === 'weekOne' || search.view === 'weekAll' ? 'weekOne' : 'dayOne') : (search.view ?? 'dayAll')
+  const week = shape === 'weekAll' || shape === 'weekOne'
+  const oneOnly = shape === 'dayOne' || shape === 'weekOne'
+  const firstDay = week ? mondayOf(date) : date
   const view = useQuery({
-    ...sdk.calendar.view(slug, { date, days: 1, cancelled, lang: locale }),
+    ...sdk.calendar.view(slug, { date: firstDay, days: week ? 7 : 1, cancelled, lang: locale }),
     // the day on screen stays while the next one loads
     placeholderData: keepPreviousData,
   })
@@ -71,6 +81,13 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
     void navigate({ to: '.', search: (prev: CalendarSearch) => ({ ...prev, ...patch }), replace })
   // another day: the booking picked on this one goes
   const goDay = (next: string) => go({ date: next === todayDate ? undefined : next, booking: undefined })
+  // a week's cell or head opens that day, as many people as the week showed
+  const openDay = (day: string, next?: 'dayOne') => go({ date: day === todayDate ? undefined : day, view: next })
+  const step = week ? 7 : 1
+  const pickShape = (range: 'day' | 'week', who: 'All' | 'One') => {
+    const next = `${range}${who}` as const
+    go({ view: next === 'dayAll' ? undefined : next }, true)
+  }
   // the waiting requests, most urgent first: the chip opens the first (B-Calendar `openQueue`)
   const queue = useQuery(sdk.requests.list(slug)).data?.items ?? []
   /**
@@ -127,8 +144,8 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
               size="s"
               iconOnly
               className="max-sm:size-11"
-              aria-label={t('prev')}
-              onClick={() => goDay(addDays(date, -1))}
+              aria-label={t(week ? 'prevWeek' : 'prev')}
+              onClick={() => goDay(addDays(date, -step))}
             >
               <ChevronLeft />
             </Button>
@@ -137,19 +154,62 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
               size="s"
               iconOnly
               className="max-sm:size-11"
-              aria-label={t('next')}
-              onClick={() => goDay(addDays(date, 1))}
+              aria-label={t(week ? 'nextWeek' : 'next')}
+              onClick={() => goDay(addDays(date, step))}
             >
               <ChevronRight />
             </Button>
           </span>
           <DatePicker
             look="title"
-            copy={{ ...words, value: fmt.weekdayDate, placeholder: t('pickDate') }}
+            copy={{
+              ...words,
+              value: week
+                ? () => t('weekRange', { from: fmt.dayMonth(firstDay), to: fmt.dayMonth(addDays(firstDay, 6)) })
+                : fmt.weekdayDate,
+              placeholder: t('pickDate'),
+            }}
             today={todayDate}
             value={date}
             onValueChange={goDay}
           />
+          <Segmented
+            aria-label={t('views.range')}
+            size="s"
+            className="max-sm:hidden"
+            value={week ? 'week' : 'day'}
+            onValueChange={(range) => range && pickShape(range as 'day' | 'week', oneOnly ? 'One' : 'All')}
+          >
+            <SegmentedItem value="day">{t('views.day')}</SegmentedItem>
+            <SegmentedItem value="week">{t('views.week')}</SegmentedItem>
+          </Segmented>
+          {!specialist && (
+            <Segmented
+              aria-label={t('views.who')}
+              size="s"
+              className="max-sm:hidden"
+              value={oneOnly ? 'one' : 'all'}
+              onValueChange={(who) => who && pickShape(week ? 'week' : 'day', who === 'one' ? 'One' : 'All')}
+            >
+              <SegmentedItem value="all">{t('views.all')}</SegmentedItem>
+              <SegmentedItem value="one">{t('views.one')}</SegmentedItem>
+            </Segmented>
+          )}
+          {!specialist && oneOnly && phoneStaff && (
+            <Select
+              size="s"
+              aria-label={t('specialist')}
+              className="w-auto max-sm:hidden"
+              value={phoneStaff}
+              onChange={(e) => go({ staff: e.target.value }, true)}
+            >
+              {columns.map((c) => (
+                <option key={c.staffId} value={c.staffId}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          )}
           <span className="flex-1" />
           {first ? (
             <button
@@ -185,8 +245,18 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
             <Plus aria-hidden />
             {t('newBooking')}
           </Button>
+          <CalendarLegend statuses={view.data?.internalStatuses ?? []} />
         </div>
-        {summary && (
+        {week && view.data && (
+          <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-small text-n-600">
+            {t.rich('weekLine', {
+              bookings: t('columnBookings', { n: view.data.summary.reduce((sum, d) => sum + d.count, 0) }),
+              requests: t('requests', { n: view.data.summary.reduce((sum, d) => sum + d.requests, 0) + view.data.moves.length }),
+              b: bold,
+            })}
+          </p>
+        )}
+        {!week && summary && (
           <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-small text-n-600">
             <span>{t.rich('bookings', { n: summary.count, b: bold })}</span>
             {dot}
@@ -238,7 +308,19 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           <Plus aria-hidden />
         </Button>
       )}
-      {view.data ? (
+      {view.data && shape === 'weekAll' && (
+        <WeekAll view={view.data} from={view.data.from} today={todayDate} onDay={(day) => openDay(day)} />
+      )}
+      {view.data && shape === 'weekOne' && columns.find((c) => c.staffId === phoneStaff) && (
+        <WeekOne
+          view={view.data}
+          column={columns.find((c) => c.staffId === phoneStaff)!}
+          from={view.data.from}
+          now={now}
+          onDay={(day) => openDay(day, 'dayOne')}
+        />
+      )}
+      {view.data && !week ? (
         <DayGrid
           view={view.data}
           date={shown}
@@ -248,6 +330,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           phoneStaff={phoneStaff}
           busy={view.isPlaceholderData}
           specialist={specialist}
+          only={oneOnly ? phoneStaff : undefined}
           moving={moving.booking ? { booking: moving.booking, target: moving.target, onPick: moving.pick } : undefined}
           onOpen={(pick) =>
             'request' in pick
@@ -258,9 +341,11 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           onBook={(slot) => go({ panel: 'new', staff: slot.staffId, start: slot.start }, true)}
         />
       ) : (
-        <div className="flex flex-1 items-center justify-center py-20">
-          <Spinner label={t('loading')} />
-        </div>
+        !view.data && (
+          <div className="flex flex-1 items-center justify-center py-20">
+            <Spinner label={t('loading')} />
+          </div>
+        )
       )}
       {moving.booking && moving.target && moving.summary && (
         <MoveConfirm

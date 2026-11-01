@@ -163,7 +163,8 @@ export function StatusLegend({
           e.preventDefault()
           titleRef.current?.focus()
         }}
-        className="flex max-h-[calc(100vh-200px)] w-80 flex-col gap-4 overflow-y-auto p-4"
+        // the room under the trigger, not a guess at where it sits: a banner or a second toolbar row moves it down
+        className="flex max-h-[min(calc(100vh-200px),var(--radix-popover-content-available-height))] w-80 flex-col gap-4 overflow-y-auto p-4"
       >
         <div className="-my-1.5 flex items-center justify-between gap-2">
           <h2 id={titleId} ref={titleRef} tabIndex={-1} className="m-0 text-[15px] leading-5 font-semibold outline-none">

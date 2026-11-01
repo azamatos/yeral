@@ -1,5 +1,5 @@
 export { canMoveBooking } from './model/can-move'
 export { AffectedBookingsList, useAffectedCount, useJoin, type AffectedBooking } from './ui/affected-bookings-list'
-export { BookingBlock, MoveBlock, type CalendarBooking, type CalendarMove } from './ui/booking-block'
+export { BLOCK_LOOK, BookingBlock, MoveBlock, type CalendarBooking, type CalendarMove } from './ui/booking-block'
 export { InternalStatusChip, useInternalStatusName } from './ui/internal-status-chip'
 export { BOOKING_STATUS_ICON, COLOUR_KEY, INTERNAL_STATUS_ICON } from './ui/status-icons'
