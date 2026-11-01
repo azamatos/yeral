@@ -131,7 +131,7 @@ flowchart TD
 - On phones the search field opens a full-screen search sheet: what, then where, then when (Mobile 1).
 - Design differs from the owner's direction: the Ýeral Biznes block says "Ýeke işleýän hünärmenler üçin mugt." (Free for solo specialists) and links to *Bahalar* (Prices), and the footer links to *Bahalar* too. The owner decided Ýeral is free for everyone now (activeContext 2026-10-16; business spec §25). Home was not updated in v0.5, so this copy has to change; the drawn free wording is the B-Landing "Mugt" band.
 
-**Status:** Design: drawn (Home; Mobile 1) · Code: built (api) — the "free today" list uses `GET /v1/search`.
+**Status:** Design: drawn (Home; Mobile 1) · Code: built (`pages/home`, 01.11.2026: the popular list until location comes with slice 5's D4; the phone's search sheet, «Try the business app» and the footer's About, Help and legal links are still to come) (api) — the "free today" list uses `GET /v1/search`.
 
 ### C-03 · Search, filter, sort and page through results
 
@@ -180,7 +180,7 @@ flowchart TD
 - There is no specialist-gender filter (staff have no such field; F-012 is Later).
 - The party filter accepts 1–8 for every restaurant; the business's own online limit (D1) isn't used yet (code: `MAX_ONLINE_PARTY`).
 
-**Status:** Design: drawn (Search · `party`; States 01, 08; Mobile 2); filters drawer text only · Code: built (api) — `GET /v1/search`; no specialist-gender filter.
+**Status:** Design: drawn (Search · `party`; States 01, 08; Mobile 2); filters drawer text only · Code: built (`pages/search`, 01.11.2026; the address says `day=`, as `date=` belongs to the booking's address; the party chip waits for tables, the empty state's tomorrow rows and the skeleton's 300 ms aren't there yet) (api) — `GET /v1/search`; no specialist-gender filter.
 
 ### C-04 · Search on the map
 
@@ -242,7 +242,7 @@ flowchart LR
 - Unknown category: the 404 page (States tile 09).
 - Category pages follow the same "free time only" rule as search (C-03; Q-150, decided 18.10.2026).
 
-**Status:** Design: text only (pattern of Search) · Code: built (api) — categories with their intro text, search by category.
+**Status:** Design: text only (pattern of Search) · Code: built (`pages/search` at `/{lang}/c/{category}`, 01.11.2026) (api) — categories with their intro text, search by category.
 
 ## The business page
 

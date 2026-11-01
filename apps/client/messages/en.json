@@ -103,13 +103,93 @@
     "saved": "Changes saved"
   },
   "footer": {
+    "forClients": "For clients",
+    "search": "Search",
+    "myBookings": "My bookings",
     "forBusiness": "For business",
     "business": "{brand} Business",
     "businessLogIn": "Business login",
     "copyright": "© {year} {brand}"
   },
   "home": {
-    "lead": "Search, business pages and booking come with the next parts of the site."
+    "kicker": "Online booking for any service",
+    "title": "Take your place.",
+    "lead": "A barber's chair, a dentist's appointment or a lesson: see the free times and book in a minute.",
+    "what": "What?",
+    "whatPlaceholder": "Service, place or specialist",
+    "where": "Where?",
+    "when": "When?",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "week": "This week",
+    "submit": "Show free times",
+    "popular": "Popular places",
+    "popularCaption": "By rating and number of reviews",
+    "seeAll": "See all",
+    "categories": "Not only beauty",
+    "categoriesCaption": "Any specialist or place that sells its time, in one app.",
+    "how": "How it works",
+    "steps": { "search": "Search", "pick": "Pick a time", "confirmed": "Get confirmed" },
+    "stepsText": {
+      "search": "Type a service or a place and pick a day: you'll see the places with a free time.",
+      "pick": "Choose the specialist and the time that suits you.",
+      "confirmed": "The business confirms, and the booking shows in My bookings, where you can change or cancel it."
+    },
+    "brandBusiness": "Ýeral Business",
+    "businessLabel": "{brand}",
+    "businessTitle": "Do you sell your time? Clients will find you here.",
+    "businessText": "Your calendar, requests and client list in one place. Free for everyone.",
+    "businessAction": "Add your business",
+    "reasons": { "online": "Online booking day and night", "reminders": "Reminders", "calendar": "The team's calendar" },
+    "reasonsText": {
+      "online": "Clients pick a free time and book themselves, without a call.",
+      "reminders": "Clients are reminded before they come, so fewer times go empty.",
+      "calendar": "Everyone on one screen, on a computer or a phone."
+    }
+  },
+  "businessCard": {
+    "line": "{category} · {street}",
+    "lineFar": "{line} · {distance}",
+    "from": "from {price}",
+    "example": "Example",
+    "bookAt": "Book {name} at {time}",
+    "more": "+{n}"
+  },
+  "search": {
+    "title": "Search",
+    "box": "Service, place or specialist",
+    "categories": "Categories",
+    "all": "All",
+    "filtersButton": "Filters",
+    "filtersOn": "Filters: {n}",
+    "day": "Which day",
+    "sort": "Sort",
+    "near": "Places near you",
+    "nearName": "{name} near you",
+    "popular": "Popular places",
+    "count": {
+      "today": "{n, plural, one {# place} other {# places}} · free time today",
+      "tomorrow": "{n, plural, one {# place} other {# places}} · free time tomorrow",
+      "week": "{n, plural, one {# place} other {# places}} · free time this week"
+    },
+    "days": { "today": "Today", "tomorrow": "Tomorrow", "week": "This week" },
+    "sorts": { "distance": "Nearest", "popular": "Most popular", "rating": "Rating", "price": "Price" },
+    "nothing": "No free time here",
+    "nothingHint": "Pick another day or clear the filters.",
+    "tryTomorrow": "Try tomorrow",
+    "clearFilters": "Clear filters",
+    "showMore": "Show more",
+    "filters": {
+      "title": "Filters",
+      "close": "Close",
+      "from": "Price from",
+      "to": "Price to",
+      "rating": "Rating 4.5+",
+      "openNow": "Open now",
+      "women": "Women only",
+      "clear": "Clear",
+      "apply": "Show results"
+    }
   },
   "notFound": {
     "title": "Page not found",
