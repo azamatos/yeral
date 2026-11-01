@@ -1,6 +1,6 @@
 /** The end-to-end flows' hook: time passes for one booking, and the real jobs do the rest (`E2E_HOOKS`). */
 import { addDays, nowMin, today } from '@yeral/domain/time'
-import { and, eq, gt, gte } from 'drizzle-orm'
+import { and, eq, gt, gte, sql } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { testDatabase } from '../../../test/db'
@@ -82,5 +82,29 @@ describe('e2e hook: time passes for one booking', () => {
     const row = await rowOf(confirmed!.id)
     expect(row.date < today(DEMO_NOW)).toBe(true)
     expect(row.start).toBe(confirmed!.start)
+  })
+
+  it('a visit whose time of day has passed ends today: a day back could be past the no-show window', async () => {
+    const [confirmed] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.businessId, salon), eq(bookings.status, 'confirmed')))
+    expect(confirmed, 'the seed has one more visit').toBeDefined()
+    const ahead = addDays(today(DEMO_NOW), 5)
+    // just after midnight: nobody's day has anything there
+    const earlier = confirmed!.start - 5
+    await db.transaction(async (tx) => {
+      await tx
+        .update(bookings)
+        .set({ date: ahead, start: confirmed!.start - earlier, end: confirmed!.end - earlier })
+        .where(eq(bookings.id, confirmed!.id))
+      await tx
+        .update(bookingItems)
+        .set({ date: ahead, start: sql`${bookingItems.start} - ${earlier}`, end: sql`${bookingItems.end} - ${earlier}` })
+        .where(eq(bookingItems.bookingId, confirmed!.id))
+    })
+    const res = await elapse(testApp(db, { e2eHooks: true }).app, confirmed!.code)
+    expect(await res.json()).toEqual({ status: 'completed' })
+    expect((await rowOf(confirmed!.id)).date).toBe(today(DEMO_NOW))
   })
 })

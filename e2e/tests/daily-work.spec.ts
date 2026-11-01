@@ -64,7 +64,7 @@ test('the owner books a client by phone from the calendar and the client’s My 
   await chooseAndSignIn(client, phone)
 
   const owner = await openOwnerCalendar(browser)
-  await owner.getByRole('button', { name: 'New booking' }).click()
+  await owner.getByRole('button', { name: 'New booking', exact: true }).click()
   const drawer = owner.getByRole('dialog', { name: 'New booking' })
   await drawer.getByRole('textbox', { name: 'Phone number' }).fill(phone)
   await expect(drawer.getByText(/^This number isn’t saved yet/)).toBeVisible()
