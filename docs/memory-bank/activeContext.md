@@ -1,19 +1,14 @@
 # Active context
 
-_Last updated: 2026-10-31_ · the current state only; the history by day is in `progress.md` → "Done".
+_Last updated: 2026-11-01_ · the current state only; the history by day is in `progress.md` → "Done".
 
 ## Current focus
 
-**2026-10-31: hygiene done, slice 3 all but closed, slice 4 planned; four pieces parked as drafts.** 30.10–31.10 merged
-#251–#262 (progress.md): activeContext trimmed; the support contacts out of the repo into the server's `.env`
-(`YERAL_SUPPORT_PHONE|TELEGRAM|EMAIL`, `hello@yeral.app` the third way); HSTS and a per-site CSP (the client site's
-with a per-request nonce; #253); slice 3's «How was it?» card, «You rated», the review's refusal, move mode on the
-api's own-items reads with the rules and «Add to calendar», the tabs' counts, a move losing a service refused; Playwright
-in CI with the first two flows (`pnpm e2e`, #258); the slice 4 plan (`log/2026-10-31-slice-4-plan.md`, #259); ADR 0014
-amended: one agent at a time (#261). **Not deployed yet:** the server runs 74fae7d; #253 and #255 take effect only
-with a deploy, which first needs the three support lines in `/srv/yeral/.env` (Next steps 1). Parked as draft PRs
-when the weekly limit cut the agents off (**#263** e2e flows, **#264** slice 4's api gaps A1, **#265** U1, **#266** U2):
-a fresh agent takes each over, one at a time. `main` was red 31.10 for a date-dependent story (fixed in #262).
+**2026-11-01: slice 3 closed in CI, slice 4 under way, only the main session works now.** Merged since 31.10: #263 e2e
+flows, #264 A1, #265 U1, #266 U2, #268 B12 notifications, #269 B2 booking drawer, #270 B3 report and cancel. Left in
+slice 4, in order: B1 (#271), B4, B5, B6, B7, a small PR putting the member's `staffId` on the workspace schema, B8, B9,
+B10, B11, B13, `daily-work.spec.ts`, then the fold and the deploy. The live server runs main at 808b640 (31.10), so
+nothing from #263 on is live; the deploy after slice 4 also checks a business page's map and photos for CSP violations.
 
 Where things stand: M0–M2 released as tags (#20, 16.10); releases paused until the MVP works (ADR 0009 amended, #133),
 production goes by hand with the owner's go. The api, the business app and the client site run on the own server
@@ -39,8 +34,10 @@ activeContext" rows now point):
 - Ýeral may be shown in the owner's portfolio, always as in development (27.10); the README's credit line stays.
 - 30.10: `hello@yeral.app` works and is configured (the owner tested it); the order of work: hygiene → close slice 3
   with e2e → slice 4, 5 → slices 6 + 7, the first launch. Agents run on Fable at high effort (Claude Code specific).
-- 31.10: one agent at a time, two at most, one on battery; no worktree per agent (ADR 0014 amended, AGENTS.md).
-  `gh pr merge` is allowed in `.claude/settings.json`: a reviewed PR on green CI merges without a prompt. Slice 4's
+- 01.11: no agents on this project, only the main session (ADR 0014 amended, AGENTS.md). PR merges are Claude's own.
+- 31.10: Ýeral takes at most 30 % of the week; deploys and SSH are Claude's own, at each slice's end. Finish the plan
+  to a working MVP with demo settings, take the recommended option, ask nothing small; the owner reviews the whole
+  platform afterwards. `gh pr merge` is allowed in `.claude/settings.json`: a reviewed PR on green CI merges without a prompt. Slice 4's
   three decisions (browser notifications: three events, in front and in the background, no web push; the installable
   app: manifest, icons and a small offline-page service worker; no dragging in slice 4) were put to the owner on 31.10
   with the recommended option; no answer yet — they stand as "Claude (delegated)" until the owner says otherwise.
@@ -91,11 +88,8 @@ the book has had none open since 21.10. Where the pre-book questions (old number
 
 ## Next steps
 
-1. **Deploy (owner's go):** add to `/srv/yeral/.env` (mode 600) `YERAL_SUPPORT_PHONE`, `YERAL_SUPPORT_TELEGRAM`,
-   `YERAL_SUPPORT_EMAIL=hello@yeral.app` (the phone and handle are the owner's; `deploy.sh` refuses without them),
-   then `infra/server/README.md` → "Deploying Ýeral by hand" (a backup first) and its post-deploy checklist for the
-   CSP (both sites with the console open, the maps, photos, the QR, the events stream; `curl -sI` for the headers;
-   rollback: `sites-yeral.caddy.before-latest` + `caddy reload`). Until then the live sites keep the old contacts.
+1. **Deploys:** at each slice's end, `infra/server/README.md` → "Deploying Ýeral by hand" (a backup first) with
+   `git archive origin/main`. The support lines are in `/srv/yeral/.env` since 31.10.
 2. **Close P4 slice 3:** finish draft **#263** (expiry with offers, cancel + Undo, a move, the review, 390 px: the
    env-gated api test hook must stay off in production); the live click test with skill `qa-flows` after the deploy;
    two bugs #258 found: a click on the SSR'd client site before React hydrates is lost, and a request block on the day
@@ -125,7 +119,7 @@ the book has had none open since 21.10. Where the pre-book questions (old number
    too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
-**Waiting on the owner:** the go for the deploy (Next steps 1); the `make-example` slug (which test business opens to clients); an objection, if any, to slice 4's three decisions. Branch protection on `main`
+**Waiting on the owner:** the `make-example` slug (which test business opens to clients); an objection, if any, to slice 4's three decisions. Branch protection on `main`
 when the demo app is done (27.10). The admin account once the admin tool (slice 6) is deployed, nothing secret
 through the chat: Claude runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite
 <login> "<name>"` (login 3–32 of a-z 0-9 . -) and the owner opens the setup link (24 hours,
@@ -134,11 +128,10 @@ Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an early Ýeral prot
 live, then goes (21.10); the owner's other Pages projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts
 for error tracking and uptime checks.
 
-**Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`; a production deploy needs the owner's go each
-time: the permission check refuses one Claude starts on its own); deploy by hand with `infra/server/README.md` →
+**Server:** `ssh yeral-vps` (Claude's own since 31.10: deploy and SSH need no go); deploy by hand with `infra/server/README.md` →
 "Deploying Ýeral by hand" (`deploy.sh` saves the database first; the backups and config copies kept on the server are
-in `progress.md`'s deploy entries 23.10–26.10, every backup mode 600). Since 2026-10-26 11:20 UTC it runs main at
-74fae7d (main is far ahead: #251–#262 wait for the next deploy) (images `yeral-api`, `yeral-business`, `yeral-client` at `74fae7d0837a75bb`): migrations 0000–0044, the 6
+in `progress.md`'s deploy entries 23.10–26.10, every backup mode 600). Since 2026-10-31 23:47 it runs main at
+808b640: migrations 0000–0044 and later, the 6
 cities, the category catalogue with its starter services, the 11 example businesses, the owner's test businesses;
 `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no admin account yet; `SIGN_IN_CODE_ON_SCREEN` and `EXAMPLE_BUSINESSES` on
 (owner, 25.10), `DEMO_WORKSPACE` off (on at the first launch). Public through the edge Caddy (`yeral.caddy` in

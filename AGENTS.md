@@ -63,8 +63,8 @@ and milestones: `docs/memory-bank/progress.md`.
 - The owner writes in English. The product is built in English; each market adds its languages at launch
   (Turkmenistan: Turkmen, Russian; ADR 0022).
 - Finished work: review it (skill `code-review`, fix what it finds), then commit, push and merge on green CI without
-  asking. There is no staging (ADR 0020): prove changes locally. Production deploys go by hand while releases are paused (ADR 0009),
-  and the owner decides when one ships.
+  asking. There is no staging (ADR 0020): prove changes locally. Production deploys go by hand while releases are paused (ADR 0009):
+  Claude deploys and uses `ssh yeral-vps` on its own, at each slice's end (owner, 2026-10-31).
 - Ask first before: repository settings, DNS changes, deleting anything in the Cloudflare or GitHub account, paid services,
   adding files from outside the repo.
 - `docs/design/` is the owner's export: read it, don't edit it (a new export replaces the folder). The old mobile designs
@@ -74,6 +74,10 @@ and milestones: `docs/memory-bank/progress.md`.
 
 ## Token budget (owner, 2026-10-26; ADR 0014 amended)
 
+- **Owner, 2026-11-01: no agents on this project.** Only the main session works here: no subagents, no workflows.
+  They took too much of the limit (a piece cost about 1.4 % of the week). This wins over the agent rules below and
+  over "Parallel work", which stay for the history.
+- Ýeral may take at most 30 % of the whole weekly limit; the rest is the owner's job and other projects (2026-10-31).
 - The budget is the week, not the night: a run never spends more than the weekly limit allows. Before a run, weigh it
   against what's left of the week and the days left, and stop when its share is spent.
 - One agent at a time by default, two at most (different packages, a time window the owner set), one on battery

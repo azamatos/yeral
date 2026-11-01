@@ -239,6 +239,9 @@ that reads a file outside every package lists it as an input with `$TURBO_ROOT$`
 
 ## Parallel agents (ADR 0014, skill `parallel-work`)
 
+**Owner, 2026-11-01: no agents on this project.** Only the main session works here: no subagents, no workflows. The rest of this
+section stays as history.
+
 - Instructions for any agent tool: `AGENTS.md`; Claude Code adds `CLAUDE.md` and `.claude/skills`.
 - Task = GitHub issue with scope + acceptance criteria; claim with label `agent:<name>`.
 - One branch per task; one agent at a time by default, two at most, one on battery (31.10). A second concurrent agent

@@ -18,8 +18,8 @@ Project skills in `.claude/skills` — use them when the task matches:
 | `parallel-work` | starting, running and handing off a task alongside other agents |
 | `memory-bank` | end of a session, after a decision, or "remember this for the project" |
 
-- One agent at a time by default; a second concurrent one works in the shared worktree `.claude/worktrees/shared`
-  (not `isolation: worktree` per agent); follow `parallel-work`.
+- No agents on this project (owner, 2026-11-01): only the main session works here, no subagents, no workflows. A
+  `code-review` level that fans out agents counts: review the diff yourself.
 - The private auto-memory holds only how to work with the owner; project facts belong in `docs/memory-bank`.
 - `.claude/settings.json` enables the TypeScript LSP plugin (`typescript-lsp@claude-plugins-official`; needs
   `npm i -g typescript-language-server typescript`): ask it where a symbol is defined, who uses it and what type it has

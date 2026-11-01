@@ -5,6 +5,8 @@ description: Run a Yeral task as one of at most two agents without collisions â€
 
 # Parallel work
 
+**Not in use: Owner, 2026-11-01: no agents on this project. Only the main session works here: no subagents, no workflows.**
+
 Decision: ADR 0014 (amended 2026-10-31: one agent at a time by default, two at most, one on battery; no worktree per
 agent). Before starting a second agent, ask: does the owner want speed within a time window, and do the two tasks
 touch different packages? If not, run the tasks one after another â€” the tokens are the same, the Mac stays cool. Needs M0 (issues board, `PORT_BASE`, `db:setup`); before that, work on a branch and tell the owner.

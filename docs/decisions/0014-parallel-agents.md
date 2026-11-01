@@ -1,8 +1,12 @@
 # 0014. Working with several agents in parallel
 
 - Status: Accepted 2026-10-13; amended 2026-10-26 (a weekly token budget; a full agent is dropped, not resumed);
-  amended 2026-10-31 (one agent at a time by default, two at most; no worktree per agent; agents clean up)
+  amended 2026-10-31 (one agent at a time by default, two at most; no worktree per agent; agents clean up);
+  amended 2026-11-01 (no agents: only the main session works on this project)
 - Decided by: owner (2–3 agents in parallel in future) + Claude
+
+**Amended 2026-11-01 (owner):** no agents on this project. Only the main session works here, no subagents and no
+workflows, because agents took too much of the limit; everything below about agents stays as history.
 
 ## Context
 
