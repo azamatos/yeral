@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import type { ClientMatch } from '@yeral/contract/clients'
+import { localized } from '@yeral/domain/model'
 import { isPhone, nationalDigits, toE164 } from '@yeral/domain/phone'
 import { addDays, parseYmd, today } from '@yeral/domain/time'
 import { PHONE_RULES } from '@yeral/features/auth-by-phone'
@@ -7,16 +8,17 @@ import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
-import { ChipRadioGroup } from '@yeral/ui/chip'
+import { Chip, ChipRadioGroup } from '@yeral/ui/chip'
 import { DateStrip } from '@yeral/ui/date-strip'
 import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@yeral/ui/drawer'
 import { Field } from '@yeral/ui/field'
+import { useMediaQuery } from '@yeral/ui/media-query'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
 import { Switch } from '@yeral/ui/switch'
 import { Textarea } from '@yeral/ui/input'
 import { TimeSlot, TimeSlots } from '@yeral/ui/time-slots'
 import { toast } from '@yeral/ui/toast'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
@@ -25,6 +27,7 @@ import {
   eligibleFor,
   missingOf,
   PARTS,
+  quickServices,
   servicesOf,
   staffOf,
   totalOf,
@@ -36,12 +39,16 @@ import { ClientField } from './client-field'
 import { ServicePicker } from './service-picker'
 
 const SECTION_TITLE = 'text-small font-medium text-n-900'
+const LINK =
+  'cursor-pointer self-start border-0 bg-transparent p-0 text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none'
 
 /**
  * The new booking (B-Calendar `panel=new`, book B-23, B-25; decision 6): Phone call or Walk-in, the client by number or
  * name, the services, the specialist, the nearest free times or another day's, the team's note, «Notify the client». It
  * saves confirmed; the toast's Undo takes it back while the client hasn't heard yet. A walk-in is today from the quarter
  * that holds now, the client told nothing. `people` are the ones the reader may book for: a specialist has their own.
+ * Under 768 it's the quick sheet (B-Mobile 5a–5c, book B-24): the keypad up, the usual services as chips, the nearest
+ * times as a grid, and another service, another time and the note a tap away.
  */
 export function NewBookingDrawer({
   slug,
@@ -66,6 +73,8 @@ export function NewBookingDrawer({
   const sdk = useSdk()
   const errorText = useErrorText()
   const todayDate = today(now)
+  const phone = useMediaQuery('(max-width: 767px)')
+  const phoneField = useRef<HTMLInputElement>(null)
 
   const [source, setSource] = useState<TeamSource>('phone')
   const [digits, setDigits] = useState('')
@@ -78,6 +87,10 @@ export function NewBookingDrawer({
   const [time, setTime] = useState<number | null>(start.start ?? null)
   const [note, setNote] = useState('')
   const [notify, setNotify] = useState(true)
+  // the quick sheet's parts behind a tap
+  const [fullList, setFullList] = useState(false)
+  const [otherTime, setOtherTime] = useState(false)
+  const [noteOpen, setNoteOpen] = useState(false)
 
   // «Book again» and the client's card name the client: their number fills in, and the lookup finds them
   const seed = useQuery({ ...sdk.clients.card(slug, start.clientId ?? '', { lang: locale, history: 1 }), enabled: !!start.clientId })
@@ -97,7 +110,7 @@ export function NewBookingDrawer({
   const ids = services.map((s) => s.id)
   const can = eligibleFor(people, services)
   const staff = specialist ? (people[0]?.staffId ?? null) : staffOf(staffId, people, services)
-  const given = people.find((p) => p.staffId === (start.staffId ?? staffId)) ?? null
+  const given = people.find((p) => p.staffId === staffId) ?? null
   const walkin = source === 'walkin'
   const day = walkin ? todayDate : date
 
@@ -119,26 +132,33 @@ export function NewBookingDrawer({
   const add = useMutation(sdk.calendar.add(slug))
   const undo = useMutation(sdk.calendar.undo(slug))
   const save = () => {
-    const phone = client?.phone ?? toE164(digits)
-    if (!staff || chosen === null || !isPhone(phone)) return
-    const words = note.trim()
+    const number = client?.phone ?? toE164(digits)
+    if (!staff || chosen === null || !isPhone(number)) return
+    const written = note.trim()
     const newName = name.trim()
     add.mutate(
       {
         source,
-        phone,
+        phone: number,
         ...(!client && newName ? { name: newName } : {}),
         serviceIds: ids,
         staffId: staff,
         date: day,
         start: chosen,
-        ...(words ? { note: words } : {}),
+        ...(written ? { note: written } : {}),
         notifyClient: notify,
       },
       {
         onSuccess: ({ code }) => {
           onClose()
-          toast(t('saved', { walkin: walkin ? 'yes' : 'no', notified: notify ? 'yes' : 'no' }), {
+          const words = phone
+            ? t('savedQuick', {
+                client: client?.name ?? newName ?? number,
+                when: t('quickWhen', { day: dayWord(day).toLowerCase(), time: fmt.time(chosen) }),
+                name: nameOf(staff),
+              })
+            : t('saved', { walkin: walkin ? 'yes' : 'no', notified: notify ? 'yes' : 'no' })
+          toast(words, {
             action: {
               label: t('undo'),
               // the drawer's gone by now: `mutate`'s own callbacks wouldn't run
@@ -190,9 +210,25 @@ export function NewBookingDrawer({
               ? t('times.gone', { time: fmt.time(time) })
               : null
 
+  // a phone keeps them behind a tap, unless the time asked for needs another (a walk-in has only today's)
+  const moreTimes = ids.length > 0 && can.length > 0 && (!phone || walkin || otherTime || (time !== null && !timeOk))
+  const noteField = (
+    <Field label={t('note')}>
+      <Textarea placeholder={t('notePlaceholder')} maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
+    </Field>
+  )
+
   return (
     <Drawer open onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent aria-describedby={undefined}>
+      <DrawerContent
+        aria-describedby={undefined}
+        // the keypad comes up with the sheet (B-Mobile 5a), when there's a number to type
+        onOpenAutoFocus={(e) => {
+          if (!phone || !phoneField.current) return
+          e.preventDefault()
+          phoneField.current.focus()
+        }}
+      >
         <DrawerHeader title={t('title')} closeLabel={t('close')} />
         <DrawerBody className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
@@ -209,12 +245,41 @@ export function NewBookingDrawer({
             client={client}
             name={name}
             showAverage={!specialist}
+            quick={phone}
+            phoneRef={phoneField}
             onDigits={setDigits}
             onClient={setPicked}
             onName={setName}
           />
 
-          {menu.data && (
+          {menu.data && phone && !fullList && (
+            <section className="flex flex-col gap-2.5">
+              <span className={SECTION_TITLE}>{t('service')}</span>
+              <div role="group" aria-label={t('service')} className="-mx-4 flex gap-2 overflow-x-auto px-4 py-0.5">
+                {quickServices(menu.data, client?.usualServices ?? [], ids, specialist ? staff : staffId).map((s) => {
+                  const on = ids.includes(s.id)
+                  return (
+                    <Chip
+                      key={s.id}
+                      selected={on}
+                      className="h-11"
+                      onClick={() => {
+                        // the keypad goes on the first chip (B-Mobile 5b)
+                        phoneField.current?.blur()
+                        setServiceIds(on ? ids.filter((id) => id !== s.id) : [...ids, s.id])
+                      }}
+                    >
+                      {localized(s.name, locale)}
+                    </Chip>
+                  )
+                })}
+                <Chip className="h-11" onClick={() => setFullList(true)}>
+                  {t('anotherService')}
+                </Chip>
+              </div>
+            </section>
+          )}
+          {menu.data && (!phone || fullList) && (
             <ServicePicker
               menu={menu.data}
               picked={services}
@@ -242,19 +307,23 @@ export function NewBookingDrawer({
                 aria-label={t('specialist')}
                 value={staff ?? ''}
                 onValueChange={(id) => {
-                  setStaffId(id)
+                  setStaffId(id || null)
                   setTime(null)
                 }}
-                options={people.map((p) => ({
-                  value: p.staffId,
-                  disabled: ids.length > 0 && !can.some((c) => c.staffId === p.staffId),
-                  label: (
-                    <>
-                      <Avatar name={p.name} src={p.photo?.url} size={24} letters={1} tone="tint" decorative />
-                      {p.name}
-                    </>
-                  ),
-                }))}
+                options={[
+                  // the quick sheet searches everyone who does it, and names the person on each time (B-Mobile 5b)
+                  ...(phone ? [{ value: '', label: t('anySpecialist') }] : []),
+                  ...people.map((p) => ({
+                    value: p.staffId,
+                    disabled: ids.length > 0 && !can.some((c) => c.staffId === p.staffId),
+                    label: (
+                      <>
+                        <Avatar name={p.name} src={p.photo?.url} size={24} letters={1} tone="tint" decorative />
+                        {p.name}
+                      </>
+                    ),
+                  })),
+                ]}
               />
             )}
             {ids.length > 0 && can.length === 0 && <Callout tone="warning">{t('noOneDoesAll')}</Callout>}
@@ -265,7 +334,7 @@ export function NewBookingDrawer({
             {hint ? (
               <span className="text-dense text-n-600">{hint}</span>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <div className={phone ? 'grid grid-cols-3 gap-2' : 'flex flex-wrap gap-2'}>
                 {nearest.map((n) => {
                   const on = n.date === day && n.start === chosen && (!staff || n.staffId === staff)
                   const who = staff ? null : nameOf(n.staffId)
@@ -273,18 +342,32 @@ export function NewBookingDrawer({
                     <TimeSlot
                       key={`${n.date}|${n.start}|${n.staffId}`}
                       selected={on}
+                      className={phone ? 'flex h-auto min-h-14 w-full min-w-0 flex-col items-center justify-center px-1' : undefined}
                       onClick={() => {
                         setDate(n.date)
                         setTime(n.start)
                         setStaffId(n.staffId)
                       }}
                     >
-                      <span className="font-normal">{dayWord(n.date)}</span> {fmt.time(n.start)}
-                      {who && (
-                        <span className="font-normal">
-                          {t('dot')}
-                          {who}
-                        </span>
+                      {phone ? (
+                        <>
+                          <span className="text-[15px] leading-5">{fmt.time(n.start)}</span>
+                          <span className="max-w-full truncate text-[12px] leading-4 font-normal">
+                            {dayWord(n.date)}
+                            {who && t('dot')}
+                            {who}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-normal">{dayWord(n.date)}</span> {fmt.time(n.start)}
+                          {who && (
+                            <span className="font-normal">
+                              {t('dot')}
+                              {who}
+                            </span>
+                          )}
+                        </>
                       )}
                       <span className="sr-only">{fmt.weekdayDate(n.date)}</span>
                     </TimeSlot>
@@ -294,7 +377,12 @@ export function NewBookingDrawer({
             )}
           </section>
 
-          {ids.length > 0 && can.length > 0 && (
+          {phone && !walkin && !moreTimes && ids.length > 0 && can.length > 0 && (
+            <button type="button" className={LINK} onClick={() => setOtherTime(true)}>
+              {t('anotherTime')}
+            </button>
+          )}
+          {moreTimes && (
             <section className="flex flex-col gap-2.5">
               <span className={SECTION_TITLE}>{t(walkin ? 'today' : 'anotherTime')}</span>
               {!walkin && free.data && (
@@ -331,9 +419,7 @@ export function NewBookingDrawer({
             </section>
           )}
 
-          <Field label={t('note')}>
-            <Textarea placeholder={t('notePlaceholder')} maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
-          </Field>
+          {!phone && noteField}
           <label className="flex cursor-pointer items-center justify-between gap-3">
             <span className="flex min-w-0 flex-col">
               <span className="text-small font-medium text-n-900">{t('notify')}</span>
@@ -341,6 +427,14 @@ export function NewBookingDrawer({
             </span>
             <Switch checked={notify} onCheckedChange={setNotify} />
           </label>
+          {phone &&
+            (noteOpen ? (
+              noteField
+            ) : (
+              <button type="button" className={LINK} onClick={() => setNoteOpen(true)}>
+                {t('addNote')}
+              </button>
+            ))}
         </DrawerBody>
         <DrawerFooter className="items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
           <span className="min-w-0 text-dense text-n-600">

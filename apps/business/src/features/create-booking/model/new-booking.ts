@@ -21,6 +21,22 @@ export const servicesOf = (menu: Menu | undefined, ids: readonly string[]): Menu
   return ids.flatMap((id) => all.find((s) => s.id === id) ?? [])
 }
 
+/**
+ * The phone sheet's chips (book B-24 step 3): this client's usual services first, then the menu's (the given person's
+ * only), up to four; a service picked from the full list stays among them.
+ */
+export function quickServices(
+  menu: Menu | undefined,
+  usual: readonly string[],
+  picked: readonly string[],
+  staffId: string | null,
+): MenuService[] {
+  const all = menu?.groups.flatMap((g) => g.services) ?? []
+  const fits = all.filter((s) => !staffId || s.staffIds.includes(staffId))
+  const first = [...servicesOf(menu, usual), ...fits].filter((s, i, list) => list.indexOf(s) === i).slice(0, 4)
+  return [...first, ...servicesOf(menu, picked).filter((s) => !first.includes(s))]
+}
+
 /** Who does all the services picked: one specialist does a booking (book B-23 step 5). */
 export const eligibleFor = <P extends Person>(people: readonly P[], services: readonly MenuService[]): P[] =>
   people.filter((p) => services.every((s) => s.staffIds.includes(p.staffId)))

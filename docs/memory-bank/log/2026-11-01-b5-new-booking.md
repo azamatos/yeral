@@ -16,9 +16,15 @@ Slice 4's B5 (`log/2026-10-31-slice-4-plan.md` → "PRs, three lanes", decision 
 - Stories on `Business/Calendar/Day`: known client with Undo, a new number, by name, from a slot with no one doing all
   the services, a walk-in, a specialist, «Book again» from the address, the Russian length at 390.
 
-## For B6, B10, B11
+## B6, the phone's quick sheet
 
-- B6's sheet can reuse `new-booking.ts` as it stands; `usualServices` on the lookup is there for its chips.
+The same `NewBookingDrawer` under 768 (`useMediaQuery`), not a second form: the keypad up (`onOpenAutoFocus`), `quickServices`
+chips with «Another service», the nearest times as a 3-column grid, «Any specialist», «Another date and time» and
+«Add an internal note» behind a tap, the toast «Booking saved: …». The + is on `calendar-page.tsx`, fixed over the tab
+bar, and moves up with `body:has([data-sonner-toast])`, hidden in move mode. Stories `QuickBooking`, `QuickBookingMore`.
+
+## For B10, B11
+
 - B10 and B11 reach it by the address: `/w/{slug}/calendar?panel=new&client=<id>`.
 
 ## Traps
