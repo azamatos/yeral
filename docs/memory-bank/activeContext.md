@@ -4,14 +4,15 @@ _Last updated: 2026-11-01_ · the current state only; the history by day is in `
 
 ## Current focus
 
-**2026-11-01: slice 4 well along, only the main session works now (no agents).** Merged since 31.10: #263 e2e flows, #264
+**2026-11-01: slice 4 nearly done, only the main session works now (no agents).** Merged since 31.10: #263 e2e flows, #264
 A1, #265 U1, #266 U2, #268 B12 notifications, #269 B2 booking drawer, #270 B3 report and cancel, #271 B1 block time, #273 B4
 move a booking, #274 B5 new booking drawer, #275 B6 the phone's quick booking and the +, #276 B7 week views, one specialist
-and the legend, #277 `staffId` on the workspace, #278 B8 bookings list; #279 B9 requests tab and bulk answers (check it
-merged). Left in slice 4, in order: B10 clients list, B11 client card, B13 installable app, `e2e/tests/daily-work.spec.ts`,
-then the deploy and the click test at 1440 and 390 (skill `qa-flows`). The live server runs main at 808b640 (31.10), so
-nothing from #263 on is live; the next deploy also checks a business page's map and photos for CSP violations. Each
-piece's log note (`log/2026-11-01-*.md`) lists what's there, its traps and what it left.
+and the legend, #277 `staffId` on the workspace, #278 B8 bookings list, #279 B9 requests tab and bulk answers, #281 B10 clients
+list, #282 B13 installable app. Left in slice 4, in order: B11 client card (`log/2026-11-01-b10-clients-list.md` → "For B11"),
+`e2e/tests/daily-work.spec.ts` (the plan's "Done when"), then the deploy and the click test at 1440 and 390 (skill
+`qa-flows`). The live server runs main at 808b640 (31.10), so nothing from #263 on is live; the next deploy also checks a
+business page's map and photos for CSP violations. Each piece's log note (`log/2026-11-01-*.md`) lists what's there, its
+traps and what it left.
 
 **How to merge (31.10–01.11 lesson):** read a `success` conclusion for the CI run of the PR's exact head commit first. A
 `gh run watch` of a run my next push cancelled once let #273 merge unverified, and a script's own last exit code hid it. After
@@ -102,8 +103,8 @@ the book has had none open since 21.10. Where the pre-book questions (old number
    SSR'd client site before React hydrates is lost, and a request block on the day grid can sit under a neighbour's; home's
    «How was it?» card comes with slice 5 (then the write-review steiger override goes). `make-example <slug>` (#233, deployed)
    opens one of the owner's test businesses once the owner names it.
-3. **Slice 4, daily work** (`log/2026-10-31-slice-4-plan.md`): finish B10, B11, B13 and `daily-work.spec.ts` (see Current
-   focus), deploy, click-test. Left from the built pieces: «Frequent clients» on the new booking's name search (needs a list
+3. **Slice 4, daily work** (`log/2026-10-31-slice-4-plan.md`): finish B11 and `daily-work.spec.ts` (see Current focus), deploy,
+   click-test. Left from the built pieces: «Frequent clients» on the new booking's name search (needs a list
    sorted by visits), the phone bookings list's filters, «Open the client's card» on the row menu and drawer (B11), the
    drawer's own staff-id trick can use the workspace's `staffId` now. Then slice 5; then slices 6 + 7, then the first launch
    (P5), approved in advance (22.10): `EXAMPLE_BUSINESSES` and `DEMO_WORKSPACE` on, the cms site joins `yeral.caddy` with its
