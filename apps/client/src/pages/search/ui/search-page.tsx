@@ -1,6 +1,7 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import type { Category } from '@yeral/contract/catalog'
+import { DEFAULT_RADIUS_KM, RADIUS_OPTIONS_KM } from '@yeral/domain/geo'
 import { today } from '@yeral/domain/time'
 import { Button } from '@yeral/ui/button'
 import { Chip, ChipRadioGroup } from '@yeral/ui/chip'
@@ -14,12 +15,13 @@ import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
 import { Select } from '@yeral/ui/select'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { List, Map as MapIcon, SearchX, SlidersHorizontal } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BusinessRow } from '@/entities/business'
+import { LocationBanner, placeAddress, usePlace, WhereField, type Place } from '@/features/pick-place'
 import { useSdk } from '@yeral/sdk/react'
 import { wrap } from '@/shared/ui'
-import { apiSearch, DAYS, filterCount, filtered, TOP_RATING, type Day, type SearchAddress, type Sort } from '../model/search'
+import { apiSearch, widerRadius, DAYS, filterCount, filtered, TOP_RATING, type Day, type SearchAddress, type Sort } from '../model/search'
 import { FiltersDrawer } from './filters-drawer'
 import { ResultsMap } from './results-map'
 
@@ -42,6 +44,11 @@ export function SearchPage({ category }: { category?: Category }) {
   const wide = useMediaQuery('(min-width: 1024px)')
   const [hot, setHot] = useState<string | null>(null)
   const [mapOpen, setMapOpen] = useState(false)
+  const located = usePlace()
+  const whereInput = useRef<HTMLInputElement>(null)
+  // the address says where when it can (a shared link); otherwise what this browser kept
+  const addressed = !!(address.near || address.city || address.area)
+  const searched = addressed ? address : { ...address, ...placeAddress(located.place) }
 
   // the box writes to the address after a pause in the typing
   const [typed, setTyped] = useState(address.what ?? '')
@@ -53,7 +60,7 @@ export function SearchPage({ category }: { category?: Category }) {
   })
 
   const list = useInfiniteQuery({
-    ...sdk.catalog.search(apiSearch({ ...address, cat: category?.id ?? address.cat }, lang, today(now))),
+    ...sdk.catalog.search(apiSearch({ ...searched, cat: category?.id ?? address.cat }, lang, today(now))),
     placeholderData: keepPreviousData,
   })
   const categories = useQuery(sdk.catalog.categories(lang)).data?.items.filter((c) => c.bookingTypes.includes('appointment')) ?? []
@@ -61,11 +68,17 @@ export function SearchPage({ category }: { category?: Category }) {
   const base = cities?.items.find((c) => c.id === (address.city ?? cities.main))
   const first = list.data?.pages[0]
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
-  const located = first?.located ?? false
+  const nearby = first?.located ?? false
   const day: Day = address.day ?? 'today'
   const count = filterCount(address)
   const name = category?.name
-  const title = located ? (name ? t('nearName', { name }) : t('near')) : (name ?? t('popular'))
+  const title = nearby ? (name ? t('nearName', { name }) : t('near')) : (name ?? t('popular'))
+  const radius = address.r ?? DEFAULT_RADIUS_KM
+  const wider = nearby ? widerRadius(radius) : undefined
+  const place = (next: Place) => {
+    located.pick(next)
+    go({ near: undefined, city: undefined, area: undefined, r: undefined, ...placeAddress(next) })
+  }
 
   const pick = (id: string) => {
     const search = (prev: SearchAddress) => ({ ...prev, cat: undefined })
@@ -106,6 +119,14 @@ export function SearchPage({ category }: { category?: Category }) {
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
           />
+          <WhereField
+            inputRef={whereInput}
+            place={located.place}
+            size="m"
+            className="w-full sm:max-w-120"
+            onPick={place}
+            onNearMe={() => void located.askBrowser()}
+          />
           <ChipRadioGroup
             aria-label={t('categories')}
             value={category?.id ?? address.cat ?? 'all'}
@@ -143,6 +164,21 @@ export function SearchPage({ category }: { category?: Category }) {
                 </SegmentedItem>
               ))}
             </Segmented>
+            {nearby && (
+              <Select
+                size="s"
+                aria-label={t('radius')}
+                className="w-auto"
+                value={String(radius)}
+                onChange={(e) => go({ r: Number(e.target.value) })}
+              >
+                {RADIUS_OPTIONS_KM.map((km) => (
+                  <option key={km} value={km}>
+                    {t('km', { km })}
+                  </option>
+                ))}
+              </Select>
+            )}
             <Select
               size="s"
               aria-label={t('sort')}
@@ -150,12 +186,20 @@ export function SearchPage({ category }: { category?: Category }) {
               value={address.sort ?? ''}
               onChange={(e) => go({ sort: (e.target.value as Sort) || undefined })}
             >
-              <option value="">{located ? t('sorts.distance') : t('sorts.popular')}</option>
+              <option value="">{nearby ? t('sorts.distance') : t('sorts.popular')}</option>
               <option value="rating">{t('sorts.rating')}</option>
               <option value="price">{t('sorts.price')}</option>
             </Select>
           </div>
         </div>
+
+        <LocationBanner
+          unknown={located.unknown && !addressed}
+          denied={located.denied}
+          locating={located.locating}
+          onAllow={() => void located.askBrowser()}
+          onType={() => whereInput.current?.focus()}
+        />
 
         {category?.intro && <p className="m-0 max-w-160 text-body text-n-600">{category.intro}</p>}
 
@@ -179,6 +223,11 @@ export function SearchPage({ category }: { category?: Category }) {
             description={t('nothingHint')}
             action={
               <span className="flex flex-wrap justify-center gap-2">
+                {wider && (
+                  <Button variant="secondary" size="s" onClick={() => go({ r: wider })}>
+                    {t('widen', { km: wider })}
+                  </Button>
+                )}
                 {day !== 'tomorrow' && (
                   <Button variant="secondary" size="s" onClick={() => go({ day: 'tomorrow' })}>
                     {t('tryTomorrow')}

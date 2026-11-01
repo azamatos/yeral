@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useImperativeHandle,
   useRef,
   useState,
   type ComponentProps,
@@ -124,10 +125,12 @@ export function ComboboxInput({
   onKeyDown,
   onFocus,
   onBlur,
+  ref,
   ...props
 }: Omit<ComponentProps<'input'>, 'value' | 'onChange' | 'size' | 'role'> & { size?: 'l' | 'm'; invalid?: boolean }) {
   const s = useCombobox()
   const input = useRef<HTMLInputElement>(null)
+  useImperativeHandle(ref, () => input.current!)
   const optionId = (i: number) => `${s.listId}-${i}`
   // Esc closes the list before a dialog around it hears it: Radix listens on the document while capturing, so this
   // listens on the window, earlier still

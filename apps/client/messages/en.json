@@ -125,6 +125,8 @@
     "submit": "Show free times",
     "popular": "Popular places",
     "popularCaption": "By rating and number of reviews",
+    "nearby": "Free today near you",
+    "nearbyCaption": "Nearest first",
     "seeAll": "See all",
     "categories": "Not only beauty",
     "categoriesCaption": "Any specialist or place that sells its time, in one app.",
@@ -146,6 +148,22 @@
       "reminders": "Clients are reminded before they come, so fewer times go empty.",
       "calendar": "Everyone on one screen, on a computer or a phone."
     }
+  },
+  "location": {
+    "title": "Let us show places near you",
+    "why": "The browser will ask for your location, only to work out distances.",
+    "allow": "Show my location",
+    "locating": "Finding your location…",
+    "type": "I'll type an address",
+    "off": "Location off — showing by city",
+    "openSettings": "Open settings",
+    "helpTitle": "Allow your location",
+    "helpText": "Open your browser's settings for this site, allow location, then reload the page.",
+    "close": "Close",
+    "where": "Where?",
+    "nearMe": "Near me",
+    "list": "Places",
+    "nothing": "No place found"
   },
   "businessCard": {
     "line": "{category} · {street}",
@@ -175,8 +193,11 @@
     "days": { "today": "Today", "tomorrow": "Tomorrow", "week": "This week" },
     "sorts": { "distance": "Nearest", "popular": "Most popular", "rating": "Rating", "price": "Price" },
     "nothing": "No free time here",
-    "nothingHint": "Pick another day or clear the filters.",
+    "nothingHint": "Widen the area, pick another day or clear the filters.",
     "tryTomorrow": "Try tomorrow",
+    "widen": "Make it {km} km",
+    "radius": "How far",
+    "km": "{km} km",
     "clearFilters": "Clear filters",
     "showMore": "Show more",
     "map": {

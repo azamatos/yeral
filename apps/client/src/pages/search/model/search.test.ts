@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apiSearch, areaOf, filterCount, filtered, searchAddress } from './search'
+import { apiSearch, areaOf, filterCount, filtered, nearOf, searchAddress, widerRadius } from './search'
 
 describe('searchAddress', () => {
   it('reads what it knows and leaves the rest out', () => {
@@ -42,6 +42,27 @@ describe('areaOf', () => {
     expect(areaOf('a,b,c,d')).toBeUndefined()
     expect(areaOf('38,58.3,37.9,58.5')).toBeUndefined()
     expect(areaOf('95,58.3,96,58.5')).toBeUndefined()
+  })
+})
+
+describe('near', () => {
+  it('reads a position and asks around it', () => {
+    expect(nearOf('37.9,58.3')).toEqual({ lat: 37.9, lng: 58.3 })
+    expect(apiSearch({ near: '37.9,58.3', r: 10 }, 'en', '2026-11-01')).toMatchObject({ lat: 37.9, lng: 58.3, r: 10 })
+  })
+
+  it('leaves out anything else', () => {
+    expect(nearOf(undefined)).toBeUndefined()
+    expect(nearOf('37.9')).toBeUndefined()
+    expect(nearOf('north,east')).toBeUndefined()
+    expect(nearOf('137,58')).toBeUndefined()
+    expect(apiSearch({ r: 10 }, 'en', '2026-11-01').r).toBeUndefined()
+  })
+
+  it('widens one step at a time, up to the last', () => {
+    expect(widerRadius()).toBe(10)
+    expect(widerRadius(10)).toBe(25)
+    expect(widerRadius(25)).toBeUndefined()
   })
 })
 

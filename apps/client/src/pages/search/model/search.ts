@@ -1,4 +1,5 @@
 import type { SearchParams } from '@yeral/sdk'
+import { DEFAULT_RADIUS_KM, RADIUS_OPTIONS_KM } from '@yeral/domain/geo'
 import { addDays } from '@yeral/domain/time'
 import type { Locale } from '@yeral/i18n'
 import { z } from 'zod'
@@ -28,6 +29,14 @@ export const searchAddress = z.object({
   to: whole.optional().catch(undefined),
   open: z.literal(true).optional().catch(undefined),
   women: z.literal(true).optional().catch(undefined),
+  /** Around a position (near me, a typed place): `lat,lng`. */
+  near: z.string().max(40).optional().catch(undefined),
+  /** The radius around it, km. */
+  r: z.coerce
+    .number()
+    .refine((n) => (RADIUS_OPTIONS_KM as readonly number[]).includes(n))
+    .optional()
+    .catch(undefined),
   /** «Search this area»: `south,west,north,east`. */
   area: z.string().max(80).optional().catch(undefined),
 })
@@ -41,6 +50,16 @@ export function areaOf(area: string | undefined): [number, number, number, numbe
   if (Math.abs(south) > 90 || Math.abs(north) > 90 || Math.abs(west) > 180 || Math.abs(east) > 180) return undefined
   return south <= north && west <= east ? [south, west, north, east] : undefined
 }
+
+/** The address's position; anything else is none. */
+export function nearOf(near: string | undefined): { lat: number; lng: number } | undefined {
+  const [lat, lng, extra] = (near ?? '').split(',').map(Number)
+  if (lat === undefined || lng === undefined || extra !== undefined) return undefined
+  return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : undefined
+}
+
+/** The next wider radius, for the empty state; none past the last. */
+export const widerRadius = (r: number = DEFAULT_RADIUS_KM) => RADIUS_OPTIONS_KM.find((km) => km > r)
 
 /** What the api is asked. A range the wrong way round is read the right way, as the api refuses one. */
 export function apiSearch(a: SearchAddress, lang: Locale, todayDate: string): SearchParams {
@@ -59,6 +78,8 @@ export function apiSearch(a: SearchAddress, lang: Locale, todayDate: string): Se
     openNow: a.open,
     womenOnly: a.women,
     bbox: areaOf(a.area),
+    ...nearOf(a.near),
+    ...(nearOf(a.near) && a.r ? { r: a.r } : {}),
   }
 }
 
