@@ -1,0 +1,4 @@
+# Crawlers may fetch the pages, so they read the noindex (the page's meta and the X-Robots-Tag header) and leave the
+# workspace out of search; a Disallow would hide that noindex and a linked address could still be listed.
+User-agent: *
+Allow: /

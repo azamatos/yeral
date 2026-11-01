@@ -54,7 +54,7 @@ const signOutRoute = createRoute({
   path: '/admin/sign-out',
   tags,
   summary: 'Sign out of the admin tool',
-  responses: { ...noContent },
+  responses: noContent,
 })
 const meRoute = createRoute({
   method: 'get',

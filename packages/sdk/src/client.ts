@@ -46,6 +46,9 @@ export function createClient(opts: ClientOptions) {
 
 export type Client = ReturnType<typeof createClient>
 
+/** Lets TanStack Query abort the request. */
+export const abortWith = (signal: AbortSignal) => ({ init: { signal } })
+
 /** Await a client call: the success body, typed by the route; otherwise an `ApiError`. */
 export async function call<T extends ClientResponse<unknown>>(request: T | Promise<T>) {
   let res: T

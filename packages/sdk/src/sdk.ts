@@ -82,7 +82,8 @@ import type {
   workspaceListSchema,
 } from '@yeral/contract/team'
 import type { z } from 'zod'
-import { call, isApiError, type Client } from './client'
+import { createAdmin } from './admin'
+import { abortWith, call, isApiError, type Client } from './client'
 import { staleKeys } from './events'
 import { audienceOf, inWorkspace, keys, type Audience, type BookingTab } from './keys'
 
@@ -98,9 +99,6 @@ const clean = (q: Record<string, string | number | boolean | undefined | null>):
 type Params<S extends z.ZodType, K extends keyof z.output<S>> = Pick<z.output<S>, K> & Partial<z.output<S>>
 
 export type SearchParams = Omit<Params<typeof searchQuerySchema, 'lang'>, 'cursor'>
-
-/** Lets TanStack Query abort the request. */
-const abortWith = (signal: AbortSignal) => ({ init: { signal } })
 
 /**
  * How long the person's workspaces and setup draft stay fresh (the business app's, which runs the live events): they
@@ -1256,7 +1254,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, demo, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, setup, links }
+  const admin = createAdmin(client, queryClient)
+
+  return { admin, auth, demo, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, setup, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

@@ -1,0 +1,87 @@
+{
+  "app": {
+    "name": "{brand} Admin",
+    "notifications": "Notifications",
+    "tag": "Admin",
+    "clientSite": "Open {brand}"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "lead": "The address may have a typo, or the page has moved.",
+    "action": "Go to the start"
+  },
+  "failed": {
+    "title": "Something went wrong",
+    "lead": "Try again. If it keeps happening, reload the page.",
+    "action": "Try again"
+  },
+  "login": {
+    "tabTitle": "Log in",
+    "title": "Log in to {brand} Admin",
+    "lead": "For the {brand} team.",
+    "login": "Login",
+    "password": "Password",
+    "code": "Authenticator code",
+    "codeHint": "The 6 digits in your authenticator app, or a recovery code.",
+    "submit": "Log in",
+    "checking": "Checking…"
+  },
+  "setup": {
+    "tabTitle": "Set up your account",
+    "expiredTitle": "This link has run out",
+    "passwordTitle": "Hello, {name}",
+    "passwordLead": "Your login is <b>{login}</b>. Choose a password of at least {min} characters.",
+    "password": "Password",
+    "repeat": "Password again",
+    "mismatch": "The two passwords are different.",
+    "tooShort": "Use at least {min} characters.",
+    "continue": "Continue",
+    "appTitle": "Add your authenticator app",
+    "appLead": "Scan the code with the app, or type the key in, then type the 6 digits it shows.",
+    "qrLabel": "QR code for your authenticator app",
+    "secret": "Key",
+    "code": "6-digit code",
+    "confirm": "Confirm",
+    "codesTitle": "Save your recovery codes",
+    "codesLead": "Each one signs you in once if you lose your phone. They won't be shown again.",
+    "saved": "I've saved them",
+    "finish": "Open {brand} Admin"
+  },
+  "recovery": {
+    "label": "Your recovery codes",
+    "copy": "Copy all",
+    "copied": "Copied"
+  },
+  "shell": {
+    "menu": "Main menu",
+    "sections": {
+      "businesses": "Businesses",
+      "reviews": "Reported reviews",
+      "team": "Team"
+    },
+    "soon": "This section comes next.",
+    "account": {
+      "menu": "Your account",
+      "trigger": "Open your account menu",
+      "triggerOf": "Open the account menu of {name}",
+      "password": "Change password",
+      "recovery": "New recovery codes",
+      "logout": "Log out"
+    }
+  },
+  "account": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "passwordTitle": "Change password",
+    "passwordLead": "Your other sessions end.",
+    "current": "Current password",
+    "new": "New password",
+    "save": "Save",
+    "passwordSaved": "Password changed",
+    "recoveryTitle": "New recovery codes",
+    "recoveryLead": "You have {left} left. New codes replace them all.",
+    "code": "Authenticator code",
+    "make": "Make new codes",
+    "recoveryDone": "Save these codes. They won't be shown again."
+  }
+}
