@@ -117,7 +117,7 @@ function Frame({
     >
       <span className="flex min-w-0 items-center gap-1.25 overflow-hidden whitespace-nowrap">
         <Icon aria-hidden strokeWidth={2} className={cn('size-3.5 flex-none', iconInk)} />
-        <span className="flex-none text-[12px] leading-4 font-semibold tabular-nums">{start}</span>
+        <span className="flex-none text-[12px] leading-4 font-semibold">{start}</span>
         <span className={cn('min-w-0 truncate text-[14px] leading-[18px] font-semibold', strike && 'line-through')}>{name}</span>
       </span>
       {lines}
@@ -207,7 +207,7 @@ export function BookingBlock({
           )}
           {wide && height >= TIMES_FROM && note && <span className={line}>{note}</span>}
           {!wide && height >= TIMES_FROM && (
-            <span className={cn(line, 'tabular-nums')}>
+            <span className={line}>
               {asked ? t('moveTo', { when: asked }) : t('timeLength', { time, length: fmt.duration(end - start) })}
             </span>
           )}
@@ -276,7 +276,7 @@ export function MoveBlock({
       lines={
         <>
           {height >= SERVICES_FROM && <span className={line}>{client}</span>}
-          {height >= TIMES_FROM && <span className={cn(line, 'tabular-nums')}>{t('moveFrom', { when: was })}</span>}
+          {height >= TIMES_FROM && <span className={line}>{t('moveFrom', { when: was })}</span>}
         </>
       }
       icons={{ count: 0, nodes: null }}

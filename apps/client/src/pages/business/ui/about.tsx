@@ -83,7 +83,7 @@ function Hours({ detail }: { detail: BusinessDetail }) {
               {fmt.weekday(d.date)}
               {d.today && <Pill tone="accent">{t('today')}</Pill>}
             </span>
-            <span className="text-right tabular-nums">
+            <span className="text-right">
               {d.hours ?? t('closed')}
               {d.special && ` · ${d.special}`}
             </span>
@@ -125,7 +125,7 @@ function Address({ detail }: { detail: BusinessDetail }) {
         <Button asChild size="s" variant="secondary">
           <a href={telHref(detail.phone)} aria-label={card('callLabel', { phone: fmt.phone(detail.phone) })}>
             <Phone aria-hidden />
-            <span className="tabular-nums">{fmt.phone(detail.phone)}</span>
+            <span>{fmt.phone(detail.phone)}</span>
           </a>
         </Button>
       </div>

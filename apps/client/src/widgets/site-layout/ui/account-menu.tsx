@@ -66,7 +66,7 @@ export function AccountMenu({ me }: { me: Me }) {
               <PersonMark firstName={me.firstName} size={40} />
               <span className="flex min-w-0 flex-col gap-0.5">
                 {name && <span className="text-body leading-5 font-semibold break-words text-n-900">{name}</span>}
-                <span className="text-dense text-n-600 tabular-nums">{phone}</span>
+                <span className="text-dense text-n-600">{phone}</span>
               </span>
             </MenuLabel>
             <MenuSeparator />
@@ -94,7 +94,7 @@ export function AccountMenu({ me }: { me: Me }) {
             <DrawerHeader
               leading={<PersonMark firstName={me.firstName} size={40} />}
               title={name ?? phone}
-              subtitle={name ? <span className="tabular-nums">{phone}</span> : undefined}
+              subtitle={name ? <span>{phone}</span> : undefined}
               closeLabel={t('close')}
             />
             <nav aria-label={t('sections')} className="flex flex-col p-2 pb-4">

@@ -156,7 +156,7 @@ function VerticalSteps({
               >
                 <span
                   className={cn(
-                    'inline-flex size-7 flex-none items-center justify-center rounded-pill border border-n-200 bg-n-100 text-dense font-bold text-n-500 tabular-nums',
+                    'inline-flex size-7 flex-none items-center justify-center rounded-pill border border-n-200 bg-n-100 text-dense font-bold text-n-500',
                     done && 'border-a-line bg-a-50 text-a-600',
                     vis && 'border-n-300 bg-n-0 text-n-900',
                     cur && 'border-a-500 bg-a-500 text-white',

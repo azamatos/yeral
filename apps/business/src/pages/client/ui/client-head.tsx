@@ -30,7 +30,7 @@ export function ClientHead({ card, manage, onEdit }: { card: ClientCard; manage:
         <div className="flex flex-wrap items-center gap-2">
           {phone ? (
             <>
-              <span className="text-body text-n-900 tabular-nums">{fmt.phone(phone)}</span>
+              <span className="text-body text-n-900">{fmt.phone(phone)}</span>
               <Button variant="ghost" size="s" iconOnly aria-label={clients('copy')} onClick={() => copy(phone)}>
                 <Copy aria-hidden />
               </Button>

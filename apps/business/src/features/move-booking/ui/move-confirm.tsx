@@ -86,7 +86,7 @@ export function MoveConfirm({
         className="flex w-70 min-w-0 flex-col gap-2.5 p-3.5"
       >
         <span className="text-dense text-n-600">{what}</span>
-        <span className="text-[16px] leading-[22px] font-semibold tabular-nums">{title}</span>
+        <span className="text-[16px] leading-[22px] font-semibold">{title}</span>
         {form}
       </PopoverContent>
     </Popover>

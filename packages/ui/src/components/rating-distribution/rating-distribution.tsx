@@ -62,6 +62,7 @@ export function RatingDistribution({
                 style={{ width: `${total ? Math.min(100, Math.max(0, (r.count / total) * 100)) : 0}%` }}
               />
             </span>
+            {/* tabular: five counts under each other, lined up by place (DS-Type 04) */}
             <span aria-hidden className="text-right text-n-600 tabular-nums">
               {r.count}
             </span>

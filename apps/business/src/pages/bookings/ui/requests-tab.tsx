@@ -173,11 +173,11 @@ export function RequestsTab({
     )
   const time = (r: BookingRequest) =>
     r.from ? (
-      <span className="tabular-nums">
+      <span>
         {when(r.from.date, r.from.start)} {t('arrow')} <b className="font-semibold">{when(r.date, r.start)}</b>
       </span>
     ) : (
-      <span className="tabular-nums">{when(r.date, r.start)}</span>
+      <span>{when(r.date, r.start)}</span>
     )
   const staff = (r: BookingRequest) => [...new Set(r.items.flatMap((i) => i.staff ?? []))].join(b('comma'))
 
@@ -238,7 +238,7 @@ export function RequestsTab({
                 >
                   {r.client.name}
                 </button>
-                {r.client.phone && <CellNote className="tabular-nums">{r.client.phone}</CellNote>}
+                {r.client.phone && <CellNote>{fmt.phone(r.client.phone)}</CellNote>}
               </TableCell>
               <TableCell>{services(r)}</TableCell>
               <TableCell>{staff(r)}</TableCell>

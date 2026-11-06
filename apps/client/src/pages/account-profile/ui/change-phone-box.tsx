@@ -71,7 +71,7 @@ export function ChangePhoneBox({
         <p className="m-0 text-small text-n-600 [&_b]:font-semibold [&_b]:text-n-900">
           {t.rich('profile.newPhone.codeLead', {
             phone: formatPhone(toE164(state.sentTo ?? state.phone)),
-            b: (chunks) => <b className="whitespace-nowrap tabular-nums">{chunks}</b>,
+            b: (chunks) => <b className="whitespace-nowrap">{chunks}</b>,
           })}{' '}
           <button type="button" onClick={steps.changeNumber} disabled={busy} className={cn(textLink, 'whitespace-nowrap')}>
             {t('profile.newPhone.changeNumber')}

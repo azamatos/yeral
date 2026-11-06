@@ -76,7 +76,7 @@ export function ShiftEditor({
             return (
               <div key={i} className="flex justify-between gap-3 border-b border-n-200 py-2.5 text-small">
                 <span>{dayName(i)}</span>
-                <span className="text-right tabular-nums">
+                <span className="text-right">
                   {hours
                     ? [
                         fmt.timeRange(hours.open, hours.close),
@@ -142,7 +142,7 @@ export function ShiftEditor({
                     step={HOURS_STEP}
                   />
                 ) : hours ? (
-                  <span className="text-body text-n-900 tabular-nums">{fmt.timeRange(hours.open, hours.close)}</span>
+                  <span className="text-body text-n-900">{fmt.timeRange(hours.open, hours.close)}</span>
                 ) : (
                   <span className="text-body text-n-500">{business[i] ? t('dayOff') : h('closed')}</span>
                 )}
@@ -316,7 +316,7 @@ export function TimeOff({
               <div key={`${d.from}-${d.to}-${d.name}`} role="listitem" className="flex items-center gap-3 border-b border-n-200 py-2">
                 <CalendarOff aria-hidden strokeWidth={1.75} className="size-4.5 flex-none text-n-600" />
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-small font-semibold tabular-nums">{text}</span>
+                  <span className="text-small font-semibold">{text}</span>
                   <span className="text-dense text-n-600">{sub}</span>
                 </span>
                 {owner && (

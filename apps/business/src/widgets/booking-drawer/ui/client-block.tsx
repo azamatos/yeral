@@ -43,7 +43,7 @@ export function ClientBlock({
         <Avatar name={client.name ?? ''} size={40} letters={1} tone="tint" decorative />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-[16px] leading-[22px] font-semibold text-n-900">{name}</span>
-          {client.phone && <span className="text-dense text-n-600 tabular-nums">{fmt.phone(client.phone)}</span>}
+          {client.phone && <span className="text-dense text-n-600">{fmt.phone(client.phone)}</span>}
           {card && (
             <span className="flex flex-wrap items-center gap-1.5 pt-1">
               <span className="text-dense text-n-600">
@@ -132,7 +132,7 @@ export function RecentVisits({ card, except, prices }: { card: ClientCard | unde
                 key={b.code}
                 className="grid grid-cols-[92px_minmax(0,1fr)_auto] items-center gap-3 border-b border-n-200 py-2.25 text-small last:border-b-0"
               >
-                <span className="text-dense text-n-600 tabular-nums">{fmt.shortDate(b.date)}</span>
+                <span className="text-dense text-n-600">{fmt.shortDate(b.date)}</span>
                 <span className="flex min-w-0 flex-col">
                   <span className="truncate">
                     {join(
@@ -145,7 +145,7 @@ export function RecentVisits({ card, except, prices }: { card: ClientCard | unde
                     {s(b.status)}
                   </span>
                 </span>
-                {prices && b.price && <span className="font-semibold tabular-nums">{fmt.price(b.price)}</span>}
+                {prices && b.price && <span className="font-semibold">{fmt.price(b.price)}</span>}
               </li>
             )
           })}

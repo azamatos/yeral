@@ -44,7 +44,7 @@ export function StatTile({ label, value, delta, caption, size, className, ...pro
   return (
     <div role="listitem" {...props} className={cn(tileVariants({ size }), className)}>
       <span className="text-label text-n-500 uppercase">{label}</span>
-      <span className={cn('whitespace-nowrap text-n-900 tabular-nums', valueClass[s])}>{value}</span>
+      <span className={cn('whitespace-nowrap text-n-900', valueClass[s])}>{value}</span>
       {(delta || caption) &&
         (delta ? (
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1.5">

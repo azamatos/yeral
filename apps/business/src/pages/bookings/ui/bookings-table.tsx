@@ -100,6 +100,7 @@ export function BookingsTable({
 }) {
   const t = useTranslations('bookings')
   const s = useTranslations('status')
+  const fmt = useFmt()
   const who = useWho()
   const words = useRowWords()
   const phone = useMediaQuery('(max-width: 767px)')
@@ -118,7 +119,7 @@ export function BookingsTable({
                 <span className="min-w-0 truncate text-small font-semibold text-n-900">{words.name(r)}</span>
                 <StatusBadge status={r.status}>{s(r.status)}</StatusBadge>
               </span>
-              <span className="text-dense text-n-600 tabular-nums">{words.when(r, now)}</span>
+              <span className="text-dense text-n-600">{words.when(r, now)}</span>
               <span className="truncate text-dense text-n-600">{words.services(r)}</span>
               {who(r) && <span className="text-dense text-n-600">{who(r)}</span>}
             </button>
@@ -157,11 +158,11 @@ export function BookingsTable({
                 </Pill>
               )}
             </span>
-            {r.client.phone && <CellNote className="tabular-nums">{r.client.phone}</CellNote>}
+            {r.client.phone && <CellNote>{fmt.phone(r.client.phone)}</CellNote>}
           </TableCell>
           <TableCell>{words.services(r)}</TableCell>
           {!specialist && <TableCell>{words.staff(r)}</TableCell>}
-          <TableCell className="tabular-nums">{words.when(r, now)}</TableCell>
+          <TableCell>{words.when(r, now)}</TableCell>
           <TableCell>{t(`source.${r.source}`)}</TableCell>
           <TableCell className="flex-col items-start gap-0.5">
             <StatusBadge status={r.status}>{s(r.status)}</StatusBadge>

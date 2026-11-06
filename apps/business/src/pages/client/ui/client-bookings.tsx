@@ -68,7 +68,7 @@ export function ClientUpcoming({
               booking={b}
               className="-mx-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-m p-3 text-small text-n-900 no-underline hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none sm:grid-cols-[120px_minmax(0,1fr)_auto_20px]"
             >
-              <span className="flex flex-col tabular-nums max-sm:col-span-2">
+              <span className="flex flex-col max-sm:col-span-2">
                 <span className="font-semibold">{fmt.relativeShortDate(b.date, today(now))}</span>
                 <Caption>{fmt.timeRange(b.start, b.end)}</Caption>
               </span>
@@ -124,7 +124,7 @@ export function ClientHistory({
               key={b.code}
               className="grid grid-cols-[88px_minmax(0,1fr)_auto] items-center gap-2.5 border-b border-n-200 py-2 text-small"
             >
-              <span className="tabular-nums">{fmt.shortDate(b.date)}</span>
+              <span>{fmt.shortDate(b.date)}</span>
               <span className="min-w-0">{what(b)}</span>
               <BookingStatus status={b.status} />
             </li>
@@ -135,14 +135,14 @@ export function ClientHistory({
           <TableHeader>
             <TableColumnHeader>{t('history.date')}</TableColumnHeader>
             <TableColumnHeader>{t('history.what')}</TableColumnHeader>
-            <TableColumnHeader>{t('history.price')}</TableColumnHeader>
+            <TableColumnHeader numeric>{t('history.price')}</TableColumnHeader>
             <TableColumnHeader>{t('history.status')}</TableColumnHeader>
           </TableHeader>
           {bookings.map((b) => (
             <TableRow key={b.code}>
-              <TableCell className="tabular-nums">{fmt.shortDate(b.date)}</TableCell>
+              <TableCell>{fmt.shortDate(b.date)}</TableCell>
               <TableCell>{what(b)}</TableCell>
-              <TableCell className="tabular-nums">{b.price ? fmt.price(b.price) : ''}</TableCell>
+              <TableCell numeric>{b.price ? fmt.price(b.price) : ''}</TableCell>
               <TableCell className="items-start">
                 <BookingStatus status={b.status} />
               </TableCell>

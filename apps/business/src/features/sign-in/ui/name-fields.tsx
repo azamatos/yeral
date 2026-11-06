@@ -52,7 +52,7 @@ export function VerifiedNumber({ phone, action }: { phone: string; action?: Reac
   return (
     <p className="m-0 flex flex-wrap items-center gap-2.5 rounded-m border border-n-200 bg-n-50 px-4 py-3 text-small">
       <CircleCheck aria-hidden className="size-5 text-st-completed-dot" />
-      <span className="font-semibold whitespace-nowrap tabular-nums">{formatPhone(phone)}</span>
+      <span className="font-semibold whitespace-nowrap">{formatPhone(phone)}</span>
       <span className="text-dense text-n-600">{t('verified')}</span>
       {action && <span className="ms-auto">{action}</span>}
     </p>

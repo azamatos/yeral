@@ -137,7 +137,7 @@ export function Field({
             <span
               id={counterId}
               className={cn(
-                'ml-auto text-dense whitespace-nowrap text-n-600 tabular-nums',
+                'ml-auto text-dense whitespace-nowrap text-n-600',
                 counter.value > counter.max ? 'font-semibold text-danger-ink' : counter.value >= counter.max * 0.9 && 'text-st-pending-ink',
               )}
             >

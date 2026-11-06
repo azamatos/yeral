@@ -177,7 +177,7 @@ export function BookingCard({
             </div>
           </div>
           <div className="flex flex-col gap-3 max-md:hidden">
-            <span className="text-[22px] leading-7 font-bold tracking-[-0.01em] tabular-nums">{fmt.phone(detail.phone)}</span>
+            <span className="text-[22px] leading-7 font-bold tracking-[-0.01em]">{fmt.phone(detail.phone)}</span>
             <CallLink phone={detail.phone} className="w-full" />
           </div>
           <div className="h-px bg-n-200 max-md:hidden" />
@@ -225,7 +225,7 @@ export function BookingCard({
           <div className="flex flex-col gap-4">
             <PlaceRows detail={detail} />
             <InfoRow icon={<Phone aria-hidden />} className="items-center [&>svg]:mt-0">
-              <a href={`tel:${detail.phone}`} className="flex-1 text-n-900 tabular-nums hover:text-a-600">
+              <a href={`tel:${detail.phone}`} className="flex-1 text-n-900 hover:text-a-600">
                 {fmt.phone(detail.phone)}
               </a>
             </InfoRow>
@@ -319,7 +319,7 @@ export function BookingBar({ detail, state, picked }: { detail: Detail; state: B
       <div role="region" aria-label={t('card.label')} className={bar}>
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-dense text-n-600">{detail.name}</span>
-          <span className="text-[17px] leading-[22px] font-bold whitespace-nowrap tabular-nums">{fmt.phone(detail.phone)}</span>
+          <span className="text-[17px] leading-[22px] font-bold whitespace-nowrap">{fmt.phone(detail.phone)}</span>
         </div>
         <div className="flex flex-none gap-2">
           {state === 'paused' && <FavouriteButton slug={detail.slug} />}

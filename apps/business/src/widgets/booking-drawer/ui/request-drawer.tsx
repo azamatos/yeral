@@ -304,7 +304,7 @@ function RequestBody({
           <Avatar name={r.client.name} size={40} letters={1} tone="tint" decorative />
           <span className="flex min-w-0 flex-col">
             <span className="text-[16px] leading-[22px] font-semibold text-n-900">{r.client.name}</span>
-            {r.client.phone && <span className="text-dense text-n-600 tabular-nums">{fmt.phone(r.client.phone)}</span>}
+            {r.client.phone && <span className="text-dense text-n-600">{fmt.phone(r.client.phone)}</span>}
             <span className="mt-1 flex flex-wrap items-center gap-2">
               {r.client.visits === 0 ? (
                 <Pill tone="accent">{t('newClient')}</Pill>

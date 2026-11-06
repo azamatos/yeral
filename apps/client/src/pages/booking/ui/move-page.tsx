@@ -365,7 +365,7 @@ export function MovePage() {
                 <h1 className="m-0 text-[28px] leading-[34px] font-bold tracking-[-0.025em] max-sm:text-[24px] max-sm:leading-[30px]">
                   {m('title')}
                 </h1>
-                <span className="inline-flex h-6.5 items-center rounded-pill border border-n-200 bg-group px-2.5 text-dense font-semibold text-st-cancelled-ink tabular-nums">
+                <span className="inline-flex h-6.5 items-center rounded-pill border border-n-200 bg-group px-2.5 text-dense font-semibold text-st-cancelled-ink">
                   {code}
                 </span>
               </div>
@@ -530,7 +530,7 @@ function MoveSent({
               },
               { key: t('sent.specialist'), value: staffName },
               { key: t('sent.address'), value: addressLine(detail, fmt) },
-              { key: words('bookingDrawer.code'), value: <span className="tabular-nums">{b.code}</span> },
+              { key: words('bookingDrawer.code'), value: <span>{b.code}</span> },
             ]}
           />
         </div>

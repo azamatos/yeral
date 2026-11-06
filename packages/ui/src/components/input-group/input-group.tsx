@@ -44,7 +44,7 @@ export function InputGroup({ prefix, suffix, size = 'l', invalid, className, ...
           aria-describedby={describedBy}
           // the unit's room: its letters and the 12 px on each side of it
           style={suffix ? { paddingRight: `calc(${suffix.length}ch + 24px)`, ...props.style } : props.style}
-          className={cn(inputClass, heights[size], suffix && 'text-right tabular-nums', 'max-sm:text-[16px]')}
+          className={cn(inputClass, heights[size], suffix && 'text-right', 'max-sm:text-[16px]')}
         />
         {suffix && (
           <span

@@ -23,7 +23,7 @@ export function AccountLine({
   const t = useTranslations('login')
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-n-200 pt-4">
-      <span className="text-dense text-n-600 [&_b]:font-semibold [&_b]:whitespace-nowrap [&_b]:text-n-900 [&_b]:tabular-nums">
+      <span className="text-dense text-n-600 [&_b]:font-semibold [&_b]:whitespace-nowrap [&_b]:text-n-900">
         {t.rich('you', { who, b: (chunks) => <b>{chunks}</b> })}
       </span>
       {ghost ? (

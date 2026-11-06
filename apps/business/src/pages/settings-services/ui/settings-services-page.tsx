@@ -529,7 +529,7 @@ function ServiceRow({
         </span>
       </div>
       <div className="flex min-w-0 flex-col gap-0.5 @max-[520px]:hidden">
-        <span className="tabular-nums">{duration}</span>
+        <span>{duration}</span>
         {service.bufferMin !== null && (
           <span className="text-dense text-n-600">
             {service.bufferMin === 0 ? t('noBuffer') : t('buffer', { duration: fmt.duration(service.bufferMin) })}
@@ -537,9 +537,9 @@ function ServiceRow({
         )}
       </div>
       <div className="flex min-w-0 flex-col gap-0.5 @max-[520px]:hidden">
-        <span className="font-semibold tabular-nums">{price}</span>
+        <span className="font-semibold">{price}</span>
         {service.priceType === 'hidden' && service.priceAmount > 0 && (
-          <span className="text-dense text-n-600 tabular-nums">{t('hiddenAmount', { amount: fmt.money(service.priceAmount) })}</span>
+          <span className="text-dense text-n-600">{t('hiddenAmount', { amount: fmt.money(service.priceAmount) })}</span>
         )}
       </div>
       <div className="flex min-w-0 items-center gap-2 @max-[760px]:hidden">

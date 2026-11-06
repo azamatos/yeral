@@ -177,7 +177,7 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
               <li key={r.id} className="flex items-center gap-2 rounded-m border border-n-200 bg-n-0 p-3">
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   {nameLink(r, 'truncate text-small font-semibold')}
-                  {r.phone && <span className="text-dense text-n-600 tabular-nums">{r.phone}</span>}
+                  {r.phone && <span className="text-dense text-n-600">{fmt.phone(r.phone)}</span>}
                   {tags(r)}
                 </span>
                 {menu(r)}
@@ -189,9 +189,9 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
             <TableHeader>
               <TableColumnHeader>{t('columns.client')}</TableColumnHeader>
               <TableColumnHeader>{t('columns.phone')}</TableColumnHeader>
-              <TableColumnHeader>{t('columns.visits')}</TableColumnHeader>
+              <TableColumnHeader numeric>{t('columns.visits')}</TableColumnHeader>
               <TableColumnHeader>{t('columns.last')}</TableColumnHeader>
-              {seesTotal && <TableColumnHeader>{t('columns.total')}</TableColumnHeader>}
+              {seesTotal && <TableColumnHeader numeric>{t('columns.total')}</TableColumnHeader>}
               <TableColumnHeader>{t('columns.next')}</TableColumnHeader>
               <TableColumnHeader>
                 <span className="sr-only">{t('columns.actions')}</span>
@@ -203,11 +203,11 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
                   {nameLink(r, 'font-semibold')}
                   {tags(r)}
                 </TableCell>
-                <TableCell className="tabular-nums">{r.phone ?? <CellNote>{t('noNumber')}</CellNote>}</TableCell>
-                <TableCell className="tabular-nums">{r.visits}</TableCell>
-                <TableCell className="tabular-nums">{r.lastVisit ? fmt.relativeShortDate(r.lastVisit, todayDate) : ''}</TableCell>
-                {seesTotal && <TableCell className="tabular-nums">{r.total !== null ? fmt.money(r.total) : ''}</TableCell>}
-                <TableCell className="tabular-nums">{next(r)}</TableCell>
+                <TableCell>{r.phone ? fmt.phone(r.phone) : <CellNote>{t('noNumber')}</CellNote>}</TableCell>
+                <TableCell numeric>{r.visits}</TableCell>
+                <TableCell>{r.lastVisit ? fmt.relativeShortDate(r.lastVisit, todayDate) : ''}</TableCell>
+                {seesTotal && <TableCell numeric>{r.total !== null ? fmt.money(r.total) : ''}</TableCell>}
+                <TableCell>{next(r)}</TableCell>
                 <TableCell>{menu(r)}</TableCell>
               </TableRow>
             ))}

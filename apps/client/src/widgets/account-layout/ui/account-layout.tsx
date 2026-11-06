@@ -46,7 +46,7 @@ export function AccountLayout({ children }: { children: ReactNode }) {
               <PersonMark firstName={me.data.firstName} size={56} />
               <div className="flex min-w-0 flex-col gap-0.5">
                 {name && <span className="text-[16px] leading-[22px] font-semibold break-words">{name}</span>}
-                <span className="text-dense text-n-600 tabular-nums">{formatPhone(me.data.phone)}</span>
+                <span className="text-dense text-n-600">{formatPhone(me.data.phone)}</span>
               </div>
             </div>
           )}

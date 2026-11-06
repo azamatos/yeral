@@ -145,7 +145,7 @@ function Bookings() {
               <CellNote>{r.note}</CellNote>
             </TableCell>
             <TableCell>{r.staff}</TableCell>
-            <TableCell className="tabular-nums">{r.time}</TableCell>
+            <TableCell>{r.time}</TableCell>
             <TableCell>
               <StatusBadge status={r.status}>{r.label}</StatusBadge>
             </TableCell>

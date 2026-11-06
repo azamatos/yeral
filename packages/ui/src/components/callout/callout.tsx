@@ -114,7 +114,7 @@ export function Callout({
         </div>
         {(value || actions) && (
           <div className="flex flex-col gap-3">
-            {value && <span className="text-[22px] leading-7 font-bold tracking-[-0.01em] tabular-nums">{value}</span>}
+            {value && <span className="text-[22px] leading-7 font-bold tracking-[-0.01em]">{value}</span>}
             {actions}
           </div>
         )}

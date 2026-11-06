@@ -108,7 +108,7 @@ export function MenuLinkItem({ link, className }: { link: MenuLink; className?: 
         {link.icon}
         <span className="flex min-w-0 flex-col">
           <span>{link.label}</span>
-          <span className="truncate text-micro text-n-600 tabular-nums">{link.caption}</span>
+          <span className="truncate text-micro text-n-600">{link.caption}</span>
         </span>
         {link.external && <ExternalLink aria-hidden className="ml-auto size-4! text-n-500!" />}
       </a>

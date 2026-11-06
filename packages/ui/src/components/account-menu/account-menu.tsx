@@ -160,7 +160,7 @@ export function AccountMenu({
       {avatar}
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-small font-semibold text-n-900">{name}</span>
-        <span className="truncate text-micro text-n-600 tabular-nums">{phone}</span>
+        <span className="truncate text-micro text-n-600">{phone}</span>
       </span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger

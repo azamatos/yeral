@@ -370,7 +370,7 @@ function MemberEditor({
               {editPhone ? (
                 <PhoneInput {...PHONE_RULES} value={form.phone} onValueChange={(phone) => change({ phone })} />
               ) : (
-                <Input readOnly value={m.phone ? formatPhone(m.phone) : ''} className="border-n-200 bg-n-50 tabular-nums" />
+                <Input readOnly value={m.phone ? formatPhone(m.phone) : ''} className="border-n-200 bg-n-50" />
               )}
             </Field>
           </TabsContent>

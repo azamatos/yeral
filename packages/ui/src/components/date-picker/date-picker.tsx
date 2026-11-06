@@ -84,7 +84,7 @@ const classNames: Partial<ClassNames> = {
     'data-[disabled=true]:[&>button]:cursor-default data-[disabled=true]:[&>button]:font-normal data-[disabled=true]:[&>button]:text-n-500 data-[disabled=true]:[&>button]:hover:bg-transparent',
   ),
   // a 320 phone: 36 days, so the week fits the popover
-  day_button: 'size-10 rounded-pill border-0 bg-transparent p-0 text-small font-semibold text-n-900 tabular-nums max-[359px]:size-9',
+  day_button: 'size-10 rounded-pill border-0 bg-transparent p-0 text-small font-semibold text-n-900 max-[359px]:size-9',
   hidden: 'invisible',
   // a range: its days on an a-50 band, the first and last solid at its rounded ends
   range_middle: 'bg-a-50 [&>button]:bg-transparent! [&>button]:text-a-700! [&>button]:hover:bg-a-100!',

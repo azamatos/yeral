@@ -72,7 +72,7 @@ export function NumberStepper({
       >
         <Minus aria-hidden strokeWidth={1.75} className="size-4.5" />
       </button>
-      <span aria-live="polite" className={cn('text-center text-body font-semibold tabular-nums', wide ? 'min-w-21' : 'min-w-14')}>
+      <span aria-live="polite" className={cn('text-center text-body font-semibold', wide ? 'min-w-21' : 'min-w-14')}>
         {format(value)}
       </span>
       <button

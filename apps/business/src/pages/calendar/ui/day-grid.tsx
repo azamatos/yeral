@@ -405,6 +405,7 @@ function DayColumn({
             data-move-slot={free && moving ? '' : undefined}
             aria-expanded={free ? menuAt === s.start : undefined}
             onClick={(e) => onSlot(s, e.currentTarget)}
+            // tabular: the slot times sit under each other down the grid (DS-Type 04)
             className={cn(
               'group absolute inset-x-0 z-2 m-0 h-5 border-0 bg-transparent px-2 text-left text-micro font-semibold text-a-600 tabular-nums focus-visible:outline-none',
               free

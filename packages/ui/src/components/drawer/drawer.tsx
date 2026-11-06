@@ -123,7 +123,7 @@ export function DrawerHeader({
             >
               <ChevronLeft />
             </PagerButton>
-            <span className="min-w-10 text-center text-dense text-n-600 tabular-nums">{pager.position}</span>
+            <span className="min-w-10 text-center text-dense text-n-600">{pager.position}</span>
             <PagerButton
               label={pager.next.label}
               aria-disabled={pager.next.disabled || undefined}

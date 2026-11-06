@@ -228,7 +228,7 @@ function TextNotes({ id, message, count, max }: { id: string; message: ReactNode
       <span
         id={`${id}-counter`}
         className={cn(
-          'ml-auto text-dense whitespace-nowrap text-n-600 tabular-nums',
+          'ml-auto text-dense whitespace-nowrap text-n-600',
           count > max ? 'font-semibold text-danger-ink' : count >= max * 0.9 && 'text-st-pending-ink',
         )}
       >

@@ -269,7 +269,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
       <Button key="call" asChild variant="secondary">
         <a href={telHref(b.business.phone)}>
           <Phone aria-hidden />
-          <span className="tabular-nums">{t('callNumber', { phone: fmt.phone(b.business.phone) })}</span>
+          <span>{t('callNumber', { phone: fmt.phone(b.business.phone) })}</span>
         </a>
       </Button>,
     )
@@ -371,7 +371,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
               <Clock aria-hidden className="size-4.5 flex-none text-st-pending-ink" strokeWidth={2} />
               {t('move')}
             </h3>
-            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[15px] leading-[22px] text-n-900 tabular-nums">
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[15px] leading-[22px] text-n-900">
               <span>{when}</span>
               <span aria-hidden className="text-n-600">
                 →
@@ -429,7 +429,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
             { key: t('duration'), value: fmt.duration(b.end - b.start) },
             ...(b.price ? [{ key: t('price'), value: fmt.price(b.price) }] : []),
             { key: t('payment'), value: t('atPlace') },
-            { key: t('code'), value: <span className="tabular-nums">{b.code}</span> },
+            { key: t('code'), value: <span>{b.code}</span> },
           ]}
         />
 
@@ -477,7 +477,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
             <span className="text-[15px] leading-[22px] font-medium">{addressLine(b, fmt)}</span>
             {b.entranceNote && <span className="text-dense text-n-600">{b.entranceNote}</span>}
             {b.geo.approximate && <span className="text-dense text-n-600">{t('approximate')}</span>}
-            <span className="text-dense text-n-600 tabular-nums">{fmt.phone(b.business.phone)}</span>
+            <span className="text-dense text-n-600">{fmt.phone(b.business.phone)}</span>
           </span>
           <PlaceMap name={b.business.name} geo={b.geo} className="h-40 rounded-m" />
           <div className="flex flex-wrap gap-2 pt-1">

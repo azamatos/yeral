@@ -1,3 +1,4 @@
+import { formatPhone } from '@yeral/domain/phone'
 import { Avatar } from '@yeral/ui/avatar'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
@@ -54,7 +55,7 @@ export function BusinessStep({
           <Avatar name={owner.name} size={32} />
           <span className="flex min-w-0 flex-col">
             <span className="text-button font-semibold">{owner.name}</span>
-            <span className="text-dense whitespace-nowrap text-n-600 tabular-nums">{owner.phone}</span>
+            <span className="text-dense whitespace-nowrap text-n-600">{formatPhone(owner.phone)}</span>
           </span>
           <span className="flex-1" />
           <span className="text-dense text-n-600">{t('setup.business.account', { brand })}</span>

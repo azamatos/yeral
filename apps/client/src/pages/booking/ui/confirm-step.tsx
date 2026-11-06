@@ -82,7 +82,7 @@ export function ConfirmStep({
               <Avatar name={person.name ?? ''} size={44} decorative />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="text-body font-semibold">{person.name}</span>
-                <span className="inline-flex items-center gap-1.5 text-dense text-n-600 tabular-nums">
+                <span className="inline-flex items-center gap-1.5 text-dense text-n-600">
                   {fmt.phone(person.phone)}
                   <CircleCheck role="img" aria-label={t('verified')} className="size-3.5 text-st-completed-dot" strokeWidth={2} />
                 </span>

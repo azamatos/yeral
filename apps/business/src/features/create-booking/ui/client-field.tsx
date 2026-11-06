@@ -20,13 +20,14 @@ const ROW =
 /** A row of the matches: the name, the number, Phone only, the visits. */
 function MatchRow({ match: m, onPick }: { match: ClientMatch; onPick: () => void }) {
   const t = useTranslations('newBooking.client')
+  const fmt = useFmt()
   const name = m.name ?? t('unnamed')
   return (
     <button type="button" className={ROW} onClick={onPick}>
       <Avatar name={name} size={32} letters={1} tone="tint" decorative />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-small font-semibold text-n-900">{name}</span>
-        <span className="text-dense text-n-600 tabular-nums">{m.phone}</span>
+        {m.phone && <span className="text-dense text-n-600">{fmt.phone(m.phone)}</span>}
       </span>
       {m.phoneOnly && (
         <Pill tone="warning" size="s">
@@ -103,7 +104,7 @@ export function ClientField({
           <Avatar name={shown} size={40} letters={1} tone="tint" decorative />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="truncate text-small font-semibold text-n-900">{shown}</span>
-            <span className="text-dense text-n-600 tabular-nums">{line.join(t('dot'))}</span>
+            <span className="text-dense text-n-600">{line.join(t('dot'))}</span>
             {client.phoneOnly && (
               <Pill tone="warning" size="s" className="self-start">
                 {t('phoneOnly')}

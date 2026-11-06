@@ -77,7 +77,7 @@ export function AffectedBookingsList({
             className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-b border-n-200 py-2.5 text-small"
           >
             <span className="flex min-w-0 flex-col">
-              <span className="font-semibold tabular-nums">{t('when', { day: day(b.date), time: fmt.timeRange(b.start, b.end) })}</span>
+              <span className="font-semibold">{t('when', { day: day(b.date), time: fmt.timeRange(b.start, b.end) })}</span>
               <span className="text-dense text-n-600">{who}</span>
             </span>
             <span className="flex flex-wrap items-center justify-end gap-1.5">

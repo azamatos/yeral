@@ -47,7 +47,7 @@ export function NameStep({ phone, onFailed }: { phone: string; onFailed: (error:
       <form noValidate onSubmit={submit} className="flex flex-col gap-5">
         <p className="m-0 inline-flex flex-wrap items-center gap-2 text-small">
           <BadgeCheck aria-hidden className="size-[18px] flex-none text-a-500" />
-          <span className="whitespace-nowrap tabular-nums">{formatPhone(phone)}</span>
+          <span className="whitespace-nowrap">{formatPhone(phone)}</span>
           <span className="text-dense text-n-600">· {t('name.verified')}</span>
         </p>
         <Field label={t('name.first')} error={missing ? t('name.required') : undefined}>

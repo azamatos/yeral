@@ -13,9 +13,9 @@ function Demo() {
       <PopoverContent aria-label="Iş wagty">
         <dl className="m-0 grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 text-body">
           <dt>Duşenbe – Anna</dt>
-          <dd className="m-0 tabular-nums">09:00–20:00</dd>
+          <dd className="m-0">09:00–20:00</dd>
           <dt className="font-semibold">Şenbe</dt>
-          <dd className="m-0 font-semibold tabular-nums">10:00–18:00</dd>
+          <dd className="m-0 font-semibold">10:00–18:00</dd>
           <dt>Ýekşenbe</dt>
           <dd className="m-0 text-n-600">Ýapyk</dd>
         </dl>

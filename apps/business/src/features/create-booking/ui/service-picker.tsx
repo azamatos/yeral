@@ -64,7 +64,7 @@ export function ServicePicker({
                 label={
                   <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
                     <span className="min-w-0 text-small text-n-900">{localized(s.name, locale)}</span>
-                    <span className="flex-none text-dense text-n-600 tabular-nums">
+                    <span className="flex-none text-dense text-n-600">
                       {showPrices ? t('meta', { length: fmt.duration(s.durationMin), price }) : fmt.duration(s.durationMin)}
                     </span>
                   </span>
@@ -77,7 +77,7 @@ export function ServicePicker({
       {picked.length > 0 && (
         <div className="flex items-center justify-between gap-3 border-t border-n-200 pt-2.5 text-small font-semibold text-n-900">
           <span>{t('total')}</span>
-          <span className="tabular-nums">
+          <span>
             {showPrices ? t('meta', { length: fmt.duration(total.minutes), price: fmt.price(total.price) }) : fmt.duration(total.minutes)}
           </span>
         </div>
