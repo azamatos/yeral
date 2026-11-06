@@ -6,12 +6,12 @@ import { Check } from 'lucide-react'
 import { useRef } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BusinessTile } from '@/entities/business'
+import { CategoryIcon } from '@/entities/category'
 import { LocationBanner, placeAddress, usePlace, type Place } from '@/features/pick-place'
 import { HowWasItCard } from '@/features/write-review'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
-import { CategoryIcon } from './category-icon'
-import { SearchCard } from './search-card'
+import { SearchBar } from '@/widgets/search-bar'
 
 /** How many cards the list shows (Home `.g4`). */
 const CARDS = 4
@@ -46,27 +46,25 @@ export function HomePage() {
 
   return (
     <>
-      <section className="pt-14 pb-22 max-sm:pt-8 max-sm:pb-14">
-        <div className={`${wrap} grid grid-cols-[repeat(auto-fit,minmax(min(460px,100%),1fr))] items-center gap-14`}>
-          <div className="flex min-w-0 flex-col gap-5">
-            <span className="text-small font-semibold text-a-600">{t('kicker')}</span>
-            <h1 className="m-0 text-[80px] leading-[80px] font-bold tracking-[-0.045em] text-n-900 max-sm:text-[48px] max-sm:leading-[50px]">
-              {t('title')}
-            </h1>
-            <p className="m-0 max-w-120 text-body-l text-n-600">{t('lead')}</p>
-            <SearchCard located={located} whereInput={whereInput} />
-          </div>
+      <section className="pt-16 pb-14 max-sm:pt-8 max-sm:pb-10">
+        <div className={`${wrap} flex flex-col items-center gap-0 text-center`}>
+          <span className="inline-flex h-7 items-center rounded-pill border border-a-line bg-a-50 px-3 text-dense font-semibold text-a-600">
+            {t('kicker')}
+          </span>
+          <h1 className="m-0 mt-5 text-display text-n-900 max-sm:text-[44px] max-sm:leading-[48px]">{t('title')}</h1>
+          <p className="m-0 mt-4 max-w-190 text-body-l text-n-600">{t('lead')}</p>
+          <SearchBar located={located} whereInput={whereInput} className="mt-10 max-sm:mt-8" />
           {photos.length === MOSAIC && (
-            <div className="grid grid-cols-[1.15fr_1fr] grid-rows-[200px_200px_180px] gap-3 max-sm:grid-rows-[140px_140px_120px]">
-              {photos.map((p, i) => (
+            <div className="mt-14 flex w-full max-w-[1040px] gap-4 max-sm:mt-8 max-sm:gap-3 max-sm:overflow-x-auto">
+              {photos.map((p) => (
                 <Link
                   key={p.slug}
                   to="/$lang/c/$category"
                   params={{ lang, category: p.category.id }}
-                  className={`relative overflow-hidden rounded-card focus-visible:shadow-focus focus-visible:outline-none ${i === 0 ? 'row-span-2' : ''}`}
+                  className="relative h-50 flex-1 overflow-hidden rounded-card bg-n-100 focus-visible:shadow-focus focus-visible:outline-none max-sm:h-35 max-sm:min-w-40"
                 >
                   <img src={p.photo!.url} alt="" className="size-full object-cover" />
-                  <span className="absolute bottom-3 left-3 inline-flex h-7.5 items-center rounded-full bg-n-0 px-3 text-dense font-semibold text-n-900">
+                  <span className="absolute bottom-3 left-3 inline-flex h-7 items-center rounded-pill bg-n-0 px-3 text-dense font-semibold text-n-900">
                     {p.category.name}
                   </span>
                 </Link>

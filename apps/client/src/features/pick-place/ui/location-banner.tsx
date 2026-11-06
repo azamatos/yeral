@@ -1,9 +1,9 @@
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
-import { Modal, ModalActions, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/modal'
 import { LocateFixed, MapPinOff } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { LocationHelp } from './location-help'
 
 /**
  * The offer to use the client's location (book C-01, States 02), and, once the browser said no, the line saying the list is
@@ -42,20 +42,7 @@ export function LocationBanner({
         >
           {t('off')}
         </Callout>
-        {help && (
-          <Modal open onOpenChange={setHelp}>
-            <ModalContent size={400}>
-              <ModalHeader title={t('helpTitle')} closeLabel={t('close')}>
-                <ModalDescription>{t('helpText')}</ModalDescription>
-              </ModalHeader>
-              <ModalActions>
-                <Button variant="secondary" onClick={() => setHelp(false)}>
-                  {t('close')}
-                </Button>
-              </ModalActions>
-            </ModalContent>
-          </Modal>
-        )}
+        <LocationHelp open={help} onOpenChange={setHelp} />
       </>
     )
   if (!unknown) return null

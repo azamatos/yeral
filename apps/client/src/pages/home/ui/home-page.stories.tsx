@@ -3,18 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BusinessCard, Category } from '@yeral/contract/catalog'
 import { today } from '@yeral/domain/time'
 import { useSearch } from '@tanstack/react-router'
-import { expect, screen, screen as page, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen as page, userEvent, waitFor } from 'storybook/test'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
 import { SiteLayout } from '@/widgets/site-layout'
 import { HomePage } from './home-page'
-
-/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
-async function pick(trigger: HTMLElement, option: string | RegExp) {
-  await userEvent.click(trigger)
-  const list = await screen.findByRole('listbox')
-  await userEvent.click(await within(list).findByRole('option', { name: option }))
-  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
-}
 
 function Home() {
   return (
@@ -128,14 +120,16 @@ export const Page: Story = {
   },
 }
 
-/** The card opens the search with what, where and when. */
+/** The bar opens the search with what, where and when. */
 export const SearchFromHome: Story = {
   play: async ({ canvas }) => {
-    await userEvent.type(await canvas.findByRole('textbox', { name: 'What?' }), 'haircut')
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Where?' }))
+    await userEvent.type(await canvas.findByRole('combobox', { name: 'What' }), 'haircut')
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Where' }))
     await userEvent.click(await canvas.findByRole('option', { name: 'Mary' }))
-    await pick(canvas.getByRole('combobox', { name: 'When?' }), 'Tomorrow')
-    await userEvent.click(canvas.getByRole('button', { name: 'Show free times' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'When Any time' }))
+    await userEvent.click(await canvas.findByRole('radio', { name: 'Tomorrow' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Done' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Search' }))
     await expect(await canvas.findByText('Search: {"what":"haircut","city":"mary","day":"tomorrow"}')).toBeVisible()
   },
 }
@@ -147,7 +141,7 @@ export const ShareLocation: Story = {
     await userEvent.click(await canvas.findByRole('button', { name: 'Show my location' }))
     await expect(await canvas.findByRole('heading', { name: 'Free today near you' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull()
-    await expect(canvas.getByRole('combobox', { name: 'Where?' })).toHaveValue('Near me')
+    await expect(canvas.getByRole('combobox', { name: 'Where' })).toHaveValue('Near me')
   },
 }
 
@@ -167,7 +161,7 @@ export const LocationRefused: Story = {
 export const TypeAnAddress: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: "I'll type an address" }))
-    const where = canvas.getByRole('combobox', { name: 'Where?' })
+    const where = canvas.getByRole('combobox', { name: 'Where' })
     await expect(where).toHaveFocus()
     await userEvent.keyboard('Bit')
     await userEvent.click(await canvas.findByRole('option', { name: 'Bitarap park' }))

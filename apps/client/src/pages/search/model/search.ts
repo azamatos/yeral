@@ -3,6 +3,7 @@ import { DEFAULT_RADIUS_KM, RADIUS_OPTIONS_KM } from '@yeral/domain/geo'
 import { addDays } from '@yeral/domain/time'
 import type { Locale } from '@yeral/i18n'
 import { z } from 'zod'
+import { TIMES_OF_DAY } from '@/widgets/search-bar'
 
 export const DAYS = ['today', 'tomorrow', 'week'] as const
 export type Day = (typeof DAYS)[number]
@@ -23,6 +24,14 @@ export const searchAddress = z.object({
   cat: z.string().max(64).optional().catch(undefined),
   city: z.string().max(64).optional().catch(undefined),
   day: z.enum(DAYS).optional().catch(undefined),
+  /** A day picked in the calendar (C7-Home «When»), `YYYY-MM-DD`; `day` wins when both are there. */
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .catch(undefined),
+  /** The part of the day picked with it; the api doesn't filter by it yet, the bar only shows it. */
+  tod: z.enum(TIMES_OF_DAY).optional().catch(undefined),
   sort: z.enum(SORTS).optional().catch(undefined),
   rating: z.coerce.number().min(0).max(5).optional().catch(undefined),
   from: whole.optional().catch(undefined),
@@ -69,7 +78,7 @@ export function apiSearch(a: SearchAddress, lang: Locale, todayDate: string): Se
     q: a.what || undefined,
     cat: a.cat,
     city: a.city,
-    ...(a.day === 'tomorrow' ? { date: addDays(todayDate, 1) } : {}),
+    ...(a.day === 'tomorrow' ? { date: addDays(todayDate, 1) } : !a.day && a.date ? { date: a.date } : {}),
     ...(a.day === 'week' ? { week: true } : {}),
     sort: a.sort,
     minRating: a.rating,
