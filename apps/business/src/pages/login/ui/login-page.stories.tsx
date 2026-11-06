@@ -786,8 +786,9 @@ export const InviteLinkDeclined: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: 'Decline' }))
     await userEvent.click(await canvas.findByRole('button', { name: 'Decline invite' }))
-    await expect(await canvas.findByRole('heading', { level: 1, name: 'You don’t have a workspace yet' })).toBeVisible()
-    await shown(canvas, 'You declined Glow Studio’s invite.')
+    // the page and the toast fade in after the modal closes: wait for them to show, not only to exist
+    await waitFor(() => expect(canvas.getByRole('heading', { level: 1, name: 'You don’t have a workspace yet' })).toBeVisible())
+    await waitFor(() => expect(canvas.getAllByText('You declined Glow Studio’s invite.')[0]).toBeVisible())
   },
 }
 
