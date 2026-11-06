@@ -1,11 +1,13 @@
 import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@yeral/ui/button'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { useId, useState, type FormEvent, type ReactNode, type Ref } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { placeAddress, WhereField, type usePlace } from '@/features/pick-place'
 
 type When = '' | 'tomorrow' | 'week'
+/** The select's value for today, no `day` param. */
+const TODAY = 'today'
 
 /** One field of the card (Home `.sf`): its small label above what's typed or picked. */
 function CardField({ label, children }: { label: string; children: (id: string) => ReactNode }) {
@@ -42,7 +44,8 @@ export function SearchCard({ located, whereInput }: { located: ReturnType<typeof
 
   const bare = 'w-full border-0 bg-transparent p-0 text-body text-n-900 outline-none'
   // a Select draws its box on the select inside it: here the card is the box, and the focus keeps its ring
-  const bareSelect = '[&_select]:h-6 [&_select]:border-0 [&_select]:bg-transparent [&_select]:pl-0 [&_select]:text-body'
+  // the card draws the cell: the trigger is bare, 24 high, the text as typed in the other cells
+  const bareSelect = 'h-6 rounded-none border-0 bg-transparent px-0 text-body shadow-none data-[state=open]:shadow-none'
   return (
     <form onSubmit={submit} className="flex max-w-130 flex-col overflow-hidden rounded-l border border-n-300 bg-n-0">
       <CardField label={t('what')}>
@@ -72,11 +75,18 @@ export function SearchCard({ located, whereInput }: { located: ReturnType<typeof
         </CardField>
         <CardField label={t('when')}>
           {(id) => (
-            <Select id={id} size="s" className={bareSelect} value={when} onChange={(e) => setWhen(e.target.value as When)}>
-              <option value="">{t('today')}</option>
-              <option value="tomorrow">{t('tomorrow')}</option>
-              <option value="week">{t('week')}</option>
-            </Select>
+            <Select
+              id={id}
+              size="l"
+              className={bareSelect}
+              value={when || TODAY}
+              onValueChange={(v) => setWhen(v === TODAY ? '' : (v as When))}
+              options={[
+                { value: TODAY, label: t('today') },
+                { value: 'tomorrow', label: t('tomorrow') },
+                { value: 'week', label: t('week') },
+              ]}
+            />
           )}
         </CardField>
       </div>

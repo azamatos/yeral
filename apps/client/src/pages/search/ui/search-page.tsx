@@ -12,7 +12,10 @@ import { Input } from '@yeral/ui/input'
 import type { MapArea } from '@yeral/ui/map-frame'
 import { useMediaQuery } from '@yeral/ui/media-query'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
+
+/** The sort select's value for the default order (distance near a place, popularity otherwise), no `sort` param. */
+const DEFAULT_SORT = 'default'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { List, Map as MapIcon, SearchX, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -166,30 +169,26 @@ export function SearchPage({ category }: { category?: Category }) {
             </Segmented>
             {nearby && (
               <Select
-                size="s"
+                size="m"
                 aria-label={t('radius')}
                 className="w-auto"
                 value={String(radius)}
-                onChange={(e) => go({ r: Number(e.target.value) })}
-              >
-                {RADIUS_OPTIONS_KM.map((km) => (
-                  <option key={km} value={km}>
-                    {t('km', { km })}
-                  </option>
-                ))}
-              </Select>
+                onValueChange={(v) => go({ r: Number(v) })}
+                options={RADIUS_OPTIONS_KM.map((km) => ({ value: String(km), label: t('km', { km }) }))}
+              />
             )}
             <Select
-              size="s"
+              size="m"
               aria-label={t('sort')}
               className="w-auto"
-              value={address.sort ?? ''}
-              onChange={(e) => go({ sort: (e.target.value as Sort) || undefined })}
-            >
-              <option value="">{nearby ? t('sorts.distance') : t('sorts.popular')}</option>
-              <option value="rating">{t('sorts.rating')}</option>
-              <option value="price">{t('sorts.price')}</option>
-            </Select>
+              value={address.sort ?? DEFAULT_SORT}
+              onValueChange={(v) => go({ sort: v === DEFAULT_SORT ? undefined : (v as Sort) })}
+              options={[
+                { value: DEFAULT_SORT, label: nearby ? t('sorts.distance') : t('sorts.popular') },
+                { value: 'rating', label: t('sorts.rating') },
+                { value: 'price', label: t('sorts.price') },
+              ]}
+            />
           </div>
         </div>
 

@@ -6,9 +6,17 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BusinessCard, Category } from '@yeral/contract/catalog'
 import { addDays, today } from '@yeral/domain/time'
 import { MapTiles } from '@yeral/ui/map-frame'
-import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
 import { SearchPage } from './search-page'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 const DAY = today()
 const card = (slug: string, name: string, patch: Partial<BusinessCard> = {}): BusinessCard => ({
@@ -202,7 +210,7 @@ export const NearAPosition: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Places near you' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull()
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'How far' }), '10')
+    await pick(canvas.getByRole('combobox', { name: 'How far' }), '10 km')
     await waitFor(() => expect(last.get('r')).toBe('10'))
     await expect(last.get('lat')).toBe('37.95')
   },
@@ -248,7 +256,8 @@ export const SearchThisArea: Story = {
   args: { path: '/en/area' },
   play: async ({ canvas, canvasElement }) => {
     await canvas.findByRole('link', { name: 'Barber Loft' })
-    await waitFor(() => expect(canvasElement.querySelector('canvas')).not.toBeNull())
+    // the lazy MapLibre import lands later when the whole file runs
+    await waitFor(() => expect(canvasElement.querySelector('canvas')).not.toBeNull(), { timeout: 3000 })
     await expect(canvas.queryByRole('button', { name: 'Search this area' })).toBeNull()
     await userEvent.click(canvas.getByRole('button', { name: 'Zoom in' }))
     await userEvent.click(await canvas.findByRole('button', { name: 'Search this area' }))
