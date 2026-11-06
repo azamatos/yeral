@@ -1169,7 +1169,7 @@ export const NewBookingFromSlot: Story = {
     await expect(await d.findByRole('checkbox', { name: /Manicure/ })).toBeVisible()
     await expect(d.queryByRole('checkbox', { name: /Hair colouring/ })).toBeNull()
     await expect(d.getByRole('radio', { name: 'Maral' })).toBeChecked()
-    await userEvent.click(d.getByRole('button', { name: 'Show all services' }))
+    await userEvent.click(d.getByRole('radio', { name: 'Show all services' }))
     await userEvent.click(await d.findByRole('checkbox', { name: /Hair colouring/ }))
     await userEvent.click(d.getByRole('checkbox', { name: /Manicure/ }))
     await expect(await d.findByText(/No one specialist does all the chosen services — make/)).toBeVisible()

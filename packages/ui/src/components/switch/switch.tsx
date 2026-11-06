@@ -11,7 +11,7 @@ export function Switch({ className, ...props }: ComponentProps<typeof SwitchPrim
     <SwitchPrimitive.Root
       {...props}
       className={cn(
-        'group inline-flex h-11 w-13 flex-none cursor-pointer items-center justify-center rounded-m border-0 bg-transparent p-0',
+        'group inline-flex h-11 w-13 flex-none cursor-pointer items-center justify-center rounded-ctl-l border-0 bg-transparent p-0',
         'focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}

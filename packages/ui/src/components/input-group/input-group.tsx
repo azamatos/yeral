@@ -7,7 +7,7 @@ const heights = { l: 'h-12 text-body', m: 'h-10 text-ctl-m' }
 
 /** The fixed box before a field (InputGroup's `prefix`, PhoneInput's «+993»): n-50 fill, n-300 line, 500 ink. */
 export const addonClass = cn(
-  'inline-flex flex-none items-center rounded-input border border-n-300 bg-n-50 px-3 font-medium text-n-900',
+  'inline-flex flex-none items-center rounded-ctl-s border border-n-300 bg-n-50 px-3 font-medium text-n-900',
   'data-disabled:border-n-200 data-disabled:text-n-500 data-invalid:border-error',
 )
 

@@ -132,7 +132,7 @@ function MemberRow({ member, me, onAsk }: { member: AdminMember; me: AdminMe; on
                 {t('reset')}
               </Button>
               {member.status !== 'disabled' && (
-                <Button size="s" variant="ghost" onClick={() => onAsk({ kind: 'disable', member })}>
+                <Button size="s" variant="tertiary" onClick={() => onAsk({ kind: 'disable', member })}>
                   {t('disable')}
                 </Button>
               )}
@@ -201,7 +201,7 @@ function ResetModal({ member, onClose, onLink }: { member: AdminMember; onClose:
           <ModalClose asChild>
             <Button>{t('cancel')}</Button>
           </ModalClose>
-          <Button variant="danger" loading={reset.isPending} onClick={() => reset.mutate(member.id, { onSuccess: onLink })}>
+          <Button variant="danger-quiet" loading={reset.isPending} onClick={() => reset.mutate(member.id, { onSuccess: onLink })}>
             {t('reset')}
           </Button>
         </ModalActions>
@@ -232,7 +232,7 @@ function DisableModal({ member, onClose }: { member: AdminMember; onClose: () =>
           <ModalClose asChild>
             <Button>{t('cancel')}</Button>
           </ModalClose>
-          <Button variant="danger" loading={disable.isPending} onClick={confirm}>
+          <Button variant="danger-quiet" loading={disable.isPending} onClick={confirm}>
             {t('disable')}
           </Button>
         </ModalActions>

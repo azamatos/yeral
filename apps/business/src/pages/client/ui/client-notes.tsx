@@ -71,7 +71,7 @@ export function ClientNotes({ slug, card }: { slug: string; card: ClientCard }) 
           <div className="flex flex-wrap items-center justify-between gap-2">
             <Checkbox label={t('alert')} checked={alert} onChange={(e) => setAlert(e.target.checked)} />
             <div className="flex gap-2">
-              <Button variant="ghost" size="s" onClick={close}>
+              <Button variant="tertiary" size="s" onClick={close}>
                 {t('cancel')}
               </Button>
               <Button

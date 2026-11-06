@@ -164,7 +164,7 @@ export const FormLayout: Story = {
         <Textarea placeholder="Biznese goşmaça maglumat" />
       </Field>
       <div className="flex justify-end gap-3">
-        <Button variant="ghost">Yza</Button>
+        <Button variant="tertiary">Yza</Button>
         <Button variant="primary" type="submit">
           Tassykla
         </Button>

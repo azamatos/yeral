@@ -114,7 +114,7 @@ export function RatingInput({
             aria-label={starLabel(n)}
             onPointerEnter={() => setHover(n)}
             className={cn(
-              'inline-flex size-12 cursor-pointer items-center justify-center rounded-m border-0 bg-transparent p-0 text-n-500',
+              'inline-flex size-12 cursor-pointer items-center justify-center rounded-ctl-l border-0 bg-transparent p-0 text-n-500',
               'hover:bg-group focus-visible:shadow-focus focus-visible:outline-none',
               n <= shown && 'text-n-900',
             )}

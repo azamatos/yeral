@@ -103,7 +103,7 @@ export function ClientEdit({ slug, card, today, onDone }: { slug: string; card: 
           addButtonLabel={add('addTagButton')}
         />
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onDone}>
+          <Button type="button" variant="tertiary" onClick={onDone}>
             {t('cancel')}
           </Button>
           <Button type="submit" disabled={!numberOk} loading={update.isPending} loadingLabel={t('saving')}>

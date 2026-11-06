@@ -94,3 +94,30 @@ export const RadioChips: Story = {
     await expect(canvas.getByRole('radio', { name: 'Price at the place' })).toHaveFocus()
   },
 }
+
+/** S 32 (active-filter chips in a toolbar) and M 40 (client category and quick filters); the ring follows the pill (A11). */
+export const Sizes: Story = {
+  render: (args) => (
+    <div className="flex flex-wrap items-center gap-2">
+      <Chip {...args} size="s">
+        Free today
+      </Chip>
+      <Chip {...args} size="s" selected>
+        <SlidersHorizontal />
+        Specialist: Jeren
+      </Chip>
+      <Chip {...args} size="m">
+        Hair
+      </Chip>
+      <Chip {...args} size="m" selected>
+        Nails
+      </Chip>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: 'Free today' }).getBoundingClientRect().height).toBe(32)
+    await expect(canvas.getByRole('button', { name: 'Hair' }).getBoundingClientRect().height).toBe(40)
+    await userEvent.tab()
+    await expect(canvas.getByRole('button', { name: 'Free today' })).toHaveFocus()
+  },
+}

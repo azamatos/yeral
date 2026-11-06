@@ -40,7 +40,7 @@ const COPY: SignInCodeStepCopy = {
 /** The header's lockup: the logo and the product tag, read together as the link's name (the screen gives the words). */
 function Lockup({ tag = 'Business' }: { tag?: string }) {
   return (
-    <a href="#home" className="flex flex-none items-center gap-2.5 rounded-s focus-visible:shadow-focus focus-visible:outline-none">
+    <a href="#home" className="flex flex-none items-center gap-2.5 rounded-ctl-m focus-visible:shadow-focus focus-visible:outline-none">
       <Logo alt="Ýeral" height={30} className="max-sm:h-6.5! max-sm:w-auto" />
       <span className="inline-flex h-5.5 items-center rounded-pill border border-a-line bg-a-50 px-2 text-micro font-semibold text-a-600">
         {tag}
@@ -53,7 +53,7 @@ function FooterLink({ children = 'Book on Ýeral as a client', host = 'yeral.app
   return (
     <a
       href="#client"
-      className="inline-flex min-h-8 flex-wrap items-center justify-center gap-2 rounded-s px-1.5 hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
+      className="inline-flex min-h-8 flex-wrap items-center justify-center gap-2 rounded-ctl-m px-1.5 hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
     >
       {children}
       <ArrowRight aria-hidden className="size-4" />
@@ -207,7 +207,7 @@ export const Invite: Story = {
     title: 'Glow Studio invites you to the team',
     media: (
       <div className="flex min-w-0 items-center gap-3.5">
-        <Avatar name="Glow Studio" size={56} tone="neutral" className="rounded-l" />
+        <Avatar name="Glow Studio" size={56} tone="neutral" className="rounded-card" />
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[17px] leading-6 font-semibold">Glow Studio</span>
           <span className="text-dense text-n-600">Beauty · Ashgabat</span>

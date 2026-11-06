@@ -56,7 +56,7 @@ export function SettingsNavItem({
         'flex flex-none items-center gap-2 rounded-pill border border-n-300 px-4 text-small font-medium whitespace-nowrap text-n-900 no-underline',
         'h-11 hover:bg-group hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none',
         'aria-[current=page]:border-a-line aria-[current=page]:bg-a-50 aria-[current=page]:font-semibold aria-[current=page]:text-a-600',
-        'md:h-auto md:min-h-10 md:gap-3 md:rounded-s md:border-0 md:px-3 md:py-2.5 md:whitespace-normal',
+        'md:h-auto md:min-h-10 md:gap-3 md:rounded-ctl-m md:border-0 md:px-3 md:py-2.5 md:whitespace-normal',
         "[&_svg]:flex-none [&_svg:not([class*='size-'])]:size-5",
         className,
       )}

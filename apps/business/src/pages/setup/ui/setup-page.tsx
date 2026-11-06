@@ -312,7 +312,7 @@ function Steps({
       back={step !== 'business' && previous ? { label: t('setup.back'), onClick: () => void open(previous) } : undefined}
       start={
         more && step === 'business' ? (
-          <Button asChild variant="ghost" size="l">
+          <Button asChild variant="tertiary" size="l">
             <Link to="/">{t('setup.cancel')}</Link>
           </Button>
         ) : undefined

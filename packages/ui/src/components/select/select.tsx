@@ -254,7 +254,7 @@ export function MultiSelect({
     </button>
   )
   const clear = count > 0 && (
-    <Button variant="ghost" size={sheet ? 'l' : 's'} onClick={() => onValueChange([])} className={cn(sheet && 'flex-1')}>
+    <Button variant="tertiary" size={sheet ? 'l' : 's'} onClick={() => onValueChange([])} className={cn(sheet && 'flex-1')}>
       {clearLabel}
     </Button>
   )

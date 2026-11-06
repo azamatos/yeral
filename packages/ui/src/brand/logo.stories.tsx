@@ -10,11 +10,11 @@ export const All: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-8">
       <Logo alt="Ýeral" />
-      <div className="rounded-m bg-n-900 p-4">
+      <div className="rounded-ctl-l bg-n-900 p-4">
         <Logo variant="lockup-white" alt="Ýeral" />
       </div>
       <Logo variant="mark" height={40} alt="Ýeral" />
-      <Logo variant="icon" height={56} alt="Ýeral" className="rounded-l" />
+      <Logo variant="icon" height={56} alt="Ýeral" className="rounded-card" />
     </div>
   ),
 }

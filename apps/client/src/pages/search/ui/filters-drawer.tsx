@@ -59,7 +59,7 @@ export function FiltersDrawer({
           <FilterSwitch label={t('women')} checked={women} onChange={setWomen} />
         </DrawerBody>
         <DrawerFooter>
-          <Button variant="ghost" onClick={clear}>
+          <Button variant="tertiary" size="s" onClick={clear}>
             {t('clear')}
           </Button>
           <Button variant="primary" className="ml-auto" onClick={apply}>

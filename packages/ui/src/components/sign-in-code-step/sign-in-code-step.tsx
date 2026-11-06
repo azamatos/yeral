@@ -178,7 +178,7 @@ export function SignInCodeStep({
   const buttonSize = size === 56 ? 'l' : 'm'
   const inline = layout === 'inline'
   const cancel = inline && onCancel && (
-    <Button type="button" variant="ghost" size="s" onClick={onCancel}>
+    <Button type="button" variant="tertiary" size="s" onClick={onCancel}>
       {copy.cancel}
     </Button>
   )

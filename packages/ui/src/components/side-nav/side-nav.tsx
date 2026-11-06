@@ -49,7 +49,7 @@ export function SideNavItem({
       // the rail's tooltip repeats the name and count already in the link: read once, not again as a description
       {...(collapsed ? { 'aria-describedby': undefined } : {})}
       className={cn(
-        'relative flex items-center rounded-s text-small font-medium text-n-900 no-underline hover:bg-group hover:text-n-900',
+        'relative flex items-center rounded-ctl-m text-small font-medium text-n-900 no-underline hover:bg-group hover:text-n-900',
         'focus-visible:shadow-focus focus-visible:outline-none aria-[current=page]:bg-a-50 aria-[current=page]:font-semibold aria-[current=page]:text-a-600',
         "[&_svg]:flex-none [&_svg:not([class*='size-'])]:size-5",
         collapsed ? 'size-11 justify-center' : 'min-h-10 gap-3 px-3 py-2.5',

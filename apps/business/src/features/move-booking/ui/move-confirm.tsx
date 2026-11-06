@@ -48,7 +48,7 @@ export function MoveConfirm({
     <>
       <Checkbox label={t('notify')} checked={notify} onChange={(e) => onNotify(e.target.checked)} className="min-h-9 font-medium" />
       <div className="flex justify-end gap-2">
-        <Button variant="ghost" size="s" className="max-sm:h-11" disabled={pending} onClick={onBack}>
+        <Button variant="tertiary" size="s" className="max-sm:h-11" disabled={pending} onClick={onBack}>
           {t('back')}
         </Button>
         <Button size="s" className="max-sm:h-11" loading={pending} loadingLabel={t('confirming')} onClick={onConfirm}>

@@ -4,7 +4,7 @@ import { useField } from '../field'
 
 /** Shared look of text controls (DS `.inp`): 48 high, radius 8, n-300 border, a-500 + tint halo on focus. */
 export const inputClass = cn(
-  'w-full min-w-0 rounded-input border border-n-300 bg-n-0 px-3.5 text-body text-n-900 outline-none',
+  'w-full min-w-0 rounded-ctl-s border border-n-300 bg-n-0 px-3.5 text-body text-n-900 outline-none',
   'placeholder:text-n-500 hover:border-n-400',
   'focus:border-a-500 focus:shadow-input-focus focus-visible:shadow-input-focus',
   'aria-invalid:border-error aria-invalid:shadow-input-error',

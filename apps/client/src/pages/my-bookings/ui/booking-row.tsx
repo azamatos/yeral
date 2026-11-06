@@ -128,10 +128,10 @@ export function BookingRow({
         <img
           src={b.business.photo.url}
           alt=""
-          className={cn('block size-24 rounded-m object-cover max-sm:size-16', b.cancelledBy === 'client' && 'opacity-50')}
+          className={cn('block size-24 rounded-ctl-l object-cover max-sm:size-16', b.cancelledBy === 'client' && 'opacity-50')}
         />
       ) : (
-        <span aria-hidden className="flex size-24 items-center justify-center rounded-m bg-n-100 text-n-500 max-sm:size-16">
+        <span aria-hidden className="flex size-24 items-center justify-center rounded-ctl-l bg-n-100 text-n-500 max-sm:size-16">
           <Building2 className="size-7" strokeWidth={1.75} />
         </span>
       )}
@@ -214,7 +214,7 @@ export function BookingRow({
           {(ahead || !b.bookOnline || b.actions.callOnly) && (
             // named from what it shows, the business read but not seen: «Call» stays in the name whatever the language
             // or the words' length (axe: label-content-name-mismatch)
-            <Button asChild size="s" variant="ghost">
+            <Button asChild size="s" variant="tertiary">
               <a href={telHref(b.business.phone)}>
                 <Phone aria-hidden />
                 {t.rich('callLabel', { business: b.business.name, hidden })}
@@ -223,7 +223,7 @@ export function BookingRow({
           )}
           {b.actions.restore && !undoFailed && (
             // the row's actions name their booking the same way: the word seen, the booking read
-            <Button size="s" variant="ghost" loading={restore.isPending} onClick={() => !restore.isPending && undo()}>
+            <Button size="s" variant="tertiary" loading={restore.isPending} onClick={() => !restore.isPending && undo()}>
               {t.rich('undoLabel', { business: b.business.name, when, hidden })}
             </Button>
           )}
@@ -234,7 +234,7 @@ export function BookingRow({
           )}
           {b.actions.editReview && b.review && onReview && (
             // the review to change while it may be (book C-35, 7 days), as the drawer offers it
-            <Button size="s" variant="ghost" onClick={() => onReview(b)}>
+            <Button size="s" variant="tertiary" onClick={() => onReview(b)}>
               {t.rich('editReviewLabel', { business: b.business.name, when, hidden })}
             </Button>
           )}

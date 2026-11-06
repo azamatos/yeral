@@ -79,7 +79,7 @@ export function BusinessActions({ business }: { business: AdminBusiness }) {
       ) : (
         <Button onClick={() => setAsking('hide')}>{t('hide')}</Button>
       )}
-      <Button variant="ghost" onClick={() => setAsking('close')}>
+      <Button variant="tertiary" onClick={() => setAsking('close')}>
         {t('close')}
       </Button>
 

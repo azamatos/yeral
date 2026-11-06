@@ -12,7 +12,7 @@ function CancelBooking({ defaultOpen }: { defaultOpen?: boolean }) {
   return (
     <Modal defaultOpen={defaultOpen}>
       <ModalTrigger asChild>
-        <Button variant="danger">Ýazylyşy ýatyr</Button>
+        <Button variant="danger-quiet">Ýazylyşy ýatyr</Button>
       </ModalTrigger>
       <ModalContent size={480}>
         <ModalHeader title="Ýazylyşy ýatyrmalymy?" closeLabel="Ýap" />
@@ -70,7 +70,7 @@ function Login({ title, lead, closeLabel }: { title: string; lead: string; close
     <Modal defaultOpen>
       <ModalContent size={400}>
         <ModalHeader
-          media={<img src={brand.icon} alt="" width={40} height={40} className="size-10 rounded-s" />}
+          media={<img src={brand.icon} alt="" width={40} height={40} className="size-10 rounded-ctl-m" />}
           title={title}
           closeLabel={closeLabel}
         >

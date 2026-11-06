@@ -43,17 +43,17 @@ function PlaceCard({ place: p }: { place: BusinessCard }) {
     <Link
       to="/$lang/b/$slug"
       params={{ lang, slug: p.slug }}
-      className="group flex flex-col gap-3 rounded-m text-n-900 no-underline focus-visible:shadow-focus focus-visible:outline-none"
+      className="group flex flex-col gap-3 rounded-ctl-l text-n-900 no-underline focus-visible:shadow-focus focus-visible:outline-none"
     >
       {p.photo ? (
         <img
           src={p.photo.url}
           alt=""
           loading="lazy"
-          className="block aspect-4/3 w-full rounded-m object-cover transition-[filter] group-hover:brightness-94"
+          className="block aspect-4/3 w-full rounded-ctl-l object-cover transition-[filter] group-hover:brightness-94"
         />
       ) : (
-        <span aria-hidden className="block aspect-4/3 w-full rounded-m bg-n-100" />
+        <span aria-hidden className="block aspect-4/3 w-full rounded-ctl-l bg-n-100" />
       )}
       <span className="flex items-start justify-between gap-2">
         <span className="flex min-w-0 flex-col gap-0.5">
@@ -73,7 +73,7 @@ function PlaceCard({ place: p }: { place: BusinessCard }) {
           {times.map((start) => (
             <span
               key={start}
-              className="inline-flex h-8 items-center justify-center rounded-input border border-n-300 bg-n-0 px-2.5 text-dense font-semibold"
+              className="inline-flex h-8 items-center justify-center rounded-ctl-s border border-n-300 bg-n-0 px-2.5 text-dense font-semibold"
             >
               {fmt.time(start)}
             </span>

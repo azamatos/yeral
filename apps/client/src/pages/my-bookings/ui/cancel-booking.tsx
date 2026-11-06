@@ -87,7 +87,7 @@ export function CancelBooking({
           <ModalDescription>{t('cancelText', { business: b.business.name, what, when })}</ModalDescription>
         </ModalHeader>
         {b.reschedule && (
-          <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+          <p className="m-0 flex items-start gap-2.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900">
             <Clock aria-hidden className="mt-px size-4.5 flex-none text-st-pending-ink" strokeWidth={2} />
             {t('cancelMove')}
           </p>

@@ -15,7 +15,7 @@ import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 
 const ROW =
-  'flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-input border-0 bg-transparent px-2 py-1.5 text-left hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none'
+  'flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-ctl-s border-0 bg-transparent px-2 py-1.5 text-left hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none'
 
 /** A row of the matches: the name, the number, Phone only, the visits. */
 function MatchRow({ match: m, onPick }: { match: ClientMatch; onPick: () => void }) {
@@ -100,7 +100,7 @@ export function ClientField({
     return (
       <section className="flex flex-col gap-2.5">
         <span className="text-small font-medium text-n-900">{t('title')}</span>
-        <div className="flex items-center gap-3 rounded-m border border-n-200 p-3">
+        <div className="flex items-center gap-3 rounded-ctl-l border border-n-200 p-3">
           <Avatar name={shown} size={40} letters={1} tone="tint" decorative />
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="truncate text-small font-semibold text-n-900">{shown}</span>
@@ -112,7 +112,7 @@ export function ClientField({
             )}
           </span>
           <Button
-            variant="ghost"
+            variant="tertiary"
             size="s"
             onClick={() => {
               onClient(null)
@@ -145,16 +145,17 @@ export function ClientField({
     <section className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <span className="text-small font-medium text-n-900">{t('title')}</span>
-        <button
-          type="button"
-          className="cursor-pointer border-0 bg-transparent p-0 text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
+        <Button
+          variant="tertiary"
+          size="s"
+          className="self-start"
           onClick={() => {
             setByName(!byName)
             setQuery('')
           }}
         >
           {byName ? t('byPhone') : t('byName')}
-        </button>
+        </Button>
       </div>
       {byName ? (
         <>

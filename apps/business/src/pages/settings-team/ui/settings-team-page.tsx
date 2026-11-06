@@ -453,7 +453,7 @@ function MemberRow({
         {owner && inviteRow && pending && (
           <Menu>
             <MenuTrigger asChild>
-              <Button variant="ghost" size="s" iconOnly aria-label={t('actions', { name })}>
+              <Button variant="plain" size="s" iconOnly aria-label={t('actions', { name })}>
                 <Ellipsis />
               </Button>
             </MenuTrigger>

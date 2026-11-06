@@ -53,7 +53,7 @@ export function Pagination({
             aria-current={p === page ? 'page' : undefined}
             onClick={() => onPageChange(p)}
             className={cn(
-              'inline-flex size-9 cursor-pointer items-center justify-center rounded-s border border-transparent bg-transparent text-small font-medium text-n-900 hover:bg-group',
+              'inline-flex size-9 cursor-pointer items-center justify-center rounded-ctl-m border border-transparent bg-transparent text-small font-medium text-n-900 hover:bg-group',
               'focus-visible:shadow-focus focus-visible:outline-none aria-[current=page]:border-n-300 aria-[current=page]:font-semibold',
             )}
           >

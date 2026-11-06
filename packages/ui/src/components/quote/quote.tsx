@@ -19,7 +19,7 @@ export function Quote({
   meta?: ReactNode
 }) {
   return (
-    <figure {...props} className={cn('m-0 flex flex-col gap-1.5 rounded-m bg-n-50 px-3.5 py-3', className)}>
+    <figure {...props} className={cn('m-0 flex flex-col gap-1.5 rounded-ctl-l bg-n-50 px-3.5 py-3', className)}>
       {(label || meta) && (
         <figcaption className="flex flex-col gap-1.5">
           {label && <span className="text-label text-n-500 uppercase">{label}</span>}

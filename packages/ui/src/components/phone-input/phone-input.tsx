@@ -91,7 +91,7 @@ function MaskedPhone({ masked, prefix, size = 48, className, id, ...aria }: Mask
         aria-label={aria['aria-label']}
         aria-describedby={aria['aria-describedby'] ?? field?.describedBy}
         className={cn(
-          'flex min-w-0 flex-1 items-center gap-2 rounded-input border border-n-200 bg-n-50 px-3.5 font-medium text-n-900',
+          'flex min-w-0 flex-1 items-center gap-2 rounded-ctl-s border border-n-200 bg-n-50 px-3.5 font-medium text-n-900',
           heights[size],
         )}
       >

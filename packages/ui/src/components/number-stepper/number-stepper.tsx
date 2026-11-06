@@ -60,7 +60,7 @@ export function NumberStepper({
       role="group"
       {...props}
       onKeyDown={onKeys}
-      className={cn('inline-flex h-11 flex-none items-center rounded-s border border-n-300 bg-n-0', className)}
+      className={cn('inline-flex h-11 flex-none items-center rounded-ctl-m border border-n-300 bg-n-0', className)}
     >
       <button
         type="button"

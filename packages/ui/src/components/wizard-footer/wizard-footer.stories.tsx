@@ -54,7 +54,7 @@ export const WithCancel: Story = {
   args: {
     back: undefined,
     start: (
-      <Button variant="ghost" size="l">
+      <Button variant="tertiary" size="l">
         Cancel
       </Button>
     ),
@@ -65,7 +65,8 @@ export const WithCancel: Story = {
 export const Saving: Story = {
   args: { primary: { children: 'Continue', loading: true, loadingLabel: 'Saving' } },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('button', { name: 'Saving' })).toHaveAttribute('aria-busy', 'true')
+    // loading keeps the label and the width (v0.7 · A4); «Saving» is read after it
+    await expect(canvas.getByRole('button', { name: /Saving/ })).toHaveAttribute('aria-busy', 'true')
     await expect(canvas.getByRole('button', { name: 'Back' })).toBeDisabled()
   },
 }

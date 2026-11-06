@@ -33,7 +33,7 @@ export function WizardFooter({ back, start, hint, primary, children, className, 
         {back && (
           <Button
             type="button"
-            variant="ghost"
+            variant="tertiary"
             size="l"
             onClick={back.onClick}
             // leaving a step while it saves would land the save's answer on another step

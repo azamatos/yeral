@@ -32,7 +32,13 @@ export function TableRow({ selected, className, ...props }: ComponentProps<'div'
       role="row"
       aria-selected={selected}
       {...props}
-      className={cn(rowClass, 'hover:bg-n-50', selected && 'bg-a-50 hover:bg-a-50', className)}
+      // a row that is a link takes the inset ring (A11): the frame clips, so the ring goes inside
+      className={cn(
+        rowClass,
+        'hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none has-[a:focus-visible]:shadow-focus-inset',
+        selected && 'bg-a-50 hover:bg-a-50',
+        className,
+      )}
     />
   )
 }

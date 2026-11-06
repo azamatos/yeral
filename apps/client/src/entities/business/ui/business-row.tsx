@@ -16,11 +16,11 @@ export function BusinessRow({ card }: { card: BusinessCard }) {
   const lang = useLocale()
   const line = useCardLine()
   return (
-    <article className="relative -mx-3 grid grid-cols-[200px_minmax(0,1fr)] gap-5 rounded-l p-3 hover:bg-n-50 max-sm:grid-cols-[112px_minmax(0,1fr)] max-sm:gap-3.5">
+    <article className="relative -mx-3 grid grid-cols-[200px_minmax(0,1fr)] gap-5 rounded-card p-3 hover:bg-n-50 max-sm:grid-cols-[112px_minmax(0,1fr)] max-sm:gap-3.5">
       {card.photo ? (
-        <img src={card.photo.url} alt="" loading="lazy" className="h-37.5 w-50 rounded-m bg-n-100 object-cover max-sm:size-28" />
+        <img src={card.photo.url} alt="" loading="lazy" className="h-37.5 w-50 rounded-ctl-l bg-n-100 object-cover max-sm:size-28" />
       ) : (
-        <span aria-hidden className="h-37.5 w-50 rounded-m bg-n-100 max-sm:size-28" />
+        <span aria-hidden className="h-37.5 w-50 rounded-ctl-l bg-n-100 max-sm:size-28" />
       )}
       <div className="flex min-w-0 flex-col gap-1.5">
         <div className="flex items-start justify-between gap-3">
@@ -28,7 +28,7 @@ export function BusinessRow({ card }: { card: BusinessCard }) {
             <Link
               to="/$lang/b/$slug"
               params={{ lang, slug: card.slug }}
-              className="text-n-900 no-underline after:absolute after:inset-0 after:rounded-l hover:underline focus-visible:outline-none focus-visible:after:shadow-focus"
+              className="text-n-900 no-underline after:absolute after:inset-0 after:rounded-card hover:underline focus-visible:outline-none focus-visible:after:shadow-focus"
             >
               {card.name}
             </Link>

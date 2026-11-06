@@ -49,7 +49,7 @@ export function DeleteAccount() {
       }}
     >
       <ModalTrigger asChild>
-        <Button variant="danger" size="s">
+        <Button variant="danger-quiet" size="s">
           {t('profile.delete')}
         </Button>
       </ModalTrigger>

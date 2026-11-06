@@ -47,7 +47,7 @@ export function SearchCard({ located, whereInput }: { located: ReturnType<typeof
   // the card draws the cell: the trigger is bare, 24 high, the text as typed in the other cells
   const bareSelect = 'h-6 rounded-none border-0 bg-transparent px-0 text-body shadow-none data-[state=open]:shadow-none'
   return (
-    <form onSubmit={submit} className="flex max-w-130 flex-col overflow-hidden rounded-l border border-n-300 bg-n-0">
+    <form onSubmit={submit} className="flex max-w-130 flex-col overflow-hidden rounded-card border border-n-300 bg-n-0">
       <CardField label={t('what')}>
         {(id) => (
           <input

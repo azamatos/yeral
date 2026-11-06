@@ -62,7 +62,7 @@ export function StaffStep({
   return (
     <div className="flex flex-col gap-6">
       <StepTitle title={move ? words('staffTitle') : t('title')} lead={t('lead')} level={move ? 2 : 1} />
-      {!anyOne && <p className="m-0 rounded-m bg-group px-3.5 py-3 text-small text-n-600">{t('noOneDoesAll')}</p>}
+      {!anyOne && <p className="m-0 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-600">{t('noOneDoesAll')}</p>}
       {free.isError && !free.data && <LoadFailed onRetry={() => void free.refetch()} />}
       <OptionCardGroup aria-label={t('label')} value={staff} onValueChange={onPick}>
         <OptionCard

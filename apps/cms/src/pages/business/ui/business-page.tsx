@@ -50,7 +50,7 @@ export function BusinessPage({ id }: { id: string }) {
         <div className="flex min-w-0 flex-col gap-6">
           <Notes business={b} />
           <Facts business={b} />
-          <MapFrame center={b.location} zoom={16} interactive={false} className="h-64 rounded-m">
+          <MapFrame center={b.location} zoom={16} interactive={false} className="h-64 rounded-ctl-l">
             <MapMarker at={b.location}>
               <MapPin hot className="-translate-y-2.5">
                 {b.name}
@@ -121,7 +121,7 @@ function Pictures({ business: b }: { business: AdminBusiness }) {
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {pictures.map((p) => (
             <li key={p.url}>
-              <img src={p.url} alt={p.alt} className="aspect-4/3 w-full rounded-m object-cover" />
+              <img src={p.url} alt={p.alt} className="aspect-4/3 w-full rounded-ctl-l object-cover" />
             </li>
           ))}
         </ul>

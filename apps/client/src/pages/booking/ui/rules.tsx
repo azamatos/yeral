@@ -30,7 +30,7 @@ export function Rules({ rules, pay = true, className }: { rules: BusinessDetail[
           </li>
         )}
       </ul>
-      {rules.note && <p className="m-0 rounded-m bg-group px-3.5 py-3 text-small text-n-600">{rules.note}</p>}
+      {rules.note && <p className="m-0 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-600">{rules.note}</p>}
     </Part>
   )
 }

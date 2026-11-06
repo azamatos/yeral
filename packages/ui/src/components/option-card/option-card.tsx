@@ -21,7 +21,7 @@ const card = cva(
         // Booking `.opt`: the dot at the end
         end: 'items-center gap-4 p-4',
         // B-Onboarding `.rro`: the dot first
-        start: 'items-start gap-3 rounded-m px-4 py-3.5',
+        start: 'items-start gap-3 rounded-ctl-l px-4 py-3.5',
         // B-Onboarding `.rcard`: stacked, the dot in the corner
         large: 'relative flex-col items-start gap-3.5 p-5',
       },

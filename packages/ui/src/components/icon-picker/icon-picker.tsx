@@ -23,7 +23,7 @@ export function IconPicker({
           value={o.value}
           aria-label={o.label}
           className={cn(
-            'inline-flex h-11 min-w-0 cursor-pointer items-center justify-center rounded-s border border-n-300 bg-n-0 p-0 text-n-900 [&_svg]:size-5',
+            'inline-flex h-11 min-w-0 cursor-pointer items-center justify-center rounded-ctl-m border border-n-300 bg-n-0 p-0 text-n-900 [&_svg]:size-5',
             'hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
             'data-[state=checked]:border-a-line data-[state=checked]:bg-a-50 data-[state=checked]:text-a-600',
           )}

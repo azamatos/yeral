@@ -66,7 +66,7 @@ export function ChangePhoneBox({
     refused && refused.phone === state.phone ? (refused.why === 'taken' ? t('errors.phone_taken') : t('profile.newPhone.same')) : undefined
 
   return (
-    <div className="flex flex-col gap-3 rounded-m border border-n-200 p-4">
+    <div className="flex flex-col gap-3 rounded-ctl-l border border-n-200 p-4">
       {state.step === 'code' && (
         <p className="m-0 text-small text-n-600 [&_b]:font-semibold [&_b]:text-n-900">
           {t.rich('profile.newPhone.codeLead', {
@@ -90,7 +90,7 @@ export function ChangePhoneBox({
         phoneError={phoneError}
       />
       {/* not while a code is on its way or being checked: the change would finish behind a closed box */}
-      <Button variant="ghost" size="s" className="self-end" disabled={busy} onClick={onCancel}>
+      <Button variant="tertiary" size="s" className="self-end" disabled={busy} onClick={onCancel}>
         {t('profile.newPhone.cancel')}
       </Button>
     </div>

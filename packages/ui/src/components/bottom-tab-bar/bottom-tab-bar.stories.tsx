@@ -21,7 +21,7 @@ function Bar({
   words?: Record<'menu' | 'calendar' | 'bookings' | 'clients' | 'more' | 'requests', string>
 }) {
   return (
-    <div className="w-97.5 rounded-m border border-n-200">
+    <div className="w-97.5 rounded-ctl-l border border-n-200">
       <BottomTabBar aria-label={words.menu}>
         <BottomTab href="#calendar" aria-current={current ? 'page' : undefined} icon={<CalendarDays />} label={words.calendar} />
         <BottomTab

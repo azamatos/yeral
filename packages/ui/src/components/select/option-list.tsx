@@ -356,7 +356,7 @@ export function SelectLayer({
             </Dialog.Title>
             {closeLabel && (
               <Dialog.Close asChild>
-                <Button variant="ghost" iconOnly aria-label={closeLabel} className="size-10 rounded-ctl-m">
+                <Button variant="plain" iconOnly aria-label={closeLabel} className="size-10 rounded-ctl-m">
                   <X />
                 </Button>
               </Dialog.Close>

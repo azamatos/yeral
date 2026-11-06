@@ -349,7 +349,7 @@ function Footer({
       )}
       <ReportMenu booking={b} kinds={kinds} context={context} report={report} />
       {canCancel && (
-        <Button variant="danger-ghost" className="sm:ml-auto" onClick={() => setCancelling(true)}>
+        <Button variant="danger-quiet" className="sm:ml-auto" onClick={() => setCancelling(true)}>
           {c('button')}
         </Button>
       )}

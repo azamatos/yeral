@@ -25,10 +25,10 @@ export function Toaster({ label }: { label?: string }) {
           toast:
             // DS-Patterns `.toast.plain`: 16 left, 20 right for words alone («Saved»); an action pulls itself 12 into
             // the right padding, leaving `.toast`'s 8 beside it
-            'flex min-h-13 w-full items-center gap-3 rounded-m bg-n-900 py-1.5 pr-5 pl-4 font-sans text-body text-white shadow-raised sm:w-auto sm:max-w-[calc(100vw-48px)]',
+            'flex min-h-13 w-full items-center gap-3 rounded-ctl-l bg-n-900 py-1.5 pr-5 pl-4 font-sans text-body text-white shadow-raised sm:w-auto sm:max-w-[calc(100vw-48px)]',
           title: 'font-normal',
           actionButton:
-            'ml-auto -mr-3 inline-flex h-10 flex-none cursor-pointer items-center rounded-m border-0 bg-transparent px-2.5 font-semibold text-a-200 hover:bg-ink-btn-hover focus-visible:shadow-focus',
+            'ml-auto -mr-3 inline-flex h-10 flex-none cursor-pointer items-center rounded-ctl-l border-0 bg-transparent px-2.5 font-semibold text-a-200 hover:bg-ink-btn-hover focus-visible:shadow-focus',
         },
       }}
     />

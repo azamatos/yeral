@@ -87,11 +87,11 @@ export function WorkspaceSwitcher({
     </span>
   )
   const trigger = cn(
-    'flex cursor-pointer items-center rounded-m border-0 bg-transparent text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group',
+    'flex cursor-pointer items-center rounded-ctl-l border-0 bg-transparent text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group',
     variant === 'rail' && 'size-11 flex-none justify-center',
     variant === 'sidebar' && 'w-full gap-2.5 p-2',
     variant === 'strip' && 'h-12 max-w-62.5 min-w-0 gap-2.5 py-1 pr-2.5 pl-1.5',
-    variant === 'row' && 'm-0 min-h-15 w-full gap-3.5 rounded-s px-3 hover:bg-n-50 focus-visible:shadow-focus-inset',
+    variant === 'row' && 'm-0 min-h-15 w-full gap-3.5 rounded-ctl-m px-3 hover:bg-n-50 focus-visible:shadow-focus-inset',
     className,
   )
   const chevrons = <ChevronsUpDown aria-hidden className="size-4 flex-none text-n-500" />
@@ -115,7 +115,7 @@ export function WorkspaceSwitcher({
             {person && <span className="text-dense text-n-600">{person}</span>}
           </div>
           <SheetClose asChild>
-            <Button variant="ghost" iconOnly aria-label={copy.close}>
+            <Button variant="plain" iconOnly aria-label={copy.close}>
               <X />
             </Button>
           </SheetClose>
@@ -131,7 +131,7 @@ export function WorkspaceSwitcher({
                 if (!item.current) onSelect(item.id)
               }}
               className={cn(
-                'flex min-h-16 w-full cursor-pointer items-center gap-3 rounded-m border-0 px-3 py-2 text-left text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none',
+                'flex min-h-16 w-full cursor-pointer items-center gap-3 rounded-ctl-l border-0 px-3 py-2 text-left text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none',
                 item.current ? 'bg-a-50 hover:bg-a-50' : 'bg-transparent',
               )}
             >
@@ -150,7 +150,7 @@ export function WorkspaceSwitcher({
               setOpen(false)
               onCreate()
             }}
-            className="flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-m border-0 bg-transparent px-3 py-2 text-left text-[15px] leading-5 font-semibold text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none"
+            className="flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-ctl-l border-0 bg-transparent px-3 py-2 text-left text-[15px] leading-5 font-semibold text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none"
           >
             <AddTile size={40} />
             {copy.create}
@@ -187,7 +187,7 @@ export function WorkspaceSwitcher({
               key={item.id}
               value={item.id}
               className={cn(
-                'flex min-h-13 cursor-pointer items-center gap-2.5 rounded-input px-2.5 py-1.5 text-small text-n-900 outline-none select-none focus-visible:shadow-focus-inset',
+                'flex min-h-13 cursor-pointer items-center gap-2.5 rounded-ctl-s px-2.5 py-1.5 text-small text-n-900 outline-none select-none focus-visible:shadow-focus-inset',
                 item.current ? 'bg-a-50' : 'data-highlighted:bg-group',
               )}
             >
@@ -203,7 +203,7 @@ export function WorkspaceSwitcher({
         <MenuSeparator className="mx-1" />
         <DropdownMenu.Item
           onSelect={() => onCreate()}
-          className="flex min-h-10 cursor-pointer items-center gap-2.5 rounded-input px-2.5 py-1.5 text-small text-n-900 outline-none select-none focus-visible:shadow-focus-inset data-highlighted:bg-group"
+          className="flex min-h-10 cursor-pointer items-center gap-2.5 rounded-ctl-s px-2.5 py-1.5 text-small text-n-900 outline-none select-none focus-visible:shadow-focus-inset data-highlighted:bg-group"
         >
           <AddTile size={32} />
           {copy.create}
@@ -245,7 +245,7 @@ function AddTile({ size }: { size: 32 | 40 }) {
       aria-hidden
       className={cn(
         'inline-flex flex-none items-center justify-center border border-dashed border-n-400 text-n-600',
-        size === 40 ? 'size-10 rounded-s' : 'size-8 rounded-input',
+        size === 40 ? 'size-10 rounded-ctl-m' : 'size-8 rounded-ctl-s',
       )}
     >
       <Plus className="size-4" />

@@ -83,7 +83,7 @@ export const PhoneSwitcher: Story = {
       />
     ),
     actions: (
-      <Button variant="ghost" iconOnly aria-label="Colours and symbols" aria-haspopup="dialog">
+      <Button variant="plain" iconOnly aria-label="Colours and symbols" aria-haspopup="dialog">
         <CircleHelp />
       </Button>
     ),
@@ -100,10 +100,10 @@ export const PhoneTitle: Story = {
   args: {
     actions: (
       <>
-        <Button variant="ghost" iconOnly aria-label="Search bookings">
+        <Button variant="plain" iconOnly aria-label="Search bookings">
           <Search />
         </Button>
-        <Button variant="ghost" iconOnly aria-label="Filters">
+        <Button variant="plain" iconOnly aria-label="Filters">
           <ListFilter />
         </Button>
       </>

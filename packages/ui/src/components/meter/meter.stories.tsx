@@ -55,7 +55,7 @@ export const Tones: Story = {
 /** On the accent tint the track is white. */
 export const OnTint: Story = {
   render: (args) => (
-    <span className="block rounded-input bg-a-50 p-2">
+    <span className="block rounded-ctl-s bg-a-50 p-2">
       <Meter {...args} surface="tint" />
     </span>
   ),
@@ -64,7 +64,7 @@ export const OnTint: Story = {
 /** In a week cell (B-Calendar `.lbar`): the 6 px load bar, then the count and the percent the cell draws. */
 export const InCell: Story = {
   render: () => (
-    <div className="flex w-45 flex-col gap-2 rounded-m border border-n-200 p-3.5">
+    <div className="flex w-45 flex-col gap-2 rounded-ctl-l border border-n-200 p-3.5">
       <Meter label="6 bookings, 72% of the day" value={72} max={100} />
       <span className="flex items-baseline justify-between text-small font-semibold">
         <span>6</span>
@@ -77,7 +77,7 @@ export const InCell: Story = {
 /** Stacked on an n-50 panel (a class's seats, later): confirmed · pending · no-show over an n-200 track. */
 export const Stacked: Story = {
   render: () => (
-    <div className="flex flex-col gap-2.5 rounded-m bg-n-50 px-4 py-3.5">
+    <div className="flex flex-col gap-2.5 rounded-ctl-l bg-n-50 px-4 py-3.5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-2">
         <span className="inline-flex items-baseline gap-2">
           <span className="text-h3 font-bold">11 / 14</span>
@@ -109,7 +109,7 @@ export const Stacked: Story = {
 /** Full: one segment at `max`. */
 export const Full: Story = {
   render: () => (
-    <div className="flex flex-col gap-2.5 rounded-m bg-n-50 px-4 py-3.5">
+    <div className="flex flex-col gap-2.5 rounded-ctl-l bg-n-50 px-4 py-3.5">
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-h3 font-bold">14 / 14</span>
         <span className="text-small font-semibold text-st-cancelled-ink">Full</span>

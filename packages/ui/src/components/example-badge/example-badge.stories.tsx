@@ -50,7 +50,7 @@ export const OnCard: Story = {
 export const OnSearchRow: Story = {
   render: (args) => (
     <a href="#row" className="flex w-80 items-center gap-3">
-      <span className="size-12 flex-none rounded-s bg-n-300" />
+      <span className="size-12 flex-none rounded-ctl-m bg-n-300" />
       <span className="flex min-w-0 flex-col">
         <span className="flex items-center gap-2 text-body font-semibold">
           <span>
@@ -86,7 +86,7 @@ export const OnPageHeader: Story = {
 /** On a map pin: the flask before the name, n-600 on the white pin, white on the chosen ink pin. */
 export const OnMapPin: Story = {
   render: () => (
-    <div className="relative h-24 w-80 rounded-s bg-n-100">
+    <div className="relative h-24 w-80 rounded-ctl-m bg-n-100">
       <MapPin aria-label="Glow Studio, example" className="gap-1 pl-2" style={{ left: 90, bottom: 30 }}>
         <ExampleIcon className="text-n-600" />
         Glow Studio

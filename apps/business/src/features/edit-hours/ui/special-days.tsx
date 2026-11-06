@@ -129,7 +129,7 @@ export function SpecialDays({ slug, saved }: { slug: string; saved: Saved }) {
             </span>
             <Menu>
               <MenuTrigger asChild>
-                <Button variant="ghost" size="s" iconOnly disabled={busy} aria-label={t('actions', { name: d.name })}>
+                <Button variant="plain" size="s" iconOnly disabled={busy} aria-label={t('actions', { name: d.name })}>
                   <Ellipsis />
                 </Button>
               </MenuTrigger>

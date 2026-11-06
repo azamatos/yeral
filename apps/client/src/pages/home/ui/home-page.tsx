@@ -63,7 +63,7 @@ export function HomePage() {
                   key={p.slug}
                   to="/$lang/c/$category"
                   params={{ lang, category: p.category.id }}
-                  className={`relative overflow-hidden rounded-l focus-visible:shadow-focus focus-visible:outline-none ${i === 0 ? 'row-span-2' : ''}`}
+                  className={`relative overflow-hidden rounded-card focus-visible:shadow-focus focus-visible:outline-none ${i === 0 ? 'row-span-2' : ''}`}
                 >
                   <img src={p.photo!.url} alt="" className="size-full object-cover" />
                   <span className="absolute bottom-3 left-3 inline-flex h-7.5 items-center rounded-full bg-n-0 px-3 text-dense font-semibold text-n-900">
@@ -127,7 +127,7 @@ export function HomePage() {
                   key={c.id}
                   to="/$lang/c/$category"
                   params={{ lang, category: c.id }}
-                  className="flex min-h-30 flex-col gap-5 rounded-l border border-n-200 p-4 text-body font-semibold text-n-900 no-underline hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none"
+                  className="flex min-h-30 flex-col gap-5 rounded-card border border-n-200 p-4 text-body font-semibold text-n-900 no-underline hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none"
                 >
                   <CategoryIcon name={c.icon} />
                   <span className="flex flex-col gap-0.5">

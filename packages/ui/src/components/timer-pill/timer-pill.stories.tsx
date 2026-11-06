@@ -40,7 +40,7 @@ export const Hot: Story = {
 /** S on a warning-tinted block (a request card), and its hot form. */
 export const Small: Story = {
   render: (args) => (
-    <span className="inline-flex gap-2 rounded-s bg-st-pending-bg p-2">
+    <span className="inline-flex gap-2 rounded-ctl-m bg-st-pending-bg p-2">
       <TimerPill {...args} size="s" />
       <TimerPill {...args} size="s" until={min(9)} />
     </span>

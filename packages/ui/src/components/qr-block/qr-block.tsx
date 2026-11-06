@@ -145,7 +145,7 @@ export function QrBlock({
   if (variant === 'compact')
     return (
       <div className={cn('flex flex-wrap items-center gap-4', className)}>
-        <span className="inline-flex shrink-0 rounded-m border border-n-200 bg-n-0 p-3">
+        <span className="inline-flex shrink-0 rounded-ctl-l border border-n-200 bg-n-0 p-3">
           <QrCode value={value} label={label} px={120} />
         </span>
         <div className="flex min-w-0 flex-col gap-2">{actions}</div>

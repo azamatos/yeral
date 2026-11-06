@@ -51,7 +51,7 @@ export function BusinessStep({
         lead={more ? t('setup.business.leadMore', { brand }) : t('setup.business.lead')}
       />
       {more && (
-        <div className="flex flex-wrap items-center gap-2.5 rounded-m border border-n-200 bg-n-50 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2.5 rounded-ctl-l border border-n-200 bg-n-50 px-4 py-3">
           <Avatar name={owner.name} size={32} />
           <span className="flex min-w-0 flex-col">
             <span className="text-button font-semibold">{owner.name}</span>

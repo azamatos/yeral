@@ -267,7 +267,7 @@ export const LongText: Story = {
               <RotateCw />
               Обновить страницу
             </Button>
-            <Button size="s" variant="ghost">
+            <Button size="s" variant="tertiary">
               Написать в поддержку
             </Button>
           </>

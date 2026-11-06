@@ -211,7 +211,7 @@ function AddMemberSteps({
                 aria-current={cur ? 'step' : undefined}
                 onClick={() => goTo(i)}
                 className={cn(
-                  'group inline-flex min-h-8 items-center gap-2 rounded-input border-0 bg-transparent py-0 pr-1.5 pl-0.5 text-left text-small font-medium text-n-500',
+                  'group inline-flex min-h-8 items-center gap-2 rounded-ctl-s border-0 bg-transparent py-0 pr-1.5 pl-0.5 text-left text-small font-medium text-n-500',
                   'focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default',
                   done && 'cursor-pointer text-n-900',
                   cur && 'font-semibold text-n-900',
@@ -276,7 +276,7 @@ function AddMemberSteps({
                 ]}
               />
             </Field>
-            <p className="m-0 -mt-2 flex items-start gap-2 rounded-s bg-group px-3 py-2.5 text-dense text-n-600">
+            <p className="m-0 -mt-2 flex items-start gap-2 rounded-ctl-m bg-group px-3 py-2.5 text-dense text-n-600">
               <Info aria-hidden className="mt-px size-4 flex-none" strokeWidth={1.75} />
               {words(form.level === 'admin' ? 'adminMeans' : 'specialistMeans')}
             </p>
@@ -340,7 +340,7 @@ function AddMemberSteps({
                 </button>
               ))}
             </div>
-            <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+            <p className="m-0 flex items-start gap-2.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900">
               <Lock aria-hidden className="mt-px size-4.5 flex-none" strokeWidth={1.75} />
               {app ? t('noteApp', { phone: masked, days: INVITE_DAYS, date: until }) : t('noteNoApp', { name })}
             </p>

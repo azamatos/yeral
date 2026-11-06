@@ -167,7 +167,7 @@ export function BookingPage() {
             </Link>
           }
           end={
-            <Button asChild variant="ghost" iconOnly aria-label={t('close')}>
+            <Button asChild variant="plain" iconOnly aria-label={t('close')}>
               <Link to="/$lang/b/$slug" params={{ lang, slug: detail.slug }}>
                 <X aria-hidden className="size-[22px]" />
               </Link>
@@ -220,14 +220,14 @@ export function BookingPage() {
         start={
           // the flow began on the services (or on the specialist opened again from them): Back is the business page
           index === 0 || step === 'services' ? (
-            <Button asChild variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5">
+            <Button asChild variant="tertiary" className="-ml-2.5 min-w-0 pr-4 pl-2.5">
               <Link {...pageLink}>
                 <ChevronLeft aria-hidden />
                 {t('back')}
               </Link>
             </Button>
           ) : (
-            <Button variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(steps[index - 1] ?? 'services', false)}>
+            <Button variant="tertiary" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(steps[index - 1] ?? 'services', false)}>
               <ChevronLeft aria-hidden />
               {t('back')}
             </Button>
@@ -247,7 +247,7 @@ export function BookingPage() {
           />
         }
         end={
-          <Button asChild variant="ghost" iconOnly aria-label={t('close')}>
+          <Button asChild variant="plain" iconOnly aria-label={t('close')}>
             <Link {...pageLink}>
               <X aria-hidden className="size-[22px]" />
             </Link>

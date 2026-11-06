@@ -148,10 +148,10 @@ export function useDoneStep(
         <div className="flex w-full max-w-90 flex-col gap-3">
           {photos[0] ? (
             // decorative: the card's name is right under it
-            <img src={photos[0].url} alt="" className="block aspect-4/3 w-full rounded-m object-cover" />
+            <img src={photos[0].url} alt="" className="block aspect-4/3 w-full rounded-ctl-l object-cover" />
           ) : (
             // no photo yet: the card's place, as the client site keeps it for a business without one
-            <div aria-hidden className="flex aspect-4/3 w-full items-center justify-center rounded-m bg-n-100 text-n-500">
+            <div aria-hidden className="flex aspect-4/3 w-full items-center justify-center rounded-ctl-l bg-n-100 text-n-500">
               <Image className="size-8" />
             </div>
           )}

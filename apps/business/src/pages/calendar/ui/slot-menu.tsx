@@ -6,7 +6,7 @@ import { useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 
 const ITEM =
-  'flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-input border-0 bg-transparent px-2.5 py-1.5 text-left text-small text-n-900 hover:bg-n-50 focus-visible:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none max-sm:min-h-12 max-sm:gap-3 [&_svg]:size-[18px] [&_svg]:flex-none [&_svg]:text-n-600'
+  'flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-ctl-s border-0 bg-transparent px-2.5 py-1.5 text-left text-small text-n-900 hover:bg-n-50 focus-visible:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none max-sm:min-h-12 max-sm:gap-3 [&_svg]:size-[18px] [&_svg]:flex-none [&_svg]:text-n-600'
 
 /**
  * What a free slot offers (B-Calendar `panel=slot-menu`, DS-Business SlotMenu; B-Mobile 2b as a sheet): «14:30 · Maral»

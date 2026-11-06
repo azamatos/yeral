@@ -58,14 +58,14 @@ export function CategoryPicker({
         />
       </div>
       {shown.length > 0 ? (
-        <div role="radiogroup" aria-labelledby={labelId} className="max-h-90 overflow-y-auto rounded-m border border-n-200 p-1.5">
+        <div role="radiogroup" aria-labelledby={labelId} className="max-h-90 overflow-y-auto rounded-ctl-l border border-n-200 p-1.5">
           {shown.map((c) => {
             const on = c.id === value
             return (
               <label
                 key={c.id}
                 className={cn(
-                  'flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-s px-3 py-2 text-button text-n-900 hover:bg-n-50',
+                  'flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-ctl-m px-3 py-2 text-button text-n-900 hover:bg-n-50',
                   'has-[:focus-visible]:shadow-focus-inset',
                   on && 'bg-a-50 font-semibold text-a-600 hover:bg-a-50',
                 )}
@@ -84,7 +84,7 @@ export function CategoryPicker({
           })}
         </div>
       ) : (
-        <div role="status" className="flex flex-col items-start gap-2 rounded-m border border-n-200 p-5">
+        <div role="status" className="flex flex-col items-start gap-2 rounded-ctl-l border border-n-200 p-5">
           <span className="text-body font-semibold">{t('setup.category.noneTitle', { brand })}</span>
           <span className="text-dense text-n-600">{t('setup.category.noneText', { query: query.trim() })}</span>
           <ContactYeral

@@ -25,10 +25,10 @@ const avatar = cva('inline-flex flex-none items-center justify-center overflow-h
     tone: { tint: 'bg-a-50 text-a-600', neutral: 'bg-n-100 text-n-600' },
   },
   compoundVariants: [
-    { shape: 'square', size: [24, 28, 32], className: 'rounded-input' },
-    { shape: 'square', size: [36, 40], className: 'rounded-s' },
-    { shape: 'square', size: [44, 48], className: 'rounded-m' },
-    { shape: 'square', size: [56, 64], className: 'rounded-l' },
+    { shape: 'square', size: [24, 28, 32], className: 'rounded-ctl-s' },
+    { shape: 'square', size: [36, 40], className: 'rounded-ctl-m' },
+    { shape: 'square', size: [44, 48], className: 'rounded-ctl-l' },
+    { shape: 'square', size: [56, 64], className: 'rounded-card' },
   ],
   defaultVariants: { size: 40, shape: 'circle', tone: 'tint' },
 })

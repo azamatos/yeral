@@ -15,7 +15,7 @@ export function BackLink({ asChild, className, children, ...props }: ComponentPr
     <Comp
       {...props}
       className={cn(
-        'inline-flex h-9 items-center gap-0.5 rounded-s pr-2.5 pl-1 text-small font-medium whitespace-nowrap text-n-600 no-underline',
+        'inline-flex h-9 items-center gap-0.5 rounded-ctl-m pr-2.5 pl-1 text-small font-medium whitespace-nowrap text-n-600 no-underline',
         'hover:bg-group hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none',
         className,
       )}

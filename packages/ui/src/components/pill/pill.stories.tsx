@@ -27,7 +27,7 @@ export const Tones: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
       {TONES.map(([tone, text]) => (
-        <span key={tone} className={tone === 'ink' ? 'rounded-s bg-n-500 p-2' : 'p-2'}>
+        <span key={tone} className={tone === 'ink' ? 'rounded-ctl-m bg-n-500 p-2' : 'p-2'}>
           <Pill tone={tone}>{text}</Pill>
         </span>
       ))}
@@ -41,7 +41,7 @@ export const Sizes: Story = {
     <div className="grid grid-cols-[repeat(3,max-content)] items-center gap-3">
       {TONES.map(([tone, text]) =>
         (['s', 'm', 'l'] as const).map((size) => (
-          <span key={`${tone}-${size}`} className={tone === 'ink' ? 'rounded-s bg-n-500 p-2' : 'p-2'}>
+          <span key={`${tone}-${size}`} className={tone === 'ink' ? 'rounded-ctl-m bg-n-500 p-2' : 'p-2'}>
             <Pill tone={tone} size={size}>
               {text}
             </Pill>

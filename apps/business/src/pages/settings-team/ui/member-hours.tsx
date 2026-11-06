@@ -321,7 +321,7 @@ export function TimeOff({
                 </span>
                 {owner && (
                   <Button
-                    variant="ghost"
+                    variant="plain"
                     size="s"
                     iconOnly
                     aria-label={t('remove', { range: text })}
@@ -337,7 +337,7 @@ export function TimeOff({
         </div>
       )}
       {owner && draft && (
-        <div role="group" aria-label={t('addLabel')} className="flex flex-col gap-4 rounded-m border border-n-200 p-4">
+        <div role="group" aria-label={t('addLabel')} className="flex flex-col gap-4 rounded-ctl-l border border-n-200 p-4">
           <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
             <Field label={t('from')}>
               <DatePicker
@@ -374,7 +374,7 @@ export function TimeOff({
             />
           </Field>
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" size="s" disabled={busy} onClick={() => setDraft(null)}>
+            <Button variant="tertiary" size="s" disabled={busy} onClick={() => setDraft(null)}>
               {t('cancel')}
             </Button>
             <Button

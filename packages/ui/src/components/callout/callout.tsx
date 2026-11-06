@@ -19,7 +19,7 @@ const callout = cva('flex text-small text-n-900 [&_b]:font-semibold [&_strong]:f
       s: "gap-2.5 px-3.5 py-3 [&_[data-callout-icon]_svg:not([class*='size-'])]:size-4.5",
     },
     layout: {
-      box: 'items-start rounded-m border',
+      box: 'items-start rounded-ctl-l border',
       // full bleed above the page header: the tone's line only at the bottom, no radius, no dismiss
       banner: 'items-start border-b px-6 py-3',
     },

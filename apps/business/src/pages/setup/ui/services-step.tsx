@@ -213,7 +213,7 @@ export function useServicesStep(
         type="button"
         disabled={saving}
         onClick={() => update((f) => withNewRow(f, ownName))}
-        className="flex h-13 w-full items-center justify-center gap-2 rounded-m border border-dashed border-n-300 bg-n-0 text-body font-semibold text-a-600 hover:border-n-400 hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:text-n-500"
+        className="flex h-13 w-full items-center justify-center gap-2 rounded-ctl-l border border-dashed border-n-300 bg-n-0 text-body font-semibold text-a-600 hover:border-n-400 hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:text-n-500"
       >
         <Plus aria-hidden strokeWidth={2} className="size-4.5" />
         {t('add')}

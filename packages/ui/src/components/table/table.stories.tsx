@@ -89,7 +89,7 @@ function Bookings() {
         <span className="text-[19px] font-bold tracking-[-0.02em]">Ýazylyşlar</span>
         <span className="text-dense text-n-600">Çarşenbe, 14 oktýabr</span>
         <div className="flex-1" />
-        <label className="flex h-9 w-60 items-center gap-2 rounded-s border border-n-300 px-3 text-small text-n-500">
+        <label className="flex h-9 w-60 items-center gap-2 rounded-ctl-m border border-n-300 px-3 text-small text-n-500">
           <Search className="size-4" />
           <input
             aria-label="Müşderi ýa-da telefon"
@@ -150,7 +150,7 @@ function Bookings() {
               <StatusBadge status={r.status}>{r.label}</StatusBadge>
             </TableCell>
             <TableCell>
-              <Button variant="ghost" iconOnly size="s" aria-label={`Hereketler: ${r.name}`}>
+              <Button variant="plain" iconOnly size="s" aria-label={`Hereketler: ${r.name}`}>
                 <MoreHorizontal />
               </Button>
             </TableCell>

@@ -34,7 +34,7 @@ export function BulkBar({ count, clearLabel, onClear, children, className, style
       className={cn(
         'sticky bottom-0 z-5 flex flex-wrap items-center gap-3 rounded-b-[15px] bg-n-900 py-3 pr-3 pl-5 text-white max-sm:bottom-(--tab-bar)',
         // S buttons are 44 high with radius 12 on phones (B-Bookings `.b-sm` under 768)
-        'max-sm:[&_button]:h-11 max-sm:[&_button]:rounded-m',
+        'max-sm:[&_button]:h-11 max-sm:[&_button]:rounded-ctl-l',
         className,
       )}
     >

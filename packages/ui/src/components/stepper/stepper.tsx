@@ -65,8 +65,8 @@ export function Stepper({ orientation = 'horizontal', ...props }: StepperProps) 
                 'group inline-flex items-center gap-2 border-0 bg-transparent text-small font-medium whitespace-nowrap text-n-500',
                 'focus-visible:shadow-focus-inset focus-visible:outline-none disabled:cursor-default',
                 compact
-                  ? 'min-h-8 rounded-input pr-1.5 pl-0.5 leading-4.5 focus-visible:shadow-focus'
-                  : 'border-b-2 border-transparent px-0.5 focus-visible:rounded-input',
+                  ? 'min-h-8 rounded-ctl-s pr-1.5 pl-0.5 leading-4.5 focus-visible:shadow-focus'
+                  : 'border-b-2 border-transparent px-0.5 focus-visible:rounded-ctl-s',
                 ((done && opens(i)) || ahead) && 'cursor-pointer text-n-900',
                 cur && 'font-semibold text-n-900',
                 cur && !compact && 'border-a-500',
@@ -148,7 +148,7 @@ function VerticalSteps({
                   if (!cur) onStepClick?.(i)
                 }}
                 className={cn(
-                  'flex w-full items-start gap-3 rounded-m border-0 bg-transparent px-3 py-2.5 text-left text-n-500',
+                  'flex w-full items-start gap-3 rounded-ctl-l border-0 bg-transparent px-3 py-2.5 text-left text-n-500',
                   'focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default',
                   (done || vis) && 'text-n-900 enabled:cursor-pointer enabled:hover:bg-n-100',
                   cur && 'cursor-default bg-n-0 text-n-900 shadow-[0_0_0_1px_var(--color-n-200)]',

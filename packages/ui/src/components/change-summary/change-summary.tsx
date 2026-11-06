@@ -39,7 +39,7 @@ export function ChangeSummary({
       <div
         {...props}
         className={cn(
-          'grid grid-cols-[minmax(92px,max-content)_minmax(0,1fr)] items-baseline gap-2.5 rounded-m bg-n-50 p-3.5 text-small',
+          'grid grid-cols-[minmax(92px,max-content)_minmax(0,1fr)] items-baseline gap-2.5 rounded-ctl-l bg-n-50 p-3.5 text-small',
           className,
         )}
       >

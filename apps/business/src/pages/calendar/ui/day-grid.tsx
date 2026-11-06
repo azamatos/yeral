@@ -475,7 +475,7 @@ function DayColumn({
         <div
           key={i}
           className={cn(
-            'pointer-events-none absolute right-1 left-1 z-4 flex items-start overflow-hidden rounded-input border border-n-200 bg-n-50 px-2 py-1.25 text-[12px] leading-4 font-medium whitespace-nowrap text-n-600',
+            'pointer-events-none absolute right-1 left-1 z-4 flex items-start overflow-hidden rounded-ctl-s border border-n-200 bg-n-50 px-2 py-1.25 text-[12px] leading-4 font-medium whitespace-nowrap text-n-600',
             overlaps(e, live) && 'left-[calc(50%+2px)]',
           )}
           style={at(e.start, e.end)}

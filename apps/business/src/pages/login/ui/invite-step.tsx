@@ -137,7 +137,7 @@ export function InviteStep({
         {t('login.invite.until', { date: fmt.dayMonth(localOf(invite.expiresAt).date) })}
       </p>
       {asking ? (
-        <div role="group" aria-labelledby="invite-decline" className="flex flex-col gap-3 rounded-m border border-n-200 bg-n-50 p-4">
+        <div role="group" aria-labelledby="invite-decline" className="flex flex-col gap-3 rounded-ctl-l border border-n-200 bg-n-50 p-4">
           <p id="invite-decline" ref={confirmRef} tabIndex={-1} className="m-0 text-body font-semibold focus:outline-none">
             {t('login.invite.declineTitle')}
           </p>
@@ -145,10 +145,10 @@ export function InviteStep({
             {invite.invitedBy ? t('login.invite.declineLead', { name: invite.invitedBy }) : t('login.invite.declineLeadNobody')}
           </p>
           <div className="flex flex-wrap justify-end gap-2">
-            <Button variant="ghost" disabled={declining} onClick={() => setAsking(false)}>
+            <Button variant="tertiary" disabled={declining} onClick={() => setAsking(false)}>
               {t('login.invite.back')}
             </Button>
-            <Button variant="danger" loading={declining} onClick={onDecline}>
+            <Button variant="danger-quiet" loading={declining} onClick={onDecline}>
               {t('login.invite.declineConfirm')}
             </Button>
           </div>

@@ -69,7 +69,7 @@ function BulkDecline({
             {t('back')}
           </Button>
           <Button
-            variant="danger"
+            variant="danger-quiet"
             disabled={!ready}
             loading={pending}
             loadingLabel={t('declining')}
@@ -190,7 +190,7 @@ export function RequestsTab({
               <button
                 type="button"
                 onClick={() => onOpen(r.code)}
-                className="flex w-full cursor-pointer flex-col gap-1 rounded-m border border-n-200 bg-n-0 p-3 text-left focus-visible:shadow-focus focus-visible:outline-none"
+                className="flex w-full cursor-pointer flex-col gap-1 rounded-ctl-l border border-n-200 bg-n-0 p-3 text-left focus-visible:shadow-focus focus-visible:outline-none"
               >
                 <span className="flex items-center justify-between gap-2">
                   <span className="min-w-0 truncate text-small font-semibold text-n-900">{r.client.name}</span>
@@ -249,7 +249,7 @@ export function RequestsTab({
                 {r.canAnswer ? (
                   <>
                     <Button
-                      variant="ghost"
+                      variant="plain"
                       size="s"
                       iconOnly
                       className="flex-none"
@@ -260,7 +260,7 @@ export function RequestsTab({
                       <Check aria-hidden />
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="plain"
                       size="s"
                       iconOnly
                       className="flex-none"

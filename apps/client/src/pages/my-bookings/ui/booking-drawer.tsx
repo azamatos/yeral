@@ -217,7 +217,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
     footer.push(
       <Button
         key="note"
-        variant="ghost"
+        variant="tertiary"
         onClick={() => {
           setDraft(b.clientNote ?? '')
           setEditing(true)
@@ -229,7 +229,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
     )
   if (b.actions.cancel)
     footer.push(
-      <Button key="cancel" ref={cancelButton} variant="danger" onClick={() => setCancelling(true)}>
+      <Button key="cancel" ref={cancelButton} variant="danger-quiet" onClick={() => setCancelling(true)}>
         {t('cancel')}
       </Button>,
     )
@@ -305,9 +305,9 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
       <DrawerHeader
         leading={
           b.business.photo ? (
-            <img src={b.business.photo.url} alt="" className="block size-14 flex-none rounded-m object-cover" />
+            <img src={b.business.photo.url} alt="" className="block size-14 flex-none rounded-ctl-l object-cover" />
           ) : (
-            <span aria-hidden className="flex size-14 flex-none items-center justify-center rounded-m bg-n-100 text-n-500">
+            <span aria-hidden className="flex size-14 flex-none items-center justify-center rounded-ctl-l bg-n-100 text-n-500">
               <Building2 className="size-6" strokeWidth={1.75} />
             </span>
           )
@@ -365,7 +365,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
         {b.reschedule && (
           <section
             aria-labelledby={`${b.code}-move`}
-            className="flex flex-col items-start gap-2 rounded-m border border-st-pending-line bg-st-pending-bg px-4 py-3.5"
+            className="flex flex-col items-start gap-2 rounded-ctl-l border border-st-pending-line bg-st-pending-bg px-4 py-3.5"
           >
             <h3 id={`${b.code}-move`} className="m-0 flex items-center gap-2 text-[15px] leading-5 font-semibold text-n-900">
               <Clock aria-hidden className="size-4.5 flex-none text-st-pending-ink" strokeWidth={2} />
@@ -382,7 +382,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
             <span className="text-dense text-n-600">{t('moveKeeps')}</span>
             <Button
               size="s"
-              variant="danger-ghost"
+              variant="danger-quiet"
               className="-ml-3"
               loading={withdraw.isPending}
               onClick={() =>
@@ -454,7 +454,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
               />
             </Field>
             <div className="flex justify-end gap-2">
-              <Button size="s" variant="ghost" onClick={() => setEditing(false)}>
+              <Button size="s" variant="tertiary" onClick={() => setEditing(false)}>
                 {t('cancelEdit')}
               </Button>
               <Button size="s" variant="secondary" loading={saveNote.isPending} onClick={() => !saveNote.isPending && save()}>
@@ -479,7 +479,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
             {b.geo.approximate && <span className="text-dense text-n-600">{t('approximate')}</span>}
             <span className="text-dense text-n-600">{fmt.phone(b.business.phone)}</span>
           </span>
-          <PlaceMap name={b.business.name} geo={b.geo} className="h-40 rounded-m" />
+          <PlaceMap name={b.business.name} geo={b.geo} className="h-40 rounded-ctl-l" />
           <div className="flex flex-wrap gap-2 pt-1">
             {!b.geo.approximate && (
               <DirectionsButton name={b.business.name} geo={b.geo}>

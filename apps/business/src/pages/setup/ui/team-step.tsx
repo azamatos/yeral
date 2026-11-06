@@ -203,7 +203,7 @@ function TeamRows({
           type="button"
           disabled={disabled}
           onClick={add}
-          className="flex h-13 w-full items-center justify-center gap-2 rounded-m border border-dashed border-n-300 bg-n-0 text-body font-semibold text-a-600 hover:border-n-400 hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:text-n-500"
+          className="flex h-13 w-full items-center justify-center gap-2 rounded-ctl-l border border-dashed border-n-300 bg-n-0 text-body font-semibold text-a-600 hover:border-n-400 hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:text-n-500"
         >
           <Plus aria-hidden strokeWidth={2} className="size-4.5" />
           {t('add')}
@@ -295,7 +295,7 @@ function MemberRow({
             { value: 'admin', label: t('admin') },
           ]}
         />
-        <Button variant="ghost" size="m" iconOnly aria-label={t('remove', { name: who })} disabled={disabled} onClick={onRemove}>
+        <Button variant="plain" size="m" iconOnly aria-label={t('remove', { name: who })} disabled={disabled} onClick={onRemove}>
           <X aria-hidden strokeWidth={1.75} />
         </Button>
       </div>

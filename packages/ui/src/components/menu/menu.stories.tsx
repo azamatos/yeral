@@ -52,7 +52,7 @@ function LanguageMenu() {
   return (
     <Menu>
       <MenuTrigger asChild>
-        <Button variant="ghost">
+        <Button variant="tertiary">
           <Globe />
           {lang.toUpperCase()}
           <span className="sr-only">— dil saýla</span>

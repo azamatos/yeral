@@ -207,7 +207,7 @@ export function DatePicker(props: DatePickerProps) {
           aria-labelledby={field ? `${field.labelId} ${valueId}` : undefined}
           className={cn(
             look === 'title'
-              ? 'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-s border-0 bg-transparent px-2.5 text-[17px] leading-6 font-semibold tracking-[-0.01em] whitespace-nowrap text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none'
+              ? 'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-ctl-m border-0 bg-transparent px-2.5 text-[17px] leading-6 font-semibold tracking-[-0.01em] whitespace-nowrap text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none'
               : cn(
                   inputClass,
                   'flex h-12 cursor-pointer items-center justify-between gap-2 text-left disabled:cursor-default disabled:bg-n-50 disabled:text-n-500',

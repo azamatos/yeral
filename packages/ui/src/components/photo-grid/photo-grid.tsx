@@ -57,7 +57,7 @@ export interface PhotoGridProps {
 }
 
 const CONTROL =
-  'absolute inline-flex size-7 items-center justify-center rounded-input border-0 bg-n-0 p-0 text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none aria-disabled:cursor-default aria-disabled:text-n-500'
+  'absolute inline-flex size-7 items-center justify-center rounded-ctl-s border-0 bg-n-0 p-0 text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none aria-disabled:cursor-default aria-disabled:text-n-500'
 
 const moveTo = (from: readonly string[], id: string, to: number) => {
   const rest = from.filter((x) => x !== id)
@@ -177,7 +177,7 @@ export function PhotoGrid({
               onDragOver={(e) => dragged && e.preventDefault()}
               onDrop={(e) => onDrop(e, photo.id)}
               className={cn(
-                'relative m-0 aspect-square overflow-hidden rounded-m bg-n-100',
+                'relative m-0 aspect-square overflow-hidden rounded-ctl-l bg-n-100',
                 isLifted && 'shadow-raised outline-2 outline-a-500',
               )}
             >
@@ -235,7 +235,7 @@ export function PhotoGrid({
             <li
               key={file.id}
               aria-label={words.uploadingLabel(file.name)}
-              className="relative m-0 flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-m border border-n-200 bg-n-50 p-3 text-center text-micro font-semibold text-n-900"
+              className="relative m-0 flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-ctl-l border border-n-200 bg-n-50 p-3 text-center text-micro font-semibold text-n-900"
             >
               <Spinner aria-hidden className="size-5" />
               <span>{words.uploading}</span>
@@ -243,7 +243,7 @@ export function PhotoGrid({
           ) : (
             <li
               key={file.id}
-              className="relative m-0 flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-m border-[1.5px] border-dashed border-error bg-n-0 p-3 text-center text-micro font-semibold [overflow-wrap:anywhere] text-danger-ink"
+              className="relative m-0 flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-ctl-l border-[1.5px] border-dashed border-error bg-n-0 p-3 text-center text-micro font-semibold [overflow-wrap:anywhere] text-danger-ink"
             >
               <ImageOff aria-hidden className="size-5.5" />
               <span>{file.tile}</span>
@@ -262,7 +262,7 @@ export function PhotoGrid({
           <li className="m-0 aspect-square">
             <label
               htmlFor={inputId}
-              className="flex size-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-m border-[1.5px] border-dashed border-n-300 bg-n-0 p-2 text-center text-dense font-semibold text-a-600 hover:bg-n-50 has-focus-visible:shadow-focus"
+              className="flex size-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-ctl-l border-[1.5px] border-dashed border-n-300 bg-n-0 p-2 text-center text-dense font-semibold text-a-600 hover:bg-n-50 has-focus-visible:shadow-focus"
             >
               <Plus aria-hidden className="size-5.5" />
               <span>{words.add}</span>

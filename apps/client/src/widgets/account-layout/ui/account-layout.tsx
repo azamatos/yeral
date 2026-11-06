@@ -11,7 +11,7 @@ import { PersonMark, wrap } from '@/shared/ui'
 
 /** A place in the account aside (`.sn`): 40 high, 14/500, r10; the current one on tint; pills under 1024. */
 const navItem = cn(
-  'flex h-10 cursor-pointer items-center gap-3 rounded-s border-0 bg-transparent px-3 text-small font-medium whitespace-nowrap text-n-900 no-underline',
+  'flex h-10 cursor-pointer items-center gap-3 rounded-ctl-m border-0 bg-transparent px-3 text-small font-medium whitespace-nowrap text-n-900 no-underline',
   'hover:bg-group focus-visible:shadow-focus focus-visible:outline-none [&_svg]:size-5 [&_svg]:flex-none',
   'data-[status=active]:bg-a-50 data-[status=active]:font-semibold data-[status=active]:text-a-600',
   'max-md:h-11 max-md:flex-none max-md:gap-2 max-md:rounded-pill max-md:border max-md:border-n-300 max-md:px-4 max-md:data-[status=active]:border-a-line',

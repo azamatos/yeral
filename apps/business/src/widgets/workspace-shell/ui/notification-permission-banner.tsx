@@ -45,7 +45,7 @@ export function NotificationPermissionBanner() {
         className="py-3 pr-3"
         action={
           <Button
-            variant="ghost"
+            variant="plain"
             size="s"
             iconOnly
             aria-label={t('close')}

@@ -60,7 +60,7 @@ export function ModalHeader({
 }) {
   const close = (
     <Dialog.Close asChild>
-      <Button variant="ghost" iconOnly aria-label={closeLabel} className="-mt-1 -mr-2 size-9 flex-none rounded-s">
+      <Button variant="plain" iconOnly aria-label={closeLabel} className="-mt-1 -mr-2 size-9 flex-none rounded-ctl-m">
         <X />
       </Button>
     </Dialog.Close>

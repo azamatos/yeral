@@ -86,7 +86,7 @@ export function DateStrip({
                 aria-pressed={on}
                 onClick={() => onValueChange(d.date)}
                 className={cn(
-                  'group flex h-19 flex-[0_0_64px] cursor-pointer flex-col items-center justify-center gap-1 rounded-m border border-n-200 bg-n-0 p-0 text-n-900 sm:min-w-16 sm:flex-[0_0_calc((100%-48px)/7)]',
+                  'group flex h-19 flex-[0_0_64px] cursor-pointer flex-col items-center justify-center gap-1 rounded-ctl-l border border-n-200 bg-n-0 p-0 text-n-900 sm:min-w-16 sm:flex-[0_0_calc((100%-48px)/7)]',
                   'hover:border-a-500 focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-n-200',
                   on && 'border-a-500 bg-a-500 text-white',
                 )}
@@ -122,7 +122,7 @@ export function PagerButton({ label, children, className, ...props }: ComponentP
       aria-label={label}
       {...props}
       className={cn(
-        'inline-flex size-9 cursor-pointer items-center justify-center rounded-s border border-transparent bg-transparent text-n-900 hover:bg-group',
+        'inline-flex size-9 cursor-pointer items-center justify-center rounded-ctl-m border border-transparent bg-transparent text-n-900 hover:bg-group',
         'focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:bg-transparent disabled:text-n-400 [&_svg]:size-[18px]',
         'aria-disabled:cursor-default aria-disabled:bg-transparent aria-disabled:text-n-400',
         className,

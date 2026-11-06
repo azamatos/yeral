@@ -31,7 +31,7 @@ export function ClientHead({ card, manage, onEdit }: { card: ClientCard; manage:
           {phone ? (
             <>
               <span className="text-body text-n-900">{fmt.phone(phone)}</span>
-              <Button variant="ghost" size="s" iconOnly aria-label={clients('copy')} onClick={() => copy(phone)}>
+              <Button variant="plain" size="s" iconOnly aria-label={clients('copy')} onClick={() => copy(phone)}>
                 <Copy aria-hidden />
               </Button>
               <Button asChild variant="secondary" size="s">
@@ -56,7 +56,7 @@ export function ClientHead({ card, manage, onEdit }: { card: ClientCard; manage:
         </div>
       </div>
       {manage && (
-        <Button variant="ghost" size="s" onClick={onEdit}>
+        <Button variant="tertiary" size="s" onClick={onEdit}>
           {t('change')}
         </Button>
       )}

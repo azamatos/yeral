@@ -121,7 +121,7 @@ export function AccountMenu({ me }: { me: Me }) {
 
 /** A row of the phone sheet: 48 high for touch (the nearest drawn pattern: the business MoreSheet rows). */
 const sheetRow = cn(
-  'flex h-12 w-full cursor-pointer items-center gap-3 rounded-input px-3 text-left text-body text-n-900 no-underline',
+  'flex h-12 w-full cursor-pointer items-center gap-3 rounded-ctl-s px-3 text-left text-body text-n-900 no-underline',
   'hover:bg-group focus-visible:shadow-focus-inset focus-visible:outline-none disabled:cursor-progress disabled:text-n-500',
   '[&_svg]:size-5 [&_svg]:flex-none [&_svg]:text-n-600',
 )

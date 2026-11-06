@@ -47,7 +47,7 @@ export function ReplyComposer({
         <Textarea autoFocus className="h-28" placeholder={placeholder} value={text} onChange={(e) => setText(e.target.value)} />
       </Field>
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="ghost" size="s" onClick={onCancel}>
+        <Button type="button" variant="tertiary" size="s" onClick={onCancel}>
           {t('cancel')}
         </Button>
         <Button type="submit" variant="primary" size="s" disabled={!ready} loading={saving}>

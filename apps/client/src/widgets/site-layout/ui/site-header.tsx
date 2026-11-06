@@ -51,7 +51,7 @@ export function SiteHeader() {
           to="/$lang"
           params={{ lang: locale }}
           aria-label={t('site.home', { brand })}
-          className="flex flex-none rounded-s focus-visible:shadow-focus focus-visible:outline-none"
+          className="flex flex-none rounded-ctl-m focus-visible:shadow-focus focus-visible:outline-none"
         >
           <Logo alt={brand} height={30} className="max-sm:h-6! max-sm:w-auto" />
         </Link>

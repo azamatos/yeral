@@ -38,7 +38,7 @@ export function ReportMenu({
     <>
       <Menu>
         <MenuTrigger asChild>
-          <Button variant="ghost" disabled={report.filing}>
+          <Button variant="tertiary" disabled={report.filing}>
             {t('report')}
             <ChevronDown aria-hidden strokeWidth={1.75} />
           </Button>

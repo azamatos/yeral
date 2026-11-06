@@ -76,7 +76,7 @@ function Page() {
       <RequestArrivals slug={SLUG} />
       <button
         type="button"
-        className="self-start rounded-m border border-n-300 px-4 py-2 text-small"
+        className="self-start rounded-ctl-l border border-n-300 px-4 py-2 text-small"
         onClick={() => {
           const next = arriving.shift()
           if (next) waiting = [...waiting, next]

@@ -39,7 +39,7 @@ export function ReportBox({
     'dot',
   )
   return (
-    <div className="flex flex-col gap-2.5 rounded-m border border-danger-line bg-n-0 p-3.5">
+    <div className="flex flex-col gap-2.5 rounded-ctl-l border border-danger-line bg-n-0 p-3.5">
       <span className="text-small font-medium text-danger-ink">{t('boxTitle')}</span>
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <span className="text-small font-semibold text-n-900">{line}</span>

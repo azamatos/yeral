@@ -140,7 +140,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           </Button>
           <span className="flex flex-none items-center gap-0.5">
             <Button
-              variant="ghost"
+              variant="plain"
               size="s"
               iconOnly
               className="max-sm:size-11"
@@ -150,7 +150,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
               <ChevronLeft />
             </Button>
             <Button
-              variant="ghost"
+              variant="plain"
               size="s"
               iconOnly
               className="max-sm:size-11"
