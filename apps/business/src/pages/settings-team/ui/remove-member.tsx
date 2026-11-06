@@ -7,7 +7,7 @@ import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Modal, ModalActions, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/modal'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { toast } from '@yeral/ui/toast'
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
@@ -188,14 +188,9 @@ function RemoveBody({
                 aria-labelledby={`${labelId}-to`}
                 aria-describedby={`${labelId}-to-cap`}
                 value={to}
-                onChange={(e) => setTo(e.target.value)}
-              >
-                {colleagues.map((c) => (
-                  <option key={c.staffId} value={c.staffId}>
-                    {c.name}
-                  </option>
-                ))}
-              </Select>
+                onValueChange={setTo}
+                options={colleagues.map((c) => ({ value: c.staffId, label: c.name }))}
+              />
               <span id={`${labelId}-to-cap`} className="text-dense text-n-600">
                 {t('toCaption')}
               </span>
@@ -228,11 +223,12 @@ function RemoveBody({
                             className="w-56"
                             aria-label={t('rowAria', { client: b.client ?? a('unnamed'), when: when(b) })}
                             value={rows[b.code] ?? 'keep'}
-                            onChange={(e) => setRows((r) => ({ ...r, [b.code]: e.target.value === 'cancel' ? 'cancel' : 'keep' }))}
-                          >
-                            <option value="keep">{t('keepIt')}</option>
-                            <option value="cancel">{a('cancel')}</option>
-                          </Select>
+                            onValueChange={(v) => setRows((r) => ({ ...r, [b.code]: v === 'cancel' ? 'cancel' : 'keep' }))}
+                            options={[
+                              { value: 'keep', label: t('keepIt') },
+                              { value: 'cancel', label: a('cancel') },
+                            ]}
+                          />
                         </span>
                       )
                   : undefined

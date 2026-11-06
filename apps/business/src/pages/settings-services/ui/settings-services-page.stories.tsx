@@ -8,11 +8,19 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { Menu } from '@yeral/contract/services'
 import type { TeamMember, Workspace } from '@yeral/contract/team'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { SettingsServicesPage } from './settings-services-page'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 const me: Me = {
   id: 'u-maysa',
@@ -289,10 +297,7 @@ export const EditService: Story = {
     await userEvent.click(within(drawer).getByRole('radio', { name: 'Price at the place' }))
     await expect(within(drawer).getByRole('textbox', { name: /Amount/ })).toHaveValue('250')
     await expect(within(drawer).getByText('Clients see “Price at the place”. The amount counts in your totals.')).toBeVisible()
-    await userEvent.selectOptions(
-      within(drawer).getByRole('combobox', { name: 'Buffer after the service' }),
-      'As in Booking rules · 10 min',
-    )
+    await pick(within(drawer).getByRole('combobox', { name: 'Buffer after the service' }), 'As in Booking rules · 10 min')
     await userEvent.click(within(drawer).getByRole('checkbox', { name: /Aýna/ }))
     await expect(within(drawer).getByText('No specialist chosen — clients can’t book this service.')).toBeVisible()
     await userEvent.click(within(drawer).getByRole('button', { name: 'Save' }))
@@ -324,8 +329,8 @@ export const AddService: Story = {
     await userEvent.type(within(drawer).getByRole('textbox', { name: 'Name' }), 'Beard trim')
     await userEvent.type(within(drawer).getByRole('textbox', { name: /Price/ }), '5x0')
     await expect(within(drawer).getByText('50 TMT')).toBeVisible()
-    await userEvent.selectOptions(within(drawer).getByRole('combobox', { name: 'Group' }), 'Nails')
-    await userEvent.selectOptions(within(drawer).getByRole('combobox', { name: 'Duration' }), '30 min')
+    await pick(within(drawer).getByRole('combobox', { name: 'Group' }), 'Nails')
+    await pick(within(drawer).getByRole('combobox', { name: 'Duration' }), '30 min')
     await userEvent.click(within(drawer).getByRole('checkbox', { name: /Maral/ }))
     await userEvent.click(within(drawer).getByRole('button', { name: 'Save' }))
     await waitFor(() =>
@@ -355,7 +360,7 @@ export const AddToEmptyGroup: Story = {
     await userEvent.click(within(spa).getByRole('button', { name: 'Add service to Spa' }))
     const drawer = await within(document.body).findByRole('dialog', { name: 'New service' })
     await expect(within(drawer).getByText('Goes to Spa')).toBeVisible()
-    await expect(within(drawer).getByRole('combobox', { name: 'Group' })).toHaveValue('spa')
+    await expect(within(drawer).getByRole('combobox', { name: 'Group' })).toHaveTextContent('Spa')
   },
 }
 

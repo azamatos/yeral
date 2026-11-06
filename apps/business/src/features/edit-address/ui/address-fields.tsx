@@ -4,7 +4,7 @@ import { Combobox, ComboboxInput, ComboboxList, type ComboboxOption } from '@yer
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { MapFrame, MapPinHandle } from '@yeral/ui/map-frame'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { SettingsRow } from '@yeral/ui/settings-row'
 import { Switch } from '@yeral/ui/switch'
 import { Info, MapPin, Move } from 'lucide-react'
@@ -69,20 +69,18 @@ export function AddressFields({
   const floorLength = form.floor.trim().length
 
   // the settings' fields are 44 (B-Settings `.inp.i44`), as the rest of Business profile; the wizard's 48
-  const size = settings ? 'm' : undefined
-  const input = settings ? 'h-11' : undefined
+  const size = settings ? 'm' : 'l'
   // Save waits for an address picked from the list: Settings says so at the street, the wizard at its Continue
   const unpicked = settings && address.edited && problem === 'pick' && t('hintPick')
 
   const cityField = (
     <Field label={t('city')} className={settings ? undefined : 'max-w-80'} disabled={disabled}>
-      <Select size={size} value={form.cityId} onChange={(e) => pickCity(e.target.value)}>
-        {address.cities.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </Select>
+      <Select
+        size={size}
+        value={form.cityId}
+        onValueChange={pickCity}
+        options={address.cities.map((c) => ({ value: c.id, label: c.name }))}
+      />
     </Field>
   )
 
@@ -176,7 +174,7 @@ export function AddressFields({
           value={form.floor}
           placeholder={t('floorPlaceholder')}
           maxLength={FLOOR_MAX * 2}
-          className={input}
+          size={size}
           onChange={(e) => set((f) => ({ ...f, floor: e.target.value }))}
         />
       </Field>
@@ -191,7 +189,7 @@ export function AddressFields({
           value={form.entrance}
           placeholder={t('entrancePlaceholder')}
           maxLength={ENTRANCE_MAX * 2}
-          className={input}
+          size={size}
           onChange={(e) => set((f) => ({ ...f, entrance: e.target.value }))}
         />
       </Field>

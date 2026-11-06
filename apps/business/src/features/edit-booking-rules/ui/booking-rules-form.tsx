@@ -7,7 +7,7 @@ import { Input } from '@yeral/ui/input'
 import { NumberStepper } from '@yeral/ui/number-stepper'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { SettingsSection, SettingsSectionTitle } from '@yeral/ui/settings-layout'
 import { SettingsRow } from '@yeral/ui/settings-row'
 import { Switch } from '@yeral/ui/switch'
@@ -120,30 +120,20 @@ export function BookingRulesForm({ rules, bufferNote }: { rules: RulesFormState;
             size="m"
             className={select}
             disabled={saving}
-            value={form.leadMinutes}
-            onChange={(e) => set({ leadMinutes: Number(e.target.value) })}
-          >
-            {choicesWith(LEAD_CHOICES, form.leadMinutes).map((m) => (
-              <option key={m} value={m}>
-                {label.lead(m)}
-              </option>
-            ))}
-          </Select>
+            value={String(form.leadMinutes)}
+            onValueChange={(v) => set({ leadMinutes: Number(v) })}
+            options={choicesWith(LEAD_CHOICES, form.leadMinutes).map((m) => ({ value: String(m), label: label.lead(m) }))}
+          />
         </SettingsRow>
         <SettingsRow label={t('window')} description={t('windowHint')}>
           <Select
             size="m"
             className={select}
             disabled={saving}
-            value={form.windowDays}
-            onChange={(e) => set({ windowDays: Number(e.target.value) })}
-          >
-            {choicesWith(WINDOW_CHOICES, form.windowDays).map((d) => (
-              <option key={d} value={d}>
-                {label.window(d)}
-              </option>
-            ))}
-          </Select>
+            value={String(form.windowDays)}
+            onValueChange={(v) => set({ windowDays: Number(v) })}
+            options={choicesWith(WINDOW_CHOICES, form.windowDays).map((d) => ({ value: String(d), label: label.window(d) }))}
+          />
         </SettingsRow>
         <SettingsRow
           label={t('buffer')}
@@ -166,20 +156,15 @@ export function BookingRulesForm({ rules, bufferNote }: { rules: RulesFormState;
                   id={id}
                   className={select}
                   disabled={saving}
-                  value={other ? OTHER : form.bufferMinutes}
-                  onChange={(e) =>
-                    e.target.value === OTHER
-                      ? set({ bufferOther: String(OTHER_START) })
-                      : set({ bufferMinutes: Number(e.target.value), bufferOther: null })
+                  value={other ? OTHER : String(form.bufferMinutes)}
+                  onValueChange={(v) =>
+                    v === OTHER ? set({ bufferOther: String(OTHER_START) }) : set({ bufferMinutes: Number(v), bufferOther: null })
                   }
-                >
-                  {BUFFER_CHOICES.map((m) => (
-                    <option key={m} value={m}>
-                      {label.buffer(m)}
-                    </option>
-                  ))}
-                  <option value={OTHER}>{t('bufferOther')}</option>
-                </Select>
+                  options={[
+                    ...BUFFER_CHOICES.map((m) => ({ value: String(m), label: label.buffer(m) })),
+                    { value: OTHER, label: t('bufferOther') },
+                  ]}
+                />
                 {other && (
                   <span className="inline-flex items-center gap-2">
                     <Input
@@ -192,7 +177,8 @@ export function BookingRulesForm({ rules, bufferNote }: { rules: RulesFormState;
                       value={form.bufferOther ?? String(form.bufferMinutes)}
                       // whole minutes only, up to three figures (B-Settings `onBufCustom`)
                       onChange={(e) => set({ bufferOther: e.target.value.replace(/\D/g, '').slice(0, 3) })}
-                      className="h-11 w-18 text-center text-small"
+                      size="m"
+                      className="w-18 text-center"
                     />
                     <span className="text-dense text-n-600">{t('minutesUnit')}</span>
                   </span>

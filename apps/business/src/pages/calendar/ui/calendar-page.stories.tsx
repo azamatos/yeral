@@ -10,10 +10,18 @@ import type { CalendarView } from '@yeral/contract/calendar'
 import type { BookingRequest } from '@yeral/contract/requests'
 import type { Workspace } from '@yeral/contract/team'
 import { addDays, localOf, today } from '@yeral/domain/time'
-import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { CalendarPage } from './calendar-page'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 const me: Me = {
   id: 'u-maysa',
@@ -799,7 +807,7 @@ export const InternalStatuses: Story = {
     const block = within(grid.getByRole('group', { name: 'Aýna' })).getByRole('button', { name: /^10:00 Gözel A\..*Confirmed, Arrived$/ })
     await userEvent.click(block)
     const d = within(await page.findByRole('dialog', { name: 'Booking' }))
-    await expect(await d.findByRole('combobox', { name: 'Internal status' })).toHaveValue(id(6))
+    await expect(await d.findByRole('combobox', { name: 'Internal status' })).toHaveTextContent('Arrived')
   },
 }
 
@@ -831,9 +839,9 @@ const openBlockTime = async (canvas: Canvas, name: string, time: string) => {
 export const BlockTime: Story = {
   play: async ({ canvas }) => {
     const d = await openBlockTime(canvas, 'Maral', '15:00')
-    await expect(d.getByRole('combobox', { name: 'Person' })).toHaveValue(id(2))
-    await expect(d.getByRole('combobox', { name: 'From' })).toHaveValue('900')
-    await expect(d.getByRole('combobox', { name: 'To' })).toHaveValue('960')
+    await expect(d.getByRole('combobox', { name: 'Person' })).toHaveTextContent('Maral')
+    await expect(d.getByRole('combobox', { name: 'From' })).toHaveTextContent('15:00')
+    await expect(d.getByRole('combobox', { name: 'To' })).toHaveTextContent('16:00')
     const submit = d.getByRole('button', { name: 'Block time' })
     await expect(submit).toBeDisabled()
     await userEvent.click(d.getByRole('radio', { name: 'Training' }))
@@ -855,7 +863,7 @@ export const BlockTime: Story = {
 export const BlockOverBooking: Story = {
   play: async ({ canvas }) => {
     const d = await openBlockTime(canvas, 'Maral', '15:00')
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'From' }), '600')
+    await pick(d.getByRole('combobox', { name: 'From' }), '10:00')
     await userEvent.click(d.getByRole('radio', { name: 'Personal' }))
     await userEvent.click(d.getByRole('button', { name: 'Block time' }))
     const alert = await d.findByRole('alert')
@@ -1269,7 +1277,7 @@ export const OneSpecialist: Story = {
     await expect(await grid.findByRole('group', { name: 'Aýna' })).toBeVisible()
     await expect(grid.queryByRole('group', { name: 'Maral' })).toBeNull()
     await expect(grid.getByRole('button', { name: /Gözel A\. · \+99365000000/ })).toBeVisible()
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Specialist' }), 'Maral')
+    await pick(canvas.getByRole('combobox', { name: 'Specialist' }), 'Maral')
     await expect(await grid.findByRole('group', { name: 'Maral' })).toBeVisible()
   },
 }

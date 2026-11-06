@@ -1,10 +1,9 @@
-import { NativeSelect as Select } from '@yeral/ui/select'
-import type { ComponentProps } from 'react'
+import { Select, type SelectProps as UiSelectProps } from '@yeral/ui/select'
 import { choicesWith } from '@/shared/lib'
 import { useRuleLabels } from '../lib/labels'
 import { BUFFER_CHOICES, CANCEL_CHOICES, HOLD_CHOICES } from '../model/rules'
 
-type SelectProps<T> = Omit<ComponentProps<typeof Select>, 'value' | 'onChange' | 'children'> & {
+type SelectProps<T> = Omit<UiSelectProps, 'value' | 'onValueChange' | 'options'> & {
   value: T
   onValueChange: (value: T) => void
 }
@@ -16,13 +15,12 @@ const ANY = 'any'
 export function HoldSelect({ value, onValueChange, ...props }: SelectProps<number>) {
   const label = useRuleLabels()
   return (
-    <Select {...props} value={value} onChange={(e) => onValueChange(Number(e.target.value))}>
-      {choicesWith(HOLD_CHOICES, value).map((m) => (
-        <option key={m} value={m}>
-          {label.hold(m)}
-        </option>
-      ))}
-    </Select>
+    <Select
+      {...props}
+      value={String(value)}
+      onValueChange={(v) => onValueChange(Number(v))}
+      options={choicesWith(HOLD_CHOICES, value).map((m) => ({ value: String(m), label: label.hold(m) }))}
+    />
   )
 }
 
@@ -30,13 +28,12 @@ export function HoldSelect({ value, onValueChange, ...props }: SelectProps<numbe
 export function CancelSelect({ value, onValueChange, ...props }: SelectProps<number | null>) {
   const label = useRuleLabels()
   return (
-    <Select {...props} value={value ?? ANY} onChange={(e) => onValueChange(e.target.value === ANY ? null : Number(e.target.value))}>
-      {choicesWith(CANCEL_CHOICES, value).map((m) => (
-        <option key={m ?? ANY} value={m ?? ANY}>
-          {label.cancel(m)}
-        </option>
-      ))}
-    </Select>
+    <Select
+      {...props}
+      value={value === null ? ANY : String(value)}
+      onValueChange={(v) => onValueChange(v === ANY ? null : Number(v))}
+      options={choicesWith(CANCEL_CHOICES, value).map((m) => ({ value: m === null ? ANY : String(m), label: label.cancel(m) }))}
+    />
   )
 }
 
@@ -44,12 +41,11 @@ export function CancelSelect({ value, onValueChange, ...props }: SelectProps<num
 export function BufferSelect({ value, onValueChange, ...props }: SelectProps<number>) {
   const label = useRuleLabels()
   return (
-    <Select {...props} value={value} onChange={(e) => onValueChange(Number(e.target.value))}>
-      {choicesWith(BUFFER_CHOICES, value).map((m) => (
-        <option key={m} value={m}>
-          {label.buffer(m)}
-        </option>
-      ))}
-    </Select>
+    <Select
+      {...props}
+      value={String(value)}
+      onValueChange={(v) => onValueChange(Number(v))}
+      options={choicesWith(BUFFER_CHOICES, value).map((m) => ({ value: String(m), label: label.buffer(m) }))}
+    />
   )
 }

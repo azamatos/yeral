@@ -8,10 +8,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { TeamMember } from '@yeral/contract/team'
 import { DEFAULT_RULES, type BookingRules } from '@yeral/domain/rules'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { useRulesForm } from '../model/use-rules-form'
 import { BookingRulesForm } from './booking-rules-form'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 const saved: Record<string, unknown>[] = []
 
@@ -92,11 +100,11 @@ type Story = StoryObj<typeof meta>
 export const Manual: Story = {
   play: async ({ canvas }) => {
     const hold = await canvas.findByRole('combobox', { name: 'Hold requests for' })
-    await expect(hold).toHaveValue('30')
+    await expect(hold).toHaveTextContent('30 min')
     await expect(canvas.queryByRole('radiogroup', { name: 'Who answers requests?' })).toBeNull()
     await expect(canvas.getByRole('button', { name: 'Save' })).toBeDisabled()
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Minimum notice' }), 'No limit')
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'How far ahead clients can book' }), '90 days')
+    await pick(canvas.getByRole('combobox', { name: 'Minimum notice' }), 'No limit')
+    await pick(canvas.getByRole('combobox', { name: 'How far ahead clients can book' }), '90 days')
     await userEvent.click(canvas.getByRole('radio', { name: '30 min' }))
     await expect(canvas.getByText('Clients see free times like this: 10:00, 10:30, 11:00…')).toBeVisible()
     await userEvent.click(canvas.getByRole('switch', { name: 'Ask clients for a reason when they cancel' }))
@@ -150,7 +158,7 @@ export const WithTeam: Story = {
  */
 export const CustomBuffer: Story = {
   play: async ({ canvas }) => {
-    await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Buffer' }), 'Other…')
+    await pick(await canvas.findByRole('combobox', { name: 'Buffer' }), 'Other…')
     const minutes = canvas.getByRole('textbox', { name: 'Buffer, minutes' })
     await expect(minutes).toHaveValue('25')
     await expect(minutes).toHaveAccessibleDescription(/Free time kept after each service/)
@@ -173,7 +181,7 @@ export const CustomBuffer: Story = {
 export const StoredOtherBuffer: Story = {
   args: { server: fakeApi({ rules: { bufferMinutes: 45 } }) },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('combobox', { name: 'Buffer' })).toHaveValue('other')
+    await expect(await canvas.findByRole('combobox', { name: 'Buffer' })).toHaveTextContent('Other…')
     await expect(canvas.getByRole('textbox', { name: 'Buffer, minutes' })).toHaveValue('45')
     await expect(canvas.getByRole('button', { name: 'Save' })).toBeDisabled()
   },
@@ -186,7 +194,7 @@ export const Instant: Story = {
     await expect(await canvas.findByText('Clients may be up to 15 min late')).toBeVisible()
     await expect(canvas.getByText('Fixed')).toBeVisible()
     await expect(canvas.queryByRole('combobox', { name: 'Hold requests for' })).toBeNull()
-    await expect(canvas.getByRole('combobox', { name: 'Clients can cancel for free' })).toHaveValue('any')
+    await expect(canvas.getByRole('combobox', { name: 'Clients can cancel for free' })).toHaveTextContent('Any time')
   },
 }
 
@@ -194,11 +202,11 @@ export const Instant: Story = {
 export const SaveFails: Story = {
   args: { server: fakeApi({ fail: true }) },
   play: async ({ canvas }) => {
-    await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Minimum notice' }), '24 h')
+    await pick(await canvas.findByRole('combobox', { name: 'Minimum notice' }), '24 h')
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
     const toast = await within(document.body).findByText('Something went wrong. Please try again.')
     await waitFor(() => expect(toast).toBeVisible())
-    await expect(canvas.getByRole('combobox', { name: 'Minimum notice' })).toHaveValue('1440')
+    await expect(canvas.getByRole('combobox', { name: 'Minimum notice' })).toHaveTextContent('24 h')
     await expect(canvas.getByRole('button', { name: 'Save' })).toBeEnabled()
   },
 }

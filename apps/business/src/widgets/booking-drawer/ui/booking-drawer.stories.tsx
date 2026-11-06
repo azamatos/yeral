@@ -86,18 +86,20 @@ export const InternalStatus: Story = {
     const d = within(await open())
     const select = await d.findByRole('combobox', { name: 'Internal status' })
     await expect(d.getByText('Only the team sees it · the booking status doesn’t change')).toBeVisible()
+    await userEvent.click(select)
+    const list = await page.findByRole('listbox')
     await expect(
-      within(select)
+      within(list)
         .getAllByRole('option')
         .map((o) => o.textContent),
     ).toEqual(['None', 'Arrived', 'Preparing'])
-    await userEvent.selectOptions(select, 'Arrived')
+    await userEvent.click(within(list).getByRole('option', { name: 'Arrived' }))
     const saved = await canvas
       .findByText('Internal status: Arrived', {}, { timeout: 3000 })
       .then((n) => n.closest('[data-sonner-toast]') as HTMLElement)
-    await expect(select).toHaveValue(id(2))
+    await expect(select).toHaveTextContent('Arrived')
     await userEvent.click(within(saved).getByRole('button', { name: 'Undo' }))
-    await waitFor(() => expect(select).toHaveValue(''))
+    await waitFor(() => expect(select).toHaveTextContent('None'))
   },
 }
 
@@ -106,7 +108,7 @@ export const InternalStatusSet: Story = {
   args: { server: fakeApi({ internal: true, booking: booking({ internalStatusId: id(2) }) }) },
   play: async () => {
     const d = within(await open())
-    await expect(await d.findByRole('combobox', { name: 'Internal status' })).toHaveValue(id(2))
+    await expect(await d.findByRole('combobox', { name: 'Internal status' })).toHaveTextContent('Arrived')
   },
 }
 

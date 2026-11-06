@@ -15,7 +15,7 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Input, Textarea } from '@yeral/ui/input'
 import { InputGroup } from '@yeral/ui/input-group'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { textLink } from '@yeral/ui/text-link'
@@ -211,22 +211,20 @@ function ServiceEditor({
           </Field>
           <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
             <Field label={t('group')}>
-              <Select size="m" value={form.groupId} onChange={(e) => set({ groupId: e.target.value })}>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {localized(g.name, locale)}
-                  </option>
-                ))}
-              </Select>
+              <Select
+                size="m"
+                value={form.groupId}
+                onValueChange={(groupId) => set({ groupId })}
+                options={groups.map((g) => ({ value: g.id, label: localized(g.name, locale) }))}
+              />
             </Field>
             <Field label={t('duration')}>
-              <Select size="m" value={form.durationMin} onChange={(e) => set({ durationMin: Number(e.target.value) })}>
-                {choicesWith(DURATION_CHOICES, form.durationMin).map((m) => (
-                  <option key={m} value={m}>
-                    {fmt.duration(m)}
-                  </option>
-                ))}
-              </Select>
+              <Select
+                size="m"
+                value={String(form.durationMin)}
+                onValueChange={(v) => set({ durationMin: Number(v) })}
+                options={choicesWith(DURATION_CHOICES, form.durationMin).map((m) => ({ value: String(m), label: fmt.duration(m) }))}
+              />
             </Field>
           </div>
           <Field
@@ -239,16 +237,18 @@ function ServiceEditor({
               ),
             })}
           >
-            <Select size="m" value={form.buffer} onChange={(e) => set({ buffer: e.target.value === RULE ? RULE : Number(e.target.value) })}>
-              <option value={RULE}>
-                {rules.data ? t('bufferRule', { buffer: fmt.duration(rules.data.bufferMinutes) }) : t('bufferRuleShort')}
-              </option>
-              {SERVICE_BUFFERS.map((m) => (
-                <option key={m} value={m}>
-                  {m === 0 ? t('bufferNone') : fmt.duration(m)}
-                </option>
-              ))}
-            </Select>
+            <Select
+              size="m"
+              value={String(form.buffer)}
+              onValueChange={(v) => set({ buffer: v === RULE ? RULE : Number(v) })}
+              options={[
+                {
+                  value: RULE,
+                  label: rules.data ? t('bufferRule', { buffer: fmt.duration(rules.data.bufferMinutes) }) : t('bufferRuleShort'),
+                },
+                ...SERVICE_BUFFERS.map((m) => ({ value: String(m), label: m === 0 ? t('bufferNone') : fmt.duration(m) })),
+              ]}
+            />
           </Field>
 
           <div className="h-px bg-n-200" />
