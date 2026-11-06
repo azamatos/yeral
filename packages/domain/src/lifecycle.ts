@@ -92,6 +92,8 @@ export const EXPIRY_WARNING_MINUTES = 5
 export const REVIEW_REPLY_MAX = 500
 /** A reported review isn't counted while Ýeral checks it, this long at most; then it counts again (book Q-261). */
 export const REVIEW_REPORT_HOURS = 48
+/** The explanation with a report ("Düşündiriş", B-54): this long at most. */
+export const REVIEW_REPORT_TEXT_MAX = 300
 
 /** A review can be written until this long after the visit ends (book Q-126). */
 export const REVIEW_WRITE_DAYS = 30

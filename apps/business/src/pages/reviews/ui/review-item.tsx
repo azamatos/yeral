@@ -11,7 +11,7 @@ import { Quote } from '@yeral/ui/quote'
 import { Stars } from '@yeral/ui/rating'
 import { toast } from '@yeral/ui/toast'
 import { Clock, Ellipsis, Flag, Reply, ShieldAlert, ShieldCheck } from 'lucide-react'
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
@@ -59,6 +59,22 @@ export function ReviewItem({
   const [composing, setComposing] = useState(false)
   const reply = useMutation(sdk.reviews.reply(slug))
   const remove = useMutation(sdk.reviews.deleteReply(slug))
+  // the composer closed or the reply went: the focus moves to the button that takes its place (Change over the
+  // reply, or Reply), once the refreshed review renders it
+  const focusNext = useRef<'reply' | 'change' | null>(null)
+  const replyButton = useRef<HTMLButtonElement>(null)
+  const changeButton = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (composing || !focusNext.current) return
+    const target = focusNext.current === 'change' ? changeButton.current : replyButton.current
+    if (!target) return
+    focusNext.current = null
+    target.focus()
+  })
+  const close = () => {
+    focusNext.current = r.reply ? 'change' : 'reply'
+    setComposing(false)
+  }
 
   const post = (text: string) => {
     const editing = !!r.reply
@@ -66,6 +82,7 @@ export function ReviewItem({
       { id: r.id, text },
       {
         onSuccess: () => {
+          focusNext.current = 'change'
           setComposing(false)
           toast(editing ? t('toast.updated') : t('toast.posted'))
         },
@@ -77,13 +94,15 @@ export function ReviewItem({
     const old = r.reply?.text
     if (!old) return
     remove.mutate(r.id, {
-      onSuccess: () =>
+      onSuccess: () => {
+        focusNext.current = 'reply'
         toast(t('toast.deleted'), {
           action: {
             label: t('toast.undo'),
             onClick: () => reply.mutate({ id: r.id, text: old }, { onError: (error) => toast(errorText(error)) }),
           },
-        }),
+        })
+      },
       onError: (error) => toast(errorText(error)),
     })
   }
@@ -166,6 +185,7 @@ export function ReviewItem({
                 {manage && (
                   <span className="ml-auto flex items-center gap-1">
                     <button
+                      ref={changeButton}
                       type="button"
                       aria-label={t('item.changeTo', { name: r.author })}
                       className={cn(LINK_BUTTON, 'text-a-600')}
@@ -192,7 +212,13 @@ export function ReviewItem({
         )}
         {manage && !r.reply && !composing && (
           <div>
-            <Button variant="secondary" size="s" aria-label={t('item.replyTo', { name: r.author })} onClick={() => setComposing(true)}>
+            <Button
+              ref={replyButton}
+              variant="secondary"
+              size="s"
+              aria-label={t('item.replyTo', { name: r.author })}
+              onClick={() => setComposing(true)}
+            >
               <Reply aria-hidden />
               {t('item.reply')}
             </Button>
@@ -206,7 +232,7 @@ export function ReviewItem({
               r.rating >= 4 ? t('composer.placeholderGood', { name: r.author.split(' ')[0] ?? r.author }) : t('composer.placeholderLow')
             }
             saving={reply.isPending}
-            onCancel={() => setComposing(false)}
+            onCancel={close}
             onSubmit={post}
           />
         )}

@@ -53,15 +53,18 @@ function Reviews({ workspace }: { workspace: Workspace }) {
   const { slug } = workspace
   // the api lets the owner and administrators reply and report (`reviewsReply: all`); a specialist only reads
   const manage = workspace.level !== 'specialist'
+  // a specialist's address keeps neither «not answered» (no chip) nor a specialist (the api refuses another's)
+  const unanswered = manage && search.filter === 'unanswered'
+  const staffId = manage ? search.staff : undefined
   // a chip or the specialist changes the address, not the scroll
   const go = (patch: Partial<ReviewsSearch>) =>
     void navigate({ to: '.', search: (prev: ReviewsSearch) => ({ ...prev, ...patch }), replace: true, resetScroll: false })
 
   const list = useInfiniteQuery({
     ...sdk.reviews.list(slug, {
-      unanswered: search.filter === 'unanswered' ? true : undefined,
+      unanswered: unanswered ? true : undefined,
       stars: search.stars,
-      staff: search.staff,
+      staff: staffId,
       sort: search.order,
       lang: locale,
     }),
@@ -72,7 +75,7 @@ function Reviews({ workspace }: { workspace: Workspace }) {
   const first = list.data?.pages[0]
   const summary = first?.summary ?? null
   const total = first?.total
-  const filtered = !!(search.filter || search.stars || search.staff)
+  const filtered = !!(unanswered || search.stars || staffId)
   const clear = () => go({ filter: undefined, stars: undefined, staff: undefined })
 
   if (list.isError && !list.data) throw list.error
@@ -82,7 +85,7 @@ function Reviews({ workspace }: { workspace: Workspace }) {
       if (r.isError) toast(errorText(r.error))
     })
 
-  const chip = search.stars ? String(search.stars) : (search.filter ?? 'all')
+  const chip = search.stars ? String(search.stars) : unanswered ? 'unanswered' : 'all'
   const pickChip = (value: string) => {
     if (value === 'all') go({ filter: undefined, stars: undefined })
     else if (value === 'unanswered') go({ filter: 'unanswered', stars: undefined })
@@ -116,7 +119,7 @@ function Reviews({ workspace }: { workspace: Workspace }) {
   const uncounted = summary && !filtered && total !== undefined ? total - summary.count : 0
 
   const empty = () => {
-    if (filtered && search.filter === 'unanswered' && !search.stars && !search.staff)
+    if (unanswered && !search.stars && !staffId)
       return (
         <EmptyState
           bordered
@@ -257,7 +260,11 @@ function Reviews({ workspace }: { workspace: Workspace }) {
         ) : (
           <section
             aria-label={manage ? t('list') : t('listAboutYou')}
-            className={cn('flex flex-col border-t border-n-200', list.isFetching && !list.isFetchingNextPage && 'opacity-60')}
+            className={cn(
+              'flex flex-col border-t border-n-200',
+              // the old rows dim while a changed filter loads; a refresh after a reply or a report changes nothing visible
+              list.isPlaceholderData && 'opacity-60',
+            )}
           >
             {rows.map((r) => (
               <ReviewItem key={r.id} slug={slug} business={workspace.name} review={r} manage={manage} onReport={() => setReporting(r)} />

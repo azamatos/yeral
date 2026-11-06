@@ -150,11 +150,14 @@ const many = (): Sample[] => [
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
-type Options = { reviews?: () => Sample[]; failMore?: boolean; stall?: boolean }
+type Options = { reviews?: () => Sample[]; failMore?: boolean; stall?: boolean; reportedMeanwhile?: boolean }
 
 /** The api as the stories need it: the list with its filters and pages, the summary recounted after every change. */
 const fakeApi =
-  (level: Workspace['level'], { reviews = samples, failMore = false, stall = false }: Options = {}): (() => typeof fetch) =>
+  (
+    level: Workspace['level'],
+    { reviews = samples, failMore = false, stall = false, reportedMeanwhile = false }: Options = {},
+  ): (() => typeof fetch) =>
   () => {
     const rows = reviews()
     const summary = () => {
@@ -178,6 +181,8 @@ const fakeApi =
         const q = url.searchParams
         const offset = Number(q.get('cursor') ?? 0)
         if (offset && failMore) return json({ error: { code: 'internal' } }, 500)
+        // as the api: a specialist asks for nobody else's reviews
+        if (level === 'specialist' && q.get('staff') && q.get('staff') !== AYNA) return json({ error: { code: 'forbidden' } }, 403)
         const mine = level === 'specialist' ? rows.filter((r) => r.staff === AYNA) : rows
         const items = mine
           .filter((r) => (q.get('unanswered') ? !r.reply : true))
@@ -206,8 +211,10 @@ const fakeApi =
           r.reply = { text: ((await request.json()) as { text: string }).text, at: Date.now(), by: 'Maýsa' }
         if (m[3] === 'reply' && m[1] === 'DELETE') r.reply = null
         if (m[3] === 'report') {
-          if (r.report) return json({ error: { code: 'already_reported' } }, 409)
           const body = (await request.json()) as { reason: ReviewReportReason; text?: string }
+          // an administrator reported it a moment earlier: the report is theirs, the answer is 409
+          if (reportedMeanwhile && !r.report) r.report = { reason: 'spam', text: null, at: Date.now(), by: 'Leýli', state: 'checking' }
+          if (r.report) return json({ error: { code: 'already_reported' } }, 409)
           r.report = { reason: body.reason, text: body.text ?? null, at: Date.now(), by: 'Maýsa', state: 'checking' }
         }
         return new Response(null, { status: 204 })
@@ -284,6 +291,18 @@ export const Reply: Story = {
     await waitFor(() => expect(canvas.getByText('Thank you, Döwran! See you again soon.')).toBeVisible())
     await expect(canvas.getByText('Just now')).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Reply to Döwran S.' })).toBeNull()
+    // the focus moves on to the reply's Change
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Change the reply to Döwran S.' })).toHaveFocus())
+  },
+}
+
+/** Cancel closes the composer and gives the focus back to Reply. */
+export const CancelReply: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Reply to Döwran S.' }))
+    await expect(canvas.getByRole('textbox', { name: 'Your reply as Glow Studio' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Reply to Döwran S.' })).toHaveFocus())
   },
 }
 
@@ -306,7 +325,7 @@ export const DeleteReply: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: 'Delete the reply to Gözel A.' }))
     await page.findByText('Reply deleted')
-    await waitFor(() => expect(canvas.getByRole('button', { name: 'Reply to Gözel A.' })).toBeVisible())
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Reply to Gözel A.' })).toHaveFocus())
     await userEvent.click(page.getByRole('button', { name: 'Undo' }))
     await waitFor(() => expect(canvas.getByText('Thank you, Gözel! See you next week.')).toBeVisible())
   },
@@ -342,6 +361,24 @@ export const Report: Story = {
     await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
     await waitFor(() => expect(canvas.getAllByText('Ýeral is checking · not counted in your rating')).toHaveLength(2))
     await expect(canvas.getByText('Reason: Ad or spam')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Review by Mähri G.: actions' })).toBeNull()
+  },
+}
+
+/** Someone else reported it a moment earlier: the api refuses, the modal closes, the list shows the check. */
+export const ReportedMeanwhile: Story = {
+  args: { server: fakeApi('owner', { reportedMeanwhile: true }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Review by Mähri G.: actions' }))
+    await userEvent.click(await page.findByRole('menuitem', { name: /Report/ }))
+    const d = within(await page.findByRole('dialog', { name: 'Report the review' }))
+    await userEvent.click(d.getByRole('radio', { name: 'Ad or spam' }))
+    await userEvent.type(d.getByRole('textbox', { name: 'Explanation (optional)' }), 'Copied from a shop ad.')
+    await expect(d.getByText('22 / 300')).toBeVisible()
+    await userEvent.click(d.getByRole('button', { name: 'Report' }))
+    await page.findByText('A report was already sent.')
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(canvas.getAllByText('Ýeral is checking · not counted in your rating')).toHaveLength(2))
     await expect(canvas.queryByRole('button', { name: 'Review by Mähri G.: actions' })).toBeNull()
   },
 }
@@ -416,11 +453,15 @@ export const Loading: Story = {
   },
 }
 
-/** A specialist reads the reviews about her: no summary, no Not answered, no reply, no report. */
+/**
+ * A specialist reads the reviews about her: no summary, no Not answered, no reply, no report. A shared address with
+ * another specialist or «not answered» in it asks the api for neither (it would refuse the first).
+ */
 export const Specialist: Story = {
-  args: { server: fakeApi('specialist') },
+  args: { server: fakeApi('specialist'), path: `/w/glow-studio/reviews?staff=${MARAL}&filter=unanswered` },
   play: async ({ canvas }) => {
     const list = within(await canvas.findByRole('region', { name: 'Reviews about you' }))
+    await expect(canvas.getByRole('radio', { name: 'All' })).toBeChecked()
     await expect(canvas.getByText('Reviews about you, from clients after their visits. The owner and admins reply to them.')).toBeVisible()
     await expect(canvas.queryByRole('region', { name: 'Rating summary' })).toBeNull()
     await expect(list.getByText('Gülälek N.')).toBeVisible()

@@ -1770,6 +1770,7 @@
       "explanation": "Explanation",
       "explanationOptional": "Explanation (optional)",
       "placeholder": "For example: the review is about another salon",
+      "counter": "{count} / {max}",
       "caption": "The {brand} team checks it within 48 hours. Until then the review stays visible but isn’t counted in your rating.",
       "cancel": "Cancel",
       "send": "Report"

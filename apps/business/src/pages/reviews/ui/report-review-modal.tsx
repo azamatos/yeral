@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
 import type { TeamReview } from '@yeral/contract/reviews'
+import { REVIEW_REPORT_TEXT_MAX } from '@yeral/domain/lifecycle'
 import { REVIEW_REPORT_REASONS, type ReviewReportReason } from '@yeral/domain/model'
+import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Radio } from '@yeral/ui/checkbox'
 import { Field } from '@yeral/ui/field'
@@ -31,7 +33,7 @@ export function ReportReviewModal({ slug, review: r, onClose }: { slug: string; 
   const [text, setText] = useState('')
   const report = useMutation(sdk.reviews.report(slug))
   const explanation = text.trim()
-  const ready = !!reason && (reason !== 'other' || explanation.length > 0) && explanation.length <= 300
+  const ready = !!reason && (reason !== 'other' || explanation.length > 0) && explanation.length <= REVIEW_REPORT_TEXT_MAX
 
   const send = () => {
     if (!reason) return
@@ -42,7 +44,11 @@ export function ReportReviewModal({ slug, review: r, onClose }: { slug: string; 
           toast(t('toast.reported', { brand }))
           onClose()
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => {
+          toast(errorText(error))
+          // someone reported it meanwhile: the list (refreshed by the sdk) says so now
+          if (isApiError(error, 'already_reported')) onClose()
+        },
       },
     )
   }
@@ -78,8 +84,20 @@ export function ReportReviewModal({ slug, review: r, onClose }: { slug: string; 
             />
           ))}
         </fieldset>
-        <Field label={reason === 'other' ? t('report.explanation') : t('report.explanationOptional')}>
-          <Textarea maxLength={300} placeholder={t('report.placeholder')} value={text} onChange={(e) => setText(e.target.value)} />
+        <Field
+          label={reason === 'other' ? t('report.explanation') : t('report.explanationOptional')}
+          counter={{
+            value: explanation.length,
+            max: REVIEW_REPORT_TEXT_MAX,
+            text: t('report.counter', { count: explanation.length, max: REVIEW_REPORT_TEXT_MAX }),
+          }}
+        >
+          <Textarea
+            maxLength={REVIEW_REPORT_TEXT_MAX}
+            placeholder={t('report.placeholder')}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
         </Field>
         <ModalDescription className="text-dense text-n-600">{t('report.caption', { brand })}</ModalDescription>
         <ModalActions>
