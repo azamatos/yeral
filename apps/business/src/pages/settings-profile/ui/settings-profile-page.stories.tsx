@@ -216,7 +216,12 @@ export const Owner: Story = {
     await waitFor(() => expect(canvas.getByRole('combobox', { name: 'Category' })).toHaveDisplayValue('Beauty'))
     await expect(canvas.getByRole('textbox', { name: 'About your business' })).toHaveValue(PROFILE.about.en)
     // the example follows the category: a salon's here, a dentist's on a dental clinic (the owner's #47)
-    await expect(canvas.getByRole('textbox', { name: 'About your business' })).toHaveAttribute('placeholder', /^For example: a cosy studio/)
+    await waitFor(() =>
+      expect(canvas.getByRole('textbox', { name: 'About your business' })).toHaveAttribute(
+        'placeholder',
+        expect.stringMatching(/^For example: a cosy studio/),
+      ),
+    )
     await expect(canvas.getByRole('checkbox', { name: 'Wi-Fi' })).toBeChecked()
     await expect(canvas.getByRole('checkbox', { name: 'Air conditioning' })).not.toBeChecked()
     await expect(canvas.getByRole('switch', { name: 'Pause online booking' })).not.toBeChecked()
