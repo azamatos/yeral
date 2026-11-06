@@ -31,7 +31,7 @@ before any code used them were edited in place (marked "revised").
 | [0023](0023-one-deployment-per-market.md) | One code base, one deployment per market; first launch on the own server | Accepted 2026-10-18 (revised 2026-10-19) |
 | [0024](0024-own-server-docker-caddy.md) | The own server runs every app: Docker + Caddy, Postgres beside the api, no Neon, no Workers | Accepted 2026-10-19 |
 | [0025](0025-fixed-levels-team-rows-invites.md) | Three fixed access levels; a team member is one staff row; invites wait for an answer | Accepted 2026-10-19 |
-| [0026](0026-team-accounts-password-and-totp.md) | The Ýeral team signs in with its own accounts: a password and an authenticator code | Accepted 2026-10-21 |
+| [0026](0026-team-accounts-password-and-totp.md) | The Ýeral team signs in with its own accounts: a password and an authenticator code | Accepted 2026-10-21 (amended 2026-11-06: two steps; a superadmin and admins) |
 | [0027](0027-address-search-geocoder-port.md) | The address search goes through a geocoder port: Photon over OpenStreetMap | Accepted 2026-10-21 |
 | [0028](0028-push-channel-sse-notify.md) | Changes reach open pages through server-sent events nudged by a Postgres NOTIFY | Accepted 2026-10-25 |
 

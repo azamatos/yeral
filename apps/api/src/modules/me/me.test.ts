@@ -529,6 +529,7 @@ describe('account', () => {
         '/v1/w/{slug}/settings/photos/order',
         '/v1/w/{slug}/team/{staffId}/photo',
         '/v1/admin/sign-in',
+        '/v1/admin/sign-in/code',
         '/v1/admin/sign-out',
         '/v1/admin/me',
         '/v1/admin/me/password',

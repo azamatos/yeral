@@ -84,13 +84,19 @@ export const ERROR_STATUS = {
   /** New hours or a special day leave bookings outside: keep or cancel them (book Q-211), `details` lists them. */
   bookings_affected: 409,
   // the Ýeral team's sign-in (ADR 0026)
-  /** The login, the password or the code is wrong: one answer for all three. */
+  /** The login or the password is wrong: one answer for both. */
   sign_in_failed: 401,
-  /** The authenticator code didn't match while setting the app up. */
+  /** The sign-in's challenge ran out, was used, or took too many wrong codes: back to the login and password. */
+  sign_in_expired: 401,
+  /** The authenticator code (or the recovery code) didn't match: at a sign-in's second step, or setting the app up. */
   admin_code_wrong: 400,
   /** A setup link that ran out, was used or never was. */
   setup_expired: 404,
   login_taken: 409,
+  /** Only the superadmin invites, resets and turns off teammates (book Q-011). */
+  superadmin_only: 403,
+  /** Nobody resets or turns off the superadmin's account from the admin tool. */
+  superadmin_protected: 403,
   /** The owner's number has an account unused for 6 months (book Q-270): its holder signs in first. */
   owner_account_unused: 409,
   /** The server has no `ADMIN_SECRET_KEY`: no admin tool there. */

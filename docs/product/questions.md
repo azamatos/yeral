@@ -75,7 +75,7 @@ Nothing describes who in the Ýeral team may do what.
 - A · One role at launch: every team member can do everything in the admin tool. (recommended)
 - B · Separate roles from the start, for example moderator, support and admin.
 
-answer: A · One role at launch: every team member can do everything in the admin tool. (18.10.2026)
+answer: A · One role at launch: every team member can do everything in the admin tool. (18.10.2026) Owner, 04.11.2026: two roles after all — a superadmin (the first account, exactly one) who adds admins, hands out new setup links and turns admins off, and can't be turned off or reset by anyone; admins, who do everything else and see the team read-only. Managers, analysts and investors come later, when they have rights of their own (ADR 0026 amended).
 
 ## Q-012 · Hiding a business or blocking a client across Ýeral
 chapter: 03 · status: decided

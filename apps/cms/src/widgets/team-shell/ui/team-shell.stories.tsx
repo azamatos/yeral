@@ -4,7 +4,7 @@ import { json, PageStory, pathOf } from '@/shared/storybook'
 import { TeamPage } from './team-page'
 import { TeamShell } from './team-shell'
 
-const ME = { id: 'a1', login: 'ayna', name: 'Aýna', recoveryCodesLeft: 7 }
+const ME = { id: 'a1', login: 'ayna', name: 'Aýna', role: 'superadmin', recoveryCodesLeft: 7 }
 
 const working = (): typeof fetch => {
   let signedIn = true

@@ -14,6 +14,8 @@ import {
   adminSetupSchema,
   adminSetupSecretSchema,
   adminSetupTokenParamSchema,
+  adminSignInChallengeSchema,
+  adminSignInCodeSchema,
   adminSignInSchema,
 } from '@yeral/contract/admin'
 import { listOf } from '@yeral/contract/common'
@@ -28,12 +30,13 @@ import {
   chooseSetupPassword,
   confirmSetup,
   disableAdmin,
+  finishSignIn,
   guardAddress,
   inviteAdmin,
   renewRecoveryCodes,
   resetAdmin,
   setupOf,
-  signIn,
+  startSignIn,
 } from './accounts'
 import { endAdminSession, requireAdmin, startAdminSession } from './session'
 
@@ -45,8 +48,17 @@ const signInRoute = createRoute({
   method: 'post',
   path: '/admin/sign-in',
   tags,
-  summary: 'Sign in with the login, the password and the authenticator code (or a recovery code); any wrong part is `sign_in_failed`',
+  summary: 'Sign in, step 1: the login and the password (`sign_in_failed` for a wrong one); a challenge for the code, 5 minutes',
   request: jsonBody(adminSignInSchema),
+  responses: { 200: json(adminSignInChallengeSchema), 400: errors[400], ...signedIn, 429: errors[429] },
+})
+const signInCodeRoute = createRoute({
+  method: 'post',
+  path: '/admin/sign-in/code',
+  tags,
+  summary:
+    'Step 2: the authenticator code (or a recovery code) for the challenge; `admin_code_wrong` stays on it, `sign_in_expired` is back to step 1',
+  request: jsonBody(adminSignInCodeSchema),
   responses: { 200: json(adminMeSchema), 400: errors[400], ...signedIn, 429: errors[429] },
 })
 const signOutRoute = createRoute({
@@ -114,7 +126,7 @@ const inviteRoute = createRoute({
   method: 'post',
   path: '/admin/team',
   tags,
-  summary: 'A new account and its setup link (24 hours); `login_taken`',
+  summary: 'A new admin account and its setup link (24 hours), by the superadmin (`superadmin_only`); `login_taken`',
   request: jsonBody(adminInviteSchema),
   responses: { 201: json(adminSetupLinkSchema), 400: errors[400], 409: errors[409], ...signedIn },
 })
@@ -122,7 +134,8 @@ const resetRoute = createRoute({
   method: 'post',
   path: '/admin/team/{id}/reset',
   tags,
-  summary: 'A teammate starts again from a new setup link: password, app, recovery codes and sessions go',
+  summary:
+    'An admin starts again from a new setup link, by the superadmin (`superadmin_only`, never the superadmin’s own: `superadmin_protected`): password, app, recovery codes and sessions go',
   request: { params: adminIdParamSchema },
   responses: { 200: json(adminSetupLinkSchema), 404: errors[404], ...signedIn },
 })
@@ -130,7 +143,8 @@ const disableRoute = createRoute({
   method: 'post',
   path: '/admin/team/{id}/disable',
   tags,
-  summary: 'A teammate’s account is turned off (never one’s own); a reset brings it back',
+  summary:
+    'An admin’s account is turned off by the superadmin (`superadmin_only`; never the superadmin: `superadmin_protected`); a reset brings it back',
   request: { params: adminIdParamSchema },
   responses: { ...noContent, 404: errors[404], ...signedIn },
 })
@@ -140,7 +154,12 @@ export const adminRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const input = c.req.valid('json')
     await guardAddress(deps, ipOf(c), input.login)
-    const admin = await signIn(deps, input, (tx, signed) => startAdminSession(c, tx, signed.id))
+    return c.json(await startSignIn(deps, input), 200)
+  })
+  .openapi(signInCodeRoute, async (c) => {
+    const { deps } = c.var
+    await guardAddress(deps, ipOf(c))
+    const admin = await finishSignIn(deps, c.req.valid('json'), (tx, signed) => startAdminSession(c, tx, signed.id))
     return c.json(adminMeOf(admin), 200)
   })
   .openapi(signOutRoute, async (c) => {

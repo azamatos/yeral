@@ -1,7 +1,8 @@
 /**
- * The Ýeral team's admin tool (book F-178; ADR 0026): its own accounts, signed in with a login, a password and an
- * authenticator code. One role (Q-011): every account can do everything.
+ * The Ýeral team's admin tool (book F-178; ADR 0026): its own accounts, signed in with a login and a password, then an
+ * authenticator code. Two roles (Q-011, owner 04.11.2026): the superadmin changes the team; admins do everything else.
  */
+import { ADMIN_ROLES } from '@yeral/domain/admin-roles'
 import { REVIEW_REPORT_REASONS, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { z } from 'zod'
 import { NAME_MAX } from '@yeral/domain/names'
@@ -32,21 +33,38 @@ export const totpCodeSchema = z
   .trim()
   .regex(/^\d{6}$/)
 
-/** Sign in: any wrong part is `sign_in_failed`. `code` is the app's 6 digits or a recovery code (`abcd-efgh`). */
+/** Sign in, step 1: the login and the password; a wrong one or an unknown login is `sign_in_failed`. */
 export const adminSignInSchema = z
   .object({
     login: z.string().trim().toLowerCase().max(64),
     password: z.string().max(128),
-    code: z.string().trim().max(20),
   })
   .strict()
   .meta({ id: 'AdminSignIn' })
+
+/** Step 1 passed: the code is for this challenge, within minutes (`expiresAt`); used once. */
+export const adminSignInChallengeSchema = z
+  .object({ challenge: z.string(), login: z.string(), expiresAt: epochSchema })
+  .meta({ id: 'AdminSignInChallenge' })
+
+/**
+ * Step 2: the app's 6 digits or a recovery code (`abcd-efgh`) for the challenge. A wrong code is `admin_code_wrong`
+ * (and counts); a challenge that ran out or was used is `sign_in_expired`: back to step 1.
+ */
+export const adminSignInCodeSchema = z
+  .object({
+    challenge: z.string().min(20).max(100),
+    code: z.string().trim().max(20),
+  })
+  .strict()
+  .meta({ id: 'AdminSignInCode' })
 
 export const adminMeSchema = z
   .object({
     id: idSchema,
     login: z.string(),
     name: z.string(),
+    role: z.enum(ADMIN_ROLES),
     /** Recovery codes not used yet; new ones replace them all. */
     recoveryCodesLeft: z.number().int().min(0),
   })
@@ -57,6 +75,7 @@ export const adminMemberSchema = z
     id: idSchema,
     login: z.string(),
     name: z.string(),
+    role: z.enum(ADMIN_ROLES),
     status: z.enum(ADMIN_STATUSES),
     /** Who invited them; null for the server command. */
     invitedBy: z.string().nullable(),
@@ -226,6 +245,7 @@ export const adminReviewSchema = z
   .meta({ id: 'AdminReview' })
 
 export type AdminMe = z.infer<typeof adminMeSchema>
+export type AdminSignInChallenge = z.infer<typeof adminSignInChallengeSchema>
 export type AdminMember = z.infer<typeof adminMemberSchema>
 export type AdminSetupLink = z.infer<typeof adminSetupLinkSchema>
 export type AdminSetupSecret = z.infer<typeof adminSetupSecretSchema>

@@ -7,8 +7,8 @@
  * at seed time (the demo day becomes that day), so a long-lived database goes stale: `seed` starts it over on today.
  *
  * `admin-invite <login> "<name>"` (`pnpm --filter @yeral/api admin:invite`; on the server `node dist/cli.js
- * admin-invite` in the api's container): a Ýeral team account and its setup link, or a new link for a login that exists
- * (ADR 0026).
+ * admin-invite` in the api's container): a Ýeral team account and its setup link (the first account ever is the
+ * superadmin, later ones admins; book Q-011), or a new link for a login that exists, the superadmin's included (ADR 0026).
  *
  * `make-example <slug> [--off]` (on the server `node dist/cli.js make-example` in the api's container; the owner's D2):
  * while the sign-in code shows on the screen, one of the owner's test businesses opens to clients marked "Example", still
@@ -53,7 +53,9 @@ async function adminInvite(db: ReturnType<typeof createDb>, [login, ...name]: st
   if (!parsed.success || !name.join(' ').trim()) throw new Error('usage: admin-invite <login> "<name>" (login: 3–32 of a-z 0-9 . -)')
   const deps = { db, now: Date.now, site: config.site, adminKey: config.adminKey, log: createLogger(config.logLevel, { app: 'cli' }) }
   const link = await inviteOrReset(deps, parsed.data, name.join(' ').trim())
-  console.warn(`${link.reset ? 'reset' : 'invited'} ${parsed.data}; the setup link, valid until ${new Date(link.expiresAt).toISOString()}:`)
+  console.warn(
+    `${link.reset ? 'reset' : 'invited'} ${parsed.data} (${link.role}); the setup link, valid until ${new Date(link.expiresAt).toISOString()}:`,
+  )
   // eslint-disable-next-line no-console -- the link alone on stdout, for whoever runs this
   console.log(link.url)
 }

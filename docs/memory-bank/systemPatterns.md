@@ -209,10 +209,12 @@ apps/api/src/
   (`@yeral/domain/permissions`: `none · own · all`, the team row `view · manage`); the api checks it and leaves out what a
   level can't see (a specialist sees only their own column; money without `revenue` is left out). Invites are their own
   table and wait for the person to accept or decline. One person can be a client and on several teams at once.
-- Admin tool (cms.): the Ýeral team's own accounts (`admins`, never a phone account), a login, a password (PBKDF2) and
-  an authenticator code (TOTP) or a recovery code at each sign-in; the secrets sealed under `ADMIN_SECRET_KEY`; its own
-  cookie `<prefix>.admin` on the api's host, `SameSite=Strict`, path `/v1/admin`, 12 hours; `/v1/admin/*` only from
-  the cms origin; every change written to `admin_actions` (ADR 0026).
+- Admin tool (cms.): the Ýeral team's own accounts (`admins`, never a phone account), a login and a password (PBKDF2)
+  first, then an authenticator code (TOTP) or a recovery code for the 5-minute challenge the first step answered
+  (`admin_challenges`, hashes only); the secrets sealed under `ADMIN_SECRET_KEY`; its own cookie `<prefix>.admin` on
+  the api's host, `SameSite=Strict`, path `/v1/admin`, 12 hours; `/v1/admin/*` only from the cms origin; every change
+  written to `admin_actions`. Two roles (`admins.role`, `@yeral/domain/admin-roles`): the one superadmin changes the
+  team, admins do the rest (ADR 0026, amended 2026-11-06).
 - Mutations check `Origin` against the configured sites. Mobile apps (later) use bearer tokens.
 
 ## Configuration, domains and brand

@@ -1,14 +1,15 @@
-import type { AdminMember } from '@yeral/contract/admin'
+import type { AdminMe, AdminMember } from '@yeral/contract/admin'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { json, PageStory, pathOf } from '@/shared/storybook'
 import { TeamMembersPage } from './team-members-page'
 
-const ME = { id: 'a1', login: 'ayna', name: 'Aýna', recoveryCodesLeft: 10 }
+const ME: AdminMe = { id: 'a1', login: 'ayna', name: 'Aýna', role: 'superadmin', recoveryCodesLeft: 10 }
 const member = (over: Partial<AdminMember>): AdminMember => ({
   id: 'a1',
   login: 'ayna',
   name: 'Aýna',
+  role: 'superadmin',
   status: 'active',
   invitedBy: null,
   setupExpiresAt: null,
@@ -16,15 +17,19 @@ const member = (over: Partial<AdminMember>): AdminMember => ({
   createdAt: Date.UTC(2026, 9, 1),
   ...over,
 })
-const TEAM = [member({}), member({ id: 'a2', login: 'merdan', name: 'Merdan' })]
-const LINK = { id: 'a3', url: 'https://cms.test/setup/a-long-token', expiresAt: Date.UTC(2026, 10, 2) }
+const TEAM = [
+  member({}),
+  member({ id: 'a2', login: 'merdan', name: 'Merdan', role: 'admin', invitedBy: 'Aýna' }),
+  member({ id: 'a3', login: 'jeren', name: 'Jeren', role: 'admin', status: 'disabled', invitedBy: 'Aýna', lastSignInAt: null }),
+]
+const LINK = { id: 'a4', url: 'https://cms.test/setup/a-long-token', expiresAt: Date.UTC(2026, 10, 2) }
 
 const api =
-  (invite: () => Response = () => json(201, LINK)): (() => typeof fetch) =>
+  (invite: () => Response = () => json(201, LINK), me: AdminMe = ME): (() => typeof fetch) =>
   () =>
   (input, init) => {
     const path = pathOf(input)
-    if (path === '/v1/admin/me') return Promise.resolve(json(200, ME))
+    if (path === '/v1/admin/me') return Promise.resolve(json(200, me))
     if (path === '/v1/admin/team' && init?.method === 'POST') return Promise.resolve(invite())
     if (path.endsWith('/reset')) return Promise.resolve(json(200, LINK))
     if (path.endsWith('/disable')) return Promise.resolve(new Response(null, { status: 204 }))
@@ -42,12 +47,28 @@ type Story = StoryObj<typeof meta>
 
 const body = (element: HTMLElement) => within(element.ownerDocument.body)
 
-/** Never oneself: only a teammate's row has the buttons. */
+/** The superadmin: each row's role; the buttons on the admins' rows only, «Turn off» not on one already off. */
 export const Default: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Aýna (You)')).toBeVisible()
-    await expect(canvas.getAllByRole('button', { name: 'New setup link' })).toHaveLength(1)
+    await expect(canvas.getByText('Superadmin')).toBeVisible()
+    await expect(canvas.getAllByText('Admin')).toHaveLength(2)
+    await expect(canvas.getAllByRole('button', { name: 'New setup link' })).toHaveLength(2)
     await expect(canvas.getAllByRole('button', { name: 'Turn off' })).toHaveLength(1)
+    await expect(canvas.getByRole('button', { name: 'Add a teammate' })).toBeVisible()
+  },
+}
+
+/** An admin reads the team: no buttons, and a line saying why. */
+export const AsAdmin: Story = {
+  args: { server: api(undefined, { ...ME, id: 'a2', login: 'merdan', name: 'Merdan', role: 'admin' }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('Merdan (You)')).toBeVisible()
+    await expect(canvas.getByText('Only the superadmin changes the team.')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Add a teammate' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'New setup link' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Turn off' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('columnheader', { name: 'Actions' })).not.toBeInTheDocument()
   },
 }
 

@@ -7,7 +7,8 @@ import { keys } from './keys'
 const json = (status: number, body: unknown) =>
   new Response(body === null ? null : JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
-const ME = { id: 'a1', login: 'aýna', name: 'Aýna', recoveryCodesLeft: 10 }
+const ME = { id: 'a1', login: 'aýna', name: 'Aýna', role: 'admin', recoveryCodesLeft: 10 }
+const CHALLENGE = { challenge: 'a-challenge-token-of-some-length', login: 'aýna', expiresAt: Date.UTC(2026, 10, 6, 9, 5) }
 const UNAUTHORIZED = () => json(401, { error: { code: 'unauthorized' } })
 
 function fixture(respond: (url: URL, init: RequestInit) => Response) {
@@ -30,13 +31,17 @@ describe('admin', () => {
     expect(isApiError(error, 'admin_unavailable')).toBe(true)
   })
 
-  it('signing in fills me; a wrong part keeps nobody signed in', async () => {
-    const f = fixture(() => json(200, ME))
+  it('signing in takes two steps: the password step answers a challenge, the code step fills me', async () => {
+    const f = fixture((url) => json(200, url.pathname.endsWith('/code') ? ME : CHALLENGE))
     const signIn = f.admin.signIn()
-    const me = await signIn.mutationFn?.({ login: 'ayna', password: 'x', code: '123456' }, undefined as never)
-    await signIn.onSuccess?.(me as never, undefined as never, undefined, undefined as never)
+    const challenge = await signIn.mutationFn?.({ login: 'ayna', password: 'x' }, undefined as never)
+    expect(challenge).toEqual(CHALLENGE)
+    expect(f.queryClient.getQueryData(keys.adminMe())).toBeUndefined()
+    const signInCode = f.admin.signInCode()
+    const me = await signInCode.mutationFn?.({ challenge: CHALLENGE.challenge, code: '123456' }, undefined as never)
+    await signInCode.onSuccess?.(me as never, undefined as never, undefined, undefined as never)
     expect(f.queryClient.getQueryData(keys.adminMe())).toEqual(ME)
-    expect(f.calls[0]?.url.pathname).toBe('/v1/admin/sign-in')
+    expect(f.calls.map((c) => c.url.pathname)).toEqual(['/v1/admin/sign-in', '/v1/admin/sign-in/code'])
   })
 
   it('a 401 from a list ends the session here: me is null and what the team saw goes', async () => {
