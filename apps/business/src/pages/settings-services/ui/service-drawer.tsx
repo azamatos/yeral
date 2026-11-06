@@ -15,7 +15,7 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Input, Textarea } from '@yeral/ui/input'
 import { InputGroup } from '@yeral/ui/input-group'
-import { Select } from '@yeral/ui/select'
+import { NativeSelect as Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { textLink } from '@yeral/ui/text-link'

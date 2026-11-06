@@ -16,7 +16,7 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { Select } from '@yeral/ui/select'
+import { NativeSelect as Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'

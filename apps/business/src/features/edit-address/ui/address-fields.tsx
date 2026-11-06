@@ -4,7 +4,7 @@ import { Combobox, ComboboxInput, ComboboxList, type ComboboxOption } from '@yer
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { MapFrame, MapPinHandle } from '@yeral/ui/map-frame'
-import { Select } from '@yeral/ui/select'
+import { NativeSelect as Select } from '@yeral/ui/select'
 import { SettingsRow } from '@yeral/ui/settings-row'
 import { Switch } from '@yeral/ui/switch'
 import { Info, MapPin, Move } from 'lucide-react'

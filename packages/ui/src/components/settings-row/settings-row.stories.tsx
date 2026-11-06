@@ -7,7 +7,7 @@ import { expect, userEvent } from 'storybook/test'
 import { FieldMessage } from '../field'
 import { Input } from '../input'
 import { OptionCard, OptionCardGroup } from '../option-card'
-import { Select } from '../select'
+import { NativeSelect as Select } from '../select'
 import { Switch } from '../switch'
 import { SettingsRow } from './settings-row'
 
