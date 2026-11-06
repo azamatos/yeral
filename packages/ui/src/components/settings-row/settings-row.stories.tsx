@@ -7,7 +7,7 @@ import { expect, userEvent } from 'storybook/test'
 import { FieldMessage } from '../field'
 import { Input } from '../input'
 import { OptionCard, OptionCardGroup } from '../option-card'
-import { NativeSelect as Select } from '../select'
+import { Select } from '../select'
 import { Switch } from '../switch'
 import { SettingsRow } from './settings-row'
 
@@ -44,29 +44,41 @@ export const WithSelect: Story = {
         description="The time counts only while you’re open. The hold never runs past the visit’s start."
         className="border-t border-n-200 py-5"
       >
-        <Select defaultValue="30" className="w-55">
-          <option value="15">15 min</option>
-          <option value="30">30 min</option>
-          <option value="60">60 min</option>
-        </Select>
+        <Select
+          aria-label="Hold requests for"
+          className="w-55"
+          value="30"
+          onValueChange={() => {}}
+          options={[
+            { value: '15', label: '15 min' },
+            { value: '30', label: '30 min' },
+            { value: '60', label: '60 min' },
+          ]}
+        />
       </SettingsRow>
       <SettingsRow
         label="Clients can cancel for free"
         description="Later than this, a client can only cancel by calling you."
         className="border-y border-n-200 py-5"
       >
-        <Select defaultValue="120" className="w-55">
-          <option value="0">Any time</option>
-          <option value="120">Up to 2 h before</option>
-        </Select>
+        <Select
+          aria-label="Clients can cancel for free"
+          className="w-55"
+          value="120"
+          onValueChange={() => {}}
+          options={[
+            { value: '0', label: 'Any time' },
+            { value: '120', label: 'Up to 2 h before' },
+          ]}
+        />
       </SettingsRow>
     </>
   ),
   play: async ({ canvas }) => {
     const hold = canvas.getByRole('combobox', { name: 'Hold requests for' })
-    await expect(hold).toHaveValue('30')
+    await expect(hold).toHaveTextContent('30 min')
     await expect(hold).toHaveAccessibleDescription(/The hold never runs past the visit’s start/)
-    await expect(canvas.getByRole('combobox', { name: 'Clients can cancel for free' })).toHaveValue('120')
+    await expect(canvas.getByRole('combobox', { name: 'Clients can cancel for free' })).toHaveTextContent('Up to 2 h before')
   },
 }
 

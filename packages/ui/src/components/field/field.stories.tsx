@@ -172,3 +172,26 @@ export const FormLayout: Story = {
     </form>
   ),
 }
+
+/** A3 Sizes: S 32 / r 8 / 13, M 40 / r 10 / 14 (business toolbars and forms), L 48 / r 12 / 16 (client forms, 390). */
+export const InputSizes: Story = {
+  render: () => (
+    <div className="flex w-80 flex-col gap-4">
+      <Field label="S · 32">
+        <Input size="s" defaultValue="Glow Studio" />
+      </Field>
+      <Field label="M · 40">
+        <Input size="m" defaultValue="Glow Studio" />
+      </Field>
+      <Field label="L · 48">
+        <Input size="l" defaultValue="Glow Studio" />
+      </Field>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    const [s, m, l] = canvas.getAllByRole('textbox')
+    await expect(s).toHaveClass('h-8')
+    await expect(m).toHaveClass('h-10')
+    await expect(l).toHaveClass('h-12')
+  },
+}

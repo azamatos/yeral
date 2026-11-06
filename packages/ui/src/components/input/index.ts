@@ -1,1 +1,1 @@
-export { Input, Textarea, inputClass, useControlProps } from './input'
+export { Input, Textarea, inputClass, inputSize, useControlProps, type InputSize } from './input'

@@ -2,7 +2,8 @@ import { useId, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { inputClass, useControlProps } from '../input'
 
-const heights = { l: 'h-12 text-body', m: 'h-11 text-small' }
+// A3 Sizes: M is 40 (business forms), as Input and Select
+const heights = { l: 'h-12 text-body', m: 'h-10 text-ctl-m' }
 
 /** The fixed box before a field (InputGroup's `prefix`, PhoneInput's «+993»): n-50 fill, n-300 line, 500 ink. */
 export const addonClass = cn(
