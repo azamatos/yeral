@@ -34,6 +34,7 @@ before any code used them were edited in place (marked "revised").
 | [0026](0026-team-accounts-password-and-totp.md) | The Ýeral team signs in with its own accounts: a password and an authenticator code | Accepted 2026-10-21 (amended 2026-11-06: two steps; a superadmin and admins) |
 | [0027](0027-address-search-geocoder-port.md) | The address search goes through a geocoder port: Photon over OpenStreetMap | Accepted 2026-10-21 |
 | [0028](0028-push-channel-sse-notify.md) | Changes reach open pages through server-sent events nudged by a Postgres NOTIFY | Accepted 2026-10-25 |
+| [0029](0029-sign-in-codes-through-telegram-bot.md) | Sign-in codes through our own Telegram bot until SMS launches | Accepted 2026-11-06 |
 
 New record: copy [`_template.md`](_template.md), take the next number, add a row here, update the affected
 memory-bank file in the same commit.

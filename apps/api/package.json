@@ -19,7 +19,8 @@
     "db:seed": "tsx --env-file-if-exists=.env.local src/db/cli.ts seed",
     "db:setup": "tsx --env-file-if-exists=.env.local src/db/cli.ts setup",
     "admin:invite": "tsx --env-file-if-exists=.env.local src/db/cli.ts admin-invite",
-    "make:example": "tsx --env-file-if-exists=.env.local src/db/cli.ts make-example"
+    "make:example": "tsx --env-file-if-exists=.env.local src/db/cli.ts make-example",
+    "telegram:webhook": "tsx --env-file-if-exists=.env.local src/db/cli.ts telegram-webhook"
   },
   "dependencies": {
     "@hono/node-server": "catalog:",

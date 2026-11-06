@@ -13,6 +13,17 @@ export async function sha256Hex(text: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+/** Whether two secrets are the same, in a time that doesn't tell how far they agree (a webhook's secret header). */
+export function sameSecret(a: string, b: string): boolean {
+  const x = new TextEncoder().encode(a)
+  const y = new TextEncoder().encode(b)
+  // a different length is compared against itself, so the time doesn't say that either
+  const other = x.length === y.length ? y : x
+  let diff = x.length === y.length ? 0 : 1
+  for (let i = 0; i < x.length; i++) diff |= (x[i] ?? 0) ^ (other[i] ?? 0)
+  return diff === 0
+}
+
 /** `n` random decimal digits, uniformly. */
 export function randomDigits(n: number): string {
   const out: string[] = []

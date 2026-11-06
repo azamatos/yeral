@@ -15,7 +15,7 @@ import { users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
-import { checkCode, sendCode, showsCodeOnScreen } from './codes'
+import { checkCode, codeDelivery, sendCode, showsCodeOnScreen } from './codes'
 import { endSession } from './session'
 import { afterCode, answerIdentity } from './identity'
 
@@ -23,7 +23,8 @@ const modeRoute = createRoute({
   method: 'get',
   path: '/auth/mode',
   tags: ['auth'],
-  summary: 'Whether the sign-in shows its code on the screen (the first launch, book Q-036): the screens then say it’s a demo',
+  summary:
+    'How the sign-in’s code will reach the person: on the screen (the first launch, book Q-036; the screens then say it’s a demo), by SMS, or through our Telegram bot (ADR 0029)',
   responses: { 200: json(authModeSchema) },
 })
 
@@ -31,7 +32,7 @@ const sendCodeRoute = createRoute({
   method: 'post',
   path: '/auth/code',
   tags: ['auth'],
-  summary: 'Send a login code by SMS',
+  summary: 'Send a login code: by SMS, to the person’s Telegram, or, unlinked, the link that brings it there (`delivery`)',
   request: jsonBody(sendCodeSchema),
   responses: { 200: json(sendCodeResponseSchema), 400: errors[400], 429: errors[429] },
 })
@@ -60,7 +61,7 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
   .openapi(modeRoute, (c) => {
     // a minute: when the first launch's switch or an SMS gateway changes it, open pages follow soon
     c.header('Cache-Control', 'public, max-age=60')
-    return c.json({ codeOnScreen: showsCodeOnScreen(c.var.deps) }, 200)
+    return c.json({ codeOnScreen: showsCodeOnScreen(c.var.deps), delivery: codeDelivery(c.var.deps) }, 200)
   })
   .openapi(sendCodeRoute, async (c) => {
     const { phone, lang } = c.req.valid('json')

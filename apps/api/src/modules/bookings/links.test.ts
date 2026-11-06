@@ -141,7 +141,7 @@ describe('SMS links', () => {
     const on = testApp(db, { codeOnScreen: true })
     const visitor = browser(on.app)
     const sent = await visitor.req(`/v1/links/${token}/code`, { body: {} })
-    expect(sent.json).toEqual({ resendAfterSec: 59, expiresInSec: 300 })
+    expect(sent.json).toEqual({ resendAfterSec: 59, expiresInSec: 300, delivery: 'sms' })
     expect(on.sms.sent.at(-1)?.to).toBe('+99365444306')
     const signedIn = await visitor.req(`/v1/links/${token}/verify`, { body: { code: '1234' } })
     expect(signedIn.json).toMatchObject({ me: { phone: '+99365444306' }, isNew: true })

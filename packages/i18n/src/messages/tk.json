@@ -131,6 +131,16 @@
       "request_expired": "haýyşyň jogap wagty gutardy"
     }
   },
+  "telegram": {
+    "welcome": "Bu {brand} boty: ol size girmek üçin kodlary getirýär. Saýtda belgiňizi ýazyň we görkezilen salgyny açyň.",
+    "shareNumber": "{brand} kodlaryny şu ýerde almak üçin saýtda ýazan belgiňizi paýlaşyň.",
+    "shareButton": "Belgimi paýlaşmak",
+    "expired": "Bu salgynyň möhleti geçdi. Saýtda täze kod soraň.",
+    "noRequest": "Ilki saýtda kod soraň, soňra görkezilen salgyny açyň.",
+    "wrongNumber": "Bu saýtda ýazan belgiňiz däl ({phone}). Şol belgili Telegram hasabyňyzdan, düwme bilen öz belgiňizi paýlaşyň.",
+    "linked": "Taýýar: {brand} kodlaryňyz indi şu ýere geler.",
+    "askAgain": "Saýtda täze kod soraň."
+  },
   "sms": {
     "code": "{brand} kody: {code}",
     "confirmed": "{brand}: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",

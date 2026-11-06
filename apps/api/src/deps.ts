@@ -8,8 +8,10 @@ import { createLive, type Live } from './modules/events/live'
 import { build } from './version'
 import { noGeocoder, photonGeocoder, type GeocoderPort } from './ports/geocoder'
 import { createLogger, type Logger } from './ports/log'
+import { telegramSms } from './modules/telegram/links'
 import { logSms, type SmsPort } from './ports/sms'
 import { diskStorage, type StoragePort } from './ports/storage'
+import { telegramBot, type TelegramPort } from './ports/telegram'
 
 export interface Deps {
   db: Db
@@ -42,12 +44,23 @@ export interface Deps {
   geocoder: GeocoderPort
   /** The open event streams and their nudges (`modules/events/live.ts`); the Node entry LISTENs into it. */
   live: Live
+  /**
+   * Our Telegram bot (ADR 0029), which brings sign-in codes to linked phones until an SMS gateway comes: the Bot API and
+   * the secret its webhook checks. Null without `TELEGRAM_BOT_TOKEN`: codes go to the log, or the screen.
+   */
+  telegram: { bot: TelegramPort; webhookSecret: string } | null
 }
 
 /** The dependencies as the Node entry builds them (ADR 0024). */
 export function createDeps(config: Config, db: Db, log: Logger = createLogger(config.logLevel, { app: 'api' })): Deps {
-  const sms = logSms(log)
-  if (config.codeOnScreen && sms.delivers) throw new Error('SIGN_IN_CODE_ON_SCREEN is for a market whose SMS reach no phone')
+  const telegram = config.telegram
+    ? { bot: telegramBot(config.telegram.token, config.telegram.username), webhookSecret: config.telegram.webhookSecret }
+    : null
+  const sms = telegram ? telegramSms(db, telegram.bot, logSms(log), log) : logSms(log)
+  if (config.codeOnScreen && sms.delivers)
+    throw new Error(
+      'SIGN_IN_CODE_ON_SCREEN=true shows the code to whoever types a number: it can’t be on while codes reach phones (TELEGRAM_BOT_TOKEN is set). Set it to false.',
+    )
   return {
     db,
     site: config.site,
@@ -67,5 +80,6 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
       ? photonGeocoder(config.geocoderUrl, `${new URL(config.site.urls.client).host}/${build.version} (+${config.site.urls.client})`)
       : noGeocoder,
     live: createLive(db),
+    telegram,
   }
 }

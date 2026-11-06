@@ -67,6 +67,29 @@ While the sign-in code shows on the screen, one of the owner's test businesses o
 confirming by hand) with `ssh yeral-vps 'docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js
 make-example <slug>'`, and loses the mark (back to "in review") with `make-example <slug> --off` (operations.md).
 
+**Once, to send sign-in codes through our Telegram bot** (ADR 0029; the owner creates the bot in @BotFather,
+`@yeral_app_bot`; the token and the secret never go in the repo or chat):
+
+```
+ssh yeral-vps 'cat >> /srv/yeral/.env' <<'EOF'
+TELEGRAM_BOT_TOKEN=<the token @BotFather gave>
+TELEGRAM_WEBHOOK_SECRET=<openssl rand -hex 32>
+TELEGRAM_BOT_USERNAME=yeral_app_bot
+EOF
+```
+
+Then in `/srv/yeral/compose.yml` set `SIGN_IN_CODE_ON_SCREEN: 'false'` (the api refuses to start with it on beside
+the token: codes reach phones now) and pass the three variables to the api service, deploy, and register the webhook:
+
+```
+ssh yeral-vps 'docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js telegram-webhook'
+```
+
+It prints Telegram's answer and the address registered (`https://api.yeral.app/v1/telegram/webhook`), never the
+secrets. Run it again whenever the api's address or `TELEGRAM_WEBHOOK_SECRET` changes. With the code off the screen,
+`make-example` opens no new examples (`--off` still takes one back), the Ýeral team can verify real businesses, and
+"Change number" works (operations.md).
+
 **After a deploy that changed the headers** (`yeral.caddy` or the client site's policy, "Security headers" below),
 with the browser console open and no CSP violation reported (`Refused to load…` / `violates the following Content
 Security Policy directive`):

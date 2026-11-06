@@ -74,8 +74,16 @@ export function useCodeSteps<TVerified>({ sendCode, verify: verifyOptions, onVer
     send.mutate(
       { phone: toE164(phone), lang: locale },
       {
+        // `telegram` and `telegram_link` (ADR 0029) get their own states with the screens that show them
         onSuccess: (sent) =>
-          at((moment) => ({ type: 'codeSent', phone, resend, resendAfterSec: sent.resendAfterSec, code: sent.code, now: moment })),
+          at((moment) => ({
+            type: 'codeSent',
+            phone,
+            resend,
+            resendAfterSec: sent.resendAfterSec,
+            code: sent.delivery === 'screen' ? sent.code : undefined,
+            now: moment,
+          })),
         onError: (error) => {
           if (isApiError(error) && (SEND_REFUSALS as readonly string[]).includes(error.code))
             at((moment) => ({ type: 'sendRefused', phone, resend, error, now: moment }))
