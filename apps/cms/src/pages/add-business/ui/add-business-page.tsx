@@ -7,7 +7,7 @@ import { Button } from '@yeral/ui/button'
 import { Field, FieldMessage } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { toast } from '@yeral/ui/toast'
 import { useState, type FormEvent } from 'react'
 import { useTranslations } from 'use-intl'
@@ -38,7 +38,7 @@ export function AddBusinessPage() {
   const submit = (event: FormEvent) => {
     event.preventDefault()
     setTried(true)
-    if (badPhone) return
+    if (badPhone || !categoryId) return
     add.mutate(
       { name, categoryId, owner: { name: ownerName, phone: toE164(digits) } },
       {
@@ -62,25 +62,23 @@ export function AddBusinessPage() {
       <form onSubmit={submit} className="flex max-w-120 flex-col gap-4">
         <p className="text-small text-n-600">{t('lead')}</p>
         <Field label={t('name')}>
-          <Input value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input size="m" value={name} onChange={(e) => setName(e.target.value)} required />
         </Field>
         <Field label={t('category')}>
-          <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-            <option value="" disabled>
-              {t('pick')}
-            </option>
-            {categories.data?.items.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
+          <Select
+            value={categoryId || null}
+            placeholder={t('pick')}
+            invalid={tried && !categoryId}
+            loading={!categories.data}
+            onValueChange={setCategoryId}
+            options={(categories.data?.items ?? []).map((c) => ({ value: c.id, label: c.name }))}
+          />
         </Field>
         <Field label={t('ownerName')}>
-          <Input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required />
+          <Input size="m" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required />
         </Field>
         <Field label={t('ownerPhone')} hint={t('ownerPhoneHint')} error={tried && badPhone ? t('badPhone') : undefined}>
-          <PhoneInput {...PHONE} value={digits} onValueChange={setDigits} />
+          <PhoneInput {...PHONE} size={40} value={digits} onValueChange={setDigits} />
         </Field>
         {add.error && <FieldMessage>{errorText(add.error)}</FieldMessage>}
         <Button type="submit" variant="primary" loading={add.isPending} className="self-start">
