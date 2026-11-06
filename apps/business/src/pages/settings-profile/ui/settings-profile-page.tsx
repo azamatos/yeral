@@ -11,7 +11,7 @@ import { FieldMessage } from '@yeral/ui/field'
 import { Input, Textarea } from '@yeral/ui/input'
 import { PhoneInput } from '@yeral/ui/phone-input'
 import { SaveBar } from '@yeral/ui/save-bar'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { SettingsSection, SettingsSectionTitle } from '@yeral/ui/settings-layout'
 import { SettingsRow } from '@yeral/ui/settings-row'
 import { Spinner } from '@yeral/ui/spinner'
@@ -246,7 +246,7 @@ function NameRow({ profile }: { profile: ProfileFormState }) {
   return (
     <SettingsRow id={id} label={t('name')} description={t('nameCaption')} wide invalid={!!problem}>
       <Input
-        className="h-11"
+        size="m"
         value={profile.form.name}
         // twice the limit can be typed, so the counter and the error show what's too long (as the board does)
         maxLength={NAME_MAX * 2}
@@ -278,19 +278,11 @@ function CategoryRow({ profile }: { profile: ProfileFormState }) {
         className="w-full"
         value={profile.form.categoryId}
         disabled={profile.saving || !categories.data}
-        onChange={(e) => profile.set({ categoryId: e.target.value })}
-      >
-        {options.length ? (
-          options.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))
-        ) : (
-          // until the list loads: the one chosen, unnamed (the select waits)
-          <option value={profile.form.categoryId} />
-        )}
-      </Select>
+        // until the list loads: a spinner, the chosen one unnamed (the select waits)
+        loading={!categories.data}
+        onValueChange={(categoryId) => profile.set({ categoryId })}
+        options={options.map((c) => ({ value: c.id, label: c.name }))}
+      />
       <span className="text-dense text-n-600">
         {t.rich('settings.profile.noCategory', {
           brand: t('common.brand'),

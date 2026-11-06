@@ -9,7 +9,7 @@ import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { EmptyState } from '@yeral/ui/empty-state'
 import { Input } from '@yeral/ui/input'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { CalendarX2, Download, SearchX } from 'lucide-react'
@@ -21,6 +21,9 @@ import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import { rangeOf, type BookingsSearch, type BookingsTab, type BookingsWhen } from '../model/search'
 import { BookingsTable } from './bookings-table'
 import { RequestsTab } from './requests-tab'
+
+/** A filter's value for «All …», no search param. */
+const ALL = 'all'
 
 /**
  * The bookings list (B-Bookings, book B-30): the tabs Today · Upcoming · Past · Cancelled, the filters (search by client,
@@ -97,6 +100,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
     <>
       <div className="flex flex-wrap items-center gap-2">
         <Input
+          size="m"
           aria-label={t('search')}
           placeholder={t('search')}
           className="w-full sm:w-72"
@@ -105,47 +109,46 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
         />
         {!specialist && (
           <Select
-            size="s"
+            size="m"
             aria-label={t('staffFilter')}
             className="w-auto max-sm:hidden"
-            value={search.staff ?? ''}
-            onChange={(e) => go({ staff: e.target.value || undefined })}
-          >
-            <option value="">{t('allStaff')}</option>
-            {(people.data?.columns ?? []).map((c) => (
-              <option key={c.staffId} value={c.staffId}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
+            listWidth="content"
+            value={search.staff ?? ALL}
+            onValueChange={(v) => go({ staff: v === ALL ? undefined : v })}
+            options={[
+              { value: ALL, label: t('allStaff') },
+              ...(people.data?.columns ?? []).map((c) => ({ value: c.staffId, label: c.name })),
+            ]}
+          />
         )}
         <Select
-          size="s"
+          size="m"
           aria-label={t('serviceFilter')}
           className="w-auto max-sm:hidden"
-          value={search.service ?? ''}
-          onChange={(e) => go({ service: e.target.value || undefined })}
-        >
-          <option value="">{t('allServices')}</option>
-          {(menu.data?.groups ?? []).flatMap((g) =>
-            g.services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {localized(s.name, locale)}
-              </option>
-            )),
-          )}
-        </Select>
+          listWidth="content"
+          value={search.service ?? ALL}
+          onValueChange={(v) => go({ service: v === ALL ? undefined : v })}
+          options={[
+            { value: ALL, label: t('allServices') },
+            ...(menu.data?.groups ?? []).map((g) => ({
+              label: localized(g.name, locale),
+              options: g.services.map((s) => ({ value: s.id, label: localized(s.name, locale) })),
+            })),
+          ]}
+        />
         <Select
-          size="s"
+          size="m"
           aria-label={t('dateFilter')}
           className="w-auto max-sm:hidden"
-          value={search.when ?? ''}
-          onChange={(e) => go({ when: (e.target.value as BookingsWhen) || undefined })}
-        >
-          <option value="">{t('allTime')}</option>
-          <option value="today">{t('dateToday')}</option>
-          <option value="week">{t('dateWeek')}</option>
-        </Select>
+          listWidth="content"
+          value={search.when ?? ALL}
+          onValueChange={(v) => go({ when: v === ALL ? undefined : (v as BookingsWhen) })}
+          options={[
+            { value: ALL, label: t('allTime') },
+            { value: 'today', label: t('dateToday') },
+            { value: 'week', label: t('dateWeek') },
+          ]}
+        />
         {filtered && (
           <Button variant="ghost" size="s" onClick={clear}>
             {t('clear')}

@@ -8,7 +8,7 @@ import { Callout } from '@yeral/ui/callout'
 import { Input } from '@yeral/ui/input'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { toast } from '@yeral/ui/toast'
@@ -263,7 +263,8 @@ function MemberRow({
       <div className={COLUMNS}>
         <Input
           ref={nameRef}
-          className="h-11 text-small max-sm:text-[16px]"
+          size="m"
+          className="max-sm:text-[16px]"
           aria-label={t('nameOf', { n: index })}
           placeholder={t('name')}
           value={row.name}
@@ -272,7 +273,7 @@ function MemberRow({
           onChange={(e) => onChange({ name: e.target.value })}
         />
         <PhoneInput
-          size={44}
+          size={40}
           className="max-md:col-span-2 max-md:row-start-2"
           {...PHONE_RULES}
           aria-label={t('phoneOf', { name: who })}
@@ -288,11 +289,12 @@ function MemberRow({
           aria-label={t('levelOf', { name: who })}
           value={row.level}
           disabled={disabled}
-          onChange={(e) => onChange({ level: e.target.value === 'admin' ? 'admin' : 'specialist' })}
-        >
-          <option value="specialist">{t('specialist')}</option>
-          <option value="admin">{t('admin')}</option>
-        </Select>
+          onValueChange={(v) => onChange({ level: v === 'admin' ? 'admin' : 'specialist' })}
+          options={[
+            { value: 'specialist', label: t('specialist') },
+            { value: 'admin', label: t('admin') },
+          ]}
+        />
         <Button variant="ghost" size="m" iconOnly aria-label={t('remove', { name: who })} disabled={disabled} onClick={onRemove}>
           <X aria-hidden strokeWidth={1.75} />
         </Button>

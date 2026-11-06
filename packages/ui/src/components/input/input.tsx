@@ -15,6 +15,15 @@ export const inputClass = cn(
 
 type ControlProps = { invalid?: boolean }
 
+export type InputSize = 's' | 'm' | 'l'
+
+/** A3 Sizes (DS-Controls `.fld`): S 32 / r 8 / 13 · M 40 / r 10 / 14 · L 48 / r 12 / 16; L is the default. */
+export const inputSize: Record<InputSize, string> = {
+  s: 'h-8 rounded-ctl-s px-3 text-ctl-s',
+  m: 'h-10 rounded-ctl-m px-3 text-ctl-m',
+  l: 'h-12 rounded-ctl-l px-3.5 text-ctl-l',
+}
+
 function useControlProps(props: { id?: string; disabled?: boolean; invalid?: boolean; 'aria-describedby'?: string }) {
   const field = useField()
   return {
@@ -26,8 +35,13 @@ function useControlProps(props: { id?: string; disabled?: boolean; invalid?: boo
   }
 }
 
-export function Input({ className, invalid, ...props }: ComponentProps<'input'> & ControlProps) {
-  return <input {...props} {...useControlProps({ ...props, invalid })} className={cn(inputClass, 'h-12', className)} />
+export function Input({
+  className,
+  invalid,
+  size = 'l',
+  ...props
+}: Omit<ComponentProps<'input'>, 'size'> & ControlProps & { size?: InputSize }) {
+  return <input {...props} {...useControlProps({ ...props, invalid })} className={cn(inputClass, inputSize[size], className)} />
 }
 
 export function Textarea({ className, invalid, ...props }: ComponentProps<'textarea'> & ControlProps) {

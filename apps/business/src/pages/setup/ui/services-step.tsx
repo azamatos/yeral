@@ -6,7 +6,7 @@ import { Callout } from '@yeral/ui/callout'
 import { Checkbox } from '@yeral/ui/checkbox'
 import { Input } from '@yeral/ui/input'
 import { InputGroup } from '@yeral/ui/input-group'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
@@ -252,22 +252,18 @@ function Row({
         disabled={off}
         onChange={(e) => onChange({ name: e.target.value })}
         // B-Onboarding `.nm`: the field's line shows on hover and focus only
-        className="h-11 border-transparent px-2.5 text-small font-medium hover:border-n-300 focus:border-a-500 disabled:border-transparent disabled:bg-transparent disabled:text-n-500 max-md:col-[2/-1]"
+        size="m"
+        className="border-transparent px-2.5 font-medium hover:border-n-300 focus:border-a-500 disabled:border-transparent disabled:bg-transparent disabled:text-n-500 max-md:col-[2/-1]"
       />
       <Select
         size="m"
         aria-label={t('duration', { name })}
-        value={r.durationMin}
+        value={String(r.durationMin)}
         disabled={off}
-        onChange={(e) => onChange({ durationMin: Number(e.target.value) })}
+        onValueChange={(v) => onChange({ durationMin: Number(v) })}
         className="max-md:col-2"
-      >
-        {choicesWith<number>(DURATION_CHOICES, r.durationMin).map((m) => (
-          <option key={m} value={m}>
-            {fmt.duration(m)}
-          </option>
-        ))}
-      </Select>
+        options={choicesWith<number>(DURATION_CHOICES, r.durationMin).map((m) => ({ value: String(m), label: fmt.duration(m) }))}
+      />
       {settable ? (
         <span className="relative block min-w-0 max-md:col-3">
           {from && (

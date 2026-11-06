@@ -12,7 +12,7 @@ import { Field, FieldMessage, FieldScope } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { Modal, ModalActions, ModalClose, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { toast } from '@yeral/ui/toast'
 import { useId, useState } from 'react'
 import { useTranslations } from 'use-intl'
@@ -140,17 +140,16 @@ export function BlockTimeModal({
         <div className="flex flex-col gap-4">
           {specialist ? (
             <Field label={t('person')} hint={t('ownOnly')}>
-              <Input readOnly value={person?.name ?? ''} className="bg-n-50 text-small" />
+              <Input readOnly size="m" value={person?.name ?? ''} className="bg-n-50" />
             </Field>
           ) : (
             <Field label={t('person')}>
-              <Select value={form.staffId} onChange={(e) => change({ ...form, staffId: e.target.value })}>
-                {people.map((p) => (
-                  <option key={p.staffId} value={p.staffId}>
-                    {p.name}
-                  </option>
-                ))}
-              </Select>
+              <Select
+                value={form.staffId}
+                onValueChange={(staffId) => change({ ...form, staffId })}
+                options={people.map((p) => ({ value: p.staffId, label: p.name }))}
+                closeLabel={t('close')}
+              />
             </Field>
           )}
           <div role="group" aria-labelledby={`${id}-when`} className="flex flex-col gap-1.5">
@@ -180,32 +179,26 @@ export function BlockTimeModal({
               <Select
                 aria-label={t('from')}
                 aria-describedby={timeError ? `${id}-time` : undefined}
-                value={form.start}
+                value={String(form.start)}
                 invalid={!!timeError}
-                onChange={(e) => change(withStart(form, Number(e.target.value)))}
-              >
-                {options.starts.map((m) => (
-                  <option key={m} value={m}>
-                    {fmt.time(m)}
-                  </option>
-                ))}
-              </Select>
+                listWidth="content"
+                closeLabel={t('close')}
+                onValueChange={(v) => change(withStart(form, Number(v)))}
+                options={options.starts.map((m) => ({ value: String(m), label: fmt.time(m) }))}
+              />
               <span aria-hidden className="text-n-600">
                 {t('dash')}
               </span>
               <Select
                 aria-label={t('to')}
                 aria-describedby={timeError ? `${id}-time` : undefined}
-                value={form.end}
+                value={String(form.end)}
                 invalid={!!timeError}
-                onChange={(e) => change({ ...form, end: Number(e.target.value) })}
-              >
-                {options.ends.map((m) => (
-                  <option key={m} value={m}>
-                    {fmt.time(m)}
-                  </option>
-                ))}
-              </Select>
+                listWidth="content"
+                closeLabel={t('close')}
+                onValueChange={(v) => change({ ...form, end: Number(v) })}
+                options={options.ends.map((m) => ({ value: String(m), label: fmt.time(m) }))}
+              />
             </div>
             {timeError && (
               <FieldMessage id={`${id}-time`}>

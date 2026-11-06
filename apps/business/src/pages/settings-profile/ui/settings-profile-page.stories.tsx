@@ -213,7 +213,7 @@ export const Owner: Story = {
     await expect(await canvas.findByRole('textbox', { name: 'Business name' })).toHaveValue('Glow Studio')
     await expect(canvas.getByRole('heading', { level: 2, name: 'Business profile' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: /View your page/ })).toHaveAttribute('target', '_blank')
-    await waitFor(() => expect(canvas.getByRole('combobox', { name: 'Category' })).toHaveDisplayValue('Beauty'))
+    await waitFor(() => expect(canvas.getByRole('combobox', { name: 'Category' })).toHaveTextContent('Beauty'))
     await expect(canvas.getByRole('textbox', { name: 'About your business' })).toHaveValue(PROFILE.about.en)
     // the example follows the category: a salon's here, a dentist's on a dental clinic (the owner's #47)
     await waitFor(() =>
@@ -349,9 +349,9 @@ export const Address: Story = {
     await expect(within(section).getByRole('switch', { name: 'I work from home' })).toHaveAccessibleDescription(
       'Only clients with a confirmed booking see your exact address',
     )
-    // 44 high, as the rest of the page (B-Settings `.i44`)
-    await expect(street.getBoundingClientRect().height).toBe(44)
-    await expect(within(section).getByRole('textbox', { name: 'Floor, room' }).getBoundingClientRect().height).toBe(44)
+    // 40 high, as the rest of the page (A3 Sizes: business forms M)
+    await expect(street.getBoundingClientRect().height).toBe(40)
+    await expect(within(section).getByRole('textbox', { name: 'Floor, room' }).getBoundingClientRect().height).toBe(40)
     await expect(within(section).getByText(/Moved\?/)).toBeVisible()
     await expect(within(section).getByRole('link', { name: 'Create a business' })).toBeVisible()
     await userEvent.click(within(section).getByRole('switch', { name: 'I work from home' }))

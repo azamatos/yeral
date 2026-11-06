@@ -10,11 +10,19 @@ import type { Menu } from '@yeral/contract/services'
 import type { InternalStatus } from '@yeral/contract/settings'
 import type { TeamMember, Workspace } from '@yeral/contract/team'
 import { DEFAULT_RULES, type BookingRules } from '@yeral/domain/rules'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { SettingsRulesPage } from './settings-rules-page'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 const me: Me = {
   id: 'u-maysa',
@@ -201,7 +209,7 @@ export const Manual: Story = {
     const own = await canvas.findByText(/Set per service: Hair colouring — 15 min/)
     await expect(own).toBeVisible()
     await expect(within(own).getByRole('link', { name: 'Services' })).toHaveAttribute('href', '/w/glow-studio/settings/services')
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Hold requests for' }), '6 h')
+    await pick(canvas.getByRole('combobox', { name: 'Hold requests for' }), '6 h')
     // 14:40–19:00 today, the rest from 09:00 tomorrow
     await expect(await within(preview).findByText('The business answers by 10:40 tomorrow')).toBeVisible()
     await waitFor(() => expect(document.title).toBe('Booking rules · Settings · Glow Studio · Ýeral Business'))
@@ -228,14 +236,14 @@ export const SaveChanges: Story = {
 /** Discard puts the saved rules back and the bar goes; a buffer «Other…» out of range keeps Save off. */
 export const DiscardAndInvalid: Story = {
   play: async ({ canvas }) => {
-    await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Buffer' }), 'Other…')
+    await pick(await canvas.findByRole('combobox', { name: 'Buffer' }), 'Other…')
     const minutes = canvas.getByRole('textbox', { name: 'Buffer, minutes' })
     await userEvent.clear(minutes)
     await userEvent.type(minutes, '0')
     const bar = canvas.getByRole('region', { name: 'Unsaved changes' })
     await expect(within(bar).getByRole('button', { name: 'Save' })).toBeDisabled()
     await userEvent.click(within(bar).getByRole('button', { name: 'Discard' }))
-    await expect(canvas.getByRole('combobox', { name: 'Buffer' })).toHaveValue('10')
+    await expect(canvas.getByRole('combobox', { name: 'Buffer' })).toHaveTextContent('10 min')
     await expect(canvas.queryByRole('region', { name: 'Unsaved changes' })).toBeNull()
   },
 }
@@ -341,7 +349,7 @@ export const Laptop: Story = { globals: { viewport: { value: 'md' } } }
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
-    await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Minimum notice' }), 'No limit')
+    await pick(await canvas.findByRole('combobox', { name: 'Minimum notice' }), 'No limit')
     const bar = canvas.getByRole('region', { name: 'Unsaved changes' })
     const tabs = canvas.getByRole('link', { name: 'Calendar' }).getBoundingClientRect()
     await waitFor(() => expect(bar.getBoundingClientRect().bottom).toBeLessThanOrEqual(tabs.top))

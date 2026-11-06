@@ -9,7 +9,7 @@ import { Button } from '@yeral/ui/button'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { TagInput } from '@yeral/ui/tag-input'
 import { toast } from '@yeral/ui/toast'
 import { useState, type FormEvent } from 'react'
@@ -81,17 +81,15 @@ export function ClientEdit({ slug, card, today, onDone }: { slug: string; card: 
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={add('birthday')}>
-            <Input type="date" max={today} value={birthday} onChange={(e) => setBirthday(e.target.value)} />
+            <Input type="date" size="m" max={today} value={birthday} onChange={(e) => setBirthday(e.target.value)} />
           </Field>
           <Field label={add('source')}>
-            <Select value={source} onChange={(e) => setSource(e.target.value as ClientSource | '')}>
-              <option value="">{add('pick')}</option>
-              {CLIENT_SOURCES.map((value) => (
-                <option key={value} value={value}>
-                  {sources(value)}
-                </option>
-              ))}
-            </Select>
+            <Select
+              value={source || null}
+              placeholder={add('pick')}
+              onValueChange={(value) => setSource(value as ClientSource)}
+              options={CLIENT_SOURCES.map((value) => ({ value, label: sources(value) }))}
+            />
           </Field>
         </div>
         <TagInput

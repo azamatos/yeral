@@ -166,7 +166,7 @@ export function ComboboxInput({
       <Search
         aria-hidden
         strokeWidth={1.75}
-        className={cn('pointer-events-none absolute left-3.5 size-4.5 text-n-600', size === 'm' ? 'top-3.25' : 'top-3.75')}
+        className={cn('pointer-events-none absolute left-3.5 size-4.5 text-n-600', size === 'm' ? 'top-2.75' : 'top-3.75')}
       />
       <Input
         type="search"
@@ -190,7 +190,7 @@ export function ComboboxInput({
           onBlur?.(e)
           s.focus(false)
         }}
-        className={cn(size === 'm' ? 'h-11 pl-10 text-small' : 'pl-10.5', className)}
+        className={cn(size === 'm' ? 'h-10 pl-10 text-ctl-m' : 'pl-10.5', className)}
       />
     </div>
   )

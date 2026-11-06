@@ -16,7 +16,7 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
@@ -445,14 +445,13 @@ function MemberEditor({
                     value={form.level}
                     disabled={!owner || saving}
                     // an administrator always uses the app (B-Team `needsApp`)
-                    onChange={(e) => change(e.target.value === 'admin' ? { level: 'admin', app: true } : { level: 'specialist' })}
-                  >
-                    <option value="specialist">{levels('specialist')}</option>
-                    {/* an administrator always uses the app: they become one once they do */}
-                    <option value="admin" disabled={!m.hasApp}>
-                      {levels('admin')}
-                    </option>
-                  </Select>
+                    onValueChange={(v) => change(v === 'admin' ? { level: 'admin', app: true } : { level: 'specialist' })}
+                    options={[
+                      { value: 'specialist', label: levels('specialist') },
+                      // an administrator always uses the app: they become one once they do
+                      { value: 'admin', label: levels('admin'), disabled: !m.hasApp },
+                    ]}
+                  />
                 </Field>
                 <p className="m-0 -mt-2 flex items-start gap-2 rounded-s bg-group px-3 py-2.5 text-dense text-n-600">
                   <Info aria-hidden className="mt-px size-4 flex-none" strokeWidth={1.75} />

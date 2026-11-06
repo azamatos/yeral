@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent } from 'storybook/test'
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 import { json, PageStory, pathOf } from '@/shared/storybook'
 import { AddBusinessPage } from './add-business-page'
 
@@ -36,7 +36,9 @@ type Story = StoryObj<typeof meta>
 
 const fill = async (canvas: Parameters<NonNullable<Story['play']>>[0]['canvas']) => {
   await userEvent.type(await canvas.findByLabelText('Business name'), 'Glow Studio')
-  await userEvent.selectOptions(canvas.getByLabelText('Category'), await canvas.findByRole('option', { name: 'Beauty' }))
+  await userEvent.click(canvas.getByLabelText('Category'))
+  await userEvent.click(await within(await screen.findByRole('listbox')).findByRole('option', { name: 'Beauty' }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
   await userEvent.type(canvas.getByLabelText("Owner's name"), 'Aýna')
 }
 

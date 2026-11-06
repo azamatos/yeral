@@ -1,4 +1,4 @@
-export { MultiSelect, NativeSelect, Select, selectTriggerClass, selectTriggerSize, type MultiSelectProps, type SelectProps } from './select'
+export { MultiSelect, Select, selectTriggerClass, selectTriggerSize, type MultiSelectProps, type SelectProps } from './select'
 export {
   fieldLabelText,
   flatOptions,

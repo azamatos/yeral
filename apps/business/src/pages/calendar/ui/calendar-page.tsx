@@ -13,7 +13,7 @@ import { DatePicker } from '@yeral/ui/date-picker'
 import { cn } from '@yeral/ui/cn'
 import { Pill, pillVariants } from '@yeral/ui/pill'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { ChevronLeft, ChevronRight, Clock, Plus } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
@@ -197,18 +197,14 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           )}
           {!specialist && oneOnly && phoneStaff && (
             <Select
-              size="s"
+              size="m"
               aria-label={t('specialist')}
               className="w-auto max-sm:hidden"
+              listWidth="content"
               value={phoneStaff}
-              onChange={(e) => go({ staff: e.target.value }, true)}
-            >
-              {columns.map((c) => (
-                <option key={c.staffId} value={c.staffId}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
+              onValueChange={(staff) => go({ staff }, true)}
+              options={columns.map((c) => ({ value: c.staffId, label: c.name }))}
+            />
           )}
           <span className="flex-1" />
           {first ? (

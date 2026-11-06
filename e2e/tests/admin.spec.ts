@@ -105,7 +105,8 @@ test('the team adds a business for an owner it has met', async ({ page }) => {
 
   await page.getByRole('link', { name: 'Add a business' }).click()
   await page.getByLabel('Business name').fill('A place the team met')
-  await page.getByLabel('Category').selectOption({ index: 1 })
+  await page.getByLabel('Category').click()
+  await page.getByRole('listbox').getByRole('option').first().click()
   await page.getByLabel("Owner's name").fill('Aýgül')
   await page.getByLabel("Owner's mobile").fill(freshPhone())
   await page.getByRole('button', { name: 'Add the business' }).click()

@@ -27,7 +27,7 @@ export const Suffix: Story = {
     await expect(input).toHaveAccessibleDescription('TMT')
     await expect(input).toHaveValue('250')
     await expect(input).toHaveStyle({ textAlign: 'right' })
-    await expect(input.offsetHeight).toBe(44)
+    await expect(input.offsetHeight).toBe(40)
     await userEvent.clear(input)
     await userEvent.type(input, '80')
     await expect(input).toHaveValue('80')

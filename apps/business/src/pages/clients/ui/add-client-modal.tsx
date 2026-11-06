@@ -8,7 +8,7 @@ import { Field } from '@yeral/ui/field'
 import { Input, Textarea } from '@yeral/ui/input'
 import { Modal, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { TagInput } from '@yeral/ui/tag-input'
 import { toast } from '@yeral/ui/toast'
 import { useState } from 'react'
@@ -93,17 +93,15 @@ export function AddClientModal({
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t('birthday')}>
-            <Input type="date" max={today} value={birthday} onChange={(e) => setBirthday(e.target.value)} />
+            <Input type="date" size="m" max={today} value={birthday} onChange={(e) => setBirthday(e.target.value)} />
           </Field>
           <Field label={t('source')}>
-            <Select value={source} onChange={(e) => setSource(e.target.value as ClientSource | '')}>
-              <option value="">{t('pick')}</option>
-              {CLIENT_SOURCES.map((value) => (
-                <option key={value} value={value}>
-                  {sources(value)}
-                </option>
-              ))}
-            </Select>
+            <Select
+              value={source || null}
+              placeholder={t('pick')}
+              onValueChange={(value) => setSource(value as ClientSource)}
+              options={CLIENT_SOURCES.map((value) => ({ value, label: sources(value) }))}
+            />
           </Field>
         </div>
         <TagInput

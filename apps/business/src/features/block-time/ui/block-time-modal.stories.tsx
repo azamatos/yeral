@@ -6,9 +6,17 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { addDays, today } from '@yeral/domain/time'
 import { useState } from 'react'
-import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { BlockTimeModal } from './block-time-modal'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 const now = Date.now()
 const TOMORROW = addDays(today(now), 1)
@@ -85,10 +93,10 @@ const asked = () => page.getByTestId('asked')
 export const Default: Story = {
   play: async () => {
     const d = await dialog()
-    await expect(d.getByRole('combobox', { name: 'Person' })).toHaveValue(id(2))
+    await expect(d.getByRole('combobox', { name: 'Person' })).toHaveTextContent('Maral')
     await expect(d.getByRole('button', { name: /^Date and time / })).toBeVisible()
-    await expect(d.getByRole('combobox', { name: 'From' })).toHaveValue('870')
-    await expect(d.getByRole('combobox', { name: 'To' })).toHaveValue('930')
+    await expect(d.getByRole('combobox', { name: 'From' })).toHaveTextContent('14:30')
+    await expect(d.getByRole('combobox', { name: 'To' })).toHaveTextContent('15:30')
     const submit = d.getByRole('button', { name: 'Block time' })
     await expect(submit).toBeDisabled()
     await userEvent.click(d.getByRole('radio', { name: 'Other' }))
@@ -98,8 +106,8 @@ export const Default: Story = {
     await userEvent.type(words, 'Dentist')
     await expect(submit).toBeEnabled()
     // From moved past To: To follows
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'From' }), '960')
-    await expect(d.getByRole('combobox', { name: 'To' })).toHaveValue('975')
+    await pick(d.getByRole('combobox', { name: 'From' }), '16:00')
+    await expect(d.getByRole('combobox', { name: 'To' })).toHaveTextContent('16:15')
     await userEvent.click(submit)
     await expect(await page.findByText('Time blocked: Maral · 16:00–16:15 · Dentist')).toBeInTheDocument()
     await expect(asked()).toHaveTextContent('closed')
@@ -135,7 +143,7 @@ export const Overlap: Story = {
     )
     await expect(d.getByRole('button', { name: 'Block time' })).toBeDisabled()
     // another time clears it
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'To' }), '900')
+    await pick(d.getByRole('combobox', { name: 'To' }), '15:00')
     await expect(d.queryByRole('alert')).toBeNull()
     await userEvent.click(d.getByRole('button', { name: 'Block time' }))
     await userEvent.click(within(await d.findByRole('alert')).getByRole('button', { name: 'Open the booking' }))
@@ -149,8 +157,8 @@ export const Problems: Story = {
   play: async () => {
     const d = await dialog()
     await expect(d.getByRole('alert')).toHaveTextContent(/^This time has passed — pick a time from \d\d:\d\d\.$/)
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'From' }), '1200')
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'To' }), '1185')
+    await pick(d.getByRole('combobox', { name: 'From' }), '20:00')
+    await pick(d.getByRole('combobox', { name: 'To' }), '19:45')
     await expect(d.getByRole('alert')).toHaveTextContent('The end must be after the start.')
   },
 }

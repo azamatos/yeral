@@ -3,10 +3,18 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BusinessCard, Category } from '@yeral/contract/catalog'
 import { today } from '@yeral/domain/time'
 import { useSearch } from '@tanstack/react-router'
-import { expect, screen as page, userEvent, waitFor } from 'storybook/test'
+import { expect, screen, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
 import { SiteLayout } from '@/widgets/site-layout'
 import { HomePage } from './home-page'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 function Home() {
   return (
@@ -126,7 +134,7 @@ export const SearchFromHome: Story = {
     await userEvent.type(await canvas.findByRole('textbox', { name: 'What?' }), 'haircut')
     await userEvent.click(canvas.getByRole('combobox', { name: 'Where?' }))
     await userEvent.click(await canvas.findByRole('option', { name: 'Mary' }))
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'When?' }), 'Tomorrow')
+    await pick(canvas.getByRole('combobox', { name: 'When?' }), 'Tomorrow')
     await userEvent.click(canvas.getByRole('button', { name: 'Show free times' }))
     await expect(await canvas.findByText('Search: {"what":"haircut","city":"mary","day":"tomorrow"}')).toBeVisible()
   },

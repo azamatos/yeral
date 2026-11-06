@@ -7,11 +7,19 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { TeamMember, Workspace } from '@yeral/contract/team'
 import { addDays, today } from '@yeral/domain/time'
-import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, spyOn, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory, pickDate } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { SettingsTeamPage } from './settings-team-page'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 /** Types a time into a time field (design v0.7 · A2) and commits it with Enter. */
 async function typeTime(field: HTMLElement, time: string) {
@@ -526,7 +534,7 @@ export const AddProblems: Story = {
     await userEvent.click(dialog.getByRole('switch', { name: 'Uses the app' }))
     await expect(await dialog.findByText('This person was removed from the team — reactivate them in Team instead.')).toBeVisible()
     // an administrator always uses the app: no switch, the note says so
-    await userEvent.selectOptions(dialog.getByLabelText('Access level'), 'admin')
+    await pick(dialog.getByLabelText('Access level'), 'Admin')
     await expect(dialog.queryByRole('switch', { name: 'Uses the app' })).toBeNull()
     await expect(dialog.getByText('Manages the whole calendar and all clients; doesn’t see revenue.')).toBeVisible()
   },
@@ -577,7 +585,10 @@ export const DrawerNoApp: Story = {
     await expect(drawer.getByText(/^They’ll see the invite when they sign in with \+993 65 •• •• 22 · until/)).toBeVisible()
     await expect(drawer.getByRole('button', { name: 'Copy invite link' })).toBeVisible()
     // an administrator always uses the app: Leýli can become one once she does
-    await expect(drawer.getByRole('option', { name: 'Admin' })).toBeDisabled()
+    await userEvent.click(drawer.getByRole('combobox', { name: 'Access level' }))
+    await expect(within(await body.findByRole('listbox')).getByRole('option', { name: 'Admin' })).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument())
     await userEvent.click(drawer.getByRole('switch', { name: 'Uses the app' }))
     await expect(drawer.getByText('Saving cancels the invite. Leýli keeps working without the app.')).toBeVisible()
     await expect(drawer.getByText(/Leýli’s requests go to you and the admins/)).toBeVisible()
@@ -651,11 +662,11 @@ export const RemoveWithBookings: Story = {
     await userEvent.click(modal.getByRole('button', { name: 'Remove Maral' }))
     // the api lists the bookings ahead: moving is picked, to the colleague who does manicures
     await expect(await modal.findByRole('radio', { name: 'Move to another specialist' })).toBeChecked()
-    await expect(modal.getByRole('combobox', { name: 'To' })).toHaveDisplayValue('Leýli Berdiýewa')
+    await expect(modal.getByRole('combobox', { name: 'To' })).toHaveTextContent('Leýli Berdiýewa')
     await expect(modal.getByText('2 bookings')).toBeVisible()
     await expect(modal.getByText('Nobody else does Gel polish')).toBeVisible()
     await expect(modal.getByText('Moves to Leýli Berdiýewa')).toBeVisible()
-    await userEvent.selectOptions(modal.getByRole('combobox', { name: /^Mähri G\., .*: what happens$/ }), 'cancel')
+    await pick(modal.getByRole('combobox', { name: /^Mähri G\., .*: what happens$/ }), /^Cancel and offer/)
     await userEvent.click(modal.getByRole('button', { name: 'Remove Maral' }))
     const done = await body.findByText(
       'Maral removed from the team · 1 moved to Leýli Berdiýewa, 1 cancelled with 3 other times offered · the clients are notified',

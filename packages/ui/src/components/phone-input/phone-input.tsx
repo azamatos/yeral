@@ -9,7 +9,7 @@ type Common = {
   /** The market's country code, shown in its own box: «+993» (`COUNTRY_PREFIX` in @yeral/domain/phone). */
   prefix: string
   /** 48 (default: login, booking, forms) or 44 (dense business panels: new booking, team, settings). */
-  size?: 48 | 44
+  size?: 48 | 44 | 40
   className?: string
 }
 
@@ -41,7 +41,7 @@ type MaskedProps = Common & {
 export type PhoneInputProps = EditableProps | MaskedProps
 
 const prefixBox = addonClass
-const heights = { 48: 'h-12 text-body', 44: 'h-11 text-small' }
+const heights = { 48: 'h-12 text-body', 44: 'h-11 text-small', 40: 'h-10 text-ctl-m' }
 
 /**
  * Phone number (DS-Patterns → 05 Inputs, the sign-in phone step): the country code in a fixed n-50 box + the

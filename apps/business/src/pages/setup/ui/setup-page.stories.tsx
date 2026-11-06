@@ -10,9 +10,17 @@ import type { Menu } from '@yeral/contract/services'
 import type { SetupServices } from '@yeral/contract/setup'
 import type { TeamMember, Workspace } from '@yeral/contract/team'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 import { LAUNCH_CATEGORIES, PageStory } from '@/shared/storybook'
 import { SetupPage } from './setup-page'
+
+/** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await screen.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+}
 
 /** Types a time into a time field (design v0.7 · A2) and commits it with Enter. */
 async function typeTime(field: HTMLElement, time: string) {
@@ -879,7 +887,7 @@ export const Services: Story = {
     const haircut = canvas.getByRole('textbox', { name: 'Service name: Women’s haircut' })
     await userEvent.clear(haircut)
     await userEvent.type(haircut, 'Haircut')
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Haircut: duration' }), '45')
+    await pick(canvas.getByRole('combobox', { name: 'Haircut: duration' }), '45 min')
     await userEvent.click(canvas.getByRole('button', { name: 'Add service' }))
     const ownGroup = canvas.getByRole('textbox', { name: 'Group name: New services' })
     await expect(ownGroup).toHaveValue('New services')
@@ -940,7 +948,7 @@ export const ServicesOwn: Story = {
     await expect(canvas.getByText(/There’s no ready list for this category yet/)).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('Pick at least one service.')
     await userEvent.click(canvas.getByRole('button', { name: 'Add service' }))
-    await expect(canvas.getByRole('combobox', { name: 'New service: duration' })).toHaveValue('60')
+    await expect(canvas.getByRole('combobox', { name: 'New service: duration' })).toHaveTextContent('60 min')
   },
 }
 
@@ -992,7 +1000,7 @@ export const TeamProblems: Story = {
     await expect(cont).toBeEnabled()
     await userEvent.click(within(arslan).getByRole('switch', { name: 'Uses the app' }))
     await expect(within(arslan).getByText(/Bookable at once, never signs in/)).toBeVisible()
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Arslan: access level' }), 'Admin')
+    await pick(canvas.getByRole('combobox', { name: 'Arslan: access level' }), 'Admin')
     await expect(within(arslan).queryByRole('switch')).toBeNull()
     await expect(within(arslan).getByText(/They’ll see the invite/)).toBeVisible()
     await userEvent.clear(phone)
@@ -1034,13 +1042,13 @@ export const Rules: Story = {
     const manual = canvas.getByRole('radio', { name: /I confirm/ })
     await expect(manual).toHaveAttribute('aria-checked', 'true')
     await expect(manual).toHaveAccessibleName(/Recommended/)
-    await expect(canvas.getByRole('combobox', { name: 'Hold requests for' })).toHaveValue('30')
+    await expect(canvas.getByRole('combobox', { name: 'Hold requests for' })).toHaveTextContent('30 min')
     await expect(canvas.queryByRole('radiogroup', { name: 'Who answers requests?' })).toBeNull()
     await userEvent.click(canvas.getByRole('radio', { name: /Instant confirmation/ }))
     await expect(canvas.queryByRole('combobox', { name: 'Hold requests for' })).toBeNull()
     await expect(canvas.getByText(/Block the times you’re busy in the calendar/)).toBeVisible()
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Clients can cancel for free' }), 'Any time')
-    await expect(canvas.getByRole('combobox', { name: 'Buffer' })).toHaveValue('10')
+    await pick(canvas.getByRole('combobox', { name: 'Clients can cancel for free' }), 'Any time')
+    await expect(canvas.getByRole('combobox', { name: 'Buffer' })).toHaveTextContent('10 min')
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio is ready!' })).toBeVisible()
     await expect(rulesSaved).toEqual([{ confirmMode: 'instant', cancelWindowMinutes: null }])

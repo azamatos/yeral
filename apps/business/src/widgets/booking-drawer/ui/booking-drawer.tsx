@@ -13,7 +13,7 @@ import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { KeyValueList } from '@yeral/ui/key-value'
 import { Quote } from '@yeral/ui/quote'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { toast } from '@yeral/ui/toast'
@@ -245,6 +245,9 @@ function SourceLine({ booking: b }: { booking: CalendarBooking }) {
  * own stays offered, off, if it was switched off since); nothing when the workspace has none on. A change saves at
  * once, and the toast's Undo puts the one before back.
  */
+/** The select's value for «None», no internal status. */
+const NONE = 'none'
+
 function InternalStatusField({ slug, booking: b, statuses }: { slug: string; booking: CalendarBooking; statuses: InternalStatus[] }) {
   const t = useTranslations('bookingDrawer.booking')
   const sdk = useSdk()
@@ -284,14 +287,13 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
   if (!offered.length) return null
   return (
     <Field label={t('internalStatus')} hint={t('internalStatusCaption')}>
-      <Select size="m" className="max-w-60" value={value ?? ''} onChange={(e) => change(e.target.value || null, false)}>
-        <option value="">{t('none')}</option>
-        {offered.map((s) => (
-          <option key={s.id} value={s.id} disabled={!s.enabled}>
-            {name(s)}
-          </option>
-        ))}
-      </Select>
+      <Select
+        size="m"
+        className="max-w-60"
+        value={value ?? NONE}
+        onValueChange={(v) => change(v === NONE ? null : v, false)}
+        options={[{ value: NONE, label: t('none') }, ...offered.map((s) => ({ value: s.id, label: name(s), disabled: !s.enabled }))]}
+      />
     </Field>
   )
 }

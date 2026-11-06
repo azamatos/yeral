@@ -13,7 +13,7 @@ import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { Modal, ModalActions, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { PhoneInput } from '@yeral/ui/phone-input'
-import { NativeSelect as Select } from '@yeral/ui/select'
+import { Select } from '@yeral/ui/select'
 import { Switch } from '@yeral/ui/switch'
 import { toast } from '@yeral/ui/toast'
 import { cn } from '@yeral/ui/cn'
@@ -267,10 +267,14 @@ function AddMemberSteps({
               />
             </Field>
             <Field label={t('level')}>
-              <Select value={form.level} onChange={(e) => change({ level: e.target.value === 'admin' ? 'admin' : 'specialist' })}>
-                <option value="specialist">{levels('specialist')}</option>
-                <option value="admin">{levels('admin')}</option>
-              </Select>
+              <Select
+                value={form.level}
+                onValueChange={(v) => change({ level: v === 'admin' ? 'admin' : 'specialist' })}
+                options={[
+                  { value: 'specialist', label: levels('specialist') },
+                  { value: 'admin', label: levels('admin') },
+                ]}
+              />
             </Field>
             <p className="m-0 -mt-2 flex items-start gap-2 rounded-s bg-group px-3 py-2.5 text-dense text-n-600">
               <Info aria-hidden className="mt-px size-4 flex-none" strokeWidth={1.75} />
