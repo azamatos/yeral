@@ -375,3 +375,7 @@ Round 7 fixes patterns, not code: the code followed the drawn pattern and the pa
 - B9 · **Permissions matrix:** three equal columns Owner · Admin · Specialist, rows 48, cells ✓ / — / "Own" / "View" chips only, footnotes 1–4 under the table, an ⓘ per row says what the action covers; 390 one card per action. Admin = View on "Shifts and time off" and "Manage the team".
 - Out of scope, noted for the code: the Ýeral admin tool needs Superadmin / Admin roles and login + password then the authenticator code (owner's readme items 1 and 24).
 
+### 29.3 Client-site decisions that touch the business (round 7.3)
+- **Trusted client:** an automatic tag (green, shield-check) first among the client's tags, in the Tag filter's Automatic group, on the client card head and in the drawer client card; the business sees only the mark, not visits elsewhere. New Booking rules setting "Confirm trusted clients at once" — only for businesses that confirm by hand, off by default. Full rule in `README.md` §15 (7.3).
+- **Confirmation callout on the business page** follows the business's setting (by hand: clock + "confirms bookings by hand · Usually within 15 minutes"; instant: zap + "Bookings are confirmed at once").
+- **Something changed:** after the business changes its address (or hours), clients who visited before see a notice on the confirm step and tick "I've seen the new address".

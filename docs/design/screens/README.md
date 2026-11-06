@@ -1,9 +1,19 @@
 # Screens index
 
-Hi-fi screens exported from the "Ýeral Web" canvas (export **v0.7 round 7.2**, 06.11.2026 — see `../CHANGELOG.md`). English: the design-system boards and the **whole business app** (spec `../business/README.md` §27–28). Still Turkmen until rounds 4a–4b: the client screens. The first release has one language (English). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
+Hi-fi screens exported from the "Ýeral Web" canvas (export **v0.7 round 7.3**, 06.11.2026 — see `../CHANGELOG.md`). English: the design-system boards and the **whole business app** (spec `../business/README.md` §27–28). Still Turkmen until rounds 4a–4b: the client screens. The first release has one language (English). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
 Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to 360); boards are fixed sheets.
 
 ## client/ — yeral.app
+
+**Round 7 boards first (v0.7, English, fixed boards 1600 wide with 1440 / 390 frames).** The older client pages below are still Turkmen; where they differ, these win:
+
+| File | Replaces | Kind · frame | What |
+|---|---|---|---|
+| `C7-Home.dc.html` | Home hero search, the Search header and results toolbar, Mobile search | board · 1600×12654 | C1 — SearchBar What · Where · When with real fields, suggestion panels (categories / services / businesses; Near me, districts, cities; When as chips + calendar + time of day), location off, nothing found, 390 search card + full-screen sheet; results toolbar at M 40 with the day kept in the SearchBar |
+| `C7-Venue.dc.html` | Venue (business page), Mobile business page | board · 1600×18830 | C2 — hero cover with the name, rating, StatusPill, address, favourite and share on the photo; 390 cover that folds into a 56 px bar (3 states + motion spec); tabs as panels (Services · Specialists · Reviews · About); hours shown once; confirmation callout per business; C3 — 100 services: group index / chip rail + Groups sheet, search, one Book per row; D — Follow (later idea) |
+| `C7-Booking.dc.html` | Booking (appointment flow), Account-Profile, Mobile booking | board · 1600×23879 | C4 — start from a service (→ Specialist) or a specialist (→ their services), auto-advance, Time with Continue, summary card + Add a service, confirm step with a bigger business block, inline Telegram code and a Verified phone; D — Something changed notice; Trusted client (account + business-side close-ups) |
+
+Older pages (Turkmen):
 
 | File | Route | Kind · frame | States / tweaks |
 |---|---|---|---|
@@ -27,7 +37,7 @@ Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to
 
 | File | Replaces | Kind · frame | What |
 |---|---|---|---|
-| `B7-Hours.dc.html` | hours in B-Settings, B-Team › Hours, Special day, B-Mobile | board · 1600×10990 | B1 — a day as times on one line (breaks are gaps), Add break / remove, Copy Monday, errors, own shift vs business hours, Admin read-only, special day, 390, before/after |
+| `B7-Hours.dc.html` | hours in B-Settings, B-Team › Hours, Special day, B-Mobile | board · 1600×10998 | B1 — a day as times on one line (breaks are gaps), Add break / remove, Copy Monday, errors, own shift vs business hours, Admin read-only, special day, 390, before/after |
 | `B7-Calendar.dc.html` | B-Calendar toolbar and week views, B-Mobile calendar | board · 1600×14801 | B2 — one M toolbar (DateNav with Today, Day · Week, PeoplePicker, Filters with Show cancelled and the legend, Requests, New booking) at 1440 / 1024 / 390; B3 — readable one-person week (time, client, service; 15-min blocks; hover card) and the team week matrix |
 | `B7-Booking.dc.html` | B-Calendar drawer and New booking, B-Mobile sheets | board · 1600×11992 | B4 — drawer with status + source badges, ⓘ, one client card (name link, copy, facts, Call = Book again), footers per status, 390 sheet; B7 — client combobox (five Jahans, digits, new client), services (Jeren's / All, search, grouped), 390 |
 | `B7-Clients.dc.html` | B-Clients, B-Client, B-Mobile frames | board · 1600×18321 | B5 — clients list at scale (segments, FilterBar, sortable table, Show 25 more, empty / no results, specialist view, 1024, 390); B6 — client card (copy + Call, tags in place, labelled facts, NoteRow, History with Show more, Delete as Danger quiet, 390) |

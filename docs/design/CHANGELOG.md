@@ -4,12 +4,36 @@ Newest first. Each export replaces this folder; this file says what changed and 
 
 ---
 
+## v0.7 · round 7.3 — 06.11.2026 · client site (C1–C4, D) · round 7 complete
+
+**Round 7 = 7.1 foundations + 7.2 business screens + 7.3 client site.** The three "To do in the repo" lists (this entry and the two below) together have one line per item of the round-7 prompt: A1–A11, B1–B10, C1–C4 and D. Decisions: `README.md` §15 (all parts) and `business/README.md` §29.
+
+Three new English boards redraw the client-site screens the owner flagged, on the 7.1 foundations, on a new canvas page **"Client · round 7"** and in `screens/client/C7-*.dc.html`. The older client boards are still Turkmen; they keep what these don't redraw.
+
+**New boards** (`screens/client/`, fixed boards 1600 wide with 1440 / 390 frames)
+- `C7-Home.dc.html` (1600 × 12654) — C1: one SearchBar (What · Where · When) with real fields, suggestion panels under the bar (never over the button), When as chips + calendar + time of day instead of a select, location off, nothing found; 390 search card that opens a full-screen search; the results toolbar at M 40 with the day kept in the SearchBar.
+- `C7-Venue.dc.html` (1600 × 18830) — C2: the business page hero as a cover with the identity on the photo (name, rating, StatusPill, address, favourite, share), breadcrumbs with the category link, hours shown once (in About), the confirmation callout per business setting; the 390 cover that folds into a 56 px bar with a motion spec; Services · Specialists · Reviews · About as panels with no layout jump; C3: 100 services with a group index / chip rail + Groups sheet, search, one Book per row; D: Follow (later, idea only).
+- `C7-Booking.dc.html` (1600 × 23879) — C4: the flow starts from a service (→ specialist) or from a specialist (→ their services), single picks move on by themselves, Time keeps Continue, a second service comes from the summary ("Add a service"), the summary card's hierarchy (Clear as Tertiary S, Total, Pay at the place), the confirm step with a bigger business block, the Telegram code inline and a Verified phone; D: the "Something changed" notice (tick before Confirm), the Trusted client mark (client account + the client row, card and drawer on the business side).
+
+**Changed:** DS-Lists' "Where the filter bar is used" now says the client results' When lives in the header SearchBar.
+
+### To do in the repo (7.3 — one line per item)
+- **C1 Home search** — build `SearchBar` (What · Where · When segments, focus pill, suggestions panel with categories / services / businesses, Near me + districts + cities, location-off callout, WhenPicker chips + calendar + time of day), the compact header variant, the 390 SearchCard + full-screen SearchSheet, and the no-results page with "Search further away"; drop the native When select.
+- **C2 Business page** — `BusinessHero` cover (name, rating link, StatusPill, address, glass Favourite / Share, thumbnails → All photos), breadcrumbs with the category link to `/c/{category}`, 390 `CoverCollapse` (scroll-linked, transform/opacity, reduced-motion swap), `BusinessTabs` as panels (`?tab=`, no layout jump, state kept), hours only in About, the booking card callout per confirmation setting (by hand / at once); remove the Example badge and the "not a real business" notice.
+- **C3 Services at scale** — `ServicesBrowser`: sticky GroupIndex at ≥ 1280, chip rail + Groups sheet below, service search from 9 services, group headers with counts, one Book per row that opens the booking on the Specialist step.
+- **C4 Booking steps** — start from a service (Specialist step) or a specialist (their services with a done step), auto-advance on single picks, Continue only on Time, "Add a service" from the summary, the new `BookingSummary` hierarchy, the confirm step's BusinessBlock, inline Telegram code and VerifiedPhone, "Booking sent" / "Booking confirmed"; results toolbar at M 40 with the day in the SearchBar.
+- **D Trusted client** — rule (5+ completed visits on Ýeral, no no-show in 12 months), `TrustedBadge` in Account, the automatic tag on the business side (row, card, drawer, Tag filter), and the Booking rules setting "Confirm trusted clients at once" (off by default).
+- **D Something changed** — store the address / hours change date; on the confirm step show `ChangedNotice` to clients whose last completed visit was before it; require "I've seen the new address" before Confirm.
+- **D Follow (plan only)** — add to the product plan: Follow on the business page and an Updates list for followed places' news and offers; decide how it relates to Favourites before building.
+
+---
+
 ## v0.7 · round 7.2 — 06.11.2026 · business screens (B1–B9)
 
 Five new boards redraw the business screens the owner flagged, on the 7.1 foundations, at real scale (21 people with 19 specialists, 100 clients with five Jahans, 100 services in 15 groups, ~300 bookings a week). They live on a new canvas page **"Business · round 7"** and in `screens/business/B7-*.dc.html`; the older business pages keep everything they don't redraw (their canvas titles point to the round-7 board). Rules: `business/README.md` §29.2; components: `COMPONENTS.md` Part 0 (7.2 table); copy: `copy/EN-GLOSSARY.md` §8.
 
 **New boards** (`screens/business/`, fixed boards 1600 wide with 1440 / 1024 / 390 frames)
-- `B7-Hours.dc.html` (1600 × 10990) — B1: a day is a list of times on one line; a break is the gap between two times (no Break row); Add break / Remove the break, Copy Monday to all days, errors on the row; a specialist's Business hours · Own shift; Admin read-only; Special day; 390; before/after.
+- `B7-Hours.dc.html` (1600 × 10998) — B1: a day is a list of times on one line; a break is the gap between two times (no Break row); Add break / Remove the break, Copy Monday to all days, errors on the row; a specialist's Business hours · Own shift; Admin read-only; Special day; 390; before/after.
 - `B7-Calendar.dc.html` (1600 × 14801) — B2: one M toolbar (DateNav with a compact Today, Day · Week, one PeoplePicker, Filters with Show cancelled and the colour legend, Requests with a count, New booking as the only primary) at 1440 / 1024 / 390; B3: the one-person week with time, client and service in every block (15-min blocks too) and a hover card; the team week as one timeline row per person.
 - `B7-Booking.dc.html` (1600 × 11992) — B4: the drawer with the status and the source as equal badges ("Booked by phone" = the team added it after a call), ⓘ for internal status and note, one client card (name = link, phone + copy, facts, Call and Book again as two equal buttons), footers per status, 390 sheet; B7: New booking with one client combobox (names or digits, five Jahans told apart, + New client "ja") and services by "Jeren's services · All services" + search + groups.
 - `B7-Clients.dc.html` (1600 × 18321) — B5: the clients list (segments with counts, FilterBar, sortable one-line table, copy next to the number, one New booking icon, Show 25 more that never jumps, empty / no results, specialist view, 1024, 390); B6: the client card (copy + Call + New booking, tags in place, labelled facts, alert note as a NoteRow, History with Show more, Delete client as Danger quiet, 390).
