@@ -48,6 +48,7 @@ function Segment({
   icon,
   children,
   className,
+  trailing,
   ...props
 }: {
   on: boolean
@@ -56,6 +57,8 @@ function Segment({
   children: ReactNode
   className?: string
   ref?: Ref<HTMLDivElement>
+  /** After the column: the × that clears the segment. */
+  trailing?: ReactNode
 }) {
   return (
     <div
@@ -71,12 +74,15 @@ function Segment({
     >
       <span className={cn('flex-none [&>svg]:size-5', on ? 'text-n-900' : 'text-n-600')}>{icon}</span>
       <span className="flex min-w-0 flex-1 flex-col">{children}</span>
+      {trailing}
     </div>
   )
 }
 
 const label = 'cursor-text text-micro font-semibold text-n-900'
-const value = 'h-6 w-full min-w-0 truncate border-0 bg-transparent p-0 text-[16px] leading-6 text-n-900 outline-none placeholder:text-n-500'
+// the segment shows the focus (the white pill), so the input inside draws no ring of its own
+const value =
+  'h-6 w-full min-w-0 truncate border-0 bg-transparent p-0 text-[16px] leading-6 text-n-900 outline-none placeholder:text-n-500 focus-visible:shadow-none'
 
 /**
  * The home SearchBar (C7-Home C1, design v0.7): What · Where · When as one raised bar with real fields, the
@@ -196,7 +202,12 @@ export function SearchBar({
         className,
       )}
     >
-      <Segment on={open === 'what'} width="flex-1" icon={<Search aria-hidden />}>
+      <Segment
+        on={open === 'what'}
+        width="flex-1"
+        icon={<Search aria-hidden />}
+        trailing={<Clear label={t('clear')} shown={!!what} onClear={() => setWhat('')} />}
+      >
         <label htmlFor={`${id}-what`} className={label}>
           {t('what')}
         </label>
@@ -213,10 +224,24 @@ export function SearchBar({
           onFocus={() => setOpen('what')}
           onKeyDown={keys('what', whatList, whatRows.rows)}
         />
-        <Clear label={t('clear')} shown={!!what} onClear={() => setWhat('')} />
       </Segment>
       <span aria-hidden className={cn('h-8 w-px flex-none bg-n-200', (open === 'what' || open === 'where') && 'bg-transparent')} />
-      <Segment on={open === 'where'} width="w-[26%] max-w-[264px]" icon={<MapPin aria-hidden />} ref={whereSegment}>
+      <Segment
+        on={open === 'where'}
+        width="w-[26%] max-w-[264px]"
+        icon={<MapPin aria-hidden />}
+        ref={whereSegment}
+        trailing={
+          <Clear
+            label={t('clear')}
+            shown={!!whereTyped}
+            onClear={() => {
+              setWhereTyped('')
+              setWhereDirty(true)
+            }}
+          />
+        }
+      >
         <label htmlFor={`${id}-where`} className={label}>
           {t('where')}
         </label>
@@ -240,17 +265,15 @@ export function SearchBar({
           }}
           onKeyDown={keys('where', whereList, where.rows)}
         />
-        <Clear
-          label={t('clear')}
-          shown={!!whereTyped}
-          onClear={() => {
-            setWhereTyped('')
-            setWhereDirty(true)
-          }}
-        />
       </Segment>
       <span aria-hidden className={cn('h-8 w-px flex-none bg-n-200', (open === 'where' || open === 'when') && 'bg-transparent')} />
-      <Segment on={open === 'when'} width="w-[24%] max-w-[248px]" icon={<CalendarDays aria-hidden />} className="cursor-pointer">
+      <Segment
+        on={open === 'when'}
+        width="w-[24%] max-w-[248px]"
+        icon={<CalendarDays aria-hidden />}
+        className="cursor-pointer"
+        trailing={<Clear label={t('clear')} shown={when !== ANY_TIME} onClear={() => setWhen(ANY_TIME)} />}
+      >
         <span id={`${id}-when-label`} className="text-micro font-semibold text-n-900">
           {t('when')}
         </span>
@@ -266,7 +289,6 @@ export function SearchBar({
         >
           <span id={`${id}-when-value`}>{whenLabel(when)}</span>
         </button>
-        <Clear label={t('clear')} shown={when !== ANY_TIME} onClear={() => setWhen(ANY_TIME)} />
       </Segment>
       <Button ref={goButton} type="submit" variant="primary" size="l" className="relative z-10 ml-2 min-w-[118px]">
         <Search aria-hidden />

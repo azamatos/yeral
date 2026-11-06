@@ -36,8 +36,9 @@ function Fld({ active, icon, onClick, children }: { active: boolean; icon: React
   )
 }
 
+// the field's box shows the focus, so the input inside draws no ring of its own
 const field =
-  'h-6 w-full min-w-0 truncate border-0 bg-transparent p-0 text-left text-[16px] leading-6 text-n-900 outline-none placeholder:text-n-500'
+  'h-6 w-full min-w-0 truncate border-0 bg-transparent p-0 text-left text-[16px] leading-6 text-n-900 outline-none placeholder:text-n-500 focus-visible:shadow-none'
 
 /**
  * The phone's full-screen search (C7-Home 390): the three fields stay on top, the active one's suggestions fill the
