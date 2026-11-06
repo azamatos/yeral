@@ -188,7 +188,7 @@ type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
 export const Demo: Story = {
   args: { server: fakeApi({ ...MAYSA, me: { ...MAYSA.me, demo: true } }) },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByText('This is a demo workspace. Changes reset every night.')).toBeVisible()
+    await expect(await canvas.findByText('A workspace to try Ýeral. Changes reset every night.')).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Create your business' })).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Log in' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Account menu' })).toBeNull()

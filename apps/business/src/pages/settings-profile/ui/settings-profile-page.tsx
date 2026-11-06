@@ -324,7 +324,7 @@ function AboutSection({ profile }: { profile: ProfileFormState }) {
           aria-label={t('aboutLabel')}
           className="h-36"
           value={profile.form.about}
-          placeholder={t('aboutPlaceholder')}
+          placeholder={t('aboutPlaceholder', { category: profile.form.categoryId })}
           maxLength={ABOUT_MAX * 2}
           invalid={!!problem}
           disabled={profile.saving}

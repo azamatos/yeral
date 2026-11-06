@@ -38,7 +38,7 @@ export const Opens: Story = {
 export const DemoOff: Story = {
   args: { server: () => () => Promise.resolve(answer(404, { error: { code: 'not_found' } })) },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('heading', { level: 1, name: "The demo isn't open right now" })).toBeVisible()
+    await expect(await canvas.findByRole('heading', { level: 1, name: "The workspace to try Ýeral isn't open right now" })).toBeVisible()
     await userEvent.click(canvas.getByRole('link', { name: 'Log in' }))
     await expect(await canvas.findByText('the sign-in')).toBeVisible()
   },

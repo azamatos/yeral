@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as TryRouteImport } from './routes/try'
+import { Route as InviteTokenRouteImport } from './routes/invite/$token'
 import { Route as SetupStepRouteImport } from './routes/setup/$step'
 import { Route as WSlugRouteRouteImport } from './routes/w/$slug/route'
 import { Route as WSlugIndexRouteImport } from './routes/w/$slug/index'
@@ -43,6 +44,11 @@ const LoginRoute = LoginRouteImport.update({
 const TryRoute = TryRouteImport.update({
   id: '/try',
   path: '/try',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SetupStepRoute = SetupStepRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/try': typeof TryRoute
   '/w/$slug': typeof WSlugRouteRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/setup/$step': typeof SetupStepRoute
   '/w/$slug/settings': typeof WSlugSettingsRouteRouteWithChildren
   '/w/$slug/bookings': typeof WSlugBookingsRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/try': typeof TryRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/setup/$step': typeof SetupStepRoute
   '/w/$slug/bookings': typeof WSlugBookingsRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/try': typeof TryRoute
   '/w/$slug': typeof WSlugRouteRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/setup/$step': typeof SetupStepRoute
   '/w/$slug/settings': typeof WSlugSettingsRouteRouteWithChildren
   '/w/$slug/bookings': typeof WSlugBookingsRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/try'
     | '/w/$slug'
+    | '/invite/$token'
     | '/setup/$step'
     | '/w/$slug/settings'
     | '/w/$slug/bookings'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/try'
+    | '/invite/$token'
     | '/setup/$step'
     | '/w/$slug/bookings'
     | '/w/$slug/calendar'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/try'
     | '/w/$slug'
+    | '/invite/$token'
     | '/setup/$step'
     | '/w/$slug/settings'
     | '/w/$slug/bookings'
@@ -269,6 +281,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   TryRoute: typeof TryRoute
   WSlugRouteRoute: typeof WSlugRouteRouteWithChildren
+  InviteTokenRoute: typeof InviteTokenRoute
   SetupStepRoute: typeof SetupStepRoute
 }
 
@@ -293,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/try'
       fullPath: '/try'
       preLoaderRoute: typeof TryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/setup/$step': {
@@ -471,6 +491,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   TryRoute: TryRoute,
   WSlugRouteRoute: WSlugRouteRouteWithChildren,
+  InviteTokenRoute: InviteTokenRoute,
   SetupStepRoute: SetupStepRoute,
 }
 export const routeTree = rootRouteImport

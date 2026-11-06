@@ -11,6 +11,7 @@ import { useSdk } from '@/shared/api'
  */
 export function DemoBanner() {
   const t = useTranslations('shell.demo')
+  const all = useTranslations()
   const sdk = useSdk()
   const navigate = useNavigate()
   const leave = useMutation(sdk.auth.logout())
@@ -25,7 +26,7 @@ export function DemoBanner() {
         </Button>
       }
     >
-      {t('text')}
+      {t('text', { brand: all('common.brand') })}
     </Callout>
   )
 }

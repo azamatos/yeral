@@ -297,12 +297,19 @@ export const RemoveReport: Story = {
   },
 }
 
-/** Show more asks for the next ten; the api has no more, so the button goes. */
+/**
+ * Show more asks for the next ten; the api has no more, so the button goes. The person has read down to it, and stays
+ * there: the longer history changes the address, which used to scroll the page to the top (the owner's #12).
+ */
 export const MoreHistory: Story = {
   args: { server: fakeApi({ start: { ...card, moreHistory: true } }) },
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: 'Show more' }))
+    const more = await canvas.findByRole('button', { name: 'Show more' })
+    window.scrollTo(0, document.documentElement.scrollHeight)
+    await waitFor(() => expect(window.scrollY).toBeGreaterThan(0))
+    await userEvent.click(more)
     await waitFor(() => expect(canvas.queryByRole('button', { name: 'Show more' })).toBeNull())
+    await expect(window.scrollY).toBeGreaterThan(0)
   },
 }
 

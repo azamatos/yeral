@@ -49,8 +49,10 @@ function Client({ slug, id, level, staffId }: { slug: string; id: string; level:
   const specialist = level === 'specialist'
   const manage = !specialist
   const todayDate = today(now)
+  // the same page with another address: the person stays where they read (a longer history, the delete question on a
+  // phone, under the card); the router would scroll to the top otherwise (the owner's #12)
   const go = (patch: Partial<ClientSearch>) =>
-    void navigate({ to: '.', search: (prev: ClientSearch) => ({ ...prev, ...patch }), replace: true })
+    void navigate({ to: '.', search: (prev: ClientSearch) => ({ ...prev, ...patch }), replace: true, resetScroll: false })
 
   const shown = search.history ?? HISTORY_STEP
   const query = useQuery({

@@ -23,7 +23,7 @@ import { useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 
-const COLUMNS = '44px minmax(170px,1.3fr) minmax(140px,1.1fr) minmax(100px,.7fr) minmax(170px,1.2fr) minmax(170px,1fr)'
+const COLUMNS = '44px minmax(170px,1.3fr) minmax(140px,1.1fr) minmax(100px,.7fr) minmax(170px,1.2fr) minmax(200px,1fr)'
 
 /** Everyone asked, some at once: what landed, and what didn't. */
 async function settle<T>(items: readonly T[], run: (item: T) => Promise<unknown>) {
@@ -159,6 +159,7 @@ export function RequestsTab({
   const timer = (r: BookingRequest) => (
     <TimerPill
       size="s"
+      className="flex-none"
       until={r.holdUntil}
       left={business ? (at: number) => openMinutesBetween(business, at, r.holdUntil) : undefined}
       format={(m) => fmt.duration(m)}
@@ -242,7 +243,8 @@ export function RequestsTab({
               <TableCell>{services(r)}</TableCell>
               <TableCell>{staff(r)}</TableCell>
               <TableCell>{time(r)}</TableCell>
-              <TableCell className="flex-wrap gap-1.5">
+              {/* one line (design §5): the timer and the inline ✓ ✕, never stacked */}
+              <TableCell className="flex-row flex-nowrap items-center gap-1.5">
                 {timer(r)}
                 {r.canAnswer ? (
                   <>
@@ -250,6 +252,7 @@ export function RequestsTab({
                       variant="ghost"
                       size="s"
                       iconOnly
+                      className="flex-none"
                       aria-label={t('confirmFor', { name: r.client.name })}
                       disabled={r.fits === false}
                       onClick={() => confirmOne(r)}
@@ -260,6 +263,7 @@ export function RequestsTab({
                       variant="ghost"
                       size="s"
                       iconOnly
+                      className="flex-none"
                       aria-label={t('declineFor', { name: r.client.name })}
                       onClick={() => onOpen(r.code)}
                     >
