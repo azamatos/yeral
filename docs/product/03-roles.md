@@ -124,8 +124,10 @@ flowchart LR
 ## The Ýeral team
 
 The people who run Ýeral itself. At launch they work in a small admin tool, the CMS (cms.yeral.app), which isn't
-designed yet. There is one role: every team member can do everything in it. (business spec §24; Q-010, Q-011, decided
-18.10.2026)
+designed yet. Two roles (business spec §24; Q-010, Q-011, decided 18.10.2026, the roles added 04.11.2026): the
+**superadmin**, the first account (exactly one), adds admins, hands out new setup links and turns admins off, and nobody
+turns off or resets the superadmin; **admins** do everything else below and see the team read-only. Managers, analysts
+and investors come later, when they have rights of their own (ADR 0026).
 
 At launch the team:
 

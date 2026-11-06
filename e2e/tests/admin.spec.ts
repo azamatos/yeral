@@ -53,14 +53,21 @@ test('a teammate sets up from a link, and signs in again with a recovery code', 
   await page.getByRole('menuitem', { name: 'Log out' }).click()
   await page.waitForURL('**/login')
 
+  // step 1: the login and the password; a wrong password stays here
   await page.getByLabel('Login').fill(login)
   await page.getByLabel('Password').fill('not the password')
-  await page.getByLabel('Authenticator code').fill(codes[0]!)
-  await page.getByRole('button', { name: 'Log in' }).click()
-  await expect(page.getByRole('alert')).toHaveText('The login, password or code is wrong.')
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await expect(page.getByRole('alert')).toHaveText('The login or password is wrong.')
 
   await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByLabel('Authenticator code').fill(codes[1]!)
+  await page.getByRole('button', { name: 'Continue' }).click()
+  // step 2: the code for who they were; a wrong one stays here, a recovery code gets in
+  await expect(page.getByRole('heading', { name: 'Enter the code' })).toBeVisible()
+  await page.getByLabel('Authenticator code').fill('000000')
+  await page.getByRole('button', { name: 'Log in' }).click()
+  await expect(page.getByRole('alert')).toContainText("That code didn't match.")
+
+  await page.getByLabel('Authenticator code').fill(codes[0]!)
   await page.getByRole('button', { name: 'Log in' }).click()
   await page.waitForURL('**/businesses')
   await expect(page.getByRole('heading', { level: 1, name: 'Businesses' })).toBeVisible()

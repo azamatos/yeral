@@ -1,7 +1,8 @@
 /**
  * The admin tool's calls (book F-178; ADR 0026). The Ýeral team's session is its own cookie, so nothing here touches
  * the person `me` holds: `me()` says who's signed in, null for nobody, and a 401 from any other call means the session
- * ended, which reads the same to the shell: it goes to the sign-in. One role (Q-011), so no call asks for more.
+ * ended, which reads the same to the shell: it goes to the sign-in. The sign-in's two steps (`signIn`, `signInCode`) are
+ * the only calls that may answer 401 without ending a session. `me.role` says who changes the team (Q-011).
  */
 import { mutationOptions, queryOptions, type QueryClient } from '@tanstack/react-query'
 import type {
@@ -14,6 +15,7 @@ import type {
   adminReviewsQuerySchema,
   adminSetupConfirmSchema,
   adminSetupPasswordSchema,
+  adminSignInCodeSchema,
   adminSignInSchema,
 } from '@yeral/contract/admin'
 import type { z } from 'zod'
@@ -61,9 +63,15 @@ export function createAdmin(client: Client, queryClient: QueryClient) {
           }
         },
       }),
+    /** Step 1, the login and the password: a challenge for the code (`sign_in_failed` for a wrong one). */
     signIn: () =>
       mutationOptions({
         mutationFn: (json: z.input<typeof adminSignInSchema>) => call(admin['sign-in'].$post({ json })),
+      }),
+    /** Step 2, the code for the challenge: signed in (`admin_code_wrong` stays on the step, `sign_in_expired` is back to step 1). */
+    signInCode: () =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof adminSignInCodeSchema>) => call(admin['sign-in'].code.$post({ json })),
         onSuccess: (me) => queryClient.setQueryData(keys.adminMe(), me),
       }),
     signOut: () =>

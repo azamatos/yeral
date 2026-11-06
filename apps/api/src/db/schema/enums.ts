@@ -15,6 +15,7 @@ import {
   STAFF_STATUSES,
   VERIFICATION_STATUSES,
 } from '@yeral/domain/model'
+import { ADMIN_ROLES } from '@yeral/domain/admin-roles'
 import { BLOCK_KINDS } from '@yeral/domain/hours'
 import { LEVELS } from '@yeral/domain/permissions'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
@@ -44,3 +45,5 @@ export const inviteStatus = pgEnum('invite_status', ['pending', 'accepted', 'dec
 export const codePurpose = pgEnum('code_purpose', ['login', 'change_phone'])
 /** The Ýeral team's accounts (ADR 0026). */
 export const adminStatus = pgEnum('admin_status', ['invited', 'active', 'disabled'])
+/** One superadmin changes the team; admins do the rest (book Q-011, ADR 0026 amended 2026-11-06). */
+export const adminRole = pgEnum('admin_role', ADMIN_ROLES)
