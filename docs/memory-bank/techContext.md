@@ -88,6 +88,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | class names | `cn()` (tailwind-merge that knows the design's scales) | `@yeral/ui/cn` |
 | the time now for anything counting down on screen (TimerPill, a sentence beside it), one clock for the page, to 15 s | `useClock()` | `@yeral/ui/clock` |
 | whether a media query matches now, following resizes (a popover above 768, a sheet under it) | `useMediaQuery('(max-width: 767px)')` | `@yeral/ui/media-query` |
+| how long ago something was written («Yesterday», «2 days ago»), by the market's calendar days; the words come from the app's `when.{unit}` messages | `ago(at, now)` | `@yeral/domain/time` |
 | design-system components | `import { Button } from '@yeral/ui/button'` (subpath per component folder) | `@yeral/ui/*` |
 | an inline text link, or a button that reads as one («Change number», «Start free») | `textLink` (classes; size and layout from the caller) | `@yeral/ui/text-link` |
 | a link or a number to copy and share; a page's QR code with its downloads | `CopyField` (Copy → «Copied» 2 s, a Share menu of links); `QrBlock` / `QrCode` (lean-qr, PNG and SVG) | `@yeral/ui/copy-field`, `@yeral/ui/qr-block` |

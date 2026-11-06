@@ -76,3 +76,6 @@ export const reviewReportInputSchema = z
   .object({ reason: z.enum(REVIEW_REPORT_REASONS), text: z.string().trim().min(1).max(300).optional() })
   .strict()
   .meta({ id: 'ReviewReportInput' })
+
+export type TeamReview = z.infer<typeof teamReviewSchema>
+export type TeamReviews = z.infer<typeof teamReviewsSchema>
