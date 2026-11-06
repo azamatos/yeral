@@ -71,11 +71,11 @@ export async function clientList(
 ): Promise<{ items: ClientRow[]; total: number; cursor: string | null; counts: ClientSegmentCounts }> {
   const offset = Number(q.cursor ?? 0) || 0
   const sums = seesSums(actor)
-  // no totals, no order by them: a reader without "See revenue" gets the usual order
-  const sort = q.sort === 'total' && !sums ? 'recent' : q.sort
+  // no totals, no order by them: a reader without "See revenue" gets the usual order, its direction included
+  const order = q.sort === 'total' && !sums ? {} : { sort: q.sort, dir: q.dir }
   const where = searchOf(q.q)
   const [{ rows, total }, counts, rules] = await all(db, [
-    () => clientFacts(db, business.id, actor, now, { where, segment: q.segment, sort, dir: q.dir, limit: q.limit, offset }),
+    () => clientFacts(db, business.id, actor, now, { where, segment: q.segment, ...order, limit: q.limit, offset }),
     () => segmentCounts(db, business.id, actor, now, { where }),
     () => rulesOf(db, business.id),
   ])

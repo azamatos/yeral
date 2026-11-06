@@ -66,7 +66,8 @@ export const clientRowSchema = z
 /**
  * What the list sorts by: `recent` (the most recently seen first: the latest booking's day, ahead or past, else the day
  * the business added them), the name, the completed visits, the last visit, "Total" or the next booking. Ties keep the
- * same order on every page; a client without the thing (no visit, no booking ahead, no name) comes last either way.
+ * same order on every page; a client without the thing (no last visit, no booking ahead, no name) comes last either
+ * way, while `visits` and `total` count a client without a visit as 0 (first ascending).
  */
 export const CLIENT_SORTS = ['recent', 'name', 'visits', 'lastVisit', 'total', 'nextBooking'] as const
 export type ClientSort = (typeof CLIENT_SORTS)[number]

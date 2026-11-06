@@ -381,6 +381,12 @@ describe('clients (book B-32, B-34)', () => {
       const lapsed = await list(maysa, 'q=659100&segment=lapsed')
       expect(ids(lapsed)).toEqual([e, c])
       expect(lapsed.counts).toEqual(counts)
+      // a chip and a sort together: the chip's rows in the sort's order, the counts still the search's
+      const lapsedAsc = await list(maysa, 'q=659100&segment=lapsed&sort=recent&dir=asc')
+      expect(ids(lapsedAsc)).toEqual([c, e])
+      expect(lapsedAsc.total).toBe(2)
+      expect(lapsedAsc.counts).toEqual(counts)
+      expect(ids(await list(maysa, 'q=659100&segment=lapsed&sort=nextBooking&dir=desc'))).toEqual([e, c])
       const whole = await list(maysa, '')
       expect(whole.counts.all).toBe(whole.total)
       expect(whole.counts.all).toBeGreaterThan(5)
@@ -399,6 +405,9 @@ describe('clients (book B-32, B-34)', () => {
       const byTotal = await list(selbi, 'q=659100&sort=total')
       expect(ids(byTotal)).toEqual([e, a, d, b, c])
       expect(byTotal.items.every((x) => x.total === null)).toBe(true)
+      // the direction goes with the sort: not the oldest first, which would be `recent` ascending
+      expect(ids(await list(selbi, 'q=659100&sort=total&dir=asc'))).toEqual([e, a, d, b, c])
+      expect(ids(await list(selbi, 'q=659100&sort=name&dir=desc'))).toEqual([a, ...byId(c, e), d, b])
     })
 
     it('the card: what the completed visits cost, and how many bookings the history holds', async () => {
