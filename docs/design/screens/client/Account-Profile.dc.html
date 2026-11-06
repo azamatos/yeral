@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -325,7 +325,7 @@ button.sn{border:0;background:transparent;font-family:inherit;width:100%;cursor:
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"pane":{"editor":"enum","options":["profile","favorites"],"default":"profile","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1600}}'>
+<script type="text/x-dc" data-dc-script data-props='{"pane":{"editor":"enum","options":["profile","favorites"],"default":"profile","section":"State"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1600}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -346,9 +346,9 @@ class Component extends DCLogic {
     this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
   }
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const s = this.state;
-    
+    const B = '';
     const fmt = (dg) => dg.replace(/(\d{2})(?=\d)/g, '$1 ');
     const isProfile = s.pane !== 'favorites';
     const nKeys = ['conf', 'd1', 'h2', 'rv'];

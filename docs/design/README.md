@@ -278,8 +278,8 @@ All Turkmen copy needs a native review before launch.
 
 ## 10. Design system essentials (full spec on the canvas, tokens in `tokens.css`)
 - White base, 1px `#e6e6ea` dividers instead of boxes; one violet accent (`#5a3ff0`) for selection and status only; ink `#101014` text.
-- Font Onest 400–800. Desktop scale: display 64/68 · h1 44/48 · h2 32/38 · h3 22/28 · body-l 17/26 · body 15/22 · dense 13/18 · label 11 caps +0.07em.
-- Buttons: S 36 r10 / M 44 r12 / L 52 r14. Primary = gradient `#8265ff→#5a3ff0` + inset highlight, one per view. Secondary white + 1px `#d8d8de`. Ghost, Tint, Danger (outline: text `#a3251b`, border `#f6c7c2`; solid for the final confirm: `#b42318`, hover `#912018`, white text 6.6:1). Ink (`#101014`) for the round search button in the header query bar and for app-store buttons.
+- Font **Geist** 400–800 (v0.7; was Onest). Figures proportional; `tabular-nums` only in numeric table columns, the calendar time grid and running timers. Phones always `+993 69 90 11 22`. Desktop scale: display 64/68 · h1 44/48 · h2 32/38 · h3 22/28 · body-l 17/26 · body 15/22 · dense 13/18 · label 11 caps +0.07em.
+- Controls (v0.7): one height scale S 32 r8 / M 40 r10 / L 48 r12 for Input, Select, Segmented, Button, IconButton, Chip — client forms and every 390 field L, toolbars M. Variants Primary · Secondary · Tertiary · Danger quiet · Danger solid · Link (navigation only) · IconButton; the ghost button is retired. Our own Select everywhere (never the native one). See `screens/system/DS-Controls.dc.html`, `DS-Lists.dc.html`, `DS-Type.dc.html`; they win over the lines below. Older: buttons S 36 r10 / M 44 r12 / L 52 r14. Primary = gradient `#8265ff→#5a3ff0` + inset highlight, one per view. Secondary white + 1px `#d8d8de`. Ghost, Tint, Danger (outline: text `#a3251b`, border `#f6c7c2`; solid for the final confirm: `#b42318`, hover `#912018`, white text 6.6:1). Ink (`#101014`) for the round search button in the header query bar and for app-store buttons.
 - Switch: on = track `#5a3ff0`; off = track `#e6e6ea` with a 1.5px `#6e6e78` inset border (≥ 3:1 against white); knob white 20 px.
 - Selection: tint (`#efecfe` + `#d5cbfb` line + `#4429d6` text) for chips/rows/tabs; solid `#5a3ff0` for the chosen date and time slot.
 - Focus: `0 0 0 2px #fff, 0 0 0 4px #7a5ff4` on :focus-visible. Inputs focus: border `#5a3ff0` + 3px `#efecfe` halo.
@@ -327,3 +327,45 @@ Answers to `docs/design-requests/2026-10-16-round-6.md`; the item-by-item table 
 - **E1:** hours may end at 24:00 ("09:00–24:00", "Häzir açyk · 24:00-a çenli").
 - **F1:** an unverified business's link shows "Bu sahypa entek açylmady" (States tile 11) to visitors; the owner sees a preview banner. **F2:** reviews under moderation are listed with "Ýeral barlaýar · ortaça baha hasaplanmaýar" and not counted.
 - **Status badges** are icon + label (round 6 part A) on every client screen.
+
+## 15. Decisions log (round 7 · v0.7, from the owner's review of the live apps)
+One line per rule set or changed. Part 7.1 = foundations (boards `screens/system/DS-Type`, `DS-Controls`, `DS-Lists`); 7.2 business screens and 7.3 client site follow.
+
+**7.1 Foundations (06.11.2026)**
+- A1 · **Geist replaces Onest** as the only UI face (`--font-sans`). Onest's tabular cell is 0.67 em with a 0.36 em "1" (the gaps the owner saw); Geist's is 0.60 em with a balanced "1", same cap height and x-height as Onest, ~2 % narrower, full Turkmen Latin and Cyrillic. No digit companion: one family is simpler.
+- A1 · Figures are proportional by default; `tabular-nums` only in numeric table columns, the calendar time grid and running timers/countdowns.
+- A1 · Phone numbers are always grouped `+993 69 90 11 22`; money `1,170 TMT`.
+- A1 · Heading tracking eases for Geist: h1 −0.025 em, h2 −0.02, h3 −0.01 (display −0.03).
+- A3 · One control height scale S 32 / M 40 / L 48 with radii 8 / 10 / 12 for Input, Select, Segmented, Button, IconButton, Chip. Business desktop toolbars and forms = M; client-site forms and every 390 field/main button = L; S for table actions, active-filter chips and inside menus. Toolbars never mix sizes; underline tabs are their own row.
+- A3 · Retired: buttons 36/44/52, input 48, radii 8 (input) and 10/12/14 (buttons).
+- A4 · New Tertiary button (#f0f0f3 at rest) and Danger quiet button (white + #f6c7c2 border + #a3251b text); the ghost button is retired; Link is for navigation only; IconButton outline (standalone) or plain (in rows/toolbars), always with a tooltip.
+- A4 · Call and Book again are two equal Secondary buttons; the client's name is the link to the card ("Open the client's card" removed).
+- A2 · Ýeral Select replaces every native select: popover list (max 320 high), check on the selected row, search inside when > 8 options, group headers, multi-select with counts for filters ("Services · 3"), long lists open scrolled to the value, bottom sheet on 390.
+- A2 · Time field HH:MM: typed or picked (15-min steps), "9" → "09:00", "930" → "09:30".
+- A5 · One filter bar for every list: Search · filter menus · Sort at the right · active-filter chips + Clear all + result count on a second row; 390: Search + "Filters · N" sheet + Sort.
+- A6 · Tables: sortable headers (natural order first), whole row opens the item, a single row action is an icon button, tags in their own column with "+N", one line per row, truncation with a tooltip, numbers right-aligned.
+- A7 · Status = StatusPill (Open until / Closes at / Closed · opens …); facts are labelled, one per line; " · " only joins two short items that never wrap. Breadcrumbs: links look like links, current page ink 600, chevron separators; 390 shows only the parent as a back link.
+- A8 · Tags are edited in place: Enter saves at once, Undo toast after removing, suggestions from the business's tags; automatic tags (New, Regular, Lapsed, Reported) are outlined with an icon and can't be removed.
+- A9 · Hint lines under fields become an ⓘ next to the label with a click/tap popover.
+- A10 · Callout tones: Info (violet), Success, Warning, Danger, Neutral; the icon always takes its callout's tone. "Bookings are confirmed at once" is Info with a zap icon. Toasts are ink with a tinted icon and an "Undo" action.
+- A11 · Focus ring wraps the element's own box: tabs get 12/6 px padding and stop above the underline; links get a 2 px outline offset; rows use the inset ring.
+- B10 · Sign-in codes go to the phone number's Telegram; the on-screen code is removed everywhere; resend after a 60 s countdown; "No Telegram on this number?" help; wrong / expired / too-many states.
+- Demo · No demo, Example badge, demo banner or demo workspace anywhere; "Try the business app" is removed from B-Landing and B-Login.
+
+**Decided while drawing (7.1)**
+- A1 · Durations: minutes up to an hour (45 min, 60 min), then hours + minutes (1 h 30 min, 2 h) — never 90 min, 1.5 h or 1:30. Times are 24-hour with two-digit hours (09:00). Dates "Wed, 14 Oct" short, "Wednesday, 14 October" long. Money never "1170 TMT", "1 170 TMT" or "TMT 1,170". A time range in text is "09:00–13:00"; the spaced dash is only between two time fields.
+- A1 · Geist draws the acute of ý / Ý over the right arm (font design; reads fine in Maýsa, Ýeral).
+- A3 · Chips come in S 32 and M 40 only (no L chip; 390 uses M). Segmented L text 15/20; unselected 500 #5a5a64, selected 600 ink with a 1px #e6e6ea ring.
+- A4 · Danger quiet = today's danger outline renamed (+ #f6c7c2 active); danger-ghost retired with ghost. A disabled plain IconButton has no fill. A button without a leading icon gets a min-width equal to its loading width.
+- A11 · Tab focus box sits at y 4–36 in the 44 px tab row, so the ring ends 2 px clear of the underline and 8 px from the text. Text fields show the soft focus (border + #efecfe halo) for mouse and keyboard; buttons and chips show the ring for keyboard only.
+- A2 · Every option row keeps a 16 px check slot so meta columns line up; the search field sits above the 320 list area (not inside it); popover width = trigger, min 200, except narrow triggers (FilterButton, TimeField: content width, time list 128). 390 sheets grow to 85 % of the screen, then scroll; their search is L 48.
+- A2 · Time typing: one or two digits = hours, three or four = hours + minutes; invalid text stays and shows the error. Copy: "Choose a specialist." (Select error), "Ends before it starts. Pick a later time." (range error).
+- A5 · A filter with one value reads its name ("Tag · Regular"); two or more read a count ("Services · 3"). Search alone shows only the count on row 2 (the field has its own ×). Menu counts are tabular (a right-aligned column).
+- A5 · 390: Search L on its own row, then an M row with Filters · N, "24 of 100" and the Sort IconButton; segments become underline tabs that scroll sideways; in the Filters sheet a filter with more than 8 options opens its own list with search and Back.
+- A6 · On numeric columns the sort arrow sits before the label. On 390 the right-hand fact of a list item is the sorted column; no row action on 390.
+- A7 · The business hero meta line drops the category (it's in the breadcrumb): rating + reviews, the StatusPill, then the address line. Callouts have no close button; their actions are Secondary S under the body.
+- A8 · After Enter the tag field stays open for the next tag; "Already added" makes the existing chip glow; Backspace in an empty field selects the whole last chip; tags in table cells are read-only; on 390 adding a tag opens a sheet. The Tag filter groups "Automatic" and "Your tags".
+- A10 · NoteRow replaces the amber note box: warning icon + text + a 12/16 meta line; each note has a "…" menu (Edit · Don't show when booking · Delete). Desktop toasts sit 24 px from the content edge (right of the sidebar); error toasts with an action stay until closed.
+- B10 · The code checks itself on the 4th digit (Confirm stays on the business screens for keyboard users); the countdown is plain #6e6e78 text; Expired swaps Open Telegram for Primary "Send a new code"; Too many codes leaves only Change number and the help; the help is a popover on desktop and a sheet on 390 (Call Ýeral, Write on Telegram); success shows "Signed in" then moves on. Phone step button "Get the code"; resend "Send a new code" everywhere.
+- Demo sweep · A person without a workspace can only "Create a business" (no "look around first"). The `sms` tweak on B-Login stays as the later SMS copy.
+- Data · Jahan Berdiýewa's first visit is 9 Oct (New = first visit within 30 days).

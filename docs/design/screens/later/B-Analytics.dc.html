@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -523,7 +523,7 @@ button.mi{border:0;background:transparent;font-family:inherit;width:100%;cursor:
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["overview","staff","staffOne","services","clients","firstWeeks"],"default":"overview","section":"State"},"role":{"editor":"enum","options":["owner","specialist"],"default":"owner","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["overview","staff","staffOne","services","clients","firstWeeks"],"default":"overview","section":"State"},"role":{"editor":"enum","options":["owner","specialist"],"default":"owner","section":"State"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -547,7 +547,7 @@ class Component extends DCLogic {
   }
   renderVals() {
     const s = this.state;
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const isSpec = (this.props.role ?? 'owner') === 'specialist';
     const isOwner = !isSpec;
     const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');

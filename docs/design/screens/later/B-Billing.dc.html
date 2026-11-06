@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -356,7 +356,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"modal":{"editor":"boolean","default":false,"section":"State"},"dirty":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2120}}'>
+<script type="text/x-dc" data-dc-script data-props='{"modal":{"editor":"boolean","default":false,"section":"State"},"dirty":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":2120}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -379,13 +379,13 @@ class Component extends DCLogic {
     this.tt = setTimeout(() => this.setState({ toast: null }), 5000);
   }
   renderVals() {
-    const fnt = this.props.font ?? 'Onest';
+    const fnt = this.props.font ?? 'Geist';
     const s = this.state;
     const f = s.f;
     const upd = (patch) => this.setState({ f: Object.assign({}, this.state.f, patch) });
 
     // commission statement: first visits in October only (billing.commissionRows minus the September row), oldest first;
-    // visits after the demo clock (14 oktýabr, 11:20) are planned — Ejegyz T. comes today at 15:30
+    // visits after the sample clock (14 oktýabr, 11:20) are planned — Ejegyz T. comes today at 15:30
     const CM = [
       ['Gözel A.', 13, 'Arka massažy', '90 TMT'],
       ['Ejegyz T.', 14, 'Aýal saç kesimi', '80 TMT'],

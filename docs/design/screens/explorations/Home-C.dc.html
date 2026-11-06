@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -185,16 +185,16 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2240}}'>
+<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":2240}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = { cat: 'all', day: 'today' };
   }
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const s = this.state;
-    
+    const B = '';
     const all = [
       { cat: 'beauty', name: 'Barber Loft', img: '../../assets/photos/nathon-oski-EW_rqoSdDes-unsplash.jpg', rating: '4,9', count: '(212)', meta: 'Dellekhana · Köpetdag · Magtymguly şaýoly 12 · 1,2 km', price: 'Erkek saç kesimi · 40 TMT-den', slots: ['14:30', '15:00', '16:15', '17:00'] },
       { cat: 'health', name: 'Ak Diş', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', rating: '4,8', count: '(131)', meta: 'Diş lukmany · Berkararlyk · Görogly köçesi 52 · 2,1 km', price: 'Barlag · 50 TMT', slots: ['16:00', '17:30', '18:00'] },

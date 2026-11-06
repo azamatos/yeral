@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -69,8 +69,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .co > svg{flex:none;margin-top:1px}
 .c-neu{background:#f4f4f6}
 .c-neu > svg{color:#5a5a64}
-.fcl{padding:12px 14px;font-size:15px;line-height:22px;align-items:center}
-.fcd{font-size:17px;line-height:22px;font-weight:600;letter-spacing:.08em;font-variant-numeric:tabular-nums;margin-left:4px}
 .okl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-radius:12px;background:#f6f6f8;border:1px solid #e6e6ea;font-size:14px;line-height:20px}
 .okl svg{flex:none}
 /* AuthCard */
@@ -151,13 +149,13 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span id="lg-phone-h" class="hint">If you already book on Ýeral as a client, use that number — one account works for both.</span>
 </div>
 <div style="display: flex; flex-direction: column; gap: 12px">
-<sc-if value="{{showSend}}" hint-placeholder-val="{{true}}"><button class="b b-pri b-lg" type="submit" style="width: 100%">Send code</button></sc-if>
+<sc-if value="{{showSend}}" hint-placeholder-val="{{true}}"><button class="b b-pri b-lg" type="submit" style="width: 100%">Get the code</button></sc-if>
 <sc-if value="{{sending}}" hint-placeholder-val="{{false}}"><button class="b b-pri b-lg" type="button" aria-disabled="true" style="width: 100%"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>Sending…</button></sc-if>
 <sc-if value="{{phoneLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 42 minutes.</span></span></sc-if>
-<p class="cap" style="margin: 0">By tapping “Send code”, you agree to the <a href="#">Terms of use</a> and the <a href="#">Privacy policy</a>.</p>
+<p class="cap" style="margin: 0">By tapping “Get the code”, you agree to the <a href="#">Terms of use</a> and the <a href="#">Privacy policy</a>.</p>
 </div>
 <div class="sep"></div>
-<p class="sub">No business yet? <a href="B-Onboarding.dc.html" style="font-weight: 600">Start free</a> or <a href="B-Calendar.dc.html" style="font-weight: 600">try the business app</a></p>
+<p class="sub">No business yet? <a href="B-Onboarding.dc.html" style="font-weight: 600">Start free</a></p>
 </form>
 </sc-if>
 
@@ -165,9 +163,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <form class="stp" aria-labelledby="lg-t2" onSubmit="{{confirm}}">
 <div class="shd">
 <h1 id="lg-t2" class="h1">Enter the code</h1>
-<p class="sub">{{codeLeadA}}<b class="nw">+993 {{phoneFmt}}</b>. <button class="lnk" type="button" onClick="{{editPhone}}" style="min-height: 0; vertical-align: baseline">Change number</button></p>
+<p class="sub">{{codeLeadA}}<b class="nw">{{codeTo}}</b>. <button class="lnk" type="button" onClick="{{editPhone}}" style="min-height: 0; vertical-align: baseline">Change number</button></p>
 </div>
-<sc-if value="{{showCallout}}" hint-placeholder-val="{{true}}"><div class="co c-neu fcl" role="status"><span>Your code: <b class="fcd">{{shownCode}}</b></span></div></sc-if>
 <div class="fld" style="gap: 8px">
 <span class="flab" id="lg-code-l">{{codeLabel}}</span>
 <div class="otp" role="group" aria-labelledby="lg-code-l" aria-busy="{{checking}}">
@@ -183,10 +180,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div style="display: flex; flex-direction: column; gap: 12px">
 <sc-if value="{{notChecking}}" hint-placeholder-val="{{true}}"><button class="b b-pri b-lg" type="submit" style="width: 100%">Confirm</button></sc-if>
 <sc-if value="{{checking}}" hint-placeholder-val="{{false}}"><button class="b b-pri b-lg" type="button" aria-disabled="true" style="width: 100%"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>Checking…</button></sc-if>
+<sc-if value="{{viaTg}}" hint-placeholder-val="{{true}}"><a class="b b-sec b-lg" href="https://t.me/" target="_blank" rel="noopener" style="width: 100%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg>Open Telegram</a></sc-if>
 <sc-if value="{{showResendLink}}" hint-placeholder-val="{{true}}"><button class="lnk" type="button" disabled="{{resendDis}}" onClick="{{resend}}" style="align-self: flex-start">{{resendText}}</button></sc-if>
 </div>
 </sc-if>
-<sc-if value="{{lockOverBtn}}" hint-placeholder-val="{{false}}"><button class="b b-pri b-lg" type="button" onClick="{{newCode}}" style="width: 100%">Get a new code</button></sc-if>
+<sc-if value="{{lockOverBtn}}" hint-placeholder-val="{{false}}"><button class="b b-pri b-lg" type="button" onClick="{{newCode}}" style="width: 100%">Send a new code</button></sc-if>
 
 </form>
 </sc-if>
@@ -316,7 +314,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 <div class="acts">
 <a class="b b-pri b-lg" href="B-Onboarding.dc.html" style="width: 100%">Create a business</a>
-<a class="lnk" href="B-Calendar.dc.html" style="align-self: center">Try the business app</a>
 </div>
 <div class="co c-neu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Work at a business? Ask the owner to send an invite to your phone number — it will appear here.</span></div>
 <div class="acc">
@@ -349,7 +346,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","phoneSending","phoneIncomplete","phoneLandline","phoneLimit","code","codeChecking","codeWrong","codeLocked","codeLockOver","codeResendReady","codeResent","codeLimit","name","invite","inviteDecline","inviteExpired","setup","empty","routing"],"default":"phone","section":"Flow"},"sms":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","phoneSending","phoneIncomplete","phoneLandline","phoneLimit","code","codeChecking","codeWrong","codeLocked","codeLockOver","codeResendReady","codeResent","codeLimit","name","invite","inviteDecline","inviteExpired","setup","empty","routing"],"default":"phone","section":"Flow"},"sms":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -360,7 +357,7 @@ class Component extends DCLogic {
     this.quiet = false;
   }
 
-  // Seed for each value of the step tweak (business-demo.json → accounts; V06-R2 demo data)
+  // Seed for each value of the step tweak (business-demo.json → accounts; V06-R2 sample data)
   init(step) {
     const STEPS = ['phone', 'phoneSending', 'phoneIncomplete', 'phoneLandline', 'phoneLimit', 'code', 'codeChecking', 'codeWrong', 'codeLocked', 'codeLockOver', 'codeResendReady', 'codeResent', 'codeLimit', 'name', 'invite', 'inviteDecline', 'inviteExpired', 'setup', 'empty', 'routing'];
     const tw = STEPS.indexOf(step) >= 0 ? step : 'phone';
@@ -454,16 +451,16 @@ class Component extends DCLogic {
 
   renderVals() {
     const P = this.props;
-    const f = P.font ?? 'Onest';
-    // first release: the code shows on screen (default); the SMS copy is the later variant (tweak sms)
-    const onScreen = !(P.sms ?? false);
+    const f = P.font ?? 'Geist';
+    // v0.7 (B10): codes go to the number's Telegram (default); the SMS copy is the later variant (tweak sms)
+    const viaTg = !(P.sms ?? false);
     const s = this.state;
     const set = (patch) => this.setState(patch);
     const val = (e) => String((e && e.target && e.target.value) || '');
     const fmtPhone = (d) => [d.slice(0, 2), d.slice(2, 4), d.slice(4, 6), d.slice(6, 8)].filter(Boolean).join(' ');
     const MAX_SENDS = 5; // 5 codes for one number in an hour
 
-    // Who is behind each phone (business-demo.json → accounts, team; V06-R2 demo). Others = new person.
+    // Who is behind each phone (business-demo.json → accounts, team; V06-R2 sample data). Others = new person.
     const ACC = {
       '65102030': { name: 'Maýsa Annaýewa', role: 'Owner', count: 2 },
       '65312210': { name: 'Aýna Myradowa', role: 'Specialist', count: 2 },
@@ -514,7 +511,7 @@ class Component extends DCLogic {
     };
     const codeBoxes = [0, 1, 2, 3].map((i) => ({
       v: s.code[i] || '',
-      aria: (onScreen ? 'Code' : 'SMS code') + ', digit ' + (i + 1),
+      aria: (viaTg ? 'Code' : 'SMS code') + ', digit ' + (i + 1),
       ac: i === 0 ? 'one-time-code' : 'off',
       dis: locked,
       ro: !!s.checking,
@@ -555,12 +552,11 @@ class Component extends DCLogic {
     };
     const mm = Math.floor(s.left / 60);
     const ss = s.left % 60;
-    const resendText = s.left > 0 ? 'Get a new code in ' + mm + ':' + (ss < 10 ? '0' : '') + ss : 'Get a new code';
+    const resendText = s.left > 0 ? 'Send a new code in ' + mm + ':' + (ss < 10 ? '0' : '') + ss : 'Send a new code';
     const left3 = 3 - s.wrong;
     const codeErrText = s.lock > 0
       ? 'Too many tries. Try again in ' + s.lock + (s.lock === 1 ? ' second.' : ' seconds.')
       : 'Wrong code. ' + left3 + (left3 === 1 ? ' try' : ' tries') + ' left.';
-    const CODES = ['4821', '7305', '1946', '5582', '3067'];
 
     // ---------- name ----------
     const firstT = s.first.trim();
@@ -592,8 +588,8 @@ class Component extends DCLogic {
       isEmpty: s.step === 'empty',
       isRouting: s.step === 'routing',
       // phone
-      phoneLead: onScreen
-        ? 'Enter your phone number — we’ll show you a 4-digit code. No password needed.'
+      phoneLead: viaTg
+        ? 'Enter your phone number — we’ll send a 4-digit code to your Telegram. No password needed.'
         : 'Enter your phone number — we’ll send you a 4-digit code. No password needed.',
       phoneFmt: fmtPhone(s.phone),
       phoneCls: s.phoneErr ? 'inp is-e' : 'inp',
@@ -607,10 +603,9 @@ class Component extends DCLogic {
       phoneLimited: limited && !s.sending,
       liveMsg: s.sending ? 'Sending…' : (s.checking ? 'Checking…' : ''),
       // code
-      onScreen: onScreen,
-      shownCode: CODES[s.codeIdx % CODES.length],
-      codeLabel: onScreen ? 'Code' : 'SMS code',
-      codeLeadA: onScreen ? 'To log in with ' : 'We sent a 4-digit code to ',
+      codeLabel: viaTg ? 'Code' : 'SMS code',
+      codeLeadA: viaTg ? 'We sent the code to your Telegram, ' : 'We sent a 4-digit code to ',
+      codeTo: viaTg ? '+993 •• •• •• ' + s.phone.slice(-2) : '+993 ' + fmtPhone(s.phone),
       editPhone: () => { clearTimeout(this.tt); set({ step: 'phone', checking: false, code: ['', '', '', ''], codeErr: false, wrong: 0, lock: 0, lockOver: false, left: 0, resent: false }); },
       codeBoxes: codeBoxes,
       checking: !!s.checking,
@@ -622,8 +617,8 @@ class Component extends DCLogic {
       showResent: !!s.resent && !s.codeErr && !locked,
       showAutoHint: !locked && !s.checking && !s.codeErr,
       showConfirm: !locked,
-      showCallout: onScreen && !locked,
-      resentText: onScreen ? 'Here’s a new code.' : 'New code sent.',
+      viaTg: viaTg,
+      resentText: viaTg ? 'New code sent to your Telegram.' : 'New code sent.',
       showResendLink: !s.limited,
       codeLimited: !!s.limited,
       resendDis: s.left > 0 || !!s.checking,

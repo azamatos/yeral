@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -474,7 +474,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"selection":{"editor":"enum","options":["none","two","hidden","mixed"],"default":"none","section":"State"},"hoursCase":{"editor":"enum","options":["normal","midnight"],"default":"normal","section":"State"},"restricted":{"editor":"boolean","default":false,"section":"State"},"ownerPreview":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":5480}}'>
+<script type="text/x-dc" data-dc-script data-props='{"selection":{"editor":"enum","options":["none","two","hidden","mixed"],"default":"none","section":"State"},"hoursCase":{"editor":"enum","options":["normal","midnight"],"default":"normal","section":"State"},"restricted":{"editor":"boolean","default":false,"section":"State"},"ownerPreview":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":5480}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -491,7 +491,7 @@ class Component extends DCLogic {
     }
   }
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const s = this.state;
     const B = '';
     const restricted = !!this.props.restricted;

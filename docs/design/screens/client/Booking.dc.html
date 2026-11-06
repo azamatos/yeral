@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -670,7 +670,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["services","staff","time","confirm","sent"],"default":"services","section":"Flow"},"mode":{"editor":"enum","options":["book","move"],"default":"book","section":"Flow"},"confirmMode":{"editor":"enum","options":["manual","instant"],"default":"manual","section":"Flow"},"price":{"editor":"enum","options":["fixed","hidden","mixed"],"default":"fixed","section":"Flow"},"loggedIn":{"editor":"boolean","default":false,"section":"Flow"},"slotTaken":{"editor":"boolean","default":false,"section":"Flow"},"restricted":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1680}}'>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["services","staff","time","confirm","sent"],"default":"services","section":"Flow"},"mode":{"editor":"enum","options":["book","move"],"default":"book","section":"Flow"},"confirmMode":{"editor":"enum","options":["manual","instant"],"default":"manual","section":"Flow"},"price":{"editor":"enum","options":["fixed","hidden","mixed"],"default":"fixed","section":"Flow"},"loggedIn":{"editor":"boolean","default":false,"section":"Flow"},"slotTaken":{"editor":"boolean","default":false,"section":"Flow"},"restricted":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1680}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -688,16 +688,16 @@ class Component extends DCLogic {
 
   renderVals() {
     const P = this.props;
-    const f = P.font ?? 'Onest';
+    const f = P.font ?? 'Geist';
     // mode: book = new booking; move = "Wagty üýtget" for an existing appointment (round 6 A5)
     const move = (P.mode ?? 'book') === 'move';
     // confirmMode: manual (default — the business confirms by hand) · instant
     const instant = (P.confirmMode ?? 'manual') === 'instant';
-    // restricted: this client may book this business only by phone (round 6 A7, demo business Pamyk)
+    // restricted: this client may book this business only by phone (round 6 A7, sample business Pamyk)
     const restricted = !!(P.restricted ?? false);
     const loggedIn = !!(P.loggedIn ?? false);
     const slotTaken = !!(P.slotTaken ?? false);
-    // price: starting selection for the hidden-price demo (round 6 B1, demo-data priceExamples)
+    // price: starting selection for the hidden-price sample (round 6 B1, demo-data priceExamples)
     const PRESET = { fixed: ['s1'], hidden: ['s12'], mixed: ['s12', 's2'] };
     const price = PRESET[P.price] ? P.price : 'fixed';
     const FLOW = ['services', 'staff', 'time', 'confirm', 'sent'];
@@ -753,7 +753,7 @@ class Component extends DCLogic {
     const WS = ['Du', 'Si', 'Ça', 'Pe', 'An', 'Şe', 'Ýe'];
     // Booked start times per October day (slot step 30 min). 17 = fully booked. Today (14) also hides times before the specialist's first free time.
     // Rule (round 6 A5): the grid shows ONLY the chosen specialist's free times ("Islendik" = free with at least one specialist who does all
-    // chosen services); the booking keeps the chosen specialist — no silent swap. In this demo every Glow service has one specialist, so one table serves.
+    // chosen services); the booking keeps the chosen specialist — no silent swap. In this sample every Glow service has one specialist, so one table serves.
     const BUSY = {
       14: ['17:00', '18:30'],
       15: ['09:00', '09:30', '11:00', '12:30', '13:00', '15:00', '16:30', '17:00', '18:30'],

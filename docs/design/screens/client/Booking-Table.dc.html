@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -411,20 +411,20 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"sent":{"editor":"boolean","default":false,"section":"Flow"},"loggedIn":{"editor":"boolean","default":true,"section":"Flow"},"maxParty":{"editor":"enum","options":["8","6"],"default":"8","section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"sent":{"editor":"boolean","default":false,"section":"Flow"},"loggedIn":{"editor":"boolean","default":true,"section":"Flow"},"maxParty":{"editor":"enum","options":["8","6"],"default":"8","section":"Flow"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1900}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = { party: 4, day: 3, wk: 0, time: '19:00', area: 'terrace', reqs: {}, note: '', sent: false, ics: false, switched: false, auth: 'phone', phone: '', phoneErr: '', code: '', codeFocus: false, codeErr: false, name: '' };
   }
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const s = this.state;
     const loggedIn = this.props.loggedIn ?? true;
     const sent = !!((this.props.sent ?? false) || s.sent);
     const WD = ['Duşenbe', 'Sişenbe', 'Çarşenbe', 'Penşenbe', 'Anna', 'Şenbe', 'Ýekşenbe'];
     const WS = ['Du', 'Si', 'Ça', 'Pe', 'An', 'Şe', 'Ýe'];
-    // day index 0 = Çarşenbe, 14 oktýabr (demo "now"); 14 days, Bag kafe is open every day
+    // day index 0 = Çarşenbe, 14 oktýabr (sample "now"); 14 days, Bag kafe is open every day
     const info = (i) => { const w = (2 + i) % 7; return { w, n: 14 + i, full: WD[w] + ', ' + (14 + i) + ' oktýabr', short: WS[w] + ', ' + (14 + i) + ' okt.' }; };
     // taken times: weekends are busier
     const offFor = (i) => { const w = (2 + i) % 7; if (w >= 5) return ['13:00', '13:30', '20:00', '20:30', '21:00']; if (w === 4) return ['20:00', '20:30']; return ['12:30', '19:30']; };

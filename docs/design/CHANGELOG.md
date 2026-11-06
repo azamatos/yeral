@@ -4,6 +4,41 @@ Newest first. Each export replaces this folder; this file says what changed and 
 
 ---
 
+## v0.7 · round 7.1 — 06.11.2026 · foundations (from the owner's review of the live apps)
+
+Round 7 fixes **patterns**, not code: the live apps follow the drawn pattern and the pattern was wrong. It comes in three parts, each exported on its own: **7.1 foundations (this export)** → 7.2 business screens (B1–B9) → 7.3 client site (C1–C4, D). Three new design-system boards define the foundations; where an older board (DS-Components, DS-Patterns, DS-Business, DS-Booking, any screen) differs, **v0.7 wins** — each older DS board carries a note at the top saying so. Rules: `README.md` §15 and `business/README.md` §29 (Decisions log, round 7); components: `COMPONENTS.md` Part 0; copy: `copy/EN-GLOSSARY.md` §7; tokens: `tokens.css` v0.7. The logo is skipped (a new one is being drawn).
+
+**New boards** (`screens/system/`)
+- `DS-Type.dc.html` (1440 × 9122) — A1: why digits looked loose (Onest's tabular cell is 0.67 em, its "1" 0.36 em), Onest vs Onest + Geist digits vs Geist at 13–40 px on phones, prices, totals, hour labels, time chips, stat tiles, a table column and the code; the decision **Geist**; where tabular figures stay; the type scale in Geist; number formats.
+- `DS-Controls.dc.html` (1440 × 13218) — A3 one height scale **S 32 / M 40 / L 48** (radii 8 / 10 / 12) for Input, Select, Segmented, Button, IconButton, Chip; A4 buttons (new **Tertiary** and **Danger quiet**, IconButton outline / plain, ghost retired) + "Which button each action takes"; A2 **our own Select** (trigger states at S/M/L, list, groups, search above 8 options, multi-select filters, long time list opened at the value, 390 bottom sheets) and the **TimeField**; A9 **ⓘ InfoTip**; A11 **focus rings** (tabs, chips, links, rows).
+- `DS-Lists.dc.html` (1440 × 19312) — A5 **one FilterBar** for every list (desktop, 390 sheet, where it's used); A6 **tables** (sortable headers, the whole row opens the item, one icon action, tags column with +N, one line per row, loading / empty / no results, 390 list items); A7 **StatusPill, FactList, breadcrumbs**; A8 **tags edited in place**; A10 **callout tones, NoteRow, toasts**; B10 **the Telegram sign-in code** (every state, client modal + sheet, business login).
+
+**Changed everywhere**
+- **Font: Geist replaces Onest** on every board (Google Fonts link, the `font` tweak now Geist · Onest, `--font-sans`). Geist has Onest's cap height and x-height and is ~2 % narrower, so layouts don't move. DS · Foundations' Type section is updated.
+- **No demo anywhere:** the Example badge, the Demo banner (and the `demo` option of every `banner` tweak), the signed-out demo sidebar, DemoNote, the B-Settings `demo` tweak and **"Try the business app"** (B-Landing hero / menu / footer, B-Login phone step and no-workspace card, B-Onboarding) are removed. A person without a workspace can only create a business. Annotations say "sample" instead of "demo".
+- **Sign-in code goes to Telegram:** the on-screen code is removed from B-Login, B-Onboarding, B-Shell (change number), B-Mobile, DS-Business, DS-Patterns; the code step reads "We sent the code to your Telegram, +993 •• •• •• 30" + Open Telegram + "Send a new code in 0:42"; the phone step button is **Get the code**; resend is **Send a new code** everywhere.
+
+**Frames:** DS-Type 1440 × 9122 · DS-Controls 1440 × 13218 · DS-Lists 1440 × 19312 (new) · Main 1440 × 5630 (was 5520) · DS-Components 1440 × 5400 (was 5340) · DS-Booking 1440 × 2980 (was 2960) · DS-Patterns 1440 × 37250 (was 40500) · DS-Business 1440 × 86150 (was 86900) · B-Shell 1600 × 8820 (was 9000); every other board keeps its size (fonts swapped only).
+
+### To do in the repo (7.1 — one line per item)
+- **A1 Font** — switch `--font-sans` and the font loading to Geist 400–800 (latin, latin-ext, cyrillic, cyrillic-ext); drop Onest; apply the v0.7 heading tracking.
+- **A1 Figures** — remove `tabular-nums` everywhere except numeric table columns, the calendar time grid and running timers / countdowns (118 places today); format every phone number as `+993 69 90 11 22` (tables, cards, toasts, copy fields).
+- **A2 Select** — build `@yeral/ui` Select on the popover (desktop) and drawer (390 sheet): sizes, states, groups, search above 8 options, multi-select with counts, open scrolled to the value; replace every native `<select>` (19 screens) and the native-under-8 / Radix-above-8 split.
+- **A2 TimeField** — HH:MM field with typing ("9" → 09:00, "930" → 09:30) and the 15-min list; use it in every hours, break and shift editor.
+- **A3 Sizes** — add the `--ctl-*` tokens and give Input, Select, Segmented, Button, IconButton and Chip the shared S 32 / M 40 / L 48 heights and 8 / 10 / 12 radii; business toolbars and forms M, client forms and 390 fields L; take tabs out of toolbar rows.
+- **A4 Buttons** — add `tertiary` and `danger-quiet`, IconButton outline / plain with tooltips, loading that keeps width; retire `ghost` and `danger-ghost`; restyle the listed actions (Remove from the team, Turn off, Home, Book again, Clear, Show more, Add note, New setup link) and drop the bare-text ones (Open the client's card, By phone number, Show all services, Create a new client).
+- **A5 FilterBar** — one `FilterBar` (Search · FilterButton menus with counts · SortMenu · active chips + Clear all + result count; 390 Filters sheet) used by business Calendar, Bookings, Clients, Reviews, client Search results and the business page's Services.
+- **A6 Table** — sortable headers with `aria-sort`, row = link with hover and inset focus, one IconButton action (no "…" for a single action), tags column with "+N" popover, one-line rows with truncation + tooltip, right-aligned tabular numbers, skeleton / empty / no-results states, 390 list items.
+- **A7 Status and facts** — `StatusPill` (Open until / Closes at / Closed · opens …), `FactList` (label above value, one per line), breadcrumbs with chevrons, link-looking parents, current page ink 600, 390 back link; no more " · " run-on lines.
+- **A8 Tags** — `TagInput` in place: Enter saves at once (no form Save), suggestions with counts, Create "…", duplicate / max length, Undo toast; automatic tags outlined with an icon and not removable.
+- **A9 InfoTip** — `Field` `info` prop rendering ⓘ + popover; replace hint lines under fields (internal status first).
+- **A10 Callouts and toasts** — Callout tones Info (violet) / Success / Warning / Danger / Neutral with the icon in its own tone; "Bookings are confirmed at once" = Info + zap; `NoteRow` replaces the amber note box; toasts with icons, Undo, placement bottom-left of the content (390 bottom centre).
+- **A11 Focus** — tab focus box 12/6 px clear of the underline, chips follow the pill, links get a 2 px outline offset, rows the inset ring.
+- **B10 Telegram code** — send sign-in codes to the phone number's Telegram; rebuild `SignInCodeStep` (Get the code, masked lead, Open Telegram, 60 s countdown → Send a new code, Change number, No Telegram help, wrong / expired / too many / checking / success); remove the on-screen code everywhere (client site, business login, onboarding, change number).
+- **Demo** — remove ExampleBadge, the Demo banner kind, DemoSidebar, DemoNote, the shared demo workspace and every "demo" / "Example" / "this isn't a real business" text from the apps and Storybook.
+
+---
+
 ## v0.6 · round 3.4 — 20.10.2026 · fixes on settings and setup
 
 A small fix pass on B-Settings, B-Onboarding, their phone frames on B-Mobile and their pieces on DS · Business patterns (+ one FAQ sentence on B-Landing); everything else stays as drawn. Rules: `business/README.md` §28.5; copy in the "Round 3.4" sections of `copy/en-choices-r3-onboarding-settings.md`, `-mobile.md`, `-ds-business.md`, `-reviews-landing.md`, `-login-shell.md`.
