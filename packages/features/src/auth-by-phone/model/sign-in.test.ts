@@ -7,6 +7,7 @@ const NUMBER = '65102030'
 const run = (...events: SignInEvent[]) => events.reduce(signInReducer, initialSignIn)
 const typed = (phone = NUMBER) => run({ type: 'phoneChanged', phone })
 const sent = (opts: { phone?: string; resend?: boolean; code?: string; now?: number } = {}): SignInEvent => ({
+  delivery: opts.code ? 'screen' : 'sms',
   type: 'codeSent',
   phone: opts.phone ?? NUMBER,
   resend: opts.resend ?? false,
@@ -22,6 +23,15 @@ const refused = (error: ApiError, opts: { phone?: string; resend?: boolean; now?
   now: opts.now ?? T,
 })
 const atCode = (code?: string) => signInReducer(typed(), sent({ code }))
+
+describe('the right code', () => {
+  it('shows «Signed in» for a moment and clears the wrong code’s message; the reset ends it', () => {
+    const wrong = signInReducer(atCode(), { type: 'codeRefused', error: new ApiError(400, 'code_invalid', { attemptsLeft: 2 }), now: T })
+    const ok = signInReducer(wrong, { type: 'codeVerified' })
+    expect(ok).toMatchObject({ step: 'code', verified: true, attemptsLeft: undefined })
+    expect(signInReducer(ok, { type: 'reset' }).verified).toBe(false)
+  })
+})
 
 describe('the phone step', () => {
   it('keeps the error until the number changes', () => {

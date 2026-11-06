@@ -654,10 +654,8 @@ export const SignedOut: Story = {
     await expect(canvas.queryByRole('button', { name: 'Continue' })).toBeNull()
     await expect(canvas.queryByRole('button', { name: /Continue later/ })).toBeNull()
 
-    // the first launch shows the code on the screen: the number step says so (book Q-036)
-    await expect(await canvas.findByText(/While Ýeral is being tried out, the sign-in code shows here/)).toBeVisible()
     await userEvent.type(canvas.getByLabelText('Phone number'), '65102030')
-    await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
     const code = await canvas.findByLabelText('Code', {}, { timeout: 3000 })
     await expect(canvas.getByRole('heading', { level: 1, name: 'Enter the code' })).toBeVisible()
     await waitFor(() => expect(code).toHaveFocus())

@@ -1,4 +1,5 @@
 import { maskPhone } from '@yeral/domain/phone'
+import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, TELEGRAM_SECRET, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
@@ -6,6 +7,7 @@ import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { loginCodes, rateLimits, telegramLinkRequests, telegramLinks, telegramUpdates } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { blockedBot, telegramBot, TelegramError } from '../../ports/telegram'
 import { pruneTelegram } from './links'
 
 type App = ReturnType<typeof testApp>
@@ -87,6 +89,8 @@ describe('sign-in codes through our Telegram bot (ADR 0029)', () => {
       resendAfterSec: 59,
       expiresInSec: 300,
       delivery: 'telegram',
+      // «Open Telegram» opens the chat the code came to
+      link: 'https://t.me/yeral_test_bot',
     })
     expect(t.telegram!.sent.at(-1)).toEqual({ chatId: 1001, text: 'Ýeral code: 1234' })
     expect(t.sms.sent).toEqual([])
@@ -190,6 +194,87 @@ describe('sign-in codes through our Telegram bot (ADR 0029)', () => {
     const again = await browser(t.app).req('/v1/auth/code', { body: { phone } })
     expect(again.json).toMatchObject({ delivery: 'telegram_link' })
     expect(await db.select().from(telegramLinks)).toEqual([])
+  })
+
+  it('«Link again»: a linked number asks for a new link (a lost Telegram account, a recycled number), proved by the contact as the first time', async () => {
+    const phone = '+99365000051'
+    const t = testApp(db, { telegram: true })
+    const b = browser(t.app)
+    const first = await linkUp(t, phone, 1017)
+    t.clock.now += 60_000
+    // the stored link stays until a chat proves the number; the code went nowhere yet
+    const sentCount = t.telegram!.sent.length
+    const again = await b.req('/v1/auth/code', { body: { phone, relink: true } })
+    expect(again.status).toBe(200)
+    expect(again.json).toMatchObject({ delivery: 'telegram_link', link: expect.stringMatching(/\?start=[\w-]{32}$/) })
+    expect(nonceOf(again.json.link)).not.toBe(nonceOf(first.json.link))
+    expect(t.telegram!.sent).toHaveLength(sentCount)
+    expect(await db.select({ chatId: telegramLinks.chatId }).from(telegramLinks)).toEqual([{ chatId: 1017 }])
+    // the same limits: no second link within the resend time
+    expect((await b.req('/v1/auth/code', { body: { phone, relink: true } })).json.error).toMatchObject({ code: 'resend_too_soon' })
+    // the new chat shares the number: it holds the link now, and gets the code
+    expect((await webhook(t, start(1018, nonceOf(again.json.link)))).status).toBe(200)
+    expect((await webhook(t, contact(1018, phone))).status).toBe(200)
+    expect(await db.select({ chatId: telegramLinks.chatId }).from(telegramLinks)).toEqual([{ chatId: 1018 }])
+    expect(t.telegram!.sent.at(-1)).toMatchObject({ chatId: 1018, text: expect.stringContaining('1234') })
+    expect((await b.req('/v1/auth/verify', { body: { phone, code: '1234' } })).status).toBe(200)
+  })
+
+  it('a phone change takes «Link again» too: the new number’s old chat is someone else’s by now, a new one proves it', async () => {
+    const newPhone = '+99365000053'
+    const t = testApp(db, { telegram: true })
+    await linkUp(t, newPhone, 1020)
+    t.clock.now += 60_000
+    const b = browser(t.app)
+    await b.login('+99365222030')
+    const linked = await b.req('/v1/me/phone/code', { body: { phone: newPhone } })
+    expect(linked.json).toMatchObject({ delivery: 'telegram', link: 'https://t.me/yeral_test_bot' })
+    expect(t.telegram!.sent.at(-1)).toMatchObject({ chatId: 1020 })
+    t.clock.now += 60_000
+    const again = await b.req('/v1/me/phone/code', { body: { phone: newPhone, relink: true } })
+    expect(again.status).toBe(200)
+    expect(again.json).toMatchObject({ delivery: 'telegram_link', link: expect.stringMatching(/\?start=[\w-]{32}$/) })
+    expect((await webhook(t, start(1021, nonceOf(again.json.link)))).status).toBe(200)
+    expect((await webhook(t, contact(1021, newPhone))).status).toBe(200)
+    expect(await db.select({ chatId: telegramLinks.chatId }).from(telegramLinks).where(eq(telegramLinks.phone, newPhone))).toEqual([
+      { chatId: 1021 },
+    ])
+    expect(t.telegram!.sent.at(-1)).toMatchObject({ chatId: 1021, text: expect.stringContaining('1234') })
+    expect((await b.req('/v1/me/phone/verify', { body: { phone: newPhone, code: '1234' } })).status).toBe(200)
+  })
+
+  it('Telegram out (an error other than a blocked bot): the code request says telegram_unavailable, and the next try isn’t told to wait', async () => {
+    const phone = '+99365000052'
+    const t = testApp(db, { telegram: true })
+    const b = browser(t.app)
+    await linkUp(t, phone, 1019)
+    t.clock.now += 60_000
+    t.telegram!.down = new TelegramError('sendMessage', 502, 'Bad Gateway')
+    const failed = await b.req('/v1/auth/code', { body: { phone } })
+    expect(failed.status).toBe(503)
+    expect(failed.json.error).toMatchObject({ code: 'telegram_unavailable' })
+    // the link stays: it's Telegram that's out, not the person gone
+    expect(await db.select({ chatId: telegramLinks.chatId }).from(telegramLinks)).toEqual([{ chatId: 1019 }])
+    t.telegram!.down = null
+    const retried = await b.req('/v1/auth/code', { body: { phone } })
+    expect(retried.json).toMatchObject({ delivery: 'telegram' })
+    expect(t.telegram!.sent.at(-1)).toEqual({ chatId: 1019, text: 'Ýeral code: 1234' })
+  })
+
+  it('a Telegram error names the method and Telegram’s words, never the token in the Bot API’s address', async () => {
+    const token = '123456:SECRET-TOKEN'
+    const answers = [
+      new Response(JSON.stringify({ ok: false, description: 'Bad Gateway' }), { status: 502 }),
+      Promise.reject(new TypeError(`fetch failed: https://api.telegram.org/bot${token}/sendMessage`)),
+    ]
+    const bot = telegramBot(token, 'yeral_test_bot', () => Promise.resolve(answers.shift()!))
+    for (const expected of [{ status: 502, description: 'Bad Gateway' }, { status: 0 }]) {
+      const error = await bot.sendMessage(1, 'x').catch((e: unknown) => e)
+      expect(error).toBeInstanceOf(TelegramError)
+      expect(error).toMatchObject({ method: 'sendMessage', ...expected })
+      expect((error as Error).message).not.toContain(token)
+      expect(blockedBot(error)).toBe(false)
+    }
   })
 
   it('a chat holds one number: a new contact from it replaces the old link', async () => {

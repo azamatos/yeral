@@ -10,23 +10,25 @@ export type CodeInputProps = Omit<ComponentProps<'input'>, 'value' | 'onChange' 
   onComplete?: (code: string) => void
   length?: number
   invalid?: boolean
+  /** The right code: boxes in the success tone (SignInCodeStep's «Signed in»). */
+  success?: boolean
   /** Box size: 56 business login, 48 client modal and booking step, 52 on phones. */
   size?: 48 | 52 | 56
   /** Boxes turn 52 under 768 whatever `size` says (the sign-in step on phones). */
-  responsive?: boolean
+  responsive?: boolean | 'up'
 }
 
 const row = cva('relative inline-flex self-start', {
   variants: {
     size: { 48: 'gap-2.5', 52: 'gap-3', 56: 'gap-3' },
-    responsive: { true: 'max-sm:gap-3' },
+    responsive: { true: 'max-sm:gap-3', up: 'max-sm:gap-3' },
   },
 })
 
 const box = cva('inline-flex items-center justify-center rounded-input border border-n-300 bg-n-0 font-semibold text-n-900 tabular-nums', {
   variants: {
     size: { 48: 'size-12 text-[20px]', 52: 'size-13 text-[22px]', 56: 'size-14 text-[24px]' },
-    responsive: { true: 'max-sm:size-13 max-sm:text-[22px]' },
+    responsive: { true: 'max-sm:size-13 max-sm:text-[22px]', up: 'max-sm:size-14 max-sm:text-[24px]' },
     state: {
       idle: '',
       focus: 'border-a-500 shadow-input-focus',
@@ -34,6 +36,7 @@ const box = cva('inline-flex items-center justify-center rounded-input border bo
       // checking: read-only boxes on n-50, the digits stay ink
       checking: 'border-n-200 bg-n-50',
       disabled: 'border-n-200 bg-n-50 text-n-500',
+      success: 'border-st-completed-line bg-st-completed-bg text-st-completed-ink',
     },
   },
 })
@@ -49,6 +52,7 @@ export function CodeInput({
   onComplete,
   length = 4,
   invalid,
+  success = false,
   disabled,
   readOnly,
   size = 56,
@@ -71,15 +75,17 @@ export function CodeInput({
     <div className={cn(row({ size, responsive }), className)} onClick={() => inner.current?.focus()}>
       {Array.from({ length }, (_, i) => {
         const isActive = focused && !readOnly && i === active
-        const state = control.disabled
-          ? 'disabled'
-          : control['aria-invalid']
-            ? 'error'
-            : readOnly
-              ? 'checking'
-              : isActive
-                ? 'focus'
-                : 'idle'
+        const state = success
+          ? 'success'
+          : control.disabled
+            ? 'disabled'
+            : control['aria-invalid']
+              ? 'error'
+              : readOnly
+                ? 'checking'
+                : isActive
+                  ? 'focus'
+                  : 'idle'
         return (
           <span key={i} aria-hidden className={cn(box({ size, responsive, state }))}>
             {digits[i] ??

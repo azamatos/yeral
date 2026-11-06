@@ -24,15 +24,15 @@ const TM = { prefix: COUNTRY_PREFIX, maxDigits: MARKET.phone.length, format: for
 const COPY: SignInCodeStepCopy = {
   phoneLabel: 'Phone number',
   phonePlaceholder: '65 12 34 56',
-  sendCode: 'Send code',
+  sendCode: 'Get the code',
   sending: 'Sending…',
   codeLabel: 'Code',
   codeHint: 'It checks itself after the 4th digit.',
   yourCode: 'Your code:',
   confirm: 'Confirm',
   checking: 'Checking…',
-  resend: 'Get a new code',
-  resendIn: (time) => `Get a new code in ${time}`,
+  resend: 'Send a new code',
+  resendIn: (time) => `Send a new code in ${time}`,
   codeExpired: 'The old code no longer works.',
   resent: 'Here’s a new code.',
 }
@@ -110,7 +110,7 @@ export const Phone: Story = {
           phoneHint="If you already book on Ýeral as a client, use that number — one account works for both."
           sendNote={
             <p className="m-0 text-dense text-n-600">
-              By tapping “Send code”, you agree to the{' '}
+              By tapping “Get the code”, you agree to the{' '}
               <a href="#terms" className="text-a-600 underline">
                 Terms of use
               </a>{' '}

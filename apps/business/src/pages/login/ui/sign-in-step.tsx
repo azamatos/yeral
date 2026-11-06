@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import type { useSignIn } from '@yeral/features/auth-by-phone'
+import { useCodeDelivery, type useSignIn } from '@yeral/features/auth-by-phone'
 import { useId } from 'react'
 import { useTranslations } from 'use-intl'
 import { CodeLead, SignInForm } from '@/features/sign-in'
@@ -11,12 +11,13 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
   const titleId = useId()
   const brand = t('common.brand')
   const onCode = signIn.state.step === 'code'
+  const ahead = useCodeDelivery()
 
   return (
     <AuthPage
       titleId={titleId}
       title={onCode ? t('login.codeTitle') : t('login.title', { app: t('app.name', { brand }) })}
-      lead={onCode ? <CodeLead signIn={signIn} /> : t('login.lead')}
+      lead={onCode ? <CodeLead signIn={signIn} /> : t(ahead === 'screen' ? 'login.lead' : 'login.leadSend')}
     >
       <SignInForm signIn={signIn} labelledBy={titleId} />
       {!onCode && (

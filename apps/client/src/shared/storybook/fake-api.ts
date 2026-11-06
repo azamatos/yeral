@@ -73,6 +73,11 @@ export interface AuthApiOptions {
   signedIn?: Me | null
   /** First-launch mode: the code comes back with `POST /auth/code` (book Q-036). */
   showCode?: boolean
+  /**
+   * Codes through our Telegram bot (ADR 0029): `linked`, the number's chat gets them (else the link that makes one;
+   * `relink` always gets the link); `down`, Telegram doesn't answer (`telegram_unavailable`).
+   */
+  telegram?: { linked?: boolean; down?: boolean }
   /** Codes this number already had this hour (5 is the limit, book Q-267). */
   codes?: number
   /** How long 3 wrong codes lock (60 on the api). */
@@ -99,6 +104,7 @@ export const authApi =
     unused = [],
     signedIn = null,
     showCode = true,
+    telegram,
     codes = 0,
     lockSec = 60,
     resendSec = 59,
@@ -115,20 +121,27 @@ export const authApi =
     let wrong = 0
     let phone: string | undefined
     const code = () => CODES[(sent - 1) % CODES.length]
+    const onScreen = showCode && !telegram
+    /** How the code went (`SentCode`): by the bot when there is one. */
+    const delivery = (relink: boolean) =>
+      telegram
+        ? telegram.linked && !relink
+          ? { delivery: 'telegram', link: 'https://t.me/yeral_bot' }
+          : { delivery: 'telegram_link', link: `https://t.me/yeral_bot?start=nonce-${sent}` }
+        : onScreen
+          ? { delivery: 'screen', code: code() }
+          : { delivery: 'sms' }
     return fakeFetch(({ route, body }) => {
-      if (route === 'GET /auth/mode') return json({ codeOnScreen: showCode, delivery: showCode ? 'screen' : 'sms' })
+      if (route === 'GET /auth/mode') return json({ codeOnScreen: onScreen, delivery: telegram ? 'telegram' : onScreen ? 'screen' : 'sms' })
       if (route === 'POST /auth/code') {
         if (sent >= 5) return refuse(429, 'rate_limited', { retryAfterSec: 2520, retryAfterMin: 42 })
         if (body.phone === phone && Date.now() - sentAt < resendSec * 1000) return refuse(429, 'resend_too_soon', { retryAfterSec: 50 })
+        if (telegram?.down) return refuse(503, 'telegram_unavailable')
         phone = String(body.phone)
         sentAt = Date.now()
         sent += 1
         wrong = 0
-        return json({
-          resendAfterSec: resendSec,
-          expiresInSec: 300,
-          ...(showCode ? { delivery: 'screen', code: code() } : { delivery: 'sms' }),
-        })
+        return json({ resendAfterSec: resendSec, expiresInSec: 300, ...delivery(body.relink === true) })
       }
       if (route === 'POST /auth/verify') {
         if (wrong >= 3) return refuse(429, 'too_many_attempts', { retryAfterSec: lockSec })

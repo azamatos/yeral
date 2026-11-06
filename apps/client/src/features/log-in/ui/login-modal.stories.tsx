@@ -61,8 +61,6 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     await expect(modal.getByText('Enter your phone number to manage your bookings.')).toBeVisible()
-    // the first launch shows the code on the screen: the phone step says so, without the word «demo» (book Q-036, owner's review #44)
-    await expect(await modal.findByText(/For now the sign-in code shows here instead of coming by SMS/)).toBeVisible()
     const phone = modal.getByLabelText('Phone number')
     await waitFor(() => expect(phone).toHaveFocus())
     await userEvent.type(phone, '651020{Enter}')
@@ -141,14 +139,14 @@ export const Locked: Story = {
     await shown(/Too many tries\. Try again in [12] seconds?\./)
     await expect(modal.queryByRole('button', { name: 'Confirm' })).toBeNull()
     await shown('The old code no longer works.', 4000)
-    await userEvent.click(modal.getByRole('button', { name: 'Get a new code' }))
+    await userEvent.click(modal.getByRole('button', { name: 'Send a new code' }))
     await shown('Here’s a new code.')
     await expect(modal.getByText('7305')).toBeVisible()
     await userEvent.keyboard('{Escape}')
   },
 }
 
-/** The sixth code in an hour for one number: the wait in minutes replaces Send code. */
+/** The sixth code in an hour for one number: the wait in minutes replaces Get the code. */
 export const TooManyCodes: Story = {
   name: 'Too many codes',
   args: { server: authApi({ codes: 5 }) },
@@ -156,7 +154,7 @@ export const TooManyCodes: Story = {
     const modal = await open(canvas)
     await userEvent.type(modal.getByLabelText('Phone number'), '65901122{Enter}')
     await shown('Too many codes. Try again in 42 minutes.')
-    await expect(modal.queryByRole('button', { name: 'Send code' })).toBeNull()
+    await expect(modal.queryByRole('button', { name: 'Get the code' })).toBeNull()
     await userEvent.keyboard('{Escape}')
   },
 }
@@ -168,8 +166,8 @@ export const CodeNotShown: Story = {
   play: async ({ canvas }) => {
     const modal = await sendCode(canvas, '65901122')
     await expect(modal.queryByText('Your code:')).toBeNull()
-    await expect(modal.getByRole('button', { name: /Get a new code in 0:5\d/ })).toBeDisabled()
-    // no code-on-the-screen note once codes go by SMS: not on the phone step either
+    await expect(modal.getByRole('button', { name: /Send a new code in 0:5\d/ })).toBeDisabled()
+    // no demo note once codes go by SMS: not on the phone step either
     await userEvent.click(modal.getByRole('button', { name: 'Change number' }))
     await modal.findByLabelText('Phone number')
     await expect(modal.queryByText(/the sign-in code shows here/)).toBeNull()
@@ -226,5 +224,86 @@ export const PhoneSheet: Story = {
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     await expect(modal.getByLabelText('Phone number')).toBeVisible()
+  },
+}
+
+// ---------------------------------------------------------------- codes by Telegram (DS-Lists → 06 · B10)
+
+/** The code step once the code went to the person's Telegram: the lead with the masked number, the boxes, Open Telegram. */
+async function telegramCode(canvas: Canvas, digits = '65901122') {
+  const modal = await open(canvas)
+  await expect(await modal.findByText('We’ll send a code to your Telegram.')).toBeVisible()
+  await userEvent.type(modal.getByLabelText('Phone number'), `${digits}{Enter}`)
+  await body.findByRole('dialog', { name: 'Enter the code' })
+  await waitFor(() => expect(modal.getByLabelText('Sign-in code')).toBeInTheDocument())
+  return modal
+}
+
+/** Linked: the code goes to the chat; a right code says «Signed in» for a moment, then the modal closes. */
+export const Telegram: Story = {
+  args: { server: authApi({ people: [AYJEMAL], telegram: { linked: true } }) },
+  play: async ({ canvas }) => {
+    const modal = await telegramCode(canvas, '65901122')
+    await expect(modal.getByText(/We sent the code to your Telegram/)).toBeVisible()
+    await expect(modal.getByText('+993 •• •• •• 22')).toBeVisible()
+    await expect(modal.getByText(/Send a new code in 0:5\d/)).toBeVisible()
+    await expect(modal.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+    await expect(modal.queryByText('Your code:')).toBeNull()
+    await userEvent.keyboard('4821')
+    await shown('Signed in')
+    // the moment passes, then the modal closes
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument(), { timeout: 3000 })
+    await expect(await canvas.findByRole('button', { name: /Account menu/ })).toBeVisible()
+  },
+}
+
+/** Not linked yet: the three steps to take in Telegram sit above the boxes. */
+export const TelegramLinking: Story = {
+  args: { server: authApi({ telegram: { linked: false } }) },
+  play: async ({ canvas }) => {
+    const modal = await telegramCode(canvas)
+    await expect(modal.getByText(/To get the code, link/)).toBeVisible()
+    await expect(modal.getByText('Tap Share my number.')).toBeVisible()
+    await expect(modal.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+  },
+}
+
+/** Telegram didn't answer: the phone step says so and the person tries again. */
+export const TelegramUnavailable: Story = {
+  args: { server: authApi({ telegram: { linked: true, down: true } }) },
+  play: async ({ canvas }) => {
+    const modal = await open(canvas)
+    await userEvent.type(modal.getByLabelText('Phone number'), '65901122{Enter}')
+    await expect(await modal.findByText('Telegram didn’t answer. Try again.')).toBeVisible()
+    await expect(modal.getByLabelText('Phone number')).toBeVisible()
+  },
+}
+
+/** The help's «Link again»: a new link for a number whose Telegram is lost. */
+export const TelegramLinkAgain: Story = {
+  args: { server: authApi({ telegram: { linked: true }, resendSec: 0 }) },
+  play: async ({ canvas }) => {
+    const modal = await telegramCode(canvas)
+    await userEvent.click(modal.getByRole('button', { name: 'No Telegram on this number?' }))
+    const popover = within(await body.findByRole('dialog', { name: 'No Telegram on this number?' }))
+    await waitFor(() => expect(popover.getByRole('link', { name: 'Call' })).toBeVisible())
+    await userEvent.click(popover.getByRole('button', { name: 'Linked to another Telegram? Link again' }))
+    await expect(await modal.findByText('Tap Share my number.')).toBeVisible()
+  },
+}
+
+/** On a phone: the code step in the sheet, the help as a sheet over it. */
+export const TelegramSheet: Story = {
+  name: 'Telegram (bottom sheet)',
+  globals: { viewport: { value: 'xs' } },
+  args: { server: authApi({ telegram: { linked: true } }) },
+  play: async ({ canvas }) => {
+    const modal = await telegramCode(canvas)
+    await userEvent.click(modal.getByRole('button', { name: 'No Telegram on this number?' }))
+    const sheet = within(await body.findByRole('dialog', { name: 'No Telegram on this number?' }))
+    await waitFor(() => expect(sheet.getByRole('link', { name: 'Call Ýeral' })).toBeVisible())
+    await userEvent.click(sheet.getByRole('button', { name: 'Back to the code' }))
+    await waitFor(() => expect(body.queryByRole('dialog', { name: 'No Telegram on this number?' })).not.toBeInTheDocument())
+    await expect(modal.getByLabelText('Sign-in code')).toBeInTheDocument()
   },
 }

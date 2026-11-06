@@ -113,6 +113,13 @@ function NewNumber({ current, onClose }: { current: string; onClose: () => void 
         step={state.step}
         size={48}
         copy={{ ...said.copy, phoneLabel: t('shell.profile.newNumber'), cancel: t('shell.profile.cancel') }}
+        // the code goes to the new number's Telegram (ADR 0029): the link that makes a chat, the help, «Link again»
+        delivery={state.delivery}
+        telegram={{ ...said.telegram, codeLabel: said.copy.codeLabel }}
+        link={state.link}
+        support={site.support}
+        sendFailed={state.sendFailed}
+        onRelink={steps.relink}
         phoneRules={PHONE_RULES}
         onCancel={onClose}
         tooManyCodes={said.tooManyCodes}

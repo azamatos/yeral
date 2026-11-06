@@ -222,7 +222,17 @@ const fakeApi =
     codes = 0,
     resendSec = 59,
     sessionEnds = false,
-  }: { showCode?: boolean; signedIn?: string; lockSec?: number; codes?: number; resendSec?: number; sessionEnds?: boolean } = {}) =>
+    telegram,
+  }: {
+    showCode?: boolean
+    signedIn?: string
+    lockSec?: number
+    codes?: number
+    resendSec?: number
+    sessionEnds?: boolean
+    /** Codes through our Telegram bot (ADR 0029): `linked`, the chat gets them (else the link; `relink` always the link); `down`, no answer. */
+    telegram?: { linked?: boolean; down?: boolean }
+  } = {}) =>
   (): typeof fetch => {
     const ACCOUNTS = structuredClone(PEOPLE)
     const CODES = ['4821', '7305', '1946', '5582', '3067']
@@ -240,21 +250,26 @@ const fakeApi =
       const body = (request.method === 'GET' ? {} : await request.json().catch(() => ({}))) as Record<string, unknown>
       const route = `${request.method} ${path}`
 
-      if (route === 'GET /auth/mode') return json({ codeOnScreen: showCode, delivery: showCode ? 'screen' : 'sms' })
+      const onScreen = showCode && !telegram
+      if (route === 'GET /auth/mode') return json({ codeOnScreen: onScreen, delivery: telegram ? 'telegram' : onScreen ? 'screen' : 'sms' })
       if (route === 'POST /auth/code') {
         // 5 codes an hour for one number (book Q-267)
         if (sent >= 5) return refuse(429, 'rate_limited', { retryAfterSec: 2520, retryAfterMin: 42 })
         // the code sent less than a minute ago still works
         if (body.phone === phone && Date.now() - sentAt < resendSec * 1000) return refuse(429, 'resend_too_soon', { retryAfterSec: 50 })
+        if (telegram?.down) return refuse(503, 'telegram_unavailable')
         phone = String(body.phone)
         sentAt = Date.now()
         sent += 1
         wrong = 0
-        return json({
-          resendAfterSec: 59,
-          expiresInSec: 300,
-          ...(showCode ? { delivery: 'screen', code: CODES[(sent - 1) % CODES.length] } : { delivery: 'sms' }),
-        })
+        const went = telegram
+          ? telegram.linked && body.relink !== true
+            ? { delivery: 'telegram', link: 'https://t.me/yeral_bot' }
+            : { delivery: 'telegram_link', link: `https://t.me/yeral_bot?start=nonce-${sent}` }
+          : onScreen
+            ? { delivery: 'screen', code: CODES[(sent - 1) % CODES.length] }
+            : { delivery: 'sms' }
+        return json({ resendAfterSec: 59, expiresInSec: 300, ...went })
       }
       if (route === 'POST /auth/verify') {
         if (wrong >= 3) return refuse(429, 'too_many_attempts', { retryAfterSec: lockSec })
@@ -367,7 +382,7 @@ async function sendCode(canvas: Canvas, digits: string) {
   const phone = await canvas.findByLabelText('Phone number')
   await userEvent.clear(phone)
   await userEvent.type(phone, digits)
-  await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+  await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
   return canvas.findByLabelText('Code', {}, { timeout: 3000 })
 }
 
@@ -376,15 +391,12 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Log in to Ýeral Business' })).toBeVisible()
     await waitFor(() => expect(document.title).toBe('Log in · Ýeral Business'))
-    // the first launch shows the code on the screen: the phone step says so (book Q-036)
-    await expect(
-      await canvas.findByText(/While Ýeral is being tried out, the sign-in code shows here instead of coming by SMS/),
-    ).toBeVisible()
     const phone = canvas.getByLabelText('Phone number')
-    // a demo asks for the same made-up number on both sites
-    await expect(phone).toHaveAccessibleDescription('Use the same made-up number on the Ýeral site and here — one account works for both.')
+    await expect(phone).toHaveAccessibleDescription(
+      'If you already book on Ýeral as a client, use that number — one account works for both.',
+    )
     await userEvent.type(phone, '651020')
-    await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
     await expect(await canvas.findByRole('alert')).toHaveTextContent('The number is incomplete — it needs 8 digits.')
     await userEvent.clear(phone)
     await userEvent.type(phone, '12456789{Enter}')
@@ -397,6 +409,66 @@ export const Phone: Story = {
 }
 
 export const PhoneViewport: Story = { name: 'Phone · on a phone', globals: { viewport: { value: 'xs' } } }
+
+// ---------------------------------------------------------------- codes by Telegram (DS-Lists → 06 · B10)
+
+/** The code step once the code went to Telegram: the caption on the phone step, then the boxes. */
+async function telegramCode(canvas: Canvas, digits: string) {
+  await expect(await canvas.findByText('We’ll send a code to your Telegram.')).toBeVisible()
+  await userEvent.type(await canvas.findByLabelText('Phone number'), digits)
+  await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
+  return canvas.findByLabelText('Sign-in code', {}, { timeout: 3000 })
+}
+
+/** Linked: the lead with the masked number, Open Telegram, «Signed in» for a moment, then the name step. */
+export const Telegram: Story = {
+  args: { server: fakeApi({ telegram: { linked: true } }) },
+  play: async ({ canvas }) => {
+    await telegramCode(canvas, '65901122')
+    await expect(canvas.getByText(/We sent the code to your Telegram/)).toBeVisible()
+    await expect(canvas.getByText('+993 •• •• •• 22')).toBeVisible()
+    await expect(canvas.getByText(/Send a new code in 0:5\d/)).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+    await expect(canvas.queryByText('Your code:')).toBeNull()
+    await userEvent.keyboard('4821')
+    await shown(canvas, 'Signed in')
+    await expect(await canvas.findByLabelText('First name', {}, { timeout: 3000 })).toBeVisible()
+  },
+}
+
+/** Not linked yet: the three steps to take in Telegram above the boxes. */
+export const TelegramLinking: Story = {
+  args: { server: fakeApi({ telegram: { linked: false } }) },
+  play: async ({ canvas }) => {
+    await telegramCode(canvas, '65901122')
+    await expect(canvas.getByText(/To get the code, link/)).toBeVisible()
+    await expect(canvas.getByText('Tap Share my number.')).toBeVisible()
+  },
+}
+
+/** Telegram didn't answer: the phone step says so. */
+export const TelegramUnavailable: Story = {
+  args: { server: fakeApi({ telegram: { linked: true, down: true } }) },
+  play: async ({ canvas }) => {
+    await userEvent.type(await canvas.findByLabelText('Phone number'), '65901122{Enter}')
+    await expect(await canvas.findByText('Telegram didn’t answer. Try again.')).toBeVisible()
+  },
+}
+
+/** On a phone: the card without its frame, the help as a bottom sheet. */
+export const TelegramPhone: Story = {
+  name: 'Telegram · on a phone',
+  globals: { viewport: { value: 'xs' } },
+  args: { server: fakeApi({ telegram: { linked: true } }) },
+  play: async ({ canvas }) => {
+    await telegramCode(canvas, '65901122')
+    await userEvent.click(canvas.getByRole('button', { name: 'No Telegram on this number?' }))
+    const sheet = within(await within(document.body).findByRole('dialog', { name: 'No Telegram on this number?' }))
+    await waitFor(() => expect(sheet.getByRole('link', { name: 'Call Ýeral' })).toBeVisible())
+    await userEvent.click(sheet.getByRole('button', { name: 'Back to the code' }))
+    await waitFor(() => expect(within(document.body).queryByRole('dialog')).not.toBeInTheDocument())
+  },
+}
 
 /** A member: the code on screen, a wrong code, the right one, then the workspace used last opens. */
 export const Member: Story = {
@@ -430,10 +502,10 @@ export const ChangeNumber: Story = {
     // the field takes the focus, not the page
     await waitFor(() => expect(phone).toHaveFocus())
     await expect(phone).toHaveValue('65 10 20 30')
-    await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
     await canvas.findByLabelText('Code')
     await expect(canvas.getByText('4821')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: /Get a new code in 0:[45]\d/ })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: /Send a new code in 0:[45]\d/ })).toBeDisabled()
   },
 }
 
@@ -454,7 +526,7 @@ export const CodeNotShown: Story = {
   play: async ({ canvas }) => {
     await sendCode(canvas, '65102030')
     await expect(canvas.queryByText('Your code:')).not.toBeInTheDocument()
-    await expect(canvas.getByRole('button', { name: /Get a new code in 0:5\d/ })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: /Send a new code in 0:5\d/ })).toBeDisabled()
     // no demo note once codes go by SMS (nor on the code step), and the usual hint
     await expect(canvas.queryByText(/This is a demo/)).not.toBeInTheDocument()
     await userEvent.click(canvas.getByRole('button', { name: 'Change number' }))
@@ -674,13 +746,13 @@ export const Locked: Story = {
     await shown(canvas, /Too many tries\. Try again in [12] seconds?\./)
     await expect(canvas.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()
     await shown(canvas, 'The old code no longer works.', 4000)
-    await userEvent.click(canvas.getByRole('button', { name: 'Get a new code' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Send a new code' }))
     await shown(canvas, 'Here’s a new code.')
     await expect(canvas.getByText('7305')).toBeVisible()
   },
 }
 
-/** The sixth code in an hour for one number: the wait in minutes replaces Send code. */
+/** The sixth code in an hour for one number: the wait in minutes replaces Get the code. */
 export const TooManyCodes: Story = {
   name: 'Too many codes',
   args: { server: fakeApi({ codes: 5 }) },
@@ -688,7 +760,7 @@ export const TooManyCodes: Story = {
     const phone = await canvas.findByLabelText('Phone number')
     await userEvent.type(phone, '65102030{Enter}')
     await shown(canvas, 'Too many codes. Try again in 42 minutes.')
-    await expect(canvas.queryByRole('button', { name: 'Send code' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Get the code' })).not.toBeInTheDocument()
   },
 }
 

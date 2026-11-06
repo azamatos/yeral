@@ -6,6 +6,9 @@
  */
 import { isApiError, type ApiError } from '@yeral/sdk'
 
+/** How the code went (`SentCode.delivery`, ADR 0029). */
+export type CodeDelivery = 'screen' | 'sms' | 'telegram' | 'telegram_link'
+
 export type SignInStep = 'phone' | 'code'
 
 export interface SignInState {
@@ -18,6 +21,12 @@ export interface SignInState {
   code: string
   /** The code on screen (first launch, Q-036): only when the api hands it out. */
   shownCode?: string
+  /** How the code went (ADR 0029): the code step shows the Telegram states by it. */
+  delivery?: CodeDelivery
+  /** `telegram_link`: the link that opens our bot in Telegram, where «Share my number» brings the code. */
+  link?: string
+  /** Telegram didn't answer the request: «Telegram didn't answer. Try again.» */
+  sendFailed: boolean
   /** When a new code may be asked for (epoch ms). */
   resendAt: number
   /** Tries left after a wrong code. */
@@ -32,7 +41,12 @@ export interface SignInState {
   limit?: { phone: string; until: number }
   /** Counts «Change number» taps: the phone field takes the focus after each. */
   changedNumber: number
+  /** The code was right: «Signed in» for a moment (`SUCCESS_MS`), then what comes next (B10). */
+  verified: boolean
 }
+
+/** How long «Signed in» shows before the steps go on by themselves (B10: 0.6 s). */
+export const SUCCESS_MS = 600
 
 export const initialSignIn: SignInState = {
   step: 'phone',
@@ -41,17 +55,29 @@ export const initialSignIn: SignInState = {
   resendAt: 0,
   codeExpired: false,
   resent: false,
+  sendFailed: false,
   changedNumber: 0,
+  verified: false,
 }
 
 export type SignInEvent =
   | { type: 'phoneChanged'; phone: string }
   | { type: 'phoneInvalid'; error: 'incomplete' | 'notMobile' }
   /** `phone`: the number the code went to; `resend`: asked for from the code step («Get a new code»). */
-  | { type: 'codeSent'; phone: string; resend: boolean; resendAfterSec: number; code?: string; now: number }
+  | {
+      type: 'codeSent'
+      phone: string
+      resend: boolean
+      resendAfterSec: number
+      delivery: CodeDelivery
+      code?: string
+      link?: string
+      now: number
+    }
   | { type: 'sendRefused'; phone: string; resend: boolean; error: ApiError; now: number }
   | { type: 'codeChanged'; code: string }
   | { type: 'codeRefused'; error: ApiError; now: number }
+  | { type: 'codeVerified' }
   | { type: 'changeNumber' }
   | { type: 'tick'; now: number }
   | { type: 'reset' }
@@ -75,11 +101,11 @@ const codeStep = (s: SignInState, phone: string): SignInState => ({
 export function signInReducer(s: SignInState, e: SignInEvent): SignInState {
   switch (e.type) {
     case 'phoneChanged':
-      return { ...s, phone: e.phone, phoneError: undefined }
+      return { ...s, phone: e.phone, phoneError: undefined, sendFailed: false }
     case 'phoneInvalid':
       return { ...s, phoneError: e.error }
     case 'codeSent': {
-      const fresh = { shownCode: e.code, resendAt: e.now + e.resendAfterSec * 1000 }
+      const fresh = { shownCode: e.code, delivery: e.delivery, link: e.link, sendFailed: false, resendAt: e.now + e.resendAfterSec * 1000 }
       // a new code arrived after the person went back to change the number: it's that number's, they stay
       if (e.resend && s.step === 'phone')
         return { ...s, ...fresh, sentTo: e.phone, attemptsLeft: undefined, lockedUntil: undefined, codeExpired: false }
@@ -88,6 +114,8 @@ export function signInReducer(s: SignInState, e: SignInEvent): SignInState {
     }
     case 'sendRefused': {
       const { error, now, phone } = e
+      // our bot couldn't be reached: the person tries again where they are
+      if (isApiError(error, 'telegram_unavailable')) return { ...s, resent: false, sendFailed: true }
       if (isApiError(error, 'rate_limited')) return { ...s, resent: false, limit: { phone, until: now + secondsOf(error, 3600) * 1000 } }
       // the person went back to change the number meanwhile: nothing else to show
       if (e.resend && s.step === 'phone') return s
@@ -113,6 +141,8 @@ export function signInReducer(s: SignInState, e: SignInEvent): SignInState {
       if (isApiError(error, 'code_expired')) return { ...s, code: '', attemptsLeft: undefined, resent: false, codeExpired: true }
       return s
     }
+    case 'codeVerified':
+      return { ...s, verified: true, attemptsLeft: undefined, resent: false, sendFailed: false }
     case 'changeNumber':
       return {
         ...s,
@@ -120,6 +150,7 @@ export function signInReducer(s: SignInState, e: SignInEvent): SignInState {
         code: '',
         attemptsLeft: undefined,
         resent: false,
+        sendFailed: false,
         phoneError: undefined,
         changedNumber: s.changedNumber + 1,
       }
