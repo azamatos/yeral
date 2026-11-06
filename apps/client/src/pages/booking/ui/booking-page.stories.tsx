@@ -92,6 +92,41 @@ export const ChangeSpecialist: Story = {
   },
 }
 
+/**
+ * A service picked on the business page, then Maral's «Book» (`?services=&staff=&first=staff&step=time`): the specialist
+ * and the services are done, the flow opens on the time; Back is the services, not the business page.
+ */
+export const WithSpecialistAndService: Story = {
+  args: { path: '/en/b/glow-studio/book?services=s5&staff=st-maral&first=staff&step=time' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    const steps = within(canvas.getByRole('navigation', { name: 'Booking steps' }))
+    await expect(steps.getByRole('button', { name: 'Maral · Change' })).toBeEnabled()
+    await expect(steps.getByRole('button', { name: 'Services' })).toBeEnabled()
+    await expect(steps.getByRole('button', { name: '3 Time' })).toHaveAttribute('aria-current', 'step')
+    const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
+    await expect(summary.getByText('Maral')).toBeVisible()
+    await expect(summary.getByText('Manicure')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Back' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio?services=s5')
+  },
+}
+
+/**
+ * A service picked on the business page that Maral doesn't do, then her «Book» (no `step=`): the services open with
+ * the warning, so nobody lands on a time for «any specialist» without knowing why.
+ */
+export const WithSpecialistNotTheirs: Story = {
+  args: { path: '/en/b/glow-studio/book?services=s1&staff=st-maral&first=staff' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
+    await expect(canvas.getByText(/^Maral doesn't do Women’s haircut, so any free specialist takes this booking\./)).toBeVisible()
+    const steps = within(canvas.getByRole('navigation', { name: 'Booking steps' }))
+    await expect(steps.getByRole('button', { name: 'Any specialist · Change' })).toBeEnabled()
+  },
+}
+
 /** Step 2: anyone with the earliest time, the people who do the haircut, the others disabled with why. */
 export const Specialist: Story = {
   args: { path: '/en/b/glow-studio/book?services=s1&step=staff' },

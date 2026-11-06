@@ -251,14 +251,21 @@ export const Specialists: Story = {
   },
 }
 
-/** Services picked on the page go with a specialist's Book, to the specialist step (as the card's Continue). */
+/**
+ * Services picked on the page go with a specialist's Book: one who does them all opens the time (both steps answered,
+ * #39), one who doesn't opens the services, which say so.
+ */
 export const SpecialistsPicked: Story = {
   args: { path: '/en/b/glow-studio?services=s1' },
   play: async ({ canvas }) => {
     const team = within(await canvas.findByRole('region', { name: 'Specialists' }))
     await expect(team.getByRole('link', { name: 'Book with Aýna' })).toHaveAttribute(
       'href',
-      '/en/b/glow-studio/book?services=s1&step=staff&staff=st-ayna&first=staff',
+      '/en/b/glow-studio/book?services=s1&step=time&staff=st-ayna&first=staff',
+    )
+    await expect(team.getByRole('link', { name: 'Book with Maral' })).toHaveAttribute(
+      'href',
+      '/en/b/glow-studio/book?services=s1&staff=st-maral&first=staff',
     )
   },
 }

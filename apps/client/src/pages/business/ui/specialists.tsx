@@ -24,7 +24,11 @@ export function Specialists({ detail, state, picked }: { detail: BusinessDetail;
   const lang = useLocale()
   const now = useClock()
   const bookable = state === 'online' || state === 'preview'
-  const services = picked.length > 0 ? { services: picked.join(','), step: 'staff' as const } : {}
+  const services = picked.length > 0 ? { services: picked.join(',') } : {}
+  // services picked here and a specialist who does them all: both steps are answered, the booking opens on the time;
+  // one who doesn't do all of them opens on the services, which say so (owner's review, #39: no step to walk again)
+  const stepFor = (s: BusinessDetail['specialists'][number]) =>
+    picked.length > 0 && picked.every((id) => s.serviceIds.includes(id)) ? { step: 'time' as const } : {}
   return (
     <Section id="specialists" title={t('title')}>
       <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(170px,100%),1fr))] gap-4 p-0">
@@ -50,7 +54,7 @@ export function Specialists({ detail, state, picked }: { detail: BusinessDetail;
                   to="/$lang/b/$slug/book"
                   params={{ lang, slug: detail.slug }}
                   // the booking opens on their services with them chosen, no specialist step on the way (`stepsOf`)
-                  search={{ ...services, staff: s.id, first: 'staff' }}
+                  search={{ ...services, ...stepFor(s), staff: s.id, first: 'staff' }}
                   // the word seen stays in the name heard (axe: label-content-name-mismatch)
                   aria-label={t('bookLabel', { name: s.name })}
                 >
