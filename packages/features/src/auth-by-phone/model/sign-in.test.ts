@@ -7,6 +7,7 @@ const NUMBER = '65102030'
 const run = (...events: SignInEvent[]) => events.reduce(signInReducer, initialSignIn)
 const typed = (phone = NUMBER) => run({ type: 'phoneChanged', phone })
 const sent = (opts: { phone?: string; resend?: boolean; code?: string; now?: number } = {}): SignInEvent => ({
+  delivery: opts.code ? 'screen' : 'sms',
   type: 'codeSent',
   phone: opts.phone ?? NUMBER,
   resend: opts.resend ?? false,

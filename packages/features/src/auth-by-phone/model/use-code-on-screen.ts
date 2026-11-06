@@ -10,3 +10,9 @@ export function useCodeOnScreen(): boolean {
   const sdk = useSdk()
   return useQuery(sdk.auth.mode()).data?.codeOnScreen ?? false
 }
+
+/** How the sign-in's code will come (`GET /v1/auth/mode`, ADR 0029): the phone step's caption and the code step's lead say so ahead. */
+export function useCodeDelivery(): 'screen' | 'sms' | 'telegram' {
+  const sdk = useSdk()
+  return useQuery(sdk.auth.mode()).data?.delivery ?? 'sms'
+}

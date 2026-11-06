@@ -12,7 +12,7 @@ import { initialSignIn, signInReducer, signInView, type SignInEvent } from './si
 export type Verified = Awaited<ReturnType<NonNullable<ReturnType<Sdk['auth']['verify']>['mutationFn']>>>
 
 /** Refusals the step shows in place; anything else (no connection, a server error) is the screen's toast. */
-const SEND_REFUSALS = ['rate_limited', 'resend_too_soon', 'too_many_attempts', 'validation_error'] as const
+const SEND_REFUSALS = ['rate_limited', 'resend_too_soon', 'too_many_attempts', 'validation_error', 'telegram_unavailable'] as const
 const CODE_REFUSALS = ['code_invalid', 'too_many_attempts', 'code_expired'] as const
 
 /** Asking for a code (`sdk.auth.sendCode()`; `sdk.me.phoneCode()` has the same shape) and what checking one sends. */
@@ -69,19 +69,21 @@ export function useCodeSteps<TVerified>({ sendCode, verify: verifyOptions, onVer
     dispatch(event(moment))
   }
 
-  const request = (phone: string, resend: boolean) => {
+  /** `relink`: the number's Telegram is lost — ask for a new link to a chat (ADR 0029). */
+  const request = (phone: string, resend: boolean, relink = false) => {
     if (send.isPending) return
     send.mutate(
-      { phone: toE164(phone), lang: locale },
+      { phone: toE164(phone), lang: locale, ...(relink ? { relink: true } : {}) },
       {
-        // `telegram` and `telegram_link` (ADR 0029) get their own states with the screens that show them
         onSuccess: (sent) =>
           at((moment) => ({
             type: 'codeSent',
             phone,
             resend,
             resendAfterSec: sent.resendAfterSec,
+            delivery: sent.delivery,
             code: sent.delivery === 'screen' ? sent.code : undefined,
+            link: sent.delivery === 'telegram_link' ? sent.link : undefined,
             now: moment,
           })),
         onError: (error) => {
@@ -106,6 +108,7 @@ export function useCodeSteps<TVerified>({ sendCode, verify: verifyOptions, onVer
       else request(state.phone, false)
     },
     resend: () => request(state.sentTo ?? state.phone, true),
+    relink: () => request(state.sentTo ?? state.phone, true, true),
     submitCode: (code: string) => {
       if (!state.sentTo || verify.isPending) return
       verify.mutate(

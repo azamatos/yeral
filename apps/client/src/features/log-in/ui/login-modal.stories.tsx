@@ -61,8 +61,6 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     await expect(modal.getByText('Enter your phone number to manage your bookings.')).toBeVisible()
-    // the first launch shows the code on the screen: the phone step says so, without the word «demo» (book Q-036, owner's review #44)
-    await expect(await modal.findByText(/For now the sign-in code shows here instead of coming by SMS/)).toBeVisible()
     const phone = modal.getByLabelText('Phone number')
     await waitFor(() => expect(phone).toHaveFocus())
     await userEvent.type(phone, '651020{Enter}')
@@ -141,14 +139,14 @@ export const Locked: Story = {
     await shown(/Too many tries\. Try again in [12] seconds?\./)
     await expect(modal.queryByRole('button', { name: 'Confirm' })).toBeNull()
     await shown('The old code no longer works.', 4000)
-    await userEvent.click(modal.getByRole('button', { name: 'Get a new code' }))
+    await userEvent.click(modal.getByRole('button', { name: 'Send a new code' }))
     await shown('Here’s a new code.')
     await expect(modal.getByText('7305')).toBeVisible()
     await userEvent.keyboard('{Escape}')
   },
 }
 
-/** The sixth code in an hour for one number: the wait in minutes replaces Send code. */
+/** The sixth code in an hour for one number: the wait in minutes replaces Get the code. */
 export const TooManyCodes: Story = {
   name: 'Too many codes',
   args: { server: authApi({ codes: 5 }) },
@@ -156,7 +154,7 @@ export const TooManyCodes: Story = {
     const modal = await open(canvas)
     await userEvent.type(modal.getByLabelText('Phone number'), '65901122{Enter}')
     await shown('Too many codes. Try again in 42 minutes.')
-    await expect(modal.queryByRole('button', { name: 'Send code' })).toBeNull()
+    await expect(modal.queryByRole('button', { name: 'Get the code' })).toBeNull()
     await userEvent.keyboard('{Escape}')
   },
 }
@@ -168,8 +166,8 @@ export const CodeNotShown: Story = {
   play: async ({ canvas }) => {
     const modal = await sendCode(canvas, '65901122')
     await expect(modal.queryByText('Your code:')).toBeNull()
-    await expect(modal.getByRole('button', { name: /Get a new code in 0:5\d/ })).toBeDisabled()
-    // no code-on-the-screen note once codes go by SMS: not on the phone step either
+    await expect(modal.getByRole('button', { name: /Send a new code in 0:5\d/ })).toBeDisabled()
+    // no demo note once codes go by SMS: not on the phone step either
     await userEvent.click(modal.getByRole('button', { name: 'Change number' }))
     await modal.findByLabelText('Phone number')
     await expect(modal.queryByText(/the sign-in code shows here/)).toBeNull()

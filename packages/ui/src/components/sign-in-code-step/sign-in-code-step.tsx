@@ -5,6 +5,10 @@ import { Callout } from '../callout'
 import { CodeInput } from '../code-input'
 import { Field, FieldMessage } from '../field'
 import { PhoneInput } from '../phone-input'
+import { formatCountdown } from './countdown'
+import { TelegramStep, type TelegramStepCopy } from './telegram-step'
+
+export { formatCountdown }
 
 /** Every word the step shows. The first-release copy is the default design; with `sms` the screen passes the SMS words. */
 export type SignInCodeStepCopy = {
@@ -57,6 +61,23 @@ export type SignInCodeStepProps = Omit<ComponentProps<'form'>, 'onSubmit' | 'chi
   /** The market sends codes by SMS: no code on screen. Market config, never per person; off at the first release. */
   sms?: boolean
   /**
+   * How the code went (ADR 0029, DS-Lists B10): `telegram` and `telegram_link` draw the Telegram code step (`telegram`
+   * copy, Open Telegram, the help); `screen` keeps the code on the screen (local dev and CI); `sms` the plain boxes.
+   */
+  delivery?: 'screen' | 'sms' | 'telegram' | 'telegram_link'
+  /** The Telegram step's words. */
+  telegram?: TelegramStepCopy
+  /** `telegram_link`: the bot's link Open Telegram opens. */
+  link?: string
+  /** Ýeral's support lines for the Telegram help. */
+  support?: { phone?: string; telegram?: string }
+  /** The right code: green boxes and «Signed in» for a moment before the screen goes on. */
+  success?: boolean
+  /** Telegram didn't answer the request: «Telegram didn't answer. Try again.» */
+  sendFailed?: boolean
+  /** «Link again»: the number's Telegram is lost — ask for a new link. */
+  onRelink?: () => void
+  /**
    * 5 codes for one number in an hour: «Too many codes. Try again in 42 minutes.» On the phone step it replaces Send
    * code; on the code step the boxes are disabled and the code, Confirm and resend are hidden.
    */
@@ -105,12 +126,6 @@ export type SignInCodeStepProps = Omit<ComponentProps<'form'>, 'onSubmit' | 'chi
 
 const CODE_LENGTH = 4
 
-/** Seconds as m:ss — «0:59», «1:05». */
-export function formatCountdown(seconds: number): string {
-  const s = Math.max(0, Math.ceil(seconds))
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
-}
-
 /**
  * Sign-in step (DS-Patterns → 05 Inputs → «Sign-in · SignInCodeStep»): the phone step and the code step, the same in
  * the client login modal, the booking flows, the business login and (later) the SMS link page. Controlled and
@@ -127,6 +142,13 @@ export function SignInCodeStep({
   layout = 'page',
   onCancel,
   sms = false,
+  delivery,
+  telegram,
+  link,
+  support,
+  success = false,
+  sendFailed = false,
+  onRelink,
   tooManyCodes,
   phone = '',
   onPhoneChange,
@@ -160,6 +182,7 @@ export function SignInCodeStep({
       {copy.cancel}
     </Button>
   )
+  const viaTelegram = !inline && telegram !== undefined && (delivery === 'telegram' || delivery === 'telegram_link')
   const limited = Boolean(tooManyCodes)
   const blocked = limited || Boolean(locked) || codeExpired
   const wrong = Boolean(codeError) && !blocked
@@ -274,10 +297,35 @@ export function SignInCodeStep({
                   {copy.sendCode}
                 </SubmitButton>
               )}
+              {sendFailed && telegram && <FieldMessage>{telegram.sendFailed}</FieldMessage>}
               {sendNote}
             </div>
           )}
         </>
+      ) : viaTelegram ? (
+        <TelegramStep
+          copy={telegram}
+          linking={delivery === 'telegram_link'}
+          link={link}
+          support={support}
+          codeRef={codeRef}
+          code={code}
+          onCodeChange={(next) => {
+            if (next.length < CODE_LENGTH) sentCode.current = null
+            onCodeChange?.(next)
+          }}
+          onComplete={check}
+          checking={checking}
+          success={success}
+          codeError={codeError}
+          locked={locked}
+          tooManyCodes={tooManyCodes}
+          codeExpired={codeExpired}
+          sendFailed={sendFailed}
+          resendIn={resendIn}
+          onResend={onResend}
+          onRelink={onRelink}
+        />
       ) : (
         <>
           {!sms && shownCode && !blocked && (

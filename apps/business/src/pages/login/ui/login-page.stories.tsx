@@ -367,7 +367,7 @@ async function sendCode(canvas: Canvas, digits: string) {
   const phone = await canvas.findByLabelText('Phone number')
   await userEvent.clear(phone)
   await userEvent.type(phone, digits)
-  await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+  await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
   return canvas.findByLabelText('Code', {}, { timeout: 3000 })
 }
 
@@ -376,15 +376,12 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Log in to Ýeral Business' })).toBeVisible()
     await waitFor(() => expect(document.title).toBe('Log in · Ýeral Business'))
-    // the first launch shows the code on the screen: the phone step says so (book Q-036)
-    await expect(
-      await canvas.findByText(/While Ýeral is being tried out, the sign-in code shows here instead of coming by SMS/),
-    ).toBeVisible()
     const phone = canvas.getByLabelText('Phone number')
-    // a demo asks for the same made-up number on both sites
-    await expect(phone).toHaveAccessibleDescription('Use the same made-up number on the Ýeral site and here — one account works for both.')
+    await expect(phone).toHaveAccessibleDescription(
+      'If you already book on Ýeral as a client, use that number — one account works for both.',
+    )
     await userEvent.type(phone, '651020')
-    await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
     await expect(await canvas.findByRole('alert')).toHaveTextContent('The number is incomplete — it needs 8 digits.')
     await userEvent.clear(phone)
     await userEvent.type(phone, '12456789{Enter}')
@@ -430,10 +427,10 @@ export const ChangeNumber: Story = {
     // the field takes the focus, not the page
     await waitFor(() => expect(phone).toHaveFocus())
     await expect(phone).toHaveValue('65 10 20 30')
-    await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Get the code' }))
     await canvas.findByLabelText('Code')
     await expect(canvas.getByText('4821')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: /Get a new code in 0:[45]\d/ })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: /Send a new code in 0:[45]\d/ })).toBeDisabled()
   },
 }
 
@@ -454,7 +451,7 @@ export const CodeNotShown: Story = {
   play: async ({ canvas }) => {
     await sendCode(canvas, '65102030')
     await expect(canvas.queryByText('Your code:')).not.toBeInTheDocument()
-    await expect(canvas.getByRole('button', { name: /Get a new code in 0:5\d/ })).toBeDisabled()
+    await expect(canvas.getByRole('button', { name: /Send a new code in 0:5\d/ })).toBeDisabled()
     // no demo note once codes go by SMS (nor on the code step), and the usual hint
     await expect(canvas.queryByText(/This is a demo/)).not.toBeInTheDocument()
     await userEvent.click(canvas.getByRole('button', { name: 'Change number' }))
@@ -674,13 +671,13 @@ export const Locked: Story = {
     await shown(canvas, /Too many tries\. Try again in [12] seconds?\./)
     await expect(canvas.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()
     await shown(canvas, 'The old code no longer works.', 4000)
-    await userEvent.click(canvas.getByRole('button', { name: 'Get a new code' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Send a new code' }))
     await shown(canvas, 'Here’s a new code.')
     await expect(canvas.getByText('7305')).toBeVisible()
   },
 }
 
-/** The sixth code in an hour for one number: the wait in minutes replaces Send code. */
+/** The sixth code in an hour for one number: the wait in minutes replaces Get the code. */
 export const TooManyCodes: Story = {
   name: 'Too many codes',
   args: { server: fakeApi({ codes: 5 }) },
@@ -688,7 +685,7 @@ export const TooManyCodes: Story = {
     const phone = await canvas.findByLabelText('Phone number')
     await userEvent.type(phone, '65102030{Enter}')
     await shown(canvas, 'Too many codes. Try again in 42 minutes.')
-    await expect(canvas.queryByRole('button', { name: 'Send code' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Get the code' })).not.toBeInTheDocument()
   },
 }
 

@@ -73,6 +73,8 @@ export const ERROR_STATUS = {
   phone_taken: 409,
   /** The number can't be changed while the sign-in code shows on the screen (the first launch, book Q-036). */
   phone_change_unavailable: 409,
+  /** Our Telegram bot didn't answer the code request (a Telegram error other than a blocked bot, ADR 0029). */
+  telegram_unavailable: 503,
   // account and team
   owns_workspace: 409,
   already_on_team: 409,

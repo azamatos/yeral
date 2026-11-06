@@ -77,11 +77,12 @@ export function formatPhone(raw: string): string {
 }
 
 /**
- * `+993 65 •• •• 22`: the first and last groups shown, the rest hidden. The link page's login names the booking's
+ * `+993 65 •• •• 22`: the first and last groups shown, the rest hidden (`last`: `+993 •• •• •• 22`, the Telegram code step). The link page's login names the booking's
  * phone this way, so the person knows where the code goes without the page giving the number away (book F-068).
  */
-export function maskPhone(raw: string): string {
+export function maskPhone(raw: string, shown: 'ends' | 'last' = 'ends'): string {
   const groups = formatNational(raw).split(' ')
-  const masked = groups.map((g, i) => (i === 0 || i === groups.length - 1 ? g : '•'.repeat(g.length)))
+  const kept = (i: number) => i === groups.length - 1 || (shown === 'ends' && i === 0)
+  const masked = groups.map((g, i) => (kept(i) ? g : '•'.repeat(g.length)))
   return [COUNTRY_PREFIX, masked.join(' ')].filter(Boolean).join(' ')
 }

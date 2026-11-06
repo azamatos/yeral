@@ -439,7 +439,7 @@ export const ChangeNumber: Story = {
     await expect(await drawer.findByRole('alert')).toHaveTextContent('This is already your number')
     await userEvent.clear(drawer.getByLabelText('New phone number'))
     await userEvent.type(drawer.getByLabelText('New phone number'), '61057732')
-    await userEvent.click(drawer.getByRole('button', { name: 'Send code' }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Get the code' }))
     await expect(await drawer.findByText('+993 61 05 77 32')).toBeVisible()
     await expect(drawer.getByText('4821')).toBeVisible()
     await expect(drawer.getByText('Until the new number is verified you can log in with the old one.')).toBeVisible()

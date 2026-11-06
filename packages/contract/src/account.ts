@@ -16,7 +16,14 @@ import { NAME_MAX } from '@yeral/domain/names'
 // ── Login ──
 
 /** `lang`: the site's language, for the SMS text and a new account's language. Codes go to mobile numbers only. */
-export const sendCodeSchema = z.object({ phone: mobileInputSchema, lang: marketLocaleSchema.optional() }).meta({ id: 'SendCode' })
+export const sendCodeSchema = z
+  .object({
+    phone: mobileInputSchema,
+    lang: marketLocaleSchema.optional(),
+    /** The number's Telegram is lost (a new account, a blocked bot): ask for a new link to a chat even though one is stored (ADR 0029). */
+    relink: z.boolean().optional(),
+  })
+  .meta({ id: 'SendCode' })
 
 /**
  * How a sign-in code reaches the person (ADR 0029): `screen`, shown in the answer at the first launch, when nothing

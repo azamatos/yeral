@@ -1,0 +1,243 @@
+import { CheckIcon, CircleHelpIcon, MessageCircleIcon, PhoneIcon, SendIcon } from 'lucide-react'
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { cn } from '../../lib/cn'
+import { Button } from '../button'
+import { CodeInput } from '../code-input'
+import { FieldMessage } from '../field'
+import { Popover, PopoverContent, PopoverTrigger } from '../popover'
+import { Spinner } from '../spinner'
+import { formatCountdown } from './countdown'
+
+/** The words of the Telegram code step (DS-Lists → 06 · B10), all from the screen. */
+export type TelegramStepCopy = {
+  /** «Sign-in code» — the boxes' group label. */
+  codeLabel: string
+  /** «Checking…» */
+  checking: string
+  /** «Send a new code» */
+  resend: string
+  /** «Send a new code in 0:42» — `time` is m:ss. */
+  resendIn: (time: string) => string
+  /** «This code has expired. Get a new one.» */
+  codeExpired: string
+  /** «Open Telegram» */
+  openTelegram: string
+  /** «No Telegram on this number?» */
+  noTelegram: string
+  /** «Codes come from Telegram for now. Install Telegram, sign up with +993 •• •• •• 10, then tap Send a new code.» */
+  noTelegramHelp: ReactNode
+  /** «Still stuck? Contact Ýeral.» */
+  stillStuck: string
+  /** «Call» */
+  call: string
+  /** «Telegram» — write to Ýeral. */
+  writeTelegram: string
+  /** «Linked to another Telegram? Link again» — asks for a new link. */
+  linkAgain?: string
+  /** `telegram_link`: the three steps in Telegram — «Press Start», «Tap Share my number», «The code arrives in the chat». */
+  linkSteps?: string[]
+  /** «Telegram didn't answer. Try again.» */
+  sendFailed: string
+  /** «Signed in» */
+  signedIn: string
+}
+
+export type TelegramStepProps = {
+  copy: TelegramStepCopy
+  /** `telegram_link`: the number isn't linked yet — the three steps show above the boxes and Open Telegram opens `link`. */
+  linking: boolean
+  /** Where Open Telegram goes: the bot's link (`https://t.me/<bot>?start=…`), or the app itself. */
+  link?: string
+  /** Ýeral's support lines for the help. */
+  support?: { phone?: string; telegram?: string }
+  codeRef: RefObject<HTMLInputElement | null>
+  code: string
+  onCodeChange: (code: string) => void
+  onComplete: (code: string) => void
+  checking: boolean
+  success: boolean
+  /** «Wrong code. 2 tries left.» */
+  codeError?: ReactNode
+  /** «Too many tries. Try again in 60 seconds.» — the boxes lock. */
+  locked?: ReactNode
+  /** «Too many codes. Try again in 42 minutes.» — everything but Change number and the help is off. */
+  tooManyCodes?: ReactNode
+  codeExpired: boolean
+  sendFailed: boolean
+  resendIn: number
+  onResend?: () => void
+  onRelink?: () => void
+}
+
+/**
+ * The code step when the code goes to Telegram (DS-Lists → 06 · B10): boxes 52 (56 under 768) without a label or
+ * Confirm (the 4th digit checks), the 32 px resend slot under them («Send a new code in 0:42» → «Send a new code»;
+ * «Checking…» while the code is checked), then Secondary «Open Telegram» (Primary «Send a new code» once the code
+ * expired) and the «No Telegram on this number?» help in a popover. The first time (`linking`) the three steps the
+ * person takes in Telegram sit above the boxes.
+ */
+export function TelegramStep({
+  copy,
+  linking,
+  link,
+  support,
+  codeRef,
+  code,
+  onCodeChange,
+  onComplete,
+  checking,
+  success,
+  codeError,
+  locked,
+  tooManyCodes,
+  codeExpired,
+  sendFailed,
+  resendIn,
+  onResend,
+  onRelink,
+}: TelegramStepProps) {
+  const limited = Boolean(tooManyCodes)
+  const blocked = limited || Boolean(locked) || codeExpired
+  const wrong = Boolean(codeError) && !blocked
+  const newCodeRef = useRef<HTMLButtonElement>(null)
+  const [helpOpen, setHelpOpen] = useState(false)
+
+  // the lock is over or the code ran out: the only way on is a new code
+  useEffect(() => {
+    if (codeExpired && !limited) newCodeRef.current?.focus()
+  }, [codeExpired, limited])
+
+  const openTelegram = () => {
+    if (link) window.open(link, '_blank', 'noopener')
+    else window.location.assign('tg://')
+  }
+  const message = tooManyCodes ?? locked ?? (codeExpired ? copy.codeExpired : sendFailed ? copy.sendFailed : wrong ? codeError : undefined)
+
+  return (
+    <>
+      {linking && copy.linkSteps && !success && (
+        <ol className="m-0 flex list-decimal flex-col gap-1 ps-5 text-dense text-n-600">
+          {copy.linkSteps.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+      )}
+      <div className="flex flex-col gap-2.5">
+        <CodeInput
+          ref={codeRef}
+          value={code}
+          onValueChange={onCodeChange}
+          onComplete={onComplete}
+          length={4}
+          size={52}
+          responsive="up"
+          aria-label={copy.codeLabel}
+          invalid={wrong}
+          disabled={blocked || success}
+          success={success}
+          readOnly={checking}
+          aria-busy={checking || undefined}
+        />
+        {success ? (
+          <span role="status" className="inline-flex items-center gap-2 text-small font-semibold text-st-completed-ink">
+            <CheckIcon size={16} aria-hidden />
+            {copy.signedIn}
+          </span>
+        ) : (
+          <>
+            {message && <FieldMessage live={!blocked}>{message}</FieldMessage>}
+            {!blocked && (
+              <div className="flex min-h-8 items-center text-small text-n-600" aria-live="polite">
+                {checking ? (
+                  <span className="text-n-700 inline-flex items-center gap-2">
+                    <Spinner className="size-4" />
+                    {copy.checking}
+                  </span>
+                ) : resendIn > 0 ? (
+                  <span>{copy.resendIn(formatCountdown(resendIn))}</span>
+                ) : (
+                  <Button type="button" variant="ghost" size="s" className="-ms-2" onClick={onResend}>
+                    {copy.resend}
+                  </Button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      {!success && !limited && (
+        <>
+          {codeExpired ? (
+            <Button ref={newCodeRef} type="button" variant="primary" size="l" className="w-full" onClick={onResend}>
+              {copy.resend}
+            </Button>
+          ) : (
+            <Button type="button" variant="secondary" size="l" className="w-full" onClick={openTelegram}>
+              <SendIcon size={20} aria-hidden />
+              {copy.openTelegram}
+            </Button>
+          )}
+        </>
+      )}
+      {!success && (
+        <div className="flex justify-center">
+          <Popover open={helpOpen} onOpenChange={setHelpOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  'text-n-700 hit inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs text-small font-medium whitespace-nowrap',
+                  'hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none',
+                  helpOpen && 'text-n-900',
+                )}
+              >
+                <CircleHelpIcon size={16} className="text-n-600" aria-hidden />
+                {copy.noTelegram}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="center"
+              aria-label={copy.noTelegram}
+              className="flex w-[280px] flex-col gap-2.5 p-3 text-[13px] leading-[18px]"
+            >
+              <span>{copy.noTelegramHelp}</span>
+              <span>{copy.stillStuck}</span>
+              {(support?.phone || support?.telegram) && (
+                <span className="flex gap-2">
+                  {support.phone && (
+                    <Button asChild variant="secondary" size="s">
+                      <a href={`tel:${support.phone}`}>
+                        <PhoneIcon size={16} aria-hidden />
+                        {copy.call}
+                      </a>
+                    </Button>
+                  )}
+                  {support.telegram && (
+                    <Button asChild variant="secondary" size="s">
+                      <a href={`https://t.me/${support.telegram}`} target="_blank" rel="noreferrer">
+                        <MessageCircleIcon size={16} aria-hidden />
+                        {copy.writeTelegram}
+                      </a>
+                    </Button>
+                  )}
+                </span>
+              )}
+              {onRelink && copy.linkAgain && !linking && (
+                <button
+                  type="button"
+                  className="hit cursor-pointer self-start text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
+                  onClick={() => {
+                    setHelpOpen(false)
+                    onRelink()
+                  }}
+                >
+                  {copy.linkAgain}
+                </button>
+              )}
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
+    </>
+  )
+}
