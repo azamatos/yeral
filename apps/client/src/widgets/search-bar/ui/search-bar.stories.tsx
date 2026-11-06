@@ -6,17 +6,19 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Category } from '@yeral/contract/catalog'
 import { useSearch } from '@tanstack/react-router'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { usePlace } from '@/features/pick-place'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
 import { wrap } from '@/shared/ui'
 import { SearchBar } from './search-bar'
+import { SearchCard } from './search-card'
 
 function Home() {
   const located = usePlace()
   return (
     <div className={`${wrap} flex flex-col items-center pt-10 pb-130`}>
-      <SearchBar located={located} />
+      <SearchBar located={located} className="max-sm:hidden" />
+      <SearchCard located={located} className="w-full sm:hidden" />
     </div>
   )
 }
@@ -48,6 +50,7 @@ const fakeApi = () => () => {
     if (route === 'GET /categories') return json({ items: CATEGORIES })
     if (route === 'GET /cities') return json(CITIES)
     if (route === 'GET /places/suggest') return json({ items: [{ label: 'Bitarap park', lat: 37.94, lng: 58.38 }] })
+    if (route === 'GET /search') return json({ items: [], total: 24, cursor: null, located: false, city: 'ashgabat' })
     if (route === 'GET /search/suggest') {
       const q = query.get('q') ?? ''
       if (q === 'hairx') return json({ categories: [], services: [], businesses: [] })
@@ -64,7 +67,7 @@ const fakeApi = () => () => {
   })
   return async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = new URL(new Request(input, init).url).pathname
-    return /\/(categories|cities|places\/suggest|search\/suggest)$/.test(path) ? mine(input, init) : signIn(input, init)
+    return /\/(categories|cities|places\/suggest|search\/suggest|search)$/.test(path) ? mine(input, init) : signIn(input, init)
   }
 }
 
@@ -187,5 +190,22 @@ export const WhenOpen: Story = {
     await expect(canvas.getByRole('button', { name: 'Search' })).toHaveFocus()
     await userEvent.keyboard('{Enter}')
     await expect(await canvas.findByText('Search: {"day":"tomorrow","tod":"evening"}')).toBeVisible()
+  },
+}
+
+/** 390: the card's rows open the full-screen sheet at that field; a pick moves to the next field; «Show 24 places» searches. */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'What Service, place or specialist' }))
+    const sheet = within(await page.findByRole('dialog', { name: 'Search' }))
+    await userEvent.type(sheet.getByRole('combobox', { name: 'What' }), 'hair')
+    await userEvent.click(await sheet.findByRole('option', { name: /Women’s haircut/ }))
+    await waitFor(() => expect(sheet.getByRole('combobox', { name: 'Where' })).toHaveFocus())
+    await userEvent.click(await sheet.findByRole('option', { name: 'Mary' }))
+    await userEvent.click(await sheet.findByRole('radio', { name: 'Tomorrow' }))
+    await expect(sheet.getByRole('button', { name: 'When Tomorrow' })).toBeVisible()
+    await userEvent.click(await sheet.findByRole('button', { name: 'Show 24 places' }))
+    await expect(await canvas.findByText('Search: {"what":"Women’s haircut","city":"mary","day":"tomorrow"}')).toBeVisible()
   },
 }

@@ -11,7 +11,7 @@ import { LocationBanner, placeAddress, usePlace, type Place } from '@/features/p
 import { HowWasItCard } from '@/features/write-review'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
-import { SearchBar } from '@/widgets/search-bar'
+import { SearchBar, SearchCard } from '@/widgets/search-bar'
 
 /** How many cards the list shows (Home `.g4`). */
 const CARDS = 4
@@ -53,7 +53,8 @@ export function HomePage() {
           </span>
           <h1 className="m-0 mt-5 text-display text-n-900 max-sm:text-[44px] max-sm:leading-[48px]">{t('title')}</h1>
           <p className="m-0 mt-4 max-w-190 text-body-l text-n-600">{t('lead')}</p>
-          <SearchBar located={located} whereInput={whereInput} className="mt-10 max-sm:mt-8" />
+          <SearchBar located={located} whereInput={whereInput} className="mt-10 max-sm:hidden" />
+          <SearchCard located={located} className="mt-8 w-full sm:hidden" />
           {photos.length === MOSAIC && (
             <div className="mt-14 flex w-full max-w-[1040px] gap-4 max-sm:mt-8 max-sm:gap-3 max-sm:overflow-x-auto">
               {photos.map((p) => (
