@@ -1,8 +1,10 @@
 /*
- * Ýeral web design system v0.4 as a Tailwind theme.
+ * Ýeral web design system v0.7 as a Tailwind theme.
  * Source of truth: docs/design/tokens.css. Every value here is that file's value under a Tailwind name
  * (src/styles/tokens.test.ts fails when they drift). Default Tailwind colours, radii, shadows, type sizes and
  * breakpoints are switched off so only design values exist ("no new colours").
+ * Sizes (--s-*, --ctl-*, --row-*, --tag-h*, --nav-h, --sidebar-*, --popover-pad / -max-h) are not theme values: they
+ * are multiples of the 4px spacing unit, written as spacing classes (tokens.test.ts checks they stay multiples).
  */
 @theme static {
   /* Colours ------------------------------------------------------------------------------------------- */
@@ -75,26 +77,27 @@
 
   /* Type ---------------------------------------------------------------------------------------------- */
   --font-*: initial;
-  /* the design's Onest, self-hosted by @fontsource-variable/onest under this family name */
-  --font-sans: 'Onest Variable', ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* the design's Geist (v0.7, was Onest), self-hosted by @fontsource-variable/geist under this family name */
+  --font-sans: 'Geist Variable', ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   --text-*: initial;
+  /* heading tracking eased for Geist (v0.7): display −0.03, h1 −0.025, h2 −0.02, h3 −0.01 em */
   --text-display: 64px;
   --text-display--line-height: 68px;
-  --text-display--letter-spacing: -0.035em;
+  --text-display--letter-spacing: -0.03em;
   --text-display--font-weight: 700;
   --text-h1: 44px;
   --text-h1--line-height: 48px;
-  --text-h1--letter-spacing: -0.03em;
+  --text-h1--letter-spacing: -0.025em;
   --text-h1--font-weight: 700;
   --text-h2: 32px;
   --text-h2--line-height: 38px;
-  --text-h2--letter-spacing: -0.025em;
+  --text-h2--letter-spacing: -0.02em;
   --text-h2--font-weight: 700;
   --text-h3: 22px;
   --text-h3--line-height: 28px;
-  --text-h3--letter-spacing: -0.015em;
+  --text-h3--letter-spacing: -0.01em;
   --text-h3--font-weight: 600;
   --text-body-l: 17px;
   --text-body-l--line-height: 26px;
@@ -115,9 +118,17 @@
   /* L button (16/20): drawn on the components sheet without a token */
   --text-button-l: 16px;
   --text-button-l--line-height: 20px;
+  /* control text (v0.7 · A3): S 13 / M 14 / L 16 (L fields 16 px: no iOS zoom); the control's height sets the line */
+  --text-ctl-s: 13px;
+  --text-ctl-m: 14px;
+  --text-ctl-l: 16px;
 
   /* Layout -------------------------------------------------------------------------------------------- */
   --spacing: 4px;
+  /* Control scale (v0.7 · A3), one height for Input, Select, Segmented, Button, IconButton, Chip — as spacing classes:
+     height S h-8 (32) · M h-10 (40) · L h-12 (48); button side padding px-3 / px-4 / px-5 (12 / 16 / 20; fields 12 / 12 / 14);
+     icons size-4 / size-4.5 / size-5 (16 / 18 / 20); option rows h-9 (36), h-12 (48) on a 390 sheet; tag h-7 (28), h-6 (24)
+     in a table; popover p-1.5 (6) and max-h-80 (320). Toolbars use M and never mix sizes. Components move in the next PR. */
 
   --breakpoint-*: initial;
   --breakpoint-sm: 768px;
@@ -140,12 +151,18 @@
   --radius-*: initial;
   --radius-xs: 4px;
   --radius-sm: 6px;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+  /* control radii follow the size (v0.7 · A3): S 8 / M 10 / L 12; a Chip is always rounded-pill */
+  --radius-ctl-s: 8px;
+  --radius-ctl-m: 10px;
+  --radius-ctl-l: 12px;
+  --radius-popover: 12px;
+  /* retired in v0.7 (--r-input, --r-btn-s/m/l): kept until every component is on rounded-ctl-* (A3, A4), then removed */
   --radius-input: 8px;
   --radius-s: 10px;
   --radius-m: 12px;
   --radius-l: 14px;
-  --radius-card: 16px;
-  --radius-pill: 999px;
 
   /* Elevation ----------------------------------------------------------------------------------------- */
   --shadow-*: initial;
@@ -166,6 +183,8 @@
   --shadow-control: 0 1px 2px rgba(16, 16, 20, 0.2);
   --shadow-segment: 0 0 0 1px #e6e6ea;
   --shadow-switch-off: inset 0 0 0 1.5px #6e6e78;
+  /* v0.7: the home SearchBar (C1), a resting raised bar softer than shadow-raised */
+  --shadow-bar: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px rgba(16, 16, 20, 0.08);
 
   /* Not Tailwind namespaces; used through var() in arbitrary values */
   --primary-bg: linear-gradient(180deg, #8265ff 0%, #5a3ff0 100%);

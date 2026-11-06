@@ -30,7 +30,9 @@ Package: `packages/ui` (theme `src/styles/theme.css` — every design token unde
 - **One gradient primary button per view** (`--primary-bg`, inset highlight, `--primary-shadow`). Secondary = white +
   1px `n-300`. Ghost, Tint, Danger outline (`--danger-ink` / `--danger-line`); solid danger `--danger-solid` only for the
   final destructive confirm. The round search button in the header query bar is ink (`--ink-btn`).
-- Sizes: buttons S 36 / r10 · M 44 / r12 · L 52 / r14; inputs 48 high, radius 8; cards radius 16; pills 999.
+- Sizes: v0.7 gives every control one scale, S 32 / r8 · M 40 / r10 · L 48 / r12 (`--ctl-*`; the tokens are in the theme,
+  the components still draw the v0.4 sizes — buttons S 36 / r10 · M 44 / r12 · L 52 / r14, inputs 48 / r8 — until the A3
+  and A4 PRs move them); cards radius 16; pills 999.
 - Selection: tint (`a-50` bg, `a-line` border, `a-600` text) for chips, rows, tabs, cards; solid `a-500` for the chosen
   date and time slot. Hover rows `n-50`; pressed moves 1px down; disabled `n-100` fill + `n-500` text.
 - Focus: `--focus-ring` on `:focus-visible` everywhere; inputs focus = border `a-500` + `--input-focus` halo; error = `#d9412f` + `--input-error`.
@@ -39,8 +41,10 @@ Package: `packages/ui` (theme `src/styles/theme.css` — every design token unde
   Toast: ink, bottom-left (bottom-centre on phones), 4–6 s, one at a time, one optional action ("Yzyna al" for undo).
 - Statuses: `st-pending|confirmed|completed|cancelled|noshow` with `-bg/-line/-ink/-dot`; one badge shape everywhere;
   phone booking = confirmed + phone icon; cancelled-by-client vs by-business = same colour, icon + label.
-- Type: Onest (self-hosted variable 400–800). Desktop scale display 64/68 · h1 44/48 · h2 32/38 · h3 22/28 · body-l 17/26 ·
-  body 15/22 · dense 13/18 · button 15/20 · label 11/14 caps +0.07em; phones scale down below 768 (see `tokens.css`).
+- Type: Geist (v0.7, was Onest; self-hosted variable, `@fontsource-variable/geist`). Desktop scale display 64/68 · h1 44/48 ·
+  h2 32/38 · h3 22/28 · body-l 17/26 · body 15/22 · dense 13/18 · button 15/20 · label 11/14 caps +0.07em; heading tracking
+  −0.03 / −0.025 / −0.02 / −0.01 em; phones scale down below 768 (see `tokens.css`). Figures proportional; `tabular-nums` only
+  in numeric table columns, the time grid and running timers (the removal elsewhere is A1's second half, still to do).
 - Layout: breakpoints xl ≥1440 · lg 1280 · md 1024 · sm 768 · xs ≤767 (design at 390); grid 12/8/4; side margin 40/32/24/16;
   marketplace container 1200; app shell sidebar 248 → rail 72 → drawer.
 - Icons: Lucide, stroke 1.75, sizes 16/20/24. No emoji, no gradient backgrounds, no left-border accent cards, no new colours.
@@ -51,10 +55,15 @@ Package: `packages/ui` (theme `src/styles/theme.css` — every design token unde
 
 `packages/ui/src/styles/theme.css` carries the design's values under Tailwind names (`--color-n-200`, `--color-a-500`,
 `--radius-m`, `--text-h2`…), so classes read like the spec: `border-n-200 text-n-600 bg-a-50 rounded-m text-h2`.
-Radii: `rounded-xs` 4, `rounded-sm` 6, `rounded-input` 8, `rounded-s` 10 (S button — not `sm`), `rounded-m` 12, `rounded-l` 14,
-`rounded-card` 16, `rounded-pill`. Type adds `text-small` 14/20 (business body, menus, table cells) and `text-micro` 12/16;
-shadows `shadow-control` (knobs, photo controls, pins), `shadow-focus-inset` (focus inside clipped rows and cells),
-`shadow-input-warning`; charts `chart-1…4` (accent ramp) + `chart-area|compare|grid|axis`. Default
+Radii: `rounded-xs` 4, `rounded-sm` 6, `rounded-card` 16, `rounded-pill`, and the v0.7 control radii `rounded-ctl-s` 8 /
+`rounded-ctl-m` 10 / `rounded-ctl-l` 12 (+ `rounded-popover` 12); `rounded-input` 8, `rounded-s` 10, `rounded-m` 12, `rounded-l` 14
+are retired and stay only until every component is on the control scale. The control scale (v0.7 · A3) is spacing classes,
+not theme values: heights `h-8` / `h-10` / `h-12` (S 32 / M 40 / L 48), button padding `px-3` / `px-4` / `px-5`, icons
+`size-4` / `size-4.5` / `size-5`, text `text-ctl-s` 13 / `text-ctl-m` 14 / `text-ctl-l` 16, option rows `h-9` (`h-12` on a
+390 sheet), tags `h-7` (`h-6` in a table), popover `p-1.5 max-h-80`. Type adds `text-small` 14/20 (business body, menus,
+table cells) and `text-micro` 12/16; shadows `shadow-control` (knobs, photo controls, pins), `shadow-focus-inset` (focus
+inside clipped rows and cells), `shadow-input-warning`, `shadow-bar` (the home SearchBar); charts `chart-1…4` (accent ramp) +
+`chart-area|compare|grid|axis`. Default
 Tailwind colours are off. A value missing from the tokens is a question for the owner, not a new token. When the
 designer exports new tokens, `pnpm --filter @yeral/ui test` shows exactly what changed.
 
