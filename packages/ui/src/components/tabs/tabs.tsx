@@ -2,10 +2,15 @@ import { Tabs as TabsPrimitive } from 'radix-ui'
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
-/** Underline tab look (DS `.tab`); also for link tabs (business page section nav). */
+/**
+ * Underline tab look (DS · Controls `.tab`, v0.7 · A11); also for link tabs (business page section nav). The tab is
+ * 44 high with the label padded 12 each side; the keyboard focus ring wraps the tab box (label + 12 / 6, radius 8,
+ * y 4–36) and stops 2 px above the underline instead of hugging the word.
+ */
 export const tabClass = cn(
-  'relative -mb-px inline-flex h-11 cursor-pointer items-center border-0 border-b-2 border-transparent bg-transparent px-0.5 text-body font-medium whitespace-nowrap text-n-600 no-underline',
-  'hover:text-n-900 focus-visible:rounded-sm focus-visible:shadow-focus focus-visible:outline-none',
+  'relative -mb-px inline-flex h-11 cursor-pointer items-center border-0 border-b-2 border-transparent bg-transparent px-3 text-body font-medium whitespace-nowrap text-n-600 no-underline',
+  'hover:text-n-900 focus-visible:outline-none',
+  'after:pointer-events-none after:absolute after:inset-x-0 after:top-1 after:h-8 after:rounded-ctl-s focus-visible:after:shadow-focus',
   'data-[state=active]:border-a-500 data-[state=active]:font-semibold data-[state=active]:text-n-900',
   'aria-[current=page]:border-a-500 aria-[current=page]:font-semibold aria-[current=page]:text-n-900',
   'group',
@@ -17,7 +22,7 @@ export function Tabs(props: ComponentProps<typeof TabsPrimitive.Root>) {
 
 export function TabsList({ className, ...props }: ComponentProps<typeof TabsPrimitive.List>) {
   return (
-    <TabsPrimitive.List {...props} className={cn('flex [scrollbar-width:none] gap-8 overflow-x-auto border-b border-n-200', className)} />
+    <TabsPrimitive.List {...props} className={cn('flex [scrollbar-width:none] gap-1 overflow-x-auto border-b border-n-200', className)} />
   )
 }
 

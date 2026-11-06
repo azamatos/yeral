@@ -1,14 +1,10 @@
 import { clsx, type ClassValue } from 'clsx'
 import { extendTailwindMerge } from 'tailwind-merge'
 
-const RADII = ['xs', 'sm', 'input', 's', 'm', 'l', 'card', 'pill', 'ctl-s', 'ctl-m', 'ctl-l', 'popover']
+const RADII = ['xs', 'sm', 'card', 'pill', 'ctl-s', 'ctl-m', 'ctl-l', 'popover']
 
 // tailwind-merge needs to know the design's custom scales, or it would treat `text-small` (size) and `text-n-600` (colour) as the same group.
 const twMerge = extendTailwindMerge({
-  override: {
-    // the radii named `s` and `l` are radii: `rounded-s` and `rounded-l` alone are never the start and left sides
-    classGroups: { 'rounded-s': [{ 'rounded-s': RADII }], 'rounded-l': [{ 'rounded-l': RADII }] },
-  },
   extend: {
     // the radius scale covers every side and corner (`rounded-t-card`, `rounded-bl-xs`); the containers are widths
     theme: {
