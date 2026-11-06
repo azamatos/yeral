@@ -200,6 +200,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
               size="m"
               aria-label={t('specialist')}
               className="w-auto max-sm:hidden"
+              listWidth="content"
               value={phoneStaff}
               onValueChange={(staff) => go({ staff }, true)}
               options={columns.map((c) => ({ value: c.staffId, label: c.name }))}

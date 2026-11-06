@@ -112,6 +112,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
             size="m"
             aria-label={t('staffFilter')}
             className="w-auto max-sm:hidden"
+            listWidth="content"
             value={search.staff ?? ALL}
             onValueChange={(v) => go({ staff: v === ALL ? undefined : v })}
             options={[
@@ -124,6 +125,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
           size="m"
           aria-label={t('serviceFilter')}
           className="w-auto max-sm:hidden"
+          listWidth="content"
           value={search.service ?? ALL}
           onValueChange={(v) => go({ service: v === ALL ? undefined : v })}
           options={[
@@ -138,6 +140,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
           size="m"
           aria-label={t('dateFilter')}
           className="w-auto max-sm:hidden"
+          listWidth="content"
           value={search.when ?? ALL}
           onValueChange={(v) => go({ when: v === ALL ? undefined : (v as BookingsWhen) })}
           options={[

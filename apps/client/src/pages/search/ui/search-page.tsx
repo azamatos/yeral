@@ -125,7 +125,8 @@ export function SearchPage({ category }: { category?: Category }) {
           <WhereField
             inputRef={whereInput}
             place={located.place}
-            size="m"
+            // a client field: L 48, as the search box above it (A3 Sizes)
+            size="l"
             className="w-full sm:max-w-120"
             onPick={place}
             onNearMe={() => void located.askBrowser()}
@@ -172,6 +173,7 @@ export function SearchPage({ category }: { category?: Category }) {
                 size="m"
                 aria-label={t('radius')}
                 className="w-auto"
+                listWidth="content"
                 value={String(radius)}
                 onValueChange={(v) => go({ r: Number(v) })}
                 options={RADIUS_OPTIONS_KM.map((km) => ({ value: String(km), label: t('km', { km }) }))}
@@ -181,6 +183,7 @@ export function SearchPage({ category }: { category?: Category }) {
               size="m"
               aria-label={t('sort')}
               className="w-auto"
+              listWidth="content"
               value={address.sort ?? DEFAULT_SORT}
               onValueChange={(v) => go({ sort: v === DEFAULT_SORT ? undefined : (v as Sort) })}
               options={[
