@@ -1,4 +1,4 @@
-# Design v0.7, piece 2: the figures rule and grouped phones (A1 Figures, `fix/figures-phones`)
+# Design v0.7, piece 2: the figures rule and grouped phones (A1 Figures, PR #309, `fix/figures-phones`)
 
 - The rule (DS-Type 04, `docs/design/screens/system/DS-Type.dc.html`): figures are proportional everywhere; `tabular-nums`
   stays in exactly three places — numeric table columns, the calendar's time grid and running timers / countdowns. Never on
