@@ -145,9 +145,11 @@ test('a block over a booking is refused, and leads to the booking', async ({ bro
     .click()
   await owner.getByRole('menuitem', { name: 'Block time' }).click()
   const block = owner.getByRole('dialog', { name: 'Block time' })
-  await block.getByRole('combobox', { name: 'From' }).selectOption({ label: chosen.time })
-  const to = block.getByRole('combobox', { name: 'To' })
-  await to.selectOption({ index: (await to.getByRole('option').count()) - 1 })
+  // our own Select (design v0.7 · A2): open the trigger, pick the row in its listbox
+  await block.getByRole('combobox', { name: 'From' }).click()
+  await owner.getByRole('listbox').getByRole('option', { name: chosen.time, exact: true }).click()
+  await block.getByRole('combobox', { name: 'To' }).click()
+  await owner.getByRole('listbox').getByRole('option').last().click()
   await block.getByRole('radio', { name: 'Personal' }).check()
   await block.getByRole('button', { name: 'Block time' }).click()
 
