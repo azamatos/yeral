@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
@@ -7,7 +7,8 @@ import { Spinner } from '@yeral/ui/spinner'
 import { Check, LocateFixed, MapPin, MapPinOff } from 'lucide-react'
 import { useState, type ComponentProps } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { LocationHelp, type usePlace } from '@/features/pick-place'
+import type { usePlace } from '@/features/pick-place'
+import { SUGGEST_DELAY_MS, useDebounced } from '../model/use-debounced'
 import type { Listbox } from '../model/use-listbox'
 import { Mark, Panel, Rows, Tile, type Row, type Section } from './panel'
 
@@ -17,19 +18,25 @@ const MIN_LETTERS = 2
 
 /**
  * «Where» (C7-Home, book C-01, Q-107): Near me first (the default), then the cities; typing matches cities and the api's
- * places. The field shows the city only as data: the guessed one once the browser said no.
+ * places. The field shows the city only as data: the guessed one once the browser said no, ticked in the list too.
+ * `help` is the «How to allow» sheet: its owner renders it outside the panel, which closes when the sheet takes the focus.
  */
 export function useWhere({ typed, located, onPicked, touch }: { typed: string; located: Located; onPicked: () => void; touch?: boolean }) {
   const t = useTranslations('searchBar')
   const lang = useLocale()
   const sdk = useSdk()
   const { place } = located
+  const [help, setHelp] = useState(false)
   const cities = useQuery(sdk.catalog.cities(lang)).data
   const city = place?.kind === 'city' ? place.id : (cities?.main ?? null)
   const term = typed.trim()
   const typing = term.length >= MIN_LETTERS
-  const places = useQuery(sdk.catalog.places(typing ? term : '', lang, city))
+  const asked = useDebounced(typing ? term : '', SUGGEST_DELAY_MS)
+  const places = useQuery({ ...sdk.catalog.places(asked, lang, city), placeholderData: keepPreviousData })
+  const settled = asked === term && !places.isPlaceholderData
   const cityName = (id: string | null) => cities?.items.find((c) => c.id === id)?.name ?? ''
+  /** The city the list ticks: the picked one, or the guessed one once the browser said no. */
+  const ticked = place?.kind === 'city' ? place.id : !place && located.denied ? city : null
 
   /** What the field shows: the place, or «Near me» until one is known (the guessed city once the browser said no). */
   const shown =
@@ -66,7 +73,7 @@ export function useWhere({ typed, located, onPicked, touch }: { typed: string; l
     .filter((c) => !typing || c.name.toLocaleLowerCase().includes(term.toLocaleLowerCase()))
     .map((c): Row => ({
       id: `where-city-${c.id}`,
-      selected: place?.kind === 'city' && place.id === c.id,
+      selected: ticked === c.id,
       pick: () => {
         located.pick({ kind: 'city', id: c.id })
         onPicked()
@@ -77,7 +84,7 @@ export function useWhere({ typed, located, onPicked, touch }: { typed: string; l
           <span className="min-w-0 truncate">
             <Mark text={c.name} q={term} />
           </span>
-          {check(place?.kind === 'city' && place.id === c.id)}
+          {check(ticked === c.id)}
         </>
       ),
     }))
@@ -106,7 +113,9 @@ export function useWhere({ typed, located, onPicked, touch }: { typed: string; l
     shown,
     sections,
     rows: sections.flatMap((s) => s.rows),
-    nothing: typing && !!places.data && placeRows.length + cityRows.length === 0,
+    nothing: typing && settled && !!places.data && placeRows.length + cityRows.length === 0,
+    help,
+    setHelp,
   }
 }
 
@@ -120,7 +129,6 @@ export function WherePanel({
   ...props
 }: ComponentProps<'div'> & { where: ReturnType<typeof useWhere>; located: Located; listbox: Listbox; listId: string; touch?: boolean }) {
   const t = useTranslations('searchBar')
-  const [help, setHelp] = useState(false)
   return (
     <Panel {...props} touch={touch} className={className}>
       {located.denied && (
@@ -131,7 +139,7 @@ export function WherePanel({
           title={t('locationOff')}
           className={cn('flex-none', touch ? 'mx-4 mt-3 mb-1' : 'm-0.5 mb-1.5')}
           actions={
-            <Button variant="secondary" size="s" onMouseDown={(e) => e.preventDefault()} onClick={() => setHelp(true)}>
+            <Button variant="secondary" size="s" onMouseDown={(e) => e.preventDefault()} onClick={() => where.setHelp(true)}>
               {t('howToAllow')}
             </Button>
           }
@@ -139,7 +147,6 @@ export function WherePanel({
           {t('locationOffText')}
         </Callout>
       )}
-      <LocationHelp open={help} onOpenChange={setHelp} />
       {where.nothing && (
         <div role="status" className="flex h-16 flex-none items-center justify-center text-dense text-n-500">
           {t('noPlace')}

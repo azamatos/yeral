@@ -5,6 +5,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Category } from '@yeral/contract/catalog'
+import { addDays, today } from '@yeral/domain/time'
 import { useSearch } from '@tanstack/react-router'
 import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { usePlace } from '@/features/pick-place'
@@ -49,7 +50,10 @@ const fakeApi = () => () => {
   const mine = fakeFetch(({ route, query }) => {
     if (route === 'GET /categories') return json({ items: CATEGORIES })
     if (route === 'GET /cities') return json(CITIES)
-    if (route === 'GET /places/suggest') return json({ items: [{ label: 'Bitarap park', lat: 37.94, lng: 58.38 }] })
+    if (route === 'GET /places/suggest') {
+      const found = /bit/i.test(query.get('q') ?? '')
+      return json({ items: found ? [{ label: 'Bitarap park', lat: 37.94, lng: 58.38 }] : [] })
+    }
     if (route === 'GET /search') return json({ items: [], total: 24, cursor: null, located: false, city: 'ashgabat' })
     if (route === 'GET /search/suggest') {
       const q = query.get('q') ?? ''
@@ -163,7 +167,39 @@ export const WhereOpen: Story = {
   },
 }
 
-/** Near me refused: the Info callout on top of the list, the field shows the guessed city, the list still works. */
+/** Typing a place: the matching cities; Enter with nothing highlighted takes the first match, not the old place. */
+export const WhereTyping: Story = {
+  play: async ({ canvas }) => {
+    const where = await canvas.findByRole('combobox', { name: 'Where' })
+    await userEvent.type(where, 'Mar')
+    await expect(await canvas.findByRole('option', { name: 'Mary' })).toBeVisible()
+    await expect(canvas.queryByRole('option', { name: 'Ashgabat' })).toBeNull()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(where).toHaveValue('Mary'))
+    await expect(canvas.queryByRole('listbox')).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Search' }))
+    await expect(await canvas.findByText('Search: {"city":"mary"}')).toBeVisible()
+  },
+}
+
+/** Near me allowed: the browser's position closes the panel, the field keeps «Near me», the search carries `near`. */
+export const NearMe: Story = {
+  play: async ({ canvas }) => {
+    browserLocation(true)
+    const where = await canvas.findByRole('combobox', { name: 'Where' })
+    await userEvent.click(where)
+    await userEvent.click(await canvas.findByRole('option', { name: /Near me/ }))
+    await waitFor(() => expect(canvas.queryByRole('listbox')).toBeNull())
+    await expect(where).toHaveValue('Near me')
+    await userEvent.click(canvas.getByRole('button', { name: 'Search' }))
+    await expect(await canvas.findByText('Search: {"near":"37.95000,58.39000"}')).toBeVisible()
+  },
+}
+
+/**
+ * Near me refused: the Info callout on top of the list, «How to allow» opens the help sheet and it stays up, the field
+ * shows the guessed city, the list still works.
+ */
 export const LocationOff: Story = {
   play: async ({ canvas }) => {
     browserLocation(false)
@@ -171,8 +207,13 @@ export const LocationOff: Story = {
     await userEvent.click(where)
     await userEvent.click(await canvas.findByRole('option', { name: /Near me/ }))
     await expect(await canvas.findByText('Location is off')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'How to allow' })).toBeVisible()
     await expect(canvas.getByRole('option', { name: 'Ashgabat' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'How to allow' }))
+    const help = await page.findByRole('dialog', { name: 'Allow your location' })
+    await waitFor(() => expect(help).toBeVisible())
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(help).not.toBeInTheDocument())
+    await waitFor(() => expect(where).toHaveFocus())
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(where).toHaveValue('Ashgabat'))
   },
@@ -190,6 +231,35 @@ export const WhenOpen: Story = {
     await expect(canvas.getByRole('button', { name: 'Search' })).toHaveFocus()
     await userEvent.keyboard('{Enter}')
     await expect(await canvas.findByText('Search: {"day":"tomorrow","tod":"evening"}')).toBeVisible()
+  },
+}
+
+/**
+ * A day from the calendar (ten days on, the next month when it falls there) goes as `date`. The × shows once the focus
+ * is in the segment (⇧Tab from Search, Tab) and clears it.
+ */
+export const WhenDate: Story = {
+  play: async ({ canvas }) => {
+    const day = addDays(today(), 10)
+    const pick = async () => {
+      await userEvent.click(canvas.getByRole('button', { name: /^When / }))
+      const panel = await canvas.findByRole('dialog', { name: 'When' })
+      if (day.slice(0, 7) !== today().slice(0, 7)) await userEvent.click(within(panel).getByRole('button', { name: 'Next month' }))
+      await userEvent.click(panel.querySelector<HTMLElement>(`[data-date="${day}"]`)!)
+      await expect(canvas.queryByRole('button', { name: 'When Any time' })).toBeNull()
+      await userEvent.click(within(panel).getByRole('button', { name: 'Done' }))
+      await expect(canvas.getByRole('button', { name: 'Search' })).toHaveFocus()
+    }
+    await canvas.findByRole('button', { name: 'When Any time' })
+    await pick()
+    await userEvent.tab({ shift: true })
+    await userEvent.tab()
+    await expect(canvas.getByRole('button', { name: 'Clear' })).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(canvas.getByRole('button', { name: 'When Any time' })).toBeVisible()
+    await pick()
+    await userEvent.keyboard('{Enter}')
+    await expect(await canvas.findByText(`Search: {"date":"${day}"}`)).toBeVisible()
   },
 }
 

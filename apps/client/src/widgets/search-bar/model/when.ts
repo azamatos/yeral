@@ -8,6 +8,8 @@ export type TimeOfDay = (typeof TIMES_OF_DAY)[number]
 /** When the client wants a free time (C7-Home «When»): a quick choice or a day from the calendar, and maybe a part of it. */
 export type When = { day: QuickDay | { date: string }; tod?: TimeOfDay }
 export const ANY_TIME: When = { day: 'any' }
+/** Nothing chosen (the chips make a new object, so not by identity): the segment shows its placeholder, no ×. */
+export const isAnyTime = (when: When) => when.day === 'any' && !when.tod
 
 type Address = { day?: Exclude<QuickDay, 'any'>; date?: string; tod?: TimeOfDay }
 

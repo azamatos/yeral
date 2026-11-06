@@ -1,6 +1,6 @@
 import type { SearchParams } from '@yeral/sdk'
 import { DEFAULT_RADIUS_KM, RADIUS_OPTIONS_KM } from '@yeral/domain/geo'
-import { addDays } from '@yeral/domain/time'
+import { addDays, isYmd } from '@yeral/domain/time'
 import type { Locale } from '@yeral/i18n'
 import { z } from 'zod'
 import { TIMES_OF_DAY } from '@/widgets/search-bar'
@@ -24,12 +24,8 @@ export const searchAddress = z.object({
   cat: z.string().max(64).optional().catch(undefined),
   city: z.string().max(64).optional().catch(undefined),
   day: z.enum(DAYS).optional().catch(undefined),
-  /** A day picked in the calendar (C7-Home «When»), `YYYY-MM-DD`; `day` wins when both are there. */
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional()
-    .catch(undefined),
+  /** A day picked in the calendar (C7-Home «When»), a real `YYYY-MM-DD` (the api refuses any other); `day` wins when both are there. */
+  date: z.string().refine(isYmd).optional().catch(undefined),
   /** The part of the day picked with it; the api doesn't filter by it yet, the bar only shows it. */
   tod: z.enum(TIMES_OF_DAY).optional().catch(undefined),
   sort: z.enum(SORTS).optional().catch(undefined),

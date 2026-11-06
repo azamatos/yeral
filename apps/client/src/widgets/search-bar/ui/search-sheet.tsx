@@ -9,9 +9,9 @@ import { Modal, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { CalendarDays, MapPin, Search } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { placeAddress } from '@/features/pick-place'
+import { LocationHelp, placeAddress } from '@/features/pick-place'
 import { useListbox } from '../model/use-listbox'
-import { ANY_TIME, whenAddress, type When } from '../model/when'
+import { ANY_TIME, isAnyTime, whenAddress, type When } from '../model/when'
 import { useWhat, WhatPanel } from './what-panel'
 import { useWhenLabel, WhenPanel } from './when-panel'
 import { useWhere, WherePanel, type Located } from './where-panel'
@@ -122,12 +122,14 @@ export function SearchSheet({
     }
   }, [active])
 
-  // «Show 24 places»: the draft as the api searches it, a moment after the last change
+  // «Show 24 places»: the draft as the api searches it, a moment after the last change (keyed on its value: a new
+  // object on every render would set a timer per render and render every 300 ms for as long as the sheet is open)
   const [draft, setDraft] = useState(address)
+  const nextKey = JSON.stringify(address())
   useEffect(() => {
-    const timer = setTimeout(() => setDraft(address()), COUNT_DELAY_MS)
+    const timer = setTimeout(() => setDraft(JSON.parse(nextKey) as ReturnType<typeof address>), COUNT_DELAY_MS)
     return () => clearTimeout(timer)
-  })
+  }, [nextKey])
   const params: SearchParams = {
     lang,
     q: draft.what,
@@ -199,7 +201,7 @@ export function SearchSheet({
               aria-haspopup="dialog"
               aria-expanded={active === 'when'}
               aria-labelledby={`${id}-when-label ${id}-when-value`}
-              className={cn(field, 'cursor-pointer', when === ANY_TIME && 'text-n-500')}
+              className={cn(field, 'cursor-pointer', isAnyTime(when) && 'text-n-500')}
               onClick={() => onField('when')}
             >
               <span id={`${id}-when-label`} className="sr-only">
@@ -211,6 +213,7 @@ export function SearchSheet({
         </div>
         {active === 'what' && <WhatPanel touch what={whatRows} listbox={whatList} listId={`${id}-what-list`} />}
         {active === 'where' && <WherePanel touch where={where} located={located} listbox={whereList} listId={`${id}-where-list`} />}
+        <LocationHelp open={where.help} onOpenChange={where.setHelp} backTo={whereInput} />
         {active === 'when' && (
           <div className="min-h-0 flex-1 overflow-y-auto pb-4">
             <WhenPanel touch id={`${id}-when-panel`} when={when} onChange={onWhen} />

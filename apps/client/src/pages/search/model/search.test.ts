@@ -10,6 +10,12 @@ describe('searchAddress', () => {
       open: true,
     })
   })
+
+  it('keeps only a real calendar date and a known time of day', () => {
+    expect(searchAddress.parse({ date: '2026-11-20', tod: 'morning' })).toEqual({ date: '2026-11-20', tod: 'morning' })
+    expect(searchAddress.parse({ date: '2026-13-45', tod: 'night' })).toEqual({})
+    expect(searchAddress.parse({ date: '20.11.2026' })).toEqual({})
+  })
 })
 
 describe('apiSearch', () => {
@@ -19,6 +25,11 @@ describe('apiSearch', () => {
     expect(apiSearch({ day: 'tomorrow' }, 'en', day)).toMatchObject({ date: '2026-11-02' })
     expect(apiSearch({ day: 'week' }, 'en', day)).toMatchObject({ week: true })
     expect(apiSearch({ day: 'today' }, 'en', day).date).toBeUndefined()
+  })
+
+  it('sends a calendar date, and the day instead when both are there', () => {
+    expect(apiSearch({ date: '2026-11-20' }, 'en', day)).toMatchObject({ date: '2026-11-20' })
+    expect(apiSearch({ date: '2026-11-20', day: 'today' }, 'en', day).date).toBeUndefined()
   })
 
   it('reads a price range the right way round', () => {

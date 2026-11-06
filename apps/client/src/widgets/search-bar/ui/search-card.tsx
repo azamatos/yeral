@@ -6,7 +6,7 @@ import { CalendarDays, ChevronRight, MapPin, Search } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { placeAddress } from '@/features/pick-place'
-import { ANY_TIME, whenAddress, type When } from '../model/when'
+import { ANY_TIME, isAnyTime, whenAddress, type When } from '../model/when'
 import { SearchSheet, type Field } from './search-sheet'
 import { useWhenLabel } from './when-panel'
 import { useWhere, type Located } from './where-panel'
@@ -78,7 +78,7 @@ export function SearchCard({ located, className }: { located: Located; className
         <CardRow
           icon={<CalendarDays aria-hidden />}
           label={t('when')}
-          value={when === ANY_TIME ? null : whenLabel(when)}
+          value={isAnyTime(when) ? null : whenLabel(when)}
           placeholder={whenLabel(ANY_TIME)}
           onClick={() => setField('when')}
         />

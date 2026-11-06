@@ -15,9 +15,9 @@ import {
   type Ref,
 } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { placeAddress } from '@/features/pick-place'
+import { LocationHelp, placeAddress } from '@/features/pick-place'
 import { useListbox, type Listbox } from '../model/use-listbox'
-import { ANY_TIME, whenAddress, type When } from '../model/when'
+import { ANY_TIME, isAnyTime, whenAddress, type When } from '../model/when'
 import type { Row } from './panel'
 import { useWhat, WhatPanel } from './what-panel'
 import { WhenPanel, useWhenLabel } from './when-panel'
@@ -25,14 +25,17 @@ import { useWhere, WherePanel, type Located } from './where-panel'
 
 type Open = 'what' | 'where' | 'when' | null
 
-/** The × that clears a segment: on the hovered or focused segment only, while it holds a value. */
+/**
+ * The × that clears a segment: on the hovered or focused segment only, while it holds a value. Above the When button's
+ * overlay (`after:inset-0`), which would take the click otherwise.
+ */
 function Clear({ label, shown, onClear }: { label: string; shown: boolean; onClear: () => void }) {
   if (!shown) return null
   return (
     <button
       type="button"
       aria-label={label}
-      className="-mr-1 flex size-6 flex-none cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0 text-n-600 group-focus-within:visible group-hover:visible hover:bg-n-100 focus-visible:shadow-focus focus-visible:outline-none sm:invisible"
+      className="relative z-10 -mr-1 flex size-6 flex-none cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0 text-n-600 group-focus-within:visible group-hover:visible hover:bg-n-100 focus-visible:shadow-focus focus-visible:outline-none sm:invisible"
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClear}
     >
@@ -164,6 +167,10 @@ export function SearchBar({
     } else if (e.key === 'Enter' && open === which && list.active) {
       e.preventDefault()
       rows.find((r) => r.id === list.active)?.pick()
+    } else if (e.key === 'Enter' && which === 'where' && open === which && whereDirty && whereTyped?.trim() && rows[0]) {
+      // a place typed but none highlighted: the first match, not a search around the old place with the words dropped
+      e.preventDefault()
+      rows[0].pick()
     }
   }
   const combobox = (which: 'what' | 'where', list: Listbox, rows: Row[]) => ({
@@ -272,7 +279,7 @@ export function SearchBar({
         width="w-[24%] max-w-[248px]"
         icon={<CalendarDays aria-hidden />}
         className="cursor-pointer"
-        trailing={<Clear label={t('clear')} shown={when !== ANY_TIME} onClear={() => setWhen(ANY_TIME)} />}
+        trailing={<Clear label={t('clear')} shown={!isAnyTime(when)} onClear={() => setWhen(ANY_TIME)} />}
       >
         <span id={`${id}-when-label`} className="text-micro font-semibold text-n-900">
           {t('when')}
@@ -284,7 +291,7 @@ export function SearchBar({
           aria-expanded={open === 'when'}
           aria-controls={open === 'when' ? `${id}-when` : undefined}
           aria-labelledby={`${id}-when-label ${id}-when-value`}
-          className={cn(value, 'cursor-pointer text-left after:absolute after:inset-0', when === ANY_TIME && 'text-n-500')}
+          className={cn(value, 'cursor-pointer text-left after:absolute after:inset-0', isAnyTime(when) && 'text-n-500')}
           onClick={() => (open === 'when' ? close() : setOpen('when'))}
         >
           <span id={`${id}-when-value`}>{whenLabel(when)}</span>
@@ -308,6 +315,8 @@ export function SearchBar({
           style={{ left: whereLeft }}
         />
       )}
+      {/* outside the panel: the panel closes once the sheet takes the focus, and the sheet must outlive it */}
+      <LocationHelp open={where.help} onOpenChange={where.setHelp} backTo={whereField} />
       {open === 'when' && (
         <div
           id={`${id}-when`}

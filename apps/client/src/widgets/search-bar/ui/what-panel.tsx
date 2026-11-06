@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useSdk } from '@yeral/sdk/react'
 import { Chip } from '@yeral/ui/chip'
@@ -8,6 +8,7 @@ import { Search, Sparkles } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { CategoryIcon } from '@/entities/category'
+import { SUGGEST_DELAY_MS, useDebounced } from '../model/use-debounced'
 import type { Listbox } from '../model/use-listbox'
 import { Mark, Meta, Panel, Rows, SectionTitle, Tile, type Row, type Section } from './panel'
 
@@ -24,17 +25,20 @@ export type WhatHandlers = {
 
 /**
  * The suggestions for what's typed (C7-Home «What»): Categories · Services · Businesses from the api's suggest, up to
- * three each, the typed part in 600; nothing typed → the categories as chips. The api gives no place counts for
- * services and no photo, distance or rating for businesses yet, so the rows show what it gives.
+ * three each, the typed part in 600; nothing typed → the categories as chips. The api is asked once the typing pauses
+ * and the last answer stays up until the next one, so the rows don't flicker per letter. The api gives no place counts
+ * for services and no photo, distance or rating for businesses yet, so the rows show what it gives.
  */
 export function useWhat(q: string, h: WhatHandlers, touch?: boolean) {
   const t = useTranslations('searchBar')
   const lang = useLocale()
   const sdk = useSdk()
   const term = q.trim()
+  const asked = useDebounced(term, SUGGEST_DELAY_MS)
   const categories = useQuery(sdk.catalog.categories(lang)).data?.items ?? []
-  const suggest = useQuery(sdk.catalog.suggest(term, lang))
+  const suggest = useQuery({ ...sdk.catalog.suggest(asked, lang), placeholderData: keepPreviousData })
   const found = term ? suggest.data : undefined
+  const settled = asked === term && !suggest.isPlaceholderData
   const sections: Section[] = []
   if (found) {
     const icon = (id: string) => categories.find((c) => c.id === id)
@@ -110,8 +114,8 @@ export function useWhat(q: string, h: WhatHandlers, touch?: boolean) {
     categories,
     sections: showAll ? [...sections, { divider: rows.length > 0, rows: [showAll] }] : sections,
     rows: showAll ? [...rows, showAll] : rows,
-    loading: !!term && suggest.isPending,
-    nothing: !!found && rows.length === 0,
+    loading: !!term && !found,
+    nothing: !!found && settled && rows.length === 0,
   }
 }
 

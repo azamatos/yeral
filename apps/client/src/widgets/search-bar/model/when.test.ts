@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addMonths, ANY_TIME, dateOf, pickDate, whenAddress, whenOf } from './when'
+import { addMonths, ANY_TIME, dateOf, isAnyTime, pickDate, whenAddress, whenOf } from './when'
 
 const TODAY = '2026-11-07'
 
@@ -14,6 +14,12 @@ describe('whenAddress', () => {
   ])('%j reads as %j', (when, address) => {
     expect(whenAddress(when, TODAY)).toEqual(expect.objectContaining(address))
     expect(whenAddress(when, TODAY).date).toBe((address as { date?: string }).date)
+  })
+
+  it('knows nothing chosen by value, not by identity', () => {
+    expect(isAnyTime({ day: 'any' })).toBe(true)
+    expect(isAnyTime({ day: 'any', tod: 'morning' })).toBe(false)
+    expect(isAnyTime({ day: 'today' })).toBe(false)
   })
 
   it('round-trips through the address', () => {
