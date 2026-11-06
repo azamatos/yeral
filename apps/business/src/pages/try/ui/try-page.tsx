@@ -17,6 +17,8 @@ import { AuthPage } from '@/shared/ui'
  */
 export function TryPage() {
   const t = useTranslations('try')
+  const all = useTranslations()
+  const brand = all('common.brand')
   const sdk = useSdk()
   const navigate = useNavigate()
   const errorText = useErrorText()
@@ -36,12 +38,12 @@ export function TryPage() {
 
   if (!error)
     return (
-      <AuthPage align="center" title={t('opening')} aria-busy>
+      <AuthPage align="center" title={t('opening', { brand })} aria-busy>
         <Spinner className="size-6 text-a-500" />
       </AuthPage>
     )
   return (
-    <AuthPage focusKey="failed" title={t('offTitle')} lead={isApiError(error, 'not_found') ? t('offLead') : errorText(error)}>
+    <AuthPage focusKey="failed" title={t('offTitle', { brand })} lead={isApiError(error, 'not_found') ? t('offLead') : errorText(error)}>
       <Button asChild variant="primary" size="l">
         <Link to="/login">{t('logIn')}</Link>
       </Button>

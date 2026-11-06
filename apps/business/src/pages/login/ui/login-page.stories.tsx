@@ -11,6 +11,7 @@ import type { Setup } from '@yeral/contract/setup'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
+import { InvitePage } from './invite-page'
 import { LoginPage } from './login-page'
 
 const DAY = 86_400_000
@@ -193,6 +194,17 @@ const PEOPLE: Record<string, Account> = {
   },
 }
 
+/**
+ * The links in invites (`/invite/$token`, the api's `inviteLink`): an account's invite behind each, as it stands now,
+ * or a card that is nobody's here (answered, taken back).
+ */
+const LINKS: Record<string, { phone: string; id: string } | InviteCard> = {
+  'link-pending-0000000000000000': { phone: '+99364215590', id: 'inv-1' },
+  'link-expired-0000000000000000': { phone: '+99362481530', id: 'inv-1' },
+  'link-answered-000000000000000': invite('accepted', Date.now() + 3 * DAY),
+  'link-cancelled-00000000000000': invite('cancelled', Date.now() + 3 * DAY),
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 const refuse = (status: number, code: string, details?: Record<string, unknown>) => json({ error: { code, details } }, status)
@@ -264,6 +276,13 @@ const fakeApi =
         me = null
         return new Response(null, { status: 204 })
       }
+      // the invite behind a link is public: it opens the invite and never signs anyone in (ADR 0025)
+      const link = /^GET \/invites\/([^/]+)$/.exec(route)
+      if (link) {
+        const found = LINKS[link[1] ?? '']
+        const card = found && 'phone' in found ? ACCOUNTS[found.phone]?.invites.find((i) => i.id === found.id) : found
+        return card ? json(card) : refuse(404, 'not_found')
+      }
       if (!me || !account) return refuse(401, 'unauthorized')
       // the session ended elsewhere: the page still has `me`, the next questions get 401
       if (sessionEnds && route !== 'GET /me') {
@@ -316,7 +335,11 @@ function Setup() {
   const { step } = useParams({ strict: false })
   return <p>Setup: {step}</p>
 }
-const routes = { '/login': LoginPage, '/w/$slug/calendar': Calendar, '/setup/$step': Setup }
+function InviteLinkRoute() {
+  const { token } = useParams({ strict: false })
+  return <InvitePage token={String(token)} />
+}
+const routes = { '/login': LoginPage, '/invite/$token': InviteLinkRoute, '/w/$slug/calendar': Calendar, '/setup/$step': Setup }
 
 const meta = {
   title: 'Business/Access/LoginFlow',
@@ -349,8 +372,10 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Log in to Ýeral Business' })).toBeVisible()
     await waitFor(() => expect(document.title).toBe('Log in · Ýeral Business'))
-    // the first launch shows the code on the screen: the phone step says it's a demo (book Q-036)
-    await expect(await canvas.findByText(/This is a demo of Ýeral: the sign-in code shows here instead of an SMS/)).toBeVisible()
+    // the first launch shows the code on the screen: the phone step says so (book Q-036)
+    await expect(
+      await canvas.findByText(/While Ýeral is being tried out, the sign-in code shows here instead of coming by SMS/),
+    ).toBeVisible()
     const phone = canvas.getByLabelText('Phone number')
     // a demo asks for the same made-up number on both sites
     await expect(phone).toHaveAccessibleDescription('Use the same made-up number on the Ýeral site and here — one account works for both.')
@@ -707,5 +732,99 @@ export const Offline: Story = {
     // who is signed in can't be asked: the page offers to try again
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Something went wrong' })).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Try again' })).toBeVisible()
+  },
+}
+
+// ── The invite link (`/invite/$token`, book B-08, ADR 0025; the owner's #46: it landed on «Page not found») ──
+
+const PENDING_LINK = '/invite/link-pending-0000000000000000'
+
+/** Signed out: the invite shows with the sign-in in its card; the invited number logs in, accepts, and its calendar opens. */
+export const InviteLink: Story = {
+  name: 'Invite link · signed out, then accepted',
+  args: { path: PENDING_LINK },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio invites you to the team' })).toBeVisible()
+    await expect(canvas.getByText('Beauty · Ashgabat')).toBeVisible()
+    await expect(canvas.getByText('Log in with the number the invite was sent to, and you can accept it.')).toBeVisible()
+    await waitFor(() => expect(document.title).toBe('Invite to Glow Studio · Ýeral Business'))
+    await sendCode(canvas, '64215590')
+    // the code step keeps the business on top
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Enter the code' })).toBeVisible()
+    await userEvent.keyboard('4821')
+    await expect(await canvas.findByRole('button', { name: 'Accept' })).toBeVisible()
+    await expect(canvas.getByText('You can answer your own requests')).toBeVisible()
+    await expect(canvas.getByText('Gülnar Öwezowa · +993 64 •• •• 90')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Accept' }))
+    await expect(await canvas.findByText('Calendar of glow-studio')).toBeVisible()
+  },
+}
+
+export const InviteLinkPhone: Story = {
+  name: 'Invite link · on a phone',
+  args: { path: PENDING_LINK },
+  globals: { viewport: { value: 'xs' } },
+}
+
+/** Signed in with a number the invite wasn't sent to: it says so; «Log in with another number» brings the phone step back. */
+export const InviteLinkOtherNumber: Story = {
+  name: 'Invite link · another number',
+  args: { path: PENDING_LINK, server: fakeApi({ signedIn: '+99365102030' }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'This invite was sent to another number' })).toBeVisible()
+    await expect(canvas.getByText('Maýsa Annaýewa · +993 65 10 20 30')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Log in with another number' }))
+    await expect(await canvas.findByLabelText('Phone number')).toBeVisible()
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Glow Studio invites you to the team' })).toBeVisible()
+  },
+}
+
+/** Signed in with the invited number: the invite card as at sign-in; a decline goes on to the sign-in page, which says where they belong. */
+export const InviteLinkDeclined: Story = {
+  name: 'Invite link · signed in, declined',
+  args: { path: PENDING_LINK, server: fakeApi({ signedIn: '+99364215590' }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Decline' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Decline invite' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'You don’t have a workspace yet' })).toBeVisible()
+    await shown(canvas, 'You declined Glow Studio’s invite.')
+  },
+}
+
+export const InviteLinkExpired: Story = {
+  name: 'Invite link · expired',
+  args: { path: '/invite/link-expired-0000000000000000' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'The invite has expired' })).toBeVisible()
+    await expect(canvas.getByText(/The invite Glow Studio sent on/)).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Log in' })).toBeVisible()
+  },
+}
+
+export const InviteLinkAnswered: Story = {
+  name: 'Invite link · already answered',
+  args: { path: '/invite/link-answered-000000000000000' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'This invite has been answered' })).toBeVisible()
+  },
+}
+
+export const InviteLinkCancelled: Story = {
+  name: 'Invite link · withdrawn',
+  args: { path: '/invite/link-cancelled-00000000000000', server: fakeApi({ signedIn: '+99365102030' }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'This invite was withdrawn' })).toBeVisible()
+    // signed in: the way on is «Continue», to wherever they belong
+    await expect(canvas.getByRole('link', { name: 'Continue' })).toBeVisible()
+  },
+}
+
+export const InviteLinkNotFound: Story = {
+  name: 'Invite link · unknown',
+  args: { path: '/invite/link-unknown-0000000000000000' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'This invite link doesn’t work' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('link', { name: 'Log in' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Log in to Ýeral Business' })).toBeVisible()
   },
 }

@@ -43,10 +43,40 @@ function linesFor(invite: InviteCard): Can[] {
   )
 }
 
+/** The card's head (B-Login `step=invite`): the business's mark, name, category and city. */
+export function InviteMedia({ business }: { business: InviteCard['business'] }) {
+  const t = useTranslations()
+  return (
+    <div className="flex min-w-0 items-center gap-3.5">
+      <BusinessMark name={business.name} logo={business.logo} />
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-[17px] leading-6 font-semibold">{business.name}</span>
+        <span className="text-dense text-n-600">{t('login.invite.where', { category: business.category, city: business.city.name })}</span>
+      </span>
+    </div>
+  )
+}
+
+/** Who invited, and as what: the card's lead. */
+export function InviteBy({ invite }: { invite: InviteCard }) {
+  const t = useTranslations()
+  const level = t(`levels.${invite.level}`)
+  return (
+    <span className="flex items-center gap-2.5 text-n-900">
+      {invite.invitedBy && <Avatar name={invite.invitedBy} size={32} aria-hidden />}
+      <span>
+        {invite.invitedBy
+          ? t.rich('login.invite.by', { name: invite.invitedBy, level, b: (chunks) => <b>{chunks}</b> })
+          : t.rich('login.invite.byNobody', { level, b: (chunks) => <b>{chunks}</b> })}
+      </span>
+    </span>
+  )
+}
+
 /**
  * An invite waiting for the signed-in phone (B-Login `step=invite`, book B-08): the workspace, who invited, the level
  * and what it may do, until when; Accept joins and opens the workspace, Decline asks once in place. The answers are
- * the entry step's, which outlives this card when the invites reload.
+ * the entry step's, which outlives this card when the invites reload (and the invite link's, `InvitePage`).
  */
 export function InviteStep({
   invite,
@@ -72,7 +102,6 @@ export function InviteStep({
   const [asking, setAsking] = useState(false)
   const confirmRef = useRef<HTMLParagraphElement>(null)
   const { business } = invite
-  const level = t(`levels.${invite.level}`)
   const busy = accepting || declining
 
   // the question takes the focus when it opens (B-Login focusEl(confirmEl))
@@ -83,29 +112,10 @@ export function InviteStep({
   return (
     <AuthPage
       focusKey="invite"
-      media={
-        <div className="flex min-w-0 items-center gap-3.5">
-          <BusinessMark name={business.name} logo={business.logo} />
-          <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-[17px] leading-6 font-semibold">{business.name}</span>
-            <span className="text-dense text-n-600">
-              {t('login.invite.where', { category: business.category, city: business.city.name })}
-            </span>
-          </span>
-        </div>
-      }
+      media={<InviteMedia business={business} />}
       eyebrow={t('login.invite.eyebrow')}
       title={t('login.invite.title', { business: business.name })}
-      lead={
-        <span className="flex items-center gap-2.5 text-n-900">
-          {invite.invitedBy && <Avatar name={invite.invitedBy} size={32} aria-hidden />}
-          <span>
-            {invite.invitedBy
-              ? t.rich('login.invite.by', { name: invite.invitedBy, level, b: (chunks) => <b>{chunks}</b> })
-              : t.rich('login.invite.byNobody', { level, b: (chunks) => <b>{chunks}</b> })}
-          </span>
-        </span>
-      }
+      lead={<InviteBy invite={invite} />}
     >
       <div className="flex flex-col gap-3">
         <span id="invite-can" className="text-label text-n-500 uppercase">

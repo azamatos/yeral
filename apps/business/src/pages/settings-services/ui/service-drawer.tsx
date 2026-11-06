@@ -122,6 +122,8 @@ function ServiceEditor({
   const sdk = useSdk()
   const errorText = useErrorText()
   const rules = useQuery(sdk.settings.rules(slug))
+  // the name's example follows the business's category (a dentist isn't shown hair colouring); the catalogue's `other` until it's known
+  const profile = useQuery(sdk.settings.profile(slug))
   const add = useMutation(sdk.settings.addService(slug))
   const update = useMutation(sdk.settings.updateService(slug))
   const service = 'service' in target ? target.service : null
@@ -186,7 +188,7 @@ function ServiceEditor({
             <Input
               className="h-11"
               maxLength={SERVICE_NAME_MAX}
-              placeholder={t('namePlaceholder')}
+              placeholder={t('namePlaceholder', { category: profile.data?.categoryId ?? 'other' })}
               value={form.name}
               onChange={(e) => set({ name: e.target.value })}
             />

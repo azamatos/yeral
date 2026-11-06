@@ -552,13 +552,7 @@ function MemberEditor({
       {/* «Remove from the team» on the left beside the owner's Save (B-Team `.drw-f`); otherwise the footer's own */}
       <DrawerFooter className={owner && !ownerRow ? 'justify-between [&>*]:flex-none' : undefined}>
         {owner && !ownerRow && (
-          <Button
-            variant="danger-ghost"
-            aria-haspopup="dialog"
-            disabled={saving}
-            className="-ml-1.5 px-1.5"
-            onClick={() => setRemoving(true)}
-          >
+          <Button variant="danger-ghost" aria-haspopup="dialog" disabled={saving} onClick={() => setRemoving(true)}>
             {t('remove')}
           </Button>
         )}

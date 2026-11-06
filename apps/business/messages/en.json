@@ -103,7 +103,7 @@
       "confirm": "Leave {business}"
     },
     "demo": {
-      "text": "This is a demo workspace. Changes reset every night.",
+      "text": "A workspace to try {brand}. Changes reset every night.",
       "create": "Create your business"
     }
   },
@@ -178,7 +178,22 @@
       "declineLeadNobody": "The business will be told. To join later you’ll need a new invite.",
       "back": "Back",
       "declineConfirm": "Decline invite",
-      "declined": "You declined {business}’s invite."
+      "declined": "You declined {business}’s invite.",
+      "link": {
+        "tabTitle": "Invite to {business}",
+        "signIn": "Log in with the number the invite was sent to, and you can accept it.",
+        "otherNumberTitle": "This invite was sent to another number",
+        "otherNumberLead": "{business} sent the invite to a different number. Log in with that number to accept it.",
+        "notFoundTitle": "This invite link doesn’t work",
+        "notFoundLead": "Check the link you were sent, or ask the owner for a new invite.",
+        "answeredTitle": "This invite has been answered",
+        "answeredLead": "The invite from {business} was already accepted or declined. If you’re on the team, log in to open the workspace.",
+        "cancelledTitle": "This invite was withdrawn",
+        "cancelledLead": "{business} took the invite back. Ask the owner for a new one.",
+        "expiredNote": "Ask the owner to send it again — you’ll get a new link.",
+        "logIn": "Log in",
+        "continue": "Continue"
+      }
     },
     "expired": {
       "title": "The invite has expired",
@@ -218,7 +233,7 @@
       },
       "continue": "Continue"
     },
-    "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers.",
+    "demoNote": "While {brand} is being tried out, the sign-in code shows here instead of coming by SMS. Use a made-up number, and don’t type in real people’s names or numbers.",
     "terms": "By continuing, you agree to the <terms>Terms</terms> and the <privacy>Privacy policy</privacy>."
   },
   "notFound": {
@@ -889,7 +904,7 @@
       "about": "About",
       "aboutCaption": "What you do and why clients should come to you — 2–3 sentences are enough.",
       "aboutLabel": "About your business",
-      "aboutPlaceholder": "For example: a cosy studio in the centre — haircuts, colouring and nails by an experienced team.",
+      "aboutPlaceholder": "For example: {category, select, beauty {a cosy studio in the centre — haircuts, colouring and nails by an experienced team.} barber {a classic barbershop — haircuts, beard trims and hot-towel shaves; walk in or book ahead.} nails {a bright nail studio — manicure, pedicure and gel, with care for every detail.} spa {a quiet spa — massage, body care and steam, to switch off for an hour.} dental {a modern dental clinic — check-ups, cleaning, fillings and whitening, gentle with nervous patients.} health {a clinic with experienced doctors — consultations, tests and follow-ups, by appointment.} restaurant {a family restaurant — national and European dishes, a terrace in summer and tables for big groups.} cafe {a small cafe with its own bakery — breakfasts, coffee and desserts, a quiet place to work.} sport {a gym with trainers — personal training, group classes and a pool, open from early morning.} education {a language school — small groups and one-to-one lessons for children and adults.} auto {a car service — diagnostics, oil changes, tyres and brakes, with original parts.} pets {a grooming salon for dogs and cats — washing, trimming and nail care, calm with every pet.} home {home cleaning and repairs — regular or deep cleaning and small fixes, same day when possible.} other {what you do, who it’s for and what makes you different.}}",
       "aboutEmpty": "Write a few words about your business.",
       "aboutLong": "Too long: up to {max, number} characters.",
       "photos": {
@@ -980,7 +995,7 @@
         "editSub": "{group} · {name}",
         "close": "Close",
         "name": "Name",
-        "namePlaceholder": "For example: Hair colouring",
+        "namePlaceholder": "For example: {category, select, beauty {Hair colouring} barber {Beard trim} nails {Gel manicure} spa {Back massage} dental {Teeth cleaning} health {Doctor’s consultation} restaurant {Table for four} cafe {Table for two} sport {Personal training} education {Trial lesson} auto {Oil change} pets {Dog grooming} home {Deep cleaning} other {Consultation}}",
         "nameMissing": "Enter the service name.",
         "description": "Description",
         "optional": "(optional)",
@@ -2081,8 +2096,8 @@
   },
   "try": {
     "tabTitle": "Try the business app",
-    "opening": "Opening the demo…",
-    "offTitle": "The demo isn't open right now",
+    "opening": "Opening a workspace to try {brand}…",
+    "offTitle": "The workspace to try {brand} isn't open right now",
     "offLead": "Try again later, or log in to your own business.",
     "logIn": "Log in"
   }

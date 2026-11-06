@@ -49,8 +49,9 @@ function Client({ slug, id, level, staffId }: { slug: string; id: string; level:
   const specialist = level === 'specialist'
   const manage = !specialist
   const todayDate = today(now)
-  const go = (patch: Partial<ClientSearch>) =>
-    void navigate({ to: '.', search: (prev: ClientSearch) => ({ ...prev, ...patch }), replace: true })
+  // `keepScroll`: a longer history stays where the person reads; the router scrolls to the top otherwise
+  const go = (patch: Partial<ClientSearch>, { keepScroll = false } = {}) =>
+    void navigate({ to: '.', search: (prev: ClientSearch) => ({ ...prev, ...patch }), replace: true, resetScroll: !keepScroll })
 
   const shown = search.history ?? HISTORY_STEP
   const query = useQuery({
@@ -126,7 +127,7 @@ function Client({ slug, id, level, staffId }: { slug: string; id: string; level:
               bookings={card.history}
               more={card.moreHistory && shown < HISTORY_MAX}
               loading={query.isFetching}
-              onMore={() => go({ history: Math.min(shown + HISTORY_STEP, HISTORY_MAX) })}
+              onMore={() => go({ history: Math.min(shown + HISTORY_STEP, HISTORY_MAX) }, { keepScroll: true })}
             />
             <ClientReports slug={slug} card={card} now={now} viewer={{ level, staffId }} />
           </div>
