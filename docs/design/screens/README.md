@@ -1,6 +1,6 @@
 # Screens index
 
-Hi-fi screens exported from the "Ýeral Web" canvas (export **v0.7 round 7.1**, 06.11.2026 — see `../CHANGELOG.md`). English: the design-system boards and the **whole business app** (spec `../business/README.md` §27–28). Still Turkmen until rounds 4a–4b: the client screens. The first release has one language (English). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
+Hi-fi screens exported from the "Ýeral Web" canvas (export **v0.7 round 7.2**, 06.11.2026 — see `../CHANGELOG.md`). English: the design-system boards and the **whole business app** (spec `../business/README.md` §27–28). Still Turkmen until rounds 4a–4b: the client screens. The first release has one language (English). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
 Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to 360); boards are fixed sheets.
 
 ## client/ — yeral.app
@@ -21,7 +21,19 @@ Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to
 | `States.dc.html` | — | board · 1440×4320 | No results · location ask · location denied · slot taken · not bookable online · closed today · network error · loading skeleton · 404 · login required for favourite · 11 unverified business ("Bu sahypa entek açylmady") |
 | `Client-Map.dc.html` | — | board · 1440×2860 | Site map, flow, inventory, decisions log |
 
-## business/ — business.yeral.app (spec: `../business/README.md`; round 2 = §27, round 3 = §28)
+## business/ — business.yeral.app (spec: `../business/README.md`; round 2 = §27, round 3 = §28, round 7 = §29)
+
+**Round 7 boards first (v0.7, fixed boards 1600 wide with 1440 / 1024 / 390 frames).** Where they differ from the older pages below, they win:
+
+| File | Replaces | Kind · frame | What |
+|---|---|---|---|
+| `B7-Hours.dc.html` | hours in B-Settings, B-Team › Hours, Special day, B-Mobile | board · 1600×10990 | B1 — a day as times on one line (breaks are gaps), Add break / remove, Copy Monday, errors, own shift vs business hours, Admin read-only, special day, 390, before/after |
+| `B7-Calendar.dc.html` | B-Calendar toolbar and week views, B-Mobile calendar | board · 1600×14801 | B2 — one M toolbar (DateNav with Today, Day · Week, PeoplePicker, Filters with Show cancelled and the legend, Requests, New booking) at 1440 / 1024 / 390; B3 — readable one-person week (time, client, service; 15-min blocks; hover card) and the team week matrix |
+| `B7-Booking.dc.html` | B-Calendar drawer and New booking, B-Mobile sheets | board · 1600×11992 | B4 — drawer with status + source badges, ⓘ, one client card (name link, copy, facts, Call = Book again), footers per status, 390 sheet; B7 — client combobox (five Jahans, digits, new client), services (Jeren's / All, search, grouped), 390 |
+| `B7-Clients.dc.html` | B-Clients, B-Client, B-Mobile frames | board · 1600×18321 | B5 — clients list at scale (segments, FilterBar, sortable table, Show 25 more, empty / no results, specialist view, 1024, 390); B6 — client card (copy + Call, tags in place, labelled facts, NoteRow, History with Show more, Delete as Danger quiet, 390) |
+| `B7-Team.dc.html` | B-Bookings, B-Team list and permissions, B-Shell permissions | board · 1600×12955 | B8 — bookings and requests (Answer by + Answer on one line, day groups, bulk bar, 1024, 390); B9 — one team table (Takes bookings, Status pills, Removed + Reactivate), member footer, permissions matrix with ✓ / — / Own / View and footnotes, 390 cards |
+
+Older pages:
 
 All boards are English. Shared shell: five-item sidebar, account menu with Contact Ýeral (no Language row), no top-bar search, switcher rows "access level · city", banners via the `banner` tweak (In review · Not approved · Hidden by Ýeral; the Demo banner and the shared demo workspace are gone in v0.7).
 
