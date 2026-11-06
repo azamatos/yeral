@@ -171,7 +171,7 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
               {calendar.label}
             </Button>
           )}
-          <Button asChild size="l" variant="ghost">
+          <Button asChild size="l" variant="secondary">
             <Link to="/$lang" params={{ lang }}>
               {t('home')}
             </Link>

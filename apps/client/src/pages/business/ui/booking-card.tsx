@@ -26,7 +26,10 @@ function InfoRow({ icon, children, className }: { icon: ReactNode; children: Rea
   )
 }
 
-/** Today's hours and whether it's open (green while open), the address with its floor and distance. */
+/**
+ * Today's hours on one line and whether it's open on its own (green while open; two lines, so neither wraps mid-phrase:
+ * owner's review, #19), the address with its floor and distance.
+ */
 function PlaceRows({ detail }: { detail: Detail }) {
   const t = useTranslations('business')
   const fmt = useFmt()
@@ -36,13 +39,15 @@ function PlaceRows({ detail }: { detail: Detail }) {
   return (
     <>
       <InfoRow icon={<Clock aria-hidden />}>
-        <span>
-          {'hours' in hours
-            ? t('card.today', { hours: hours.hours })
-            : hours.reason
-              ? t('card.closedFor', { reason: hours.reason })
-              : t('card.closedToday')}{' '}
-          · <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>{open.text}</span>
+        <span className="flex flex-col">
+          <span>
+            {'hours' in hours
+              ? t('card.today', { hours: hours.hours })
+              : hours.reason
+                ? t('card.closedFor', { reason: hours.reason })
+                : t('card.closedToday')}
+          </span>
+          <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>{open.text}</span>
         </span>
       </InfoRow>
       <InfoRow icon={<MapPin aria-hidden />}>

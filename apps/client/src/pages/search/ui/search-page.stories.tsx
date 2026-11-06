@@ -115,7 +115,8 @@ export const Results: Story = {
     await expect(await canvas.findByText('2 places · free time today')).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Barber Loft' })).toHaveAttribute('href', '/en/b/barber-loft')
     await expect(canvas.getAllByText('Barbershop · Magtymguly şaýoly 12')).toHaveLength(2)
-    await expect(canvas.getByText('Example')).toBeVisible()
+    // an example business is no longer marked (owner's review, #40)
+    await expect(canvas.queryByText('Example')).toBeNull()
     await expect(canvas.getAllByText('from 40 TMT')).toHaveLength(2)
     await expect(canvas.getAllByText('+3')).toHaveLength(2)
     await expect(canvas.getByRole('link', { name: 'Book Barber Loft at 11:00' })).toHaveAttribute(

@@ -31,7 +31,15 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
+    // the category crumb and the meta line's category open the category page (#18)
+    const crumbs = within(canvas.getByRole('navigation', { name: 'You are here' }))
+    await expect(crumbs.getByRole('link', { name: 'Beauty salon' })).toHaveAttribute('href', '/en/c/beauty')
+    await expect(canvas.getAllByRole('link', { name: 'Beauty salon' })).toHaveLength(2)
+    // the open line once, in the card, on its own line under today's hours; the header says only the state (#19)
+    await expect(canvas.getByText('Open now')).toBeVisible()
     const card = within(canvas.getByRole('complementary', { name: 'Booking' }))
+    await expect(card.getByText('Today 09:00–20:00')).toBeVisible()
+    await expect(canvas.getAllByText('Open now · until 20:00')).toHaveLength(1)
     await expect(card.getByText(/^Today 15:30$/)).toBeVisible()
     await expect(card.getByRole('link', { name: 'Book' })).toHaveAttribute('href', '/en/b/glow-studio/book')
     await userEvent.click(canvas.getByRole('button', { name: 'Select: Women’s haircut' }))
@@ -82,8 +90,10 @@ export const MixedPrice: Story = {
 export const Example: Story = {
   args: { server: businessApi({ business: { ...GLOW, example: true, confirmMode: 'instant', typicalConfirmMinutes: null } }) },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('heading', { level: 1, name: /^Glow Studio\s*,\s*Example$/ })).toBeVisible()
-    await expect(canvas.getByText(/This isn’t a real business|This isn't a real business/)).toBeVisible()
+    // nothing marks it any more (owner's review, #40): no badge in the name, no notice
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
+    await expect(canvas.queryByText('Example')).toBeNull()
+    await expect(canvas.queryByText(/This isn’t a real business|This isn't a real business/)).toBeNull()
     await expect(within(canvas.getByRole('complementary', { name: 'Booking' })).getByText('Bookings are confirmed at once')).toBeVisible()
     // About says so too, without a wait
     const about = within(canvas.getByRole('region', { name: 'About' }))
@@ -145,6 +155,9 @@ export const Closed: Story = {
     const card = within(await canvas.findByRole('complementary', { name: 'Booking' }))
     await expect(card.getByText(/Closed today · Holiday/)).toBeVisible()
     await expect(card.getByText('Closed · opens tomorrow at 09:00')).toBeVisible()
+    // once on the page: the header says only «Closed» (#19)
+    await expect(canvas.getAllByText('Closed · opens tomorrow at 09:00')).toHaveLength(1)
+    await expect(canvas.getByText('Closed')).toBeVisible()
     // the hours table's today says so too
     const hours = within(canvas.getByRole('region', { name: 'About' }))
     await expect(hours.getByText('Today').closest('div')).toHaveTextContent(/Today\s*Closed · Holiday$/)
@@ -231,18 +244,28 @@ export const Specialists: Story = {
     await expect(cards[0]).toHaveTextContent(/Aýna\s*Stylist\s*4\.9\s*Next free:\s*Today 15:30\s*Book/)
     await expect(cards[2]).toHaveTextContent(/Tomorrow 10:00/)
     await expect(cards[3]).toHaveTextContent(/No free times soon/)
-    await expect(team.getByRole('link', { name: 'Book with Aýna' })).toHaveAttribute('href', '/en/b/glow-studio/book?staff=st-ayna')
+    await expect(team.getByRole('link', { name: 'Book with Aýna' })).toHaveAttribute(
+      'href',
+      '/en/b/glow-studio/book?staff=st-ayna&first=staff',
+    )
   },
 }
 
-/** Services picked on the page go with a specialist's Book, to the specialist step (as the card's Continue). */
+/**
+ * Services picked on the page go with a specialist's Book: one who does them all opens the time (both steps answered,
+ * #39), one who doesn't opens the services, which say so.
+ */
 export const SpecialistsPicked: Story = {
   args: { path: '/en/b/glow-studio?services=s1' },
   play: async ({ canvas }) => {
     const team = within(await canvas.findByRole('region', { name: 'Specialists' }))
     await expect(team.getByRole('link', { name: 'Book with Aýna' })).toHaveAttribute(
       'href',
-      '/en/b/glow-studio/book?services=s1&step=staff&staff=st-ayna',
+      '/en/b/glow-studio/book?services=s1&step=time&staff=st-ayna&first=staff',
+    )
+    await expect(team.getByRole('link', { name: 'Book with Maral' })).toHaveAttribute(
+      'href',
+      '/en/b/glow-studio/book?services=s1&staff=st-maral&first=staff',
     )
   },
 }
@@ -340,8 +363,9 @@ export const Midnight: Story = {
     }),
   },
   play: async ({ canvas }) => {
-    // the header's line and the card's
-    await expect(await canvas.findAllByText('Open now · until 24:00')).toHaveLength(2)
+    // the card's line only; the header says just «Open now» (#19)
+    await expect(await canvas.findAllByText('Open now · until 24:00')).toHaveLength(1)
+    await expect(canvas.getByText('Open now')).toBeVisible()
     const about = within(canvas.getByRole('region', { name: 'About' }))
     await expect(about.getAllByText('09:00–24:00')).toHaveLength(7)
   },

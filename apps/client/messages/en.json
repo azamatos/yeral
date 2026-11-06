@@ -53,7 +53,7 @@
       "required": "Enter your first name.",
       "continue": "Continue"
     },
-    "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers."
+    "demoNote": "For now the sign-in code shows here instead of coming by SMS. Use a made-up number, and don’t type in real people’s names or numbers."
   },
   "account": {
     "menu": "Account menu: {name}",
@@ -183,7 +183,6 @@
     "line": "{category} · {street}",
     "lineFar": "{line} · {distance}",
     "from": "from {price}",
-    "example": "Example",
     "bookAt": "Book {name} at {time}",
     "more": "+{n}"
   },
@@ -273,6 +272,7 @@
     "description": "{name} · {category}",
     "reviews": "{count, plural, one {# review} other {# reviews}}",
     "noReviews": "No reviews yet",
+    "openNow": "Open now",
     "openUntil": "Open now · until {time}",
     "opensToday": "Closed · opens at {time}",
     "opensTomorrow": "Closed · opens tomorrow at {time}",
@@ -281,9 +281,6 @@
     "away": "{distance} from you",
     "newAddress": "New address",
     "approximate": "Approximate area: the exact address comes with a confirmed booking.",
-    "example": "Example",
-    "exampleInstant": "This isn't a real business. It's here so you can try {brand}: bookings are confirmed at once, and nobody waits for you.",
-    "exampleManual": "This isn't a real business. It's here so you can try {brand}.",
     "preview": {
       "pending": "<b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link.",
       "rejected": "<b>Your page wasn't approved:</b> {reason}",
@@ -412,7 +409,8 @@
       "services": "Services",
       "staff": "Specialist",
       "time": "Time",
-      "confirm": "Confirmation"
+      "confirm": "Confirmation",
+      "chosen": "{name} · Change"
     },
     "back": "Back",
     "close": "Close",

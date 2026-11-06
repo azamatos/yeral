@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { BusinessCard } from '@yeral/contract/catalog'
 import { useFmt } from '@yeral/i18n'
-import { ExampleBadge } from '@yeral/ui/example-badge'
 import { Rating } from '@yeral/ui/rating'
 import { useLocale, useTranslations } from 'use-intl'
 import { useCardLine } from './business-meta'
@@ -41,7 +40,6 @@ export function BusinessRow({ card }: { card: BusinessCard }) {
           {card.priceFrom && (
             <span>{card.priceFrom.type === 'fixed' ? t('from', { price: fmt.price(card.priceFrom) }) : fmt.price(card.priceFrom)}</span>
           )}
-          {card.example && <ExampleBadge>{t('example')}</ExampleBadge>}
         </div>
         <TimeChips card={card} />
       </div>

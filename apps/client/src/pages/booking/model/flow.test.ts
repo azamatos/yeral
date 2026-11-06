@@ -14,6 +14,7 @@ import {
   servicesOf,
   slotsByPart,
   stepDone,
+  stepsOf,
   wasOf,
 } from './flow'
 
@@ -90,6 +91,28 @@ describe('the steps', () => {
     expect(stepDone('staff', cut)).toBe(true)
     expect(stepDone('time', cut)).toBe(false)
     expect(stepDone('time', timed)).toBe(true)
+  })
+
+  it('come in the order the booking started: from a service the specialist follows, from a specialist the services do', () => {
+    expect(stepsOf(undefined)).toEqual(['services', 'staff', 'time', 'confirm'])
+    expect(stepsOf('staff')).toEqual(['staff', 'services', 'time', 'confirm'])
+  })
+
+  it('from a specialist, open on their services with them done, and never stop at the specialist again', () => {
+    const steps = stepsOf('staff')
+    expect(currentStep(undefined, none, steps)).toBe('services')
+    expect(currentStep('confirm', none, steps)).toBe('services')
+    expect(currentStep(undefined, cut, steps)).toBe('services')
+    expect(currentStep('time', cut, steps)).toBe('time')
+    expect(currentStep('confirm', timed, steps)).toBe('confirm')
+    // «Change» on the done step opens the specialist choice
+    expect(currentStep('staff', none, steps)).toBe('staff')
+    // nothing picked yet: the services are the furthest step, so the specialist is done and Continue goes on
+    expect(reachedStep(none, steps)).toBe(1)
+    expect(reachedStep(cut, steps)).toBe(2)
+    expect(reachedStep(timed, steps)).toBe(3)
+    expect(stepDone('staff', none, steps)).toBe(true)
+    expect(stepDone('services', none, steps)).toBe(false)
   })
 })
 
