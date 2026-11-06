@@ -90,6 +90,12 @@ describe('sign-in codes through our Telegram bot (ADR 0029)', () => {
     })
     expect(t.telegram!.sent.at(-1)).toEqual({ chatId: 1001, text: 'Ýeral code: 1234' })
     expect(t.sms.sent).toEqual([])
+    // the code's limits go on: nobody floods a linked chat by typing its number
+    const sentCount = t.telegram!.sent.length
+    const tooSoon = await b.req('/v1/auth/code', { body: { phone } })
+    expect(tooSoon.status).toBe(429)
+    expect(tooSoon.json.error).toMatchObject({ code: 'resend_too_soon' })
+    expect(t.telegram!.sent).toHaveLength(sentCount)
   })
 
   it('production’s random code: the one sent on linking is a fresh one (only hashes are kept), and it signs in', async () => {

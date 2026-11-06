@@ -24,6 +24,9 @@ describe('TELEGRAM_* (our bot, ADR 0029)', () => {
     }
     expect(loadConfig(base).telegram).toBeNull()
     expect(loadConfig({ ...base, TELEGRAM_WEBHOOK_SECRET: bot.TELEGRAM_WEBHOOK_SECRET }).telegram).toBeNull()
+    // the compose file passes `${TELEGRAM_BOT_TOKEN:-}`: empty is unset, not a bad token
+    expect(loadConfig({ ...base, TELEGRAM_BOT_TOKEN: '', TELEGRAM_WEBHOOK_SECRET: '', TELEGRAM_BOT_USERNAME: '' }).telegram).toBeNull()
+    expect(loadConfig({ ...base, SIGN_IN_CODE_ON_SCREEN: '' }).codeOnScreen).toBe(false)
     expect(loadConfig({ ...base, ...bot }).telegram).toEqual({
       token: bot.TELEGRAM_BOT_TOKEN,
       webhookSecret: bot.TELEGRAM_WEBHOOK_SECRET,

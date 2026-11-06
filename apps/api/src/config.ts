@@ -130,7 +130,8 @@ export interface Config {
 }
 
 export function loadConfig(source: Record<string, unknown>): Config {
-  const env = parseEnv(envSchema, source)
+  // an empty value is unset (the compose file passes `${NAME:-}`), as `siteFromEnv` reads its own
+  const env = parseEnv(envSchema, Object.fromEntries(Object.entries(source).filter(([, value]) => value !== '')))
   const site = siteFromEnv(source)
   // a number of the market (@yeral/lib/site checks E.164 only): the examples store it, the screens write it
   if (site.support.phone && !E164.test(site.support.phone))

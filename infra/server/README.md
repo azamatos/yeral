@@ -75,11 +75,13 @@ ssh yeral-vps 'cat >> /srv/yeral/.env' <<'EOF'
 TELEGRAM_BOT_TOKEN=<the token @BotFather gave>
 TELEGRAM_WEBHOOK_SECRET=<openssl rand -hex 32>
 TELEGRAM_BOT_USERNAME=yeral_app_bot
+SIGN_IN_CODE_ON_SCREEN=false
 EOF
 ```
 
-Then in `/srv/yeral/compose.yml` set `SIGN_IN_CODE_ON_SCREEN: 'false'` (the api refuses to start with it on beside
-the token: codes reach phones now) and pass the three variables to the api service, deploy, and register the webhook:
+`compose.yml` (copied from the repo at every deploy, so never edited on the server) passes the four from `.env` to the
+api; the api refuses to start with the code on the screen beside the token (codes reach phones now). Deploy, then
+register the webhook:
 
 ```
 ssh yeral-vps 'docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js telegram-webhook'

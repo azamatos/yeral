@@ -49,8 +49,14 @@ services:
       # the photos people upload (book F-101), on the `media` volume
       MEDIA_DIR: /data/media
       # the first launch's sign-in code on the screen (book Q-036): anyone who types a number signs in as it. On since
-      # 25.10.2026 (the owner), so the business app can be tried live before the launch: test data only (operations.md)
-      SIGN_IN_CODE_ON_SCREEN: 'true'
+      # 25.10.2026 (the owner), so the business app can be tried live before the launch: test data only (operations.md).
+      # Off (`SIGN_IN_CODE_ON_SCREEN=false` in .env) once codes go through our Telegram bot: the api refuses both at once
+      SIGN_IN_CODE_ON_SCREEN: ${SIGN_IN_CODE_ON_SCREEN:-true}
+      # our Telegram bot (ADR 0029), from .env (infra/server/README.md): with the token set, sign-in codes and the other
+      # SMS-port texts reach the phones linked to its chats. All three or none; empty = no bot
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
       # the first launch's example businesses (book Q-004): `setup` adds them, marked "Example" and confirming at once.
       # On since 25.10.2026 (the owner), so slice 3's booking can be tried live while nothing can be verified
       EXAMPLE_BUSINESSES: 'true'
