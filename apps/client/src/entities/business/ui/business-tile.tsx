@@ -1,15 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import type { BusinessCard } from '@yeral/contract/catalog'
 import { useFmt } from '@yeral/i18n'
-import { ExampleBadge } from '@yeral/ui/example-badge'
 import { Rating } from '@yeral/ui/rating'
-import { useLocale, useTranslations } from 'use-intl'
+import { useLocale } from 'use-intl'
 import { useCardLine } from './business-meta'
 import { TimeChips } from './time-chips'
 
 /** A card on Home (`.vc`): the photo, the name, category · street, the rating, the next three times. */
 export function BusinessTile({ card }: { card: BusinessCard }) {
-  const t = useTranslations('businessCard')
   const fmt = useFmt()
   const lang = useLocale()
   const line = useCardLine()
@@ -40,7 +38,6 @@ export function BusinessTile({ card }: { card: BusinessCard }) {
         </div>
         {card.rating !== null && <Rating value={fmt.rating(card.rating)} count={card.reviewsCount} className="flex-none" />}
       </div>
-      {card.example && <ExampleBadge className="self-start">{t('example')}</ExampleBadge>}
       <TimeChips card={card} limit={3} />
     </article>
   )

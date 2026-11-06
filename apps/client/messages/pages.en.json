@@ -10,7 +10,7 @@
       {
         "heading": "Where it stands",
         "paragraphs": [
-          "{brand} is in development, and this site is a demo. The businesses on it are examples, marked as such, and no booking here is real. You can try the whole loop: book as a client, then open the business app and answer as a business.",
+          "{brand} is in development. The businesses on it are examples, and no booking here is real. You can try the whole loop: book as a client, then open the business app and answer as a business.",
           "It's being built for Turkmenistan first."
         ]
       },
@@ -63,7 +63,7 @@
         "paragraphs": ["{brand} is run by {operator}, {country}. In this policy, “we” means {brand}."]
       },
       {
-        "heading": "This site is a demo",
+        "heading": "The site is in development",
         "paragraphs": [
           "{brand} is in development. The businesses here are examples, the sign-in code shows on the screen instead of arriving by SMS, and no SMS is sent. Anyone who types a phone number can sign in as that number, so please don't put anything real or private here, and don't use a number you wouldn't want someone else to type.",
           "This policy will change before {brand} opens for real, and each market gets its own version, checked by a lawyer there."
@@ -101,7 +101,7 @@
         "heading": "How long we keep it",
         "paragraphs": [
           "Until you delete your account. Then your upcoming bookings are cancelled, and your account, favourites and reviews are deleted. Each business keeps its own visit records, no longer linked to a {brand} account. Copies taken before an update may keep your data a while longer.",
-          "Demo data can be reset at any time."
+          "While {brand} is in development, its data can be reset at any time."
         ]
       },
       {
@@ -128,7 +128,7 @@
         ]
       },
       {
-        "heading": "This site is a demo",
+        "heading": "The site is in development",
         "paragraphs": [
           "{brand} is in development. The businesses here are examples and a booking with one is not real: nobody is expecting you. The service may change, stop or lose data at any time, and we make no promise that it works."
         ]

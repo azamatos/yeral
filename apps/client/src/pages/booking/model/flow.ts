@@ -5,6 +5,17 @@ import { z } from 'zod'
 
 export const STEPS = ['services', 'staff', 'time', 'confirm'] as const
 export type Step = (typeof STEPS)[number]
+/** Started from a specialist's «Book» (`?first=staff`): they're chosen already, a done first step; the services come next. */
+const STEPS_FROM_STAFF = ['staff', 'services', 'time', 'confirm'] as const satisfies readonly Step[]
+
+/**
+ * The steps in the order the booking started: from a service (the business page's Continue, a bare link) the specialist
+ * follows the services, as drawn; from a specialist's «Book» the specialist is done before the flow opens («Jeren ·
+ * Change» in the stepper, which opens that choice again) and nothing stops at them on the way (owner's review, #39).
+ */
+export function stepsOf(first: 'staff' | undefined): readonly Step[] {
+  return first === 'staff' ? STEPS_FROM_STAFF : STEPS
+}
 
 /**
  * The booking flow's address (Booking, book C-12–C-14; client spec «keep `step, services, staff, date, time` in the
@@ -29,6 +40,8 @@ export const bookingSearchSchema = z.object({
     .optional()
     .catch(undefined),
   step: z.enum(STEPS).optional().catch(undefined),
+  /** The step answered before the flow opened: `staff`, a specialist's «Book» on the business page ({@link stepsOf}). */
+  first: z.enum(['staff']).optional().catch(undefined),
   /** The booking just sent (its code): the sent page, which a reload keeps. */
   sent: z.string().optional().catch(undefined),
   /** Move mode (book C-30): the confirmed appointment whose time changes (its code); no services step. */
@@ -129,23 +142,25 @@ export function servicesOf<G extends { services: readonly { id: string }[] }>(
 const timed = (choice: Choice) => choice.time !== null && choice.date !== null
 
 /**
- * The furthest step the choice reaches: the services first; with one picked, the specialist (always answered: «any»
- * by default) and the time; with a time on its day, the confirmation.
+ * The furthest step the choice reaches (an index into `steps`): the services first; with one picked, the specialist
+ * (always answered: «any» by default) and the time; with a time on its day, the confirmation.
  */
-export function reachedStep(choice: Choice): number {
-  if (choice.services.length === 0) return 0
-  return timed(choice) ? 3 : 2
+export function reachedStep(choice: Choice, steps: readonly Step[] = STEPS): number {
+  if (choice.services.length === 0) return steps.indexOf('services')
+  return steps.indexOf(timed(choice) ? 'confirm' : 'time')
 }
 
 /** The step the address asks for, held back to what the choice reaches (a shared link past its services opens them). */
-export function currentStep(asked: Step | undefined, choice: Choice): Step {
-  const index = Math.min(STEPS.indexOf(asked ?? 'services'), reachedStep(choice))
-  return STEPS[index] ?? 'services'
+export function currentStep(asked: Step | undefined, choice: Choice, steps: readonly Step[] = STEPS): Step {
+  const index = Math.min(steps.indexOf(asked ?? 'services'), reachedStep(choice, steps))
+  return steps[index] ?? 'services'
 }
 
 /** Whether the step's own choice is made, so Continue goes on (Booking `valid`). */
-export function stepDone(step: Step, choice: Choice): boolean {
-  if (step === 'services' || step === 'staff') return choice.services.length > 0
+export function stepDone(step: Step, choice: Choice, steps: readonly Step[] = STEPS): boolean {
+  if (step === 'services') return choice.services.length > 0
+  // the specialist is always answered; after the services they need one picked to be listed at all
+  if (step === 'staff') return steps.indexOf('staff') < steps.indexOf('services') || choice.services.length > 0
   return timed(choice)
 }
 

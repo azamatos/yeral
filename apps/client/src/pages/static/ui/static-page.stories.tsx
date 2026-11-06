@@ -42,7 +42,7 @@ export const Privacy: Story = {
   args: { path: '/en/privacy' },
   play: async ({ canvas, canvasElement }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Privacy policy' })).toBeVisible()
-    await expect(canvas.getByRole('heading', { level: 2, name: 'This site is a demo' })).toBeVisible()
+    await expect(canvas.getByRole('heading', { level: 2, name: 'The site is in development' })).toBeVisible()
     await expect(canvas.getByText('On a server in the European Union.')).toBeVisible()
     await waitFor(() => expect(canvasElement.textContent).not.toMatch(/\{(brand|operator|country)\}/))
   },

@@ -61,8 +61,8 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     await expect(modal.getByText('Enter your phone number to manage your bookings.')).toBeVisible()
-    // the first launch shows the code on the screen: the phone step says it's a demo (book Q-036)
-    await expect(await modal.findByText(/This is a demo of Ýeral: the sign-in code shows here instead of an SMS/)).toBeVisible()
+    // the first launch shows the code on the screen: the phone step says so, without the word «demo» (book Q-036, owner's review #44)
+    await expect(await modal.findByText(/For now the sign-in code shows here instead of coming by SMS/)).toBeVisible()
     const phone = modal.getByLabelText('Phone number')
     await waitFor(() => expect(phone).toHaveFocus())
     await userEvent.type(phone, '651020{Enter}')
@@ -169,10 +169,10 @@ export const CodeNotShown: Story = {
     const modal = await sendCode(canvas, '65901122')
     await expect(modal.queryByText('Your code:')).toBeNull()
     await expect(modal.getByRole('button', { name: /Get a new code in 0:5\d/ })).toBeDisabled()
-    // no demo note once codes go by SMS: not on the phone step either
+    // no code-on-the-screen note once codes go by SMS: not on the phone step either
     await userEvent.click(modal.getByRole('button', { name: 'Change number' }))
     await modal.findByLabelText('Phone number')
-    await expect(modal.queryByText(/This is a demo/)).toBeNull()
+    await expect(modal.queryByText(/the sign-in code shows here/)).toBeNull()
     await userEvent.keyboard('{Escape}')
   },
 }

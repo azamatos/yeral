@@ -9,7 +9,6 @@ import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
-import { ExampleBadge } from '@yeral/ui/example-badge'
 import { Pill } from '@yeral/ui/pill'
 import { Rating } from '@yeral/ui/rating'
 import { textLink } from '@yeral/ui/text-link'
@@ -140,18 +139,19 @@ function PreviewBanner({ preview }: { preview: NonNullable<BusinessDetail['previ
 }
 
 /**
- * The header (Venue `.hero`): the path, the name with «Example» for a sample business and its line, the rating,
- * reviews, category and open state, the address, the heart and Share; then the photos (one large and four small; one
- * at a time on phones, first on the page, with its count).
+ * The header (Venue `.hero`): the path (its category a link to the category page, book C-05), the name, the rating,
+ * reviews, the category and whether it's open now (the full open line is the booking card's: owner's review, #19), the
+ * address, the heart and Share; then the photos (one large and four small; one at a time on phones, first on the page,
+ * with its count). Nothing marks a sample business any more (owner's review, #40).
  */
 function Header({ detail }: { detail: BusinessDetail }) {
   const t = useTranslations('business')
   const home = useTranslations('notFound')('home')
   const fmt = useFmt()
   const lang = useLocale()
-  const brand = useTranslations('common')('brand')
   const now = useClock()
   const open = openLine(detail.open, today(now), fmt, t)
+  const categoryLink = { to: '/$lang/c/$category' as const, params: { lang, category: detail.category.id } }
   return (
     <div className="flex flex-col gap-5 pt-6 max-sm:gap-4 max-sm:pt-0">
       <Breadcrumbs label={t('crumbs')} className="max-sm:hidden">
@@ -160,20 +160,14 @@ function Header({ detail }: { detail: BusinessDetail }) {
             {home}
           </Link>
         </Crumb>
-        <span>{detail.category.name}</span>
+        <Crumb asChild>
+          <Link {...categoryLink}>{detail.category.name}</Link>
+        </Crumb>
         <Crumb current>{detail.name}</Crumb>
       </Breadcrumbs>
       <div className="flex items-end justify-between gap-x-6 gap-y-4 max-sm:flex-col max-sm:items-start">
         <div className="flex min-w-0 flex-col gap-2">
-          <h1 className="m-0 flex flex-wrap items-center gap-x-3 gap-y-1 text-[40px] leading-11 font-bold tracking-[-0.03em] max-sm:text-[30px] max-sm:leading-9">
-            {detail.name}
-            {detail.example && (
-              <>
-                <span className="sr-only">, </span>
-                <ExampleBadge>{t('example')}</ExampleBadge>
-              </>
-            )}
-          </h1>
+          <h1 className="m-0 text-[40px] leading-11 font-bold tracking-[-0.03em] max-sm:text-[30px] max-sm:leading-9">{detail.name}</h1>
           <div className="flex flex-col gap-1 text-body text-n-600">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               {detail.rating !== null && detail.reviewsCount > 0 ? (
@@ -188,9 +182,13 @@ function Header({ detail }: { detail: BusinessDetail }) {
                 <span>{t('noReviews')}</span>
               )}
               <span aria-hidden>·</span>
-              <span>{detail.category.name}</span>
+              <Link {...categoryLink} className={cn(textLink, 'font-medium')}>
+                {detail.category.name}
+              </Link>
               <span aria-hidden>·</span>
-              <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>{open.text}</span>
+              <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>
+                {open.isOpen ? t('openNow') : t('closed')}
+              </span>
             </div>
             <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
               <MapPin aria-hidden className="size-4 flex-none" strokeWidth={1.75} />
@@ -210,11 +208,6 @@ function Header({ detail }: { detail: BusinessDetail }) {
           <ShareButton name={detail.name} slug={detail.slug} />
         </div>
       </div>
-      {detail.example && (
-        <Callout tone="neutral" size="s">
-          {detail.confirmMode === 'instant' ? t('exampleInstant', { brand }) : t('exampleManual', { brand })}
-        </Callout>
-      )}
       <Gallery photos={detail.photos} />
     </div>
   )

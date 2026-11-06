@@ -186,7 +186,8 @@ function Confirms({ detail }: { detail: BusinessDetail }) {
   const instant = detail.confirmMode === 'instant'
   return (
     <div className="mt-3 flex items-start gap-3 rounded-m bg-n-50 px-5 py-4">
-      <CircleCheck aria-hidden className="mt-px size-5 flex-none text-st-completed-ink" strokeWidth={1.75} />
+      {/* the brand's colour, not the success green: a fact, not a toast (owner's review, #17) */}
+      <CircleCheck aria-hidden className="mt-px size-5 flex-none text-a-600" strokeWidth={1.75} />
       <span className="flex flex-col gap-0.5">
         <span className="text-body font-semibold text-n-900">{confirmLine(detail, fmt, card)}</span>
         <span className="text-dense text-n-600">{instant ? t('atOnce') : t('byHand', { name: detail.name })}</span>

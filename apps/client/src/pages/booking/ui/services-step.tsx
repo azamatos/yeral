@@ -1,6 +1,7 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
+import { cn } from '@yeral/ui/cn'
+import { textLink } from '@yeral/ui/text-link'
 import { UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
@@ -9,9 +10,10 @@ import { namedSpecialist, notDoneBy, servicesOf } from '../model/flow'
 import { StepTitle } from './step-title'
 
 /**
- * The booking's first step (Booking `step=services`, C-12): the services to pick. Opened from a specialist's «Book» on
- * the business page (`?staff=`), it lists only what they do, with «See all services»; a picked service they don't do
- * says so (any free specialist takes the booking until it's taken off; the address keeps them all along).
+ * The services step (Booking `step=services`, C-12): the services to pick. Opened from a specialist's «Book» on the
+ * business page (`?staff=`), it lists only what they do, with «See all services» at the list's head (a line, not a
+ * band: owner's review, #39); a picked service they don't do says so (any free specialist takes the booking until it's
+ * taken off; the address keeps them all along).
  */
 export function ServicesStep({
   detail,
@@ -37,34 +39,33 @@ export function ServicesStep({
     <>
       <StepTitle title={t('title')} lead={t('lead')} />
       <div className="mt-5 flex flex-col gap-7">
-        {named &&
-          (missing.length > 0 ? (
-            <Callout tone="warning" icon={<UserRound />} live>
-              {t('notTheirs', {
-                name: named.name,
-                services: picked
-                  .filter((s) => missing.includes(s.id))
-                  .map((s) => s.name)
-                  .join(', '),
-                count: missing.length,
-              })}
-            </Callout>
-          ) : (
-            theirs.length > 0 && (
-              <Callout
-                tone="neutral"
-                icon={<UserRound />}
-                action={
-                  <Button size="s" variant="secondary" onClick={() => setAll(only)}>
-                    {only ? t('seeAll') : t('onlyTheirs', { name: named.name })}
-                  </Button>
-                }
+        {named && missing.length > 0 && (
+          <Callout tone="warning" icon={<UserRound />} live>
+            {t('notTheirs', {
+              name: named.name,
+              services: picked
+                .filter((s) => missing.includes(s.id))
+                .map((s) => s.name)
+                .join(', '),
+              count: missing.length,
+            })}
+          </Callout>
+        )}
+        <div className="flex flex-col gap-3">
+          {named && missing.length === 0 && theirs.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-dense text-n-600">
+              <span>{only ? t('theirs', { name: named.name }) : t('allShown')}</span>
+              <button
+                type="button"
+                className={cn(textLink, 'cursor-pointer border-0 bg-transparent p-0 font-medium')}
+                onClick={() => setAll(only)}
               >
-                {only ? t('theirs', { name: named.name }) : t('allShown')}
-              </Callout>
-            )
-          ))}
-        <ServicePicker groups={only ? theirs : detail.serviceGroups} picked={ids} onToggle={onToggle} groupHeading="h2" />
+                {only ? t('seeAll') : t('onlyTheirs', { name: named.name })}
+              </button>
+            </div>
+          )}
+          <ServicePicker groups={only ? theirs : detail.serviceGroups} picked={ids} onToggle={onToggle} groupHeading="h2" />
+        </div>
       </div>
     </>
   )

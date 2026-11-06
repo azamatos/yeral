@@ -49,7 +49,8 @@ export function Specialists({ detail, state, picked }: { detail: BusinessDetail;
                 <Link
                   to="/$lang/b/$slug/book"
                   params={{ lang, slug: detail.slug }}
-                  search={{ ...services, staff: s.id }}
+                  // the booking opens on their services with them chosen, no specialist step on the way (`stepsOf`)
+                  search={{ ...services, staff: s.id, first: 'staff' }}
                   // the word seen stays in the name heard (axe: label-content-name-mismatch)
                   aria-label={t('bookLabel', { name: s.name })}
                 >

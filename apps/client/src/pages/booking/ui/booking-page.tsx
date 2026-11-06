@@ -17,7 +17,17 @@ import { useLocale, useTranslations } from 'use-intl'
 import { parseServiceIds, pickedServices, selectionTotal, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { useErrorText } from '@/shared/i18n'
 import { TermsNote, wrap } from '@/shared/ui'
-import { chosenStaff, currentStep, reachedStep, stepDone, STEPS, type BookingSearch, type Choice, type Step } from '../model/flow'
+import {
+  chosenStaff,
+  currentStep,
+  namedSpecialist,
+  reachedStep,
+  stepDone,
+  stepsOf,
+  type BookingSearch,
+  type Choice,
+  type Step,
+} from '../model/flow'
 import { ConfirmStep, type Alternative } from './confirm-step'
 import { FocusedHeader } from './focused-header'
 import { SentView } from './sent-view'
@@ -68,14 +78,19 @@ export function BookingPage() {
   // while it sends and once it's sent the confirmation stays put: the sdk refreshes the free times (the booked one goes)
   // before the page moves on to the sent page, and nothing can be sent twice
   const locked = send.isPending || send.isSuccess
-  const step = locked ? 'confirm' : currentStep(search.step, choice)
-  const index = STEPS.indexOf(step)
+  // from a specialist's «Book» they come first, done (`stepsOf`)
+  const steps = stepsOf(search.first)
+  const step = locked ? 'confirm' : currentStep(search.step, choice, steps)
+  const index = steps.indexOf(step)
   const signedIn = Boolean(me.data?.firstName)
   // the alert speaks for the time it was about: one chosen since (an offered one, another step) leaves it behind
   const taken = conflict && conflict.date === date && conflict.time === search.time ? conflict : null
-  const done = !locked && !taken && stepDone(step, choice) && (step !== 'confirm' || signedIn)
+  const done = !locked && !taken && stepDone(step, choice, steps) && (step !== 'confirm' || signedIn)
   const total = selectionTotal(picked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
+  // the done step's name: the address's specialist while nothing's picked yet (`chosenStaff` answers «any» until a
+  // service is), then whoever the picked services leave chosen
+  const firstName = ids.length === 0 ? (namedSpecialist(detail, search.staff)?.name ?? staffName) : staffName
   const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug }, search: { services: serviceIdsParam(ids) } }
 
   // the step shown goes along with every change, so a link held back to an earlier step stays on it
@@ -138,7 +153,7 @@ export function BookingPage() {
     )
   }
   const next = () => {
-    const to = STEPS[index + 1]
+    const to = steps[index + 1]
     if (done && to) go(to, true)
   }
 
@@ -191,7 +206,7 @@ export function BookingPage() {
       detail={detail}
       picked={picked}
       total={total}
-      staffName={index > 0 && picked.length > 0 ? staffName : null}
+      staffName={index >= steps.indexOf('staff') && picked.length > 0 ? staffName : null}
       date={step !== 'services' ? date : null}
       time={step !== 'services' ? time : null}
       cta={withCta ? cta : null}
@@ -203,7 +218,8 @@ export function BookingPage() {
     <div className="flex min-h-dvh flex-col bg-n-0 text-n-900">
       <FocusedHeader
         start={
-          index === 0 ? (
+          // the flow began on the services (or on the specialist opened again from them): Back is the business page
+          index === 0 || step === 'services' ? (
             <Button asChild variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5">
               <Link {...pageLink}>
                 <ChevronLeft aria-hidden />
@@ -211,7 +227,7 @@ export function BookingPage() {
               </Link>
             </Button>
           ) : (
-            <Button variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(STEPS[index - 1] ?? 'services', false)}>
+            <Button variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(steps[index - 1] ?? 'services', false)}>
               <ChevronLeft aria-hidden />
               {t('back')}
             </Button>
@@ -220,10 +236,13 @@ export function BookingPage() {
         middle={
           <Stepper
             aria-label={t('stepsLabel')}
-            steps={STEPS.map((s) => t(`steps.${s}`))}
+            // the specialist chosen on the business page reads as done («Jeren · Change»), until that choice is open again
+            steps={steps.map((s) =>
+              s === 'staff' && search.first === 'staff' && step !== 'staff' ? t('steps.chosen', { name: firstName }) : t(`steps.${s}`),
+            )}
             current={index}
-            reached={reachedStep(choice)}
-            onStepClick={(i) => go(STEPS[i] ?? 'services', false)}
+            reached={reachedStep(choice, steps)}
+            onStepClick={(i) => go(steps[i] ?? 'services', false)}
             className="self-stretch"
           />
         }

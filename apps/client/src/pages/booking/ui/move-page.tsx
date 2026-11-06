@@ -547,7 +547,7 @@ function MoveSent({
                 {calendar.label}
               </Button>
             )}
-            <Button asChild variant="ghost" size="l">
+            <Button asChild variant="secondary" size="l">
               <Link to="/$lang" params={{ lang }}>
                 {t('sent.home')}
               </Link>

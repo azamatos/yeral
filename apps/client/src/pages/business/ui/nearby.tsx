@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { BusinessCard } from '@yeral/contract/catalog'
 import { useFmt } from '@yeral/i18n'
-import { ExampleBadge } from '@yeral/ui/example-badge'
 import { Rating } from '@yeral/ui/rating'
 import { useLocale, useTranslations } from 'use-intl'
 import { wrap } from '@/shared/ui'
@@ -37,7 +36,6 @@ export function Nearby({ places }: { places: readonly BusinessCard[] }) {
  * card is the link to its page.
  */
 function PlaceCard({ place: p }: { place: BusinessCard }) {
-  const t = useTranslations('business')
   const fmt = useFmt()
   const lang = useLocale()
   const times = p.availability.type === 'appointment' || p.availability.type === 'table' ? p.availability.starts.slice(0, 3) : []
@@ -61,12 +59,6 @@ function PlaceCard({ place: p }: { place: BusinessCard }) {
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="inline-flex flex-wrap items-center gap-2 text-[17px] leading-[22px] font-semibold group-hover:underline">
             {p.name}
-            {p.example && (
-              <>
-                <span className="sr-only">, </span>
-                <ExampleBadge>{t('example')}</ExampleBadge>
-              </>
-            )}
           </span>
           <span className="text-dense text-n-600">
             {p.distanceM !== null ? `${p.category.name} · ${fmt.distance(p.distanceM)}` : p.category.name}
