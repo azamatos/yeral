@@ -140,6 +140,8 @@ const fakeApi = (): (() => typeof fetch) => () => {
     if (route === 'GET /w/glow-studio/services') return json(current)
     if (route === 'GET /w/glow-studio/team') return json({ items: [member('owner', 'Maýsa'), ...team] })
     if (route === 'GET /w/glow-studio/settings/rules') return json({ bufferMinutes: 10 })
+    // the drawer's name example follows the category (the owner's #47)
+    if (route === 'GET /w/glow-studio/settings/profile') return json({ categoryId: 'beauty' })
     if (route === 'POST /w/glow-studio/services') {
       const body = (await request.json()) as Service
       added.push(body)
@@ -310,6 +312,10 @@ export const AddService: Story = {
     await userEvent.click(await canvas.findByRole('button', { name: 'Add service' }))
     const drawer = await within(document.body).findByRole('dialog', { name: 'New service' })
     await expect(within(drawer).getByText('Goes to Hair')).toBeVisible()
+    // the name's example is the category's (a dentist doesn't see hair colouring; the owner's #47)
+    await waitFor(() =>
+      expect(within(drawer).getByRole('textbox', { name: 'Name' })).toHaveAttribute('placeholder', 'For example: Hair colouring'),
+    )
     await userEvent.click(within(drawer).getByRole('button', { name: 'Save' }))
     await expect(within(drawer).getByText('Enter the service name.')).toBeVisible()
     await expect(within(drawer).getByText('Enter the price.')).toBeVisible()
