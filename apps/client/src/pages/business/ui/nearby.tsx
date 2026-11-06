@@ -73,7 +73,7 @@ function PlaceCard({ place: p }: { place: BusinessCard }) {
           {times.map((start) => (
             <span
               key={start}
-              className="inline-flex h-8 items-center justify-center rounded-input border border-n-300 bg-n-0 px-2.5 text-dense font-semibold tabular-nums"
+              className="inline-flex h-8 items-center justify-center rounded-input border border-n-300 bg-n-0 px-2.5 text-dense font-semibold"
             >
               {fmt.time(start)}
             </span>

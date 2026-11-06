@@ -25,7 +25,7 @@ const row = cva('relative inline-flex self-start', {
   },
 })
 
-const box = cva('inline-flex items-center justify-center rounded-input border border-n-300 bg-n-0 font-semibold text-n-900 tabular-nums', {
+const box = cva('inline-flex items-center justify-center rounded-input border border-n-300 bg-n-0 font-semibold text-n-900', {
   variants: {
     size: { 48: 'size-12 text-[20px]', 52: 'size-13 text-[22px]', 56: 'size-14 text-[24px]' },
     responsive: { true: 'max-sm:size-13 max-sm:text-[22px]', up: 'max-sm:size-14 max-sm:text-[24px]' },

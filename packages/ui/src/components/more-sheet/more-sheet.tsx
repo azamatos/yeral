@@ -112,7 +112,7 @@ export function MoreSheetPerson({ name, phone, photo }: { name: string; phone: s
       <Avatar decorative name={name} src={photo} size={32} letters={1} />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[15px] leading-5 font-semibold text-n-900">{name}</span>
-        <span className="truncate text-micro text-n-600 tabular-nums">{phone}</span>
+        <span className="truncate text-micro text-n-600">{phone}</span>
       </span>
     </div>
   )

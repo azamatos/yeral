@@ -30,7 +30,7 @@ export function AvatarStack({
       {more > 0 && (
         <span
           className={cn(
-            'inline-flex flex-none items-center justify-center rounded-pill bg-n-100 font-semibold text-n-600 tabular-nums',
+            'inline-flex flex-none items-center justify-center rounded-pill bg-n-100 font-semibold text-n-600',
             box[size],
             ring,
             '-ml-2',

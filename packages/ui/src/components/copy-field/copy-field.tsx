@@ -94,7 +94,7 @@ export function CopyField({ value, display, variant = 'field', label, copy, shar
   if (variant === 'inline')
     return (
       <div className={cn('flex flex-wrap items-center gap-2', className)}>
-        <span ref={text} className="text-body font-medium text-n-900 tabular-nums">
+        <span ref={text} className="text-body font-medium text-n-900">
           {display ?? value}
         </span>
         <Button variant="ghost" size="s" iconOnly aria-label={label} title={label} onClick={() => void copyValue()}>

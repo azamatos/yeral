@@ -124,7 +124,7 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
   const moving = useMoveBooking({ slug, code: search.move, date: shown, now, people: columns, onLeave: leaveMove })
   // the person a phone shows: the address's, else the first
   const phoneStaff = columns.find((c) => c.staffId === search.staff)?.staffId ?? columns[0]?.staffId
-  const bold = (chunks: ReactNode) => <b className="font-semibold text-n-900 tabular-nums">{chunks}</b>
+  const bold = (chunks: ReactNode) => <b className="font-semibold text-n-900">{chunks}</b>
   const dot = (
     <span aria-hidden className="text-n-500">
       {t('dot')}

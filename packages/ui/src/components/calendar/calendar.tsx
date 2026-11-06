@@ -112,7 +112,7 @@ export function Calendar({
               aria-label={dayLabel?.(d)}
               onClick={() => onValueChange(d)}
               className={cn(
-                'size-10 cursor-pointer rounded-pill border-0 bg-transparent text-small font-semibold text-n-900 tabular-nums hover:bg-group',
+                'size-10 cursor-pointer rounded-pill border-0 bg-transparent text-small font-semibold text-n-900 hover:bg-group',
                 'focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:bg-transparent disabled:font-normal disabled:text-n-500',
                 d === today && 'shadow-[inset_0_0_0_1px_var(--color-n-900)]',
                 d === value && 'bg-a-500 text-white shadow-none hover:bg-a-500',

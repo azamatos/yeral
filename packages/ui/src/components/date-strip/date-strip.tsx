@@ -94,7 +94,7 @@ export function DateStrip({
                 <span className={cn('text-micro font-medium whitespace-nowrap', on ? 'text-white' : 'text-n-600')}>{d.weekday}</span>{' '}
                 <span
                   className={cn(
-                    'text-[20px] leading-6 font-bold tabular-nums',
+                    'text-[20px] leading-6 font-bold',
                     d.state === 'full' && 'font-medium line-through',
                     d.state === 'full' && !on && 'text-n-500',
                   )}

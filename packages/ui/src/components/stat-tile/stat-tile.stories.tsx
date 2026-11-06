@@ -41,7 +41,8 @@ export const Large: Story = {
     const row = canvas.getByRole('list', { name: 'Key figures' })
     await expect(row).toBeInTheDocument()
     await expect(canvas.getAllByRole('listitem')).toHaveLength(4)
-    await expect(canvas.getByText('46,200 TMT')).toHaveClass('tabular-nums')
+    // the number is the headline: proportional figures (DS-Type 04)
+    await expect(canvas.getByText('46,200 TMT')).not.toHaveClass('tabular-nums')
   },
 }
 

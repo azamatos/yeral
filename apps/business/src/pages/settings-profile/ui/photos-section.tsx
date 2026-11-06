@@ -97,7 +97,7 @@ export function PhotosSection({ slug }: { slug: string }) {
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           {title}
-          <span className="text-dense text-n-600 tabular-nums">{t('count', { count: photos.length, max: GALLERY_MAX })}</span>
+          <span className="text-dense text-n-600">{t('count', { count: photos.length, max: GALLERY_MAX })}</span>
         </div>
         <p className="m-0 text-dense text-n-600">{t('caption')}</p>
       </div>

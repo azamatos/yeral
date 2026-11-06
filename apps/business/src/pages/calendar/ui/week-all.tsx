@@ -87,7 +87,7 @@ export function WeekAll({
                     ) : (
                       <>
                         <Meter aria-hidden label={t('percent', { percent: cell.percent })} value={cell.percent} max={100} />
-                        <span className="flex flex-wrap items-baseline justify-between gap-x-1.5 text-[14px] leading-[18px] font-semibold tabular-nums">
+                        <span className="flex flex-wrap items-baseline justify-between gap-x-1.5 text-[14px] leading-[18px] font-semibold">
                           <span className="whitespace-nowrap">{count}</span>
                           <span className="text-[12px] leading-4 font-medium whitespace-nowrap text-n-600">
                             {t('percent', { percent: cell.percent })}

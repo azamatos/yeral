@@ -40,7 +40,7 @@ export function KeyValueList({
           <dd
             className={cn(
               'm-0 min-w-0',
-              facts ? 'truncate font-semibold tabular-nums' : 'font-medium',
+              facts ? 'truncate font-semibold' : 'font-medium',
               // a quiet value: n-600, at the row's weight (a compact row's «not given» regular, as drawn)
               item.muted ? cn('text-n-600', variant === 'compact' && 'font-normal') : 'text-n-900',
             )}

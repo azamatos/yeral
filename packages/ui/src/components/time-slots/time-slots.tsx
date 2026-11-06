@@ -17,7 +17,7 @@ export function TimeSlot({
       aria-pressed={selected}
       {...props}
       className={cn(
-        'cursor-pointer rounded-s border border-n-300 bg-n-0 px-3 text-small font-semibold text-n-900 tabular-nums',
+        'cursor-pointer rounded-s border border-n-300 bg-n-0 px-3 text-small font-semibold text-n-900',
         size === 's' ? 'h-9 min-w-16' : 'h-10 min-w-18',
         'hover:border-a-500 hover:text-a-600 focus-visible:shadow-focus focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:border-n-100 disabled:bg-n-50 disabled:text-n-500 disabled:line-through disabled:hover:text-n-500',

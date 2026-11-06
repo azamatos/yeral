@@ -37,12 +37,29 @@ export function TableRow({ selected, className, ...props }: ComponentProps<'div'
   )
 }
 
-export function TableColumnHeader({ className, ...props }: ComponentProps<'div'>) {
-  return <div role="columnheader" {...props} className={cn('flex min-w-0 items-center gap-1 px-2', className)} />
+/** `numeric`: the header of a column of counts or money, right-aligned over its cells (DS-Type 04). */
+export function TableColumnHeader({ numeric, className, ...props }: ComponentProps<'div'> & { numeric?: boolean }) {
+  return (
+    <div
+      role="columnheader"
+      {...props}
+      className={cn('flex min-w-0 items-center gap-1 px-2', numeric && 'justify-end text-right', className)}
+    />
+  )
 }
 
-export function TableCell({ className, ...props }: ComponentProps<'div'>) {
-  return <div role="cell" {...props} className={cn('flex min-w-0 flex-col px-2 py-2', className)} />
+/**
+ * `numeric`: counts or money that sit above numbers of the same kind, right-aligned with tabular figures so the digits
+ * line up by place — the one place a table keeps `tabular-nums` (DS-Type 04). Phones, dates and times stay proportional.
+ */
+export function TableCell({ numeric, className, ...props }: ComponentProps<'div'> & { numeric?: boolean }) {
+  return (
+    <div
+      role="cell"
+      {...props}
+      className={cn('flex min-w-0 flex-col px-2 py-2', numeric && 'items-end text-right tabular-nums', className)}
+    />
+  )
 }
 
 /** Secondary line inside a cell (phone, duration · price). */

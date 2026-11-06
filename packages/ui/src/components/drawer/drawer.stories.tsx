@@ -28,7 +28,7 @@ function BookingDetail({ defaultOpen, scrim }: { defaultOpen?: boolean; scrim?: 
             <dt className="text-n-600">Hünärmen</dt>
             <dd className="m-0">Aýna</dd>
             <dt className="text-n-600">Wagt</dt>
-            <dd className="m-0 tabular-nums">Ertir · Penşenbe, 15 oktýabr · 14:30</dd>
+            <dd className="m-0">Ertir · Penşenbe, 15 oktýabr · 14:30</dd>
             <dt className="text-n-600">Bahasy</dt>
             <dd className="m-0">80 TMT · Töleg ýerinde</dd>
           </dl>

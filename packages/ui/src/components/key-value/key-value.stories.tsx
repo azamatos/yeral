@@ -11,7 +11,7 @@ const booking = [
   { key: 'Specialist', value: 'Aýna · Stylist' },
   { key: 'Date and time', value: 'Today · 11:30–13:30' },
   { key: 'Price', value: 'from 250 TMT' },
-  { key: 'Booking code', value: <span className="tabular-nums">YR-48213</span> },
+  { key: 'Booking code', value: <span>YR-48213</span> },
 ]
 
 const meta = { title: 'Data/KeyValueList', component: KeyValueList, args: { items: booking } } satisfies Meta<typeof KeyValueList>

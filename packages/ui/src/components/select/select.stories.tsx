@@ -44,11 +44,11 @@ export const Sizes: Story = {
     await expect(canvas.getByRole('combobox', { name: 'Duration' }).offsetHeight).toBe(48)
     const hold = canvas.getByRole('combobox', { name: 'Hold requests for' })
     await expect(hold.offsetHeight).toBe(44)
-    // «10 min» in Onest's own figures: the tabular «1» would leave a gap before the «0»
+    // proportional figures in every control; tabular only in numeric table columns, the time grid and timers (DS-Type 04)
     await expect(getComputedStyle(hold).fontVariantNumeric).toBe('normal')
     const time = canvas.getByRole('combobox', { name: 'Opens' })
     await expect(time.offsetHeight).toBe(40)
     await expect(time.offsetWidth).toBe(104)
-    await expect(getComputedStyle(time).fontVariantNumeric).toBe('tabular-nums')
+    await expect(getComputedStyle(time).fontVariantNumeric).toBe('normal')
   },
 }

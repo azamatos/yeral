@@ -424,14 +424,14 @@ function MemberRow({
       <span className="hidden xl:block">{servicesText}</span>
       <span className="hidden flex-col xl:flex">
         <span>{pro && !former ? hours || '…' : '—'}</span>
-        {pro && !former && hoursSub && <span className="text-dense text-n-600 tabular-nums">{hoursSub}</span>}
+        {pro && !former && hoursSub && <span className="text-dense text-n-600">{hoursSub}</span>}
       </span>
       <div className="col-start-1 row-start-2 flex min-w-0 flex-row flex-wrap items-center gap-x-2.5 gap-y-0.5 pl-11 xl:col-start-auto xl:row-start-auto xl:flex-col xl:items-start xl:pl-0">
         <span className={`inline-flex items-center gap-2 text-small font-semibold ${tone}`}>
           <span aria-hidden className={`size-1.5 rounded-pill ${dot}`} />
           {status.label}
         </span>
-        {status.sub && <span className="text-dense text-n-600 tabular-nums">{status.sub}</span>}
+        {status.sub && <span className="text-dense text-n-600">{status.sub}</span>}
         {m.level === 'specialist' && !m.hasApp && !former && !inviteRow && (
           <span className="inline-flex items-center rounded-pill bg-n-100 px-1.75 text-[11px] leading-4 font-semibold whitespace-nowrap text-n-600">
             {t('noApp')}

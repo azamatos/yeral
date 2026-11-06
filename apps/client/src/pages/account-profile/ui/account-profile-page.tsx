@@ -135,12 +135,7 @@ function Profile({ me }: { me: Me }) {
         </form>
         <Field label={t('phone')} hint={canChange && !changing ? t('changeLead') : undefined}>
           <div className="flex items-center gap-2">
-            <Input
-              ref={phoneRef}
-              value={formatPhone(me.phone)}
-              readOnly
-              className="flex-1 border-n-200 bg-n-50 tabular-nums hover:border-n-200"
-            />
+            <Input ref={phoneRef} value={formatPhone(me.phone)} readOnly className="flex-1 border-n-200 bg-n-50 hover:border-n-200" />
             {canChange && !changing && (
               <Button ref={changeRef} variant="secondary" size="s" onClick={() => setChanging(true)}>
                 {t('change')}

@@ -112,7 +112,7 @@ export function WorkspaceSwitcher({
         <div className="flex min-h-15 flex-none items-center gap-2 py-0 pr-1 pl-4">
           <div className="flex min-w-0 flex-1 flex-col">
             <SheetTitle className="m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900">{copy.title}</SheetTitle>
-            {person && <span className="text-dense text-n-600 tabular-nums">{person}</span>}
+            {person && <span className="text-dense text-n-600">{person}</span>}
           </div>
           <SheetClose asChild>
             <Button variant="ghost" iconOnly aria-label={copy.close}>

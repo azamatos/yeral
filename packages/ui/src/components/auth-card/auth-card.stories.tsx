@@ -67,7 +67,7 @@ function AccountLine({ who = 'Gülnar Öwezowa · +993 64 •• •• 90', oth
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-n-200 pt-4">
       <span className="text-dense text-n-600">
-        You: <span className="font-semibold whitespace-nowrap text-n-900 tabular-nums">{who}</span>
+        You: <span className="font-semibold whitespace-nowrap text-n-900">{who}</span>
       </span>
       <button
         type="button"

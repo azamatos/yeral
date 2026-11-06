@@ -45,7 +45,7 @@ export function ChangePhone({ phone, canChange }: { phone: string; canChange: bo
         aria-labelledby="profile-phone"
         className="flex h-11 items-center gap-2 rounded-input border border-n-200 bg-n-50 pr-2 pl-3.5 text-body text-n-900"
       >
-        <span className="font-medium tabular-nums">{formatPhone(phone)}</span>
+        <span className="font-medium">{formatPhone(phone)}</span>
         <span className="flex-1" />
         {canChange && !open && (
           <button
@@ -101,7 +101,7 @@ function NewNumber({ current, onClose }: { current: string; onClose: () => void 
         <p className="m-0 text-dense text-n-600">
           {t.rich('shell.profile.changeTo', {
             phone: formatPhone(toE164(state.sentTo)),
-            b: (chunks) => <b className="font-semibold whitespace-nowrap text-n-900 tabular-nums">{chunks}</b>,
+            b: (chunks) => <b className="font-semibold whitespace-nowrap text-n-900">{chunks}</b>,
           })}{' '}
           <button type="button" onClick={steps.changeNumber} className={cn(textLink, 'whitespace-nowrap')}>
             {t('login.changeNumber')}

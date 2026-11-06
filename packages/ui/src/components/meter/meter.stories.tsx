@@ -66,7 +66,7 @@ export const InCell: Story = {
   render: () => (
     <div className="flex w-45 flex-col gap-2 rounded-m border border-n-200 p-3.5">
       <Meter label="6 bookings, 72% of the day" value={72} max={100} />
-      <span className="flex items-baseline justify-between text-small font-semibold tabular-nums">
+      <span className="flex items-baseline justify-between text-small font-semibold">
         <span>6</span>
         <span className="text-micro font-medium text-n-500">72%</span>
       </span>
@@ -80,7 +80,7 @@ export const Stacked: Story = {
     <div className="flex flex-col gap-2.5 rounded-m bg-n-50 px-4 py-3.5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-2">
         <span className="inline-flex items-baseline gap-2">
-          <span className="text-h3 font-bold tabular-nums">11 / 14</span>
+          <span className="text-h3 font-bold">11 / 14</span>
           <span className="text-dense text-n-600">seats</span>
         </span>
         <span className="text-small font-semibold text-a-600">3 seats left</span>
@@ -111,7 +111,7 @@ export const Full: Story = {
   render: () => (
     <div className="flex flex-col gap-2.5 rounded-m bg-n-50 px-4 py-3.5">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-h3 font-bold tabular-nums">14 / 14</span>
+        <span className="text-h3 font-bold">14 / 14</span>
         <span className="text-small font-semibold text-st-cancelled-ink">Full</span>
       </div>
       <Meter label="14 of 14 seats, full" max={14} size={8} surface="grey" segments={[{ value: 14, tone: 'accent' }]} />
