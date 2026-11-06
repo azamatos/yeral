@@ -67,8 +67,11 @@ interface Account {
   invites: InviteCard[]
   /** Numbers on other accounts: a change to one is refused. */
   taken?: string[]
-  /** Codes go through our Telegram bot (ADR 0029): the number change's code reaches the new number's chat, never the screen. */
-  telegram?: boolean
+  /**
+   * Codes go through our Telegram bot (ADR 0029): the number change's code reaches the new number's chat, never the
+   * screen; `link`, the new number has no chat yet and gets the link that makes one.
+   */
+  telegram?: boolean | 'link'
 }
 
 const MAYSA: Account = {
@@ -121,6 +124,8 @@ const fakeApi =
       if (route === 'POST /me/phone/code') {
         if (!account.me.canChangePhone) return json({ error: { code: 'phone_change_unavailable' } }, 409)
         if (account.taken?.includes(String(body.phone))) return json({ error: { code: 'phone_taken' } }, 409)
+        if (account.telegram === 'link' || body.relink === true)
+          return json({ resendAfterSec: 59, expiresInSec: 300, delivery: 'telegram_link', link: 'https://t.me/yeral_bot?start=nonce' })
         if (account.telegram) return json({ resendAfterSec: 59, expiresInSec: 300, delivery: 'telegram', link: 'https://t.me/yeral_bot' })
         return json({ resendAfterSec: 59, expiresInSec: 300, delivery: 'screen', code: '4821' })
       }
@@ -463,9 +468,34 @@ export const ChangeNumberTelegram: Story = {
     await userEvent.click(drawer.getByRole('button', { name: 'Get the code' }))
     await expect(await drawer.findByText('+993 61 05 77 32')).toBeVisible()
     await expect(drawer.queryByText('4821')).not.toBeInTheDocument()
+    // the Telegram step inline: Open Telegram, the help, Cancel on one row
+    await expect(drawer.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+    await expect(drawer.getByRole('button', { name: 'No Telegram on this number?' })).toBeVisible()
+    await expect(drawer.getByRole('button', { name: 'Cancel' })).toBeVisible()
+    // the story before may still show its toast: this story's is one more
+    const toasts = () => within(document.body).queryAllByText('Phone number changed').length
+    const before = toasts()
     await userEvent.keyboard('4821')
-    const toastShown = await within(document.body).findByText('Phone number changed')
-    await waitFor(() => expect(toastShown).toBeVisible())
+    await waitFor(() => expect(toasts()).toBeGreaterThan(before))
+  },
+}
+
+/** The new number has no Telegram chat yet: the three steps and the link that makes one, inside the box. */
+export const ChangeNumberTelegramLink: Story = {
+  args: { server: fakeApi({ ...MAYSA, telegram: 'link' }) },
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await userEvent.click(drawer.getByRole('button', { name: 'Change number' }))
+    await userEvent.type(drawer.getByLabelText('New phone number'), '61057732')
+    await userEvent.click(drawer.getByRole('button', { name: 'Get the code' }))
+    await expect(await drawer.findByText('Tap Share my number.')).toBeVisible()
+    await expect(drawer.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+    await expect(drawer.getByText(/^Send a new code in 0:5\d$/)).toBeVisible()
+    // the story before may still show its toast: this story's is one more
+    const toasts = () => within(document.body).queryAllByText('Phone number changed').length
+    const before = toasts()
+    await userEvent.keyboard('4821')
+    await waitFor(() => expect(toasts()).toBeGreaterThan(before))
   },
 }
 

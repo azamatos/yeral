@@ -77,6 +77,13 @@ export type TelegramStepProps = {
   resendIn: number
   onResend?: () => void
   onRelink?: () => void
+  /** Boxes 52 (56 under 768) on the login's page; 48 inline. */
+  size?: 48 | 52
+  /**
+   * Inside a form of its own (My profile's «Change number», B-Shell): S buttons on one row — Open Telegram (or Send a
+   * new code once the code expired), the help, and this Cancel at the row's end.
+   */
+  inline?: ReactNode
 }
 
 /**
@@ -105,6 +112,8 @@ export function TelegramStep({
   resendIn,
   onResend,
   onRelink,
+  size = 52,
+  inline,
 }: TelegramStepProps) {
   const limited = Boolean(tooManyCodes)
   const blocked = limited || Boolean(locked) || codeExpired
@@ -113,6 +122,9 @@ export function TelegramStep({
   const [helpOpen, setHelpOpen] = useState(false)
   // the help is a sheet on a phone, a popover from 768 (B10)
   const onPhone = useMediaQuery('(max-width: 767px)')
+  const isInline = inline !== undefined
+  const buttonSize = isInline ? 's' : 'l'
+  const buttonWidth = isInline ? undefined : 'w-full'
 
   // the lock is over or the code ran out: the only way on is a new code
   useEffect(() => {
@@ -124,11 +136,16 @@ export function TelegramStep({
     else window.location.assign('tg://')
   }
   const message = tooManyCodes ?? locked ?? (codeExpired ? copy.codeExpired : sendFailed ? copy.sendFailed : wrong ? codeError : undefined)
-  // the number's Telegram is lost: a new link, proved by the contact as the first time
+  // the number's Telegram is lost: a new link, proved by the contact as the first time; it asks the api for a code, so
+  // it waits with the resend
   const relink = onRelink && copy.linkAgain && !linking && (
     <button
       type="button"
-      className="hit cursor-pointer self-start text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
+      disabled={resendIn > 0 || checking}
+      className={cn(
+        'hit cursor-pointer self-start text-start text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none',
+        'disabled:cursor-default disabled:text-n-500 disabled:no-underline',
+      )}
       onClick={() => {
         setHelpOpen(false)
         onRelink()
@@ -137,6 +154,21 @@ export function TelegramStep({
       {copy.linkAgain}
     </button>
   )
+  const helpButton = <HelpButton open={helpOpen}>{copy.noTelegram}</HelpButton>
+  // what's under the boxes: Open Telegram (Primary «Send a new code» once the code expired) and the help; inline, the
+  // same on one row with Cancel at its end
+  const action = !limited ? (
+    codeExpired ? (
+      <Button ref={newCodeRef} type="button" variant="primary" size={buttonSize} className={buttonWidth} onClick={onResend}>
+        {copy.resend}
+      </Button>
+    ) : (
+      <Button type="button" variant="secondary" size={buttonSize} className={buttonWidth} onClick={openTelegram}>
+        <SendIcon size={isInline ? 16 : 20} aria-hidden />
+        {copy.openTelegram}
+      </Button>
+    )
+  ) : null
 
   return (
     <>
@@ -154,8 +186,8 @@ export function TelegramStep({
           onValueChange={onCodeChange}
           onComplete={onComplete}
           length={4}
-          size={52}
-          responsive="up"
+          size={size}
+          responsive={isInline ? undefined : 'up'}
           aria-label={copy.codeLabel}
           invalid={wrong}
           disabled={blocked || success}
@@ -171,8 +203,9 @@ export function TelegramStep({
         ) : (
           <>
             {message && <FieldMessage live={!blocked}>{message}</FieldMessage>}
+            {/* the countdown ticks without a live role (a second-by-second reading); the form's status says «Checking…» */}
             {!blocked && (
-              <div className="flex min-h-8 items-center text-small text-n-600" aria-live="polite">
+              <div className="flex min-h-8 items-center text-small text-n-600">
                 {checking ? (
                   <span className="text-n-700 inline-flex items-center gap-2">
                     <Spinner className="size-4" />
@@ -190,27 +223,13 @@ export function TelegramStep({
           </>
         )}
       </div>
-      {!success && !limited && (
-        <>
-          {codeExpired ? (
-            <Button ref={newCodeRef} type="button" variant="primary" size="l" className="w-full" onClick={onResend}>
-              {copy.resend}
-            </Button>
-          ) : (
-            <Button type="button" variant="secondary" size="l" className="w-full" onClick={openTelegram}>
-              <SendIcon size={20} aria-hidden />
-              {copy.openTelegram}
-            </Button>
-          )}
-        </>
-      )}
+      {!success && !isInline && action}
       {!success && (
-        <div className="flex justify-center">
+        <div className={cn('flex', isInline ? 'flex-wrap items-center gap-2' : 'justify-center')}>
+          {isInline && action}
           {onPhone ? (
             <Drawer open={helpOpen} onOpenChange={setHelpOpen}>
-              <DrawerTrigger asChild>
-                <HelpButton open={helpOpen}>{copy.noTelegram}</HelpButton>
-              </DrawerTrigger>
+              <DrawerTrigger asChild>{helpButton}</DrawerTrigger>
               <DrawerContent aria-describedby={undefined}>
                 <DrawerHeader title={copy.noTelegram} closeLabel={copy.close} />
                 <div className="flex flex-col gap-4 px-4 pt-4 pb-[34px] text-body">
@@ -245,9 +264,7 @@ export function TelegramStep({
             </Drawer>
           ) : (
             <Popover open={helpOpen} onOpenChange={setHelpOpen}>
-              <PopoverTrigger asChild>
-                <HelpButton open={helpOpen}>{copy.noTelegram}</HelpButton>
-              </PopoverTrigger>
+              <PopoverTrigger asChild>{helpButton}</PopoverTrigger>
               <PopoverContent
                 side="top"
                 align="center"
@@ -280,6 +297,7 @@ export function TelegramStep({
               </PopoverContent>
             </Popover>
           )}
+          {isInline && <span className="ml-auto">{inline}</span>}
         </div>
       )}
     </>

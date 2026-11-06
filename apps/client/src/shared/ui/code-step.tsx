@@ -62,6 +62,8 @@ export function CodeStep({
         ? t('notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
         : undefined)
   const delivery = state.delivery ?? (sms ? 'sms' : ahead)
+  // the boxes take the screen's own label when it gives one (the phone change names its code)
+  const telegramWords = useTelegramWords(state.sentTo ?? '')
 
   return (
     <SignInCodeStep
@@ -71,7 +73,7 @@ export function CodeStep({
       sms={sms}
       copy={copy}
       delivery={delivery}
-      telegram={useTelegramWords(state.sentTo ?? '')}
+      telegram={{ ...telegramWords, ...(words?.codeLabel ? { codeLabel: words.codeLabel } : {}) }}
       link={state.link}
       support={site.support}
       phoneRules={PHONE_RULES}

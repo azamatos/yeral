@@ -66,9 +66,17 @@ const phoneCodeRoute = createRoute({
   method: 'post',
   path: '/me/phone/code',
   tags,
-  summary: 'Send a code to a new phone number',
+  summary:
+    'Send a code to a new phone number: by SMS, to its Telegram, or, unlinked (or `relink`), the link that brings it there (`delivery`)',
   request: jsonBody(sendCodeSchema),
-  responses: { 200: json(sendCodeResponseSchema), 400: errors[400], 401: errors[401], 409: errors[409], 429: errors[429] },
+  responses: {
+    200: json(sendCodeResponseSchema),
+    400: errors[400],
+    401: errors[401],
+    409: errors[409],
+    429: errors[429],
+    503: errors[503],
+  },
 })
 const phoneVerifyRoute = createRoute({
   method: 'post',
@@ -172,7 +180,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     // with the code on the screen the number wouldn't be shown to be theirs, and a change merges the businesses'
     // records of it into the account (book Q-036)
     if (!phoneChangeOpen(c.var.deps)) throw new ApiError('phone_change_unavailable')
-    const { phone } = c.req.valid('json')
+    const { phone, relink } = c.req.valid('json')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
     return c.json(
@@ -182,6 +190,8 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
         ip: clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader),
         lang: user.lang,
         userId: user.id,
+        // the new number's Telegram link is someone else's by now (a recycled number): a new chat proves it
+        relink,
       }),
       200,
     )

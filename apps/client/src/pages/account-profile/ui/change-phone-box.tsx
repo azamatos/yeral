@@ -14,8 +14,9 @@ import { CodeStep } from '@/shared/ui'
 
 /**
  * Changing the phone number (book C-44; Account-Profile's `.pbox` under «Phone»): the new number, then the code sent to
- * it, in the site's code step with the SMS words (codes for a phone change always go by SMS: the api refuses the change
- * while the sign-in code shows on the screen, `phone_change_unavailable`). Signed in here, other devices log out.
+ * it, in the site's code step with the SMS words: the code never shows on the screen (the api refuses the change while
+ * the sign-in code does, `phone_change_unavailable`); by Telegram it draws the Telegram step (ADR 0029). Signed in
+ * here, other devices log out.
  * `onUnavailable`: the api refused the change after all (the profile hides «Change»).
  */
 export function ChangePhoneBox({

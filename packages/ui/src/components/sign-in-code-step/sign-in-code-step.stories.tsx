@@ -523,9 +523,9 @@ export const TelegramSuccess: Story = {
   },
 }
 
-/** The help on desktop: a popover with the text, Call / Telegram, «Link again». */
+/** The help on desktop: a popover with the text, Call / Telegram, «Link again» (which waits with the resend). */
 export const TelegramHelp: Story = {
-  args: { ...telegram, resendIn: 20 },
+  args: { ...telegram, resendIn: 0 },
   play: async ({ canvas, args }) => {
     await userEvent.click(help(canvas))
     const popover = within(await screen.findByRole('dialog', { name: 'No Telegram on this number?' }))
@@ -547,6 +547,8 @@ export const TelegramHelpSheet: Story = {
     const sheet = within(await screen.findByRole('dialog', { name: 'No Telegram on this number?' }))
     await waitFor(() => expect(sheet.getByRole('link', { name: 'Call Ýeral' })).toBeVisible())
     await expect(sheet.getByRole('link', { name: 'Write on Telegram' })).toBeVisible()
+    // a new link is a new code: it waits with the resend
+    await expect(sheet.getByRole('button', { name: 'Linked to another Telegram? Link again' })).toBeDisabled()
     await userEvent.click(sheet.getByRole('button', { name: 'Back to the code' }))
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'No Telegram on this number?' })).not.toBeInTheDocument())
     await waitFor(() => expect(help(canvas)).toHaveFocus())
@@ -760,4 +762,54 @@ export const InlinePhoneWidth: Story = {
 export const InlineRussian: Story = {
   name: 'Inline · Russian length',
   args: { layout: 'inline', copy: { ...RU, phoneLabel: 'Новый номер телефона', cancel: 'Отменить' }, resendIn: 42 },
+}
+
+/** The code by Telegram inside the profile's box: 48 boxes, S Open Telegram, the help and Cancel on one row. */
+export const InlineTelegram: Story = {
+  name: 'Inline · Telegram',
+  args: { ...telegram, layout: 'inline', copy: { ...TG, phoneLabel: 'New phone number', cancel: 'Cancel' }, onCancel: fn() },
+  play: async ({ args, canvas }) => {
+    await waitFor(() => expect(tgCode(canvas)).toHaveFocus())
+    await expect(canvas.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+    await expect(help(canvas)).toBeVisible()
+    await userEvent.keyboard('4821')
+    await waitFor(() => expect(args.onSubmitCode).toHaveBeenCalledWith('4821'))
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }))
+    await expect(args.onCancel).toHaveBeenCalledOnce()
+  },
+}
+
+/** The new number isn't linked yet: the three steps above the boxes, Open Telegram opens the bot's start link. */
+export const InlineTelegramLinking: Story = {
+  name: 'Inline · Telegram · first link',
+  args: {
+    ...telegram,
+    layout: 'inline',
+    copy: { ...TG, phoneLabel: 'New phone number', cancel: 'Cancel' },
+    delivery: 'telegram_link',
+    link: 'https://t.me/yeral_bot?start=abc',
+    onCancel: fn(),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('Tap Share my number.')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+  },
+}
+
+/** Telegram didn't answer the new number's code: the message beside Cancel, the number stays. */
+export const InlineTelegramUnavailable: Story = {
+  name: 'Inline · Telegram didn’t answer',
+  args: {
+    ...telegram,
+    step: 'phone',
+    layout: 'inline',
+    copy: { ...TG, phoneLabel: 'New phone number', cancel: 'Cancel' },
+    phone: '61057732',
+    sendFailed: true,
+    onCancel: fn(),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Telegram didn’t answer. Try again.')
+    await expect(canvas.getByRole('button', { name: 'Get the code' })).toBeVisible()
+  },
 }

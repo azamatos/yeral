@@ -32,6 +32,9 @@
 - Languages: the client and business apps ship `en.json` only (English for the first launch, ADR 0022), so the new
   `login.telegram.*` keys have no tk/ru yet; the error code `telegram_unavailable` got its tk/ru/en message in
   `@yeral/i18n` (the contract test wants every code in all three).
-- Left: the number change in the workspace shell (`layout="inline"`) doesn't draw the Telegram step, so a
-  `telegram_link` answer there has nowhere to show the link; the business app's «Signed in» on the setup page (it uses
-  the same `SignInForm`, untested); tk/ru for the apps' `login.telegram.*` when the apps get those languages.
+- Review (#308): the inline layout (the shell's «Change number») draws the Telegram step too — 48 boxes, S «Open
+  Telegram», the help and Cancel on one row (`TelegramStep` `size` + `inline`); `POST /me/phone/code` takes `relink`;
+  the countdown lost its live region (it was read every second); «Link again» waits with the resend (the api would
+  refuse it with `resend_too_soon`); the shell stories count toasts, since the story before may still show its own.
+- Left: the business app's «Signed in» on the setup page (it uses the same `SignInForm`, untested); tk/ru for the
+  apps' `login.telegram.*` when the apps get those languages; a leftover Storybook of a past session held port 3205.

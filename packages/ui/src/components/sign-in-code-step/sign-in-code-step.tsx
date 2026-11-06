@@ -182,7 +182,8 @@ export function SignInCodeStep({
       {copy.cancel}
     </Button>
   )
-  const viaTelegram = !inline && telegram !== undefined && (delivery === 'telegram' || delivery === 'telegram_link')
+  // inline (My profile's «Change number») draws it too: the link and the help have nowhere else to show
+  const viaTelegram = telegram !== undefined && (delivery === 'telegram' || delivery === 'telegram_link')
   const limited = Boolean(tooManyCodes)
   const blocked = limited || Boolean(locked) || codeExpired
   const wrong = Boolean(codeError) && !blocked
@@ -281,6 +282,7 @@ export function SignInCodeStep({
                   {tooManyCodes}
                 </FieldMessage>
               )}
+              {sendFailed && telegram && <FieldMessage className="mr-auto">{telegram.sendFailed}</FieldMessage>}
               {cancel}
               {!limited && (
                 <Button type="submit" variant="secondary" size="s" loading={sending} loadingText={copy.sending}>
@@ -325,6 +327,8 @@ export function SignInCodeStep({
           resendIn={resendIn}
           onResend={onResend}
           onRelink={onRelink}
+          size={inline ? 48 : 52}
+          inline={inline ? (cancel ?? null) : undefined}
         />
       ) : (
         <>

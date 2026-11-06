@@ -1,4 +1,5 @@
 import { maskPhone } from '@yeral/domain/phone'
+import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, TELEGRAM_SECRET, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
@@ -217,6 +218,29 @@ describe('sign-in codes through our Telegram bot (ADR 0029)', () => {
     expect(await db.select({ chatId: telegramLinks.chatId }).from(telegramLinks)).toEqual([{ chatId: 1018 }])
     expect(t.telegram!.sent.at(-1)).toMatchObject({ chatId: 1018, text: expect.stringContaining('1234') })
     expect((await b.req('/v1/auth/verify', { body: { phone, code: '1234' } })).status).toBe(200)
+  })
+
+  it('a phone change takes «Link again» too: the new number’s old chat is someone else’s by now, a new one proves it', async () => {
+    const newPhone = '+99365000053'
+    const t = testApp(db, { telegram: true })
+    await linkUp(t, newPhone, 1020)
+    t.clock.now += 60_000
+    const b = browser(t.app)
+    await b.login('+99365222030')
+    const linked = await b.req('/v1/me/phone/code', { body: { phone: newPhone } })
+    expect(linked.json).toMatchObject({ delivery: 'telegram', link: 'https://t.me/yeral_test_bot' })
+    expect(t.telegram!.sent.at(-1)).toMatchObject({ chatId: 1020 })
+    t.clock.now += 60_000
+    const again = await b.req('/v1/me/phone/code', { body: { phone: newPhone, relink: true } })
+    expect(again.status).toBe(200)
+    expect(again.json).toMatchObject({ delivery: 'telegram_link', link: expect.stringMatching(/\?start=[\w-]{32}$/) })
+    expect((await webhook(t, start(1021, nonceOf(again.json.link)))).status).toBe(200)
+    expect((await webhook(t, contact(1021, newPhone))).status).toBe(200)
+    expect(await db.select({ chatId: telegramLinks.chatId }).from(telegramLinks).where(eq(telegramLinks.phone, newPhone))).toEqual([
+      { chatId: 1021 },
+    ])
+    expect(t.telegram!.sent.at(-1)).toMatchObject({ chatId: 1021, text: expect.stringContaining('1234') })
+    expect((await b.req('/v1/me/phone/verify', { body: { phone: newPhone, code: '1234' } })).status).toBe(200)
   })
 
   it('Telegram out (an error other than a blocked bot): the code request says telegram_unavailable, and the next try isn’t told to wait', async () => {
