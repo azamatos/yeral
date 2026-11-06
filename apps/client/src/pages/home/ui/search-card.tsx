@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@yeral/ui/button'
-import { Select } from '@yeral/ui/select'
+import { NativeSelect as Select } from '@yeral/ui/select'
 import { useId, useState, type FormEvent, type ReactNode, type Ref } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { placeAddress, WhereField, type usePlace } from '@/features/pick-place'

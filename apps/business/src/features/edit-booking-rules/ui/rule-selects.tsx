@@ -1,4 +1,4 @@
-import { Select } from '@yeral/ui/select'
+import { NativeSelect as Select } from '@yeral/ui/select'
 import type { ComponentProps } from 'react'
 import { choicesWith } from '@/shared/lib'
 import { useRuleLabels } from '../lib/labels'
