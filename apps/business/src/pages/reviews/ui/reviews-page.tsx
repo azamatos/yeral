@@ -24,6 +24,9 @@ import type { ReviewsSearch, ReviewStars } from '../model/search'
 import { ReportReviewModal } from './report-review-modal'
 import { ReviewItem } from './review-item'
 
+/** The specialist filter's «All specialists» row (the Select has no empty value). */
+const ALL = 'all'
+
 const STAR_CHIPS: readonly ReviewStars[] = [5, 4, 3, 2, 1]
 const LINK =
   'inline-flex items-center gap-1.5 rounded-sm text-small font-semibold text-a-600 no-underline hover:underline focus-visible:shadow-focus focus-visible:outline-none'
@@ -221,34 +224,23 @@ function Reviews({ workspace }: { workspace: Workspace }) {
               <ChipRadioGroup aria-label={t('filter.label')} value={chip} onValueChange={pickChip} options={chips} />
               {manage && (
                 <Select
-                  size="s"
+                  size="m"
                   aria-label={t('filter.staff')}
-                  value={search.staff ?? ''}
-                  onChange={(e) => go({ staff: e.target.value || undefined })}
+                  value={search.staff ?? ALL}
+                  onValueChange={(v) => go({ staff: v === ALL ? undefined : v })}
+                  options={[{ value: ALL, label: t('filter.allStaff') }, ...staff.map((m) => ({ value: m.id, label: m.name }))]}
                   className="max-sm:w-full"
-                >
-                  <option value="">{t('filter.allStaff')}</option>
-                  {staff.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </Select>
+                />
               )}
             </div>
             <Select
-              size="s"
+              size="m"
               aria-label={t('sort.label')}
               value={search.order ?? 'newest'}
-              onChange={(e) => go({ order: e.target.value === 'newest' ? undefined : (e.target.value as ReviewsSearch['order']) })}
+              onValueChange={(v) => go({ order: v === 'newest' ? undefined : (v as ReviewsSearch['order']) })}
+              options={REVIEW_SORTS.map((s) => ({ value: s, label: t(`sort.${s}`) }))}
               className="max-sm:w-full"
-            >
-              {REVIEW_SORTS.map((s) => (
-                <option key={s} value={s}>
-                  {t(`sort.${s}`)}
-                </option>
-              ))}
-            </Select>
+            />
           </div>
         )}
         {list.isPending ? (

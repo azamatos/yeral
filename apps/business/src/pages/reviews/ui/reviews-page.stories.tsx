@@ -14,6 +14,14 @@ import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { ReviewsPage } from './reviews-page'
 
+/** Opens our own Select (design v0.7 · A2) and picks a row in its listbox. */
+async function pick(trigger: HTMLElement, option: string | RegExp) {
+  await userEvent.click(trigger)
+  const list = await page.findByRole('listbox')
+  await userEvent.click(await within(list).findByRole('option', { name: option }))
+  await waitFor(() => expect(page.queryByRole('listbox')).not.toBeInTheDocument())
+}
+
 const me: Me = {
   id: 'u-maysa',
   name: 'Maýsa Annaýewa',
@@ -266,10 +274,10 @@ export const Filters: Story = {
     await expect(await canvas.findByText('Merdan K.')).toBeVisible()
     await waitFor(() => expect(canvas.queryByText('Döwran S.')).toBeNull())
     await userEvent.click(canvas.getByRole('radio', { name: 'All' }))
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Filter by specialist' }), 'Aýna')
+    await pick(canvas.getByRole('combobox', { name: 'Filter by specialist' }), 'Aýna')
     await expect(await canvas.findByText('Gülälek N.')).toBeVisible()
     await waitFor(() => expect(canvas.queryByText('Mähri G.')).toBeNull())
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Sort' }), 'Oldest first')
+    await pick(canvas.getByRole('combobox', { name: 'Sort' }), 'Oldest first')
     await waitFor(async () => {
       const articles = canvas.getAllByRole('article')
       await expect(articles).toHaveLength(3)
