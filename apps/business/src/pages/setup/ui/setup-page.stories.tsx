@@ -190,9 +190,9 @@ const fakeApi =
       const path = new URL(request.url).pathname.replace(/^\/v1/, '')
       const body = (request.method === 'GET' ? {} : await request.json().catch(() => ({}))) as Record<string, unknown>
       const route = `${request.method} ${path}`
-      if (route === 'GET /auth/mode') return json({ codeOnScreen: true })
+      if (route === 'GET /auth/mode') return json({ codeOnScreen: true, delivery: 'screen' })
       if (route === 'GET /me') return json(me)
-      if (route === 'POST /auth/code') return json({ resendAfterSec: 59, expiresInSec: 300, code: '4821' })
+      if (route === 'POST /auth/code') return json({ resendAfterSec: 59, expiresInSec: 300, delivery: 'screen', code: '4821' })
       if (route === 'POST /auth/verify') {
         if (body.code !== '4821') return json({ error: { code: 'code_invalid', details: { attemptsLeft: 2 } } }, 400)
         me = nameless(String(body.phone))

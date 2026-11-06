@@ -116,7 +116,7 @@ export const authApi =
     let phone: string | undefined
     const code = () => CODES[(sent - 1) % CODES.length]
     return fakeFetch(({ route, body }) => {
-      if (route === 'GET /auth/mode') return json({ codeOnScreen: showCode })
+      if (route === 'GET /auth/mode') return json({ codeOnScreen: showCode, delivery: showCode ? 'screen' : 'sms' })
       if (route === 'POST /auth/code') {
         if (sent >= 5) return refuse(429, 'rate_limited', { retryAfterSec: 2520, retryAfterMin: 42 })
         if (body.phone === phone && Date.now() - sentAt < resendSec * 1000) return refuse(429, 'resend_too_soon', { retryAfterSec: 50 })
@@ -124,7 +124,11 @@ export const authApi =
         sentAt = Date.now()
         sent += 1
         wrong = 0
-        return json({ resendAfterSec: resendSec, expiresInSec: 300, ...(showCode ? { code: code() } : {}) })
+        return json({
+          resendAfterSec: resendSec,
+          expiresInSec: 300,
+          ...(showCode ? { delivery: 'screen', code: code() } : { delivery: 'sms' }),
+        })
       }
       if (route === 'POST /auth/verify') {
         if (wrong >= 3) return refuse(429, 'too_many_attempts', { retryAfterSec: lockSec })
@@ -178,7 +182,7 @@ export const authApi =
         phone = String(body.phone)
         sent += 1
         wrong = 0
-        return json({ resendAfterSec: resendSec, expiresInSec: 300 })
+        return json({ resendAfterSec: resendSec, expiresInSec: 300, delivery: 'sms' })
       }
       if (route === 'POST /me/phone/verify') {
         if (takenAtVerify) return refuse(409, 'phone_taken')

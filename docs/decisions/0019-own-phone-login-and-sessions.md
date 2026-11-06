@@ -1,6 +1,6 @@
 # 0019. Our own phone-code login and database sessions instead of Better Auth
 
-- Status: Accepted 2026-10-14 — revises [0005](0005-typescript-backend-in-monorepo.md) (auth library) and [0018](0018-business-workspace-model.md) (identity); amended 2026-10-21 (demo sessions, below)
+- Status: Accepted 2026-10-14 — revises [0005](0005-typescript-backend-in-monorepo.md) (auth library) and [0018](0018-business-workspace-model.md) (identity); amended 2026-10-21 (demo sessions, below); amended 2026-11-06 by [0029](0029-sign-in-codes-through-telegram-bot.md) (the code goes through our Telegram bot until SMS launches; the sign-in's answer says how, `delivery`)
 - Decided by: Claude, while building the api (M2d); the owner can reverse it before the CMS milestone at no cost
 
 ## Context

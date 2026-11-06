@@ -34,6 +34,7 @@ import { reviewRoutes } from './modules/reviews/routes'
 import { setupRoutes } from './modules/setup/routes'
 import { settingsRoutes } from './modules/settings/routes'
 import { teamRoutes } from './modules/team/routes'
+import { telegramRoutes } from './modules/telegram/routes'
 import { createLogger } from './ports/log'
 import { build } from './version'
 
@@ -109,6 +110,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', setupRoutes)
     .route('/v1', demoRoutes)
     .route('/v1', e2eRoutes)
+    .route('/v1', telegramRoutes)
     .route('/v1', adminRoutes)
     .route('/v1', adminBusinessRoutes)
     .route('/v1', adminReviewRoutes)

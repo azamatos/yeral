@@ -2,14 +2,20 @@
  * One-time login codes (client spec §4.4, §4.7; ADR 0019): 4 digits, 5 minutes, resend after 59 s, 3 wrong tries →
  * a 60-second lock and a new code. Outside production the code is always 1234 and SMS go to the log. At the first
  * launch (`codeOnScreen`, book Q-036, F-200) the sign-in's answer carries the code to show, under the same limits.
+ * With our Telegram bot (ADR 0029) the code goes to the phone's chat, or the answer carries the link that makes one.
  */
+import type { CodeDelivery } from '@yeral/contract/account'
 import type { Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
 import { and, eq, gt, isNull, lt, lte, or, sql } from 'drizzle-orm'
+import type { Queryable } from '../../db/client'
 import { loginCodes } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
 import { randomDigits, sha256Hex } from '../../lib/crypto'
+import { hit, rateLimited } from '../../lib/rate-limit'
+import { codeSmsText } from '../../notify'
+import { sendToLinked, startLink } from '../telegram/links'
 
 /**
  * Whether the plain sign-in shows its code on the screen: the first launch's switch is on and no SMS reaches a phone
@@ -17,8 +23,10 @@ import { randomDigits, sha256Hex } from '../../lib/crypto'
  * demo note and the code never disagree.
  */
 export const showsCodeOnScreen = (deps: Pick<Deps, 'codeOnScreen' | 'sms'>): boolean => deps.codeOnScreen && !deps.sms.delivers
-import { hit, rateLimited } from '../../lib/rate-limit'
-import { codeSmsText } from '../../notify'
+
+/** How the sign-in's code reaches the person, as `/auth/mode` tells the screens ahead (never `telegram_link`: that's per number). */
+export const codeDelivery = (deps: Pick<Deps, 'codeOnScreen' | 'sms' | 'telegram'>): Exclude<CodeDelivery, 'telegram_link'> =>
+  showsCodeOnScreen(deps) ? 'screen' : deps.telegram ? 'telegram' : 'sms'
 
 export const CODE_TTL_SEC = 300
 export const RESEND_SEC = 59
@@ -36,6 +44,12 @@ type Purpose = 'login' | 'change_phone'
 
 const hashOf = (purpose: Purpose, phone: string, code: string) => sha256Hex(`${purpose}:${phone}:${code}`)
 const secondsLeft = (until: Date, now: number) => Math.max(1, Math.ceil((until.getTime() - now) / 1000))
+const newCode = (deps: Pick<Deps, 'site'>) => (deps.site.demo ? DEMO_CODE : randomDigits(4))
+
+/** The sign-in's answer: the timers, and how the code reaches the person (ADR 0029). */
+export type SentCode = { resendAfterSec: number; expiresInSec: number } & (
+  { delivery: 'screen'; code: string } | { delivery: 'sms' } | { delivery: 'telegram' } | { delivery: 'telegram_link'; link: string }
+)
 
 export async function sendCode(
   deps: Deps,
@@ -51,7 +65,7 @@ export async function sendCode(
      */
     onScreen?: boolean
   },
-): Promise<{ resendAfterSec: number; expiresInSec: number; code?: string }> {
+): Promise<SentCode> {
   const { db } = deps
   const now = deps.now()
   if (!isMobile(req.phone)) throw invalid({ path: ['phone'], code: 'not_mobile' })
@@ -75,7 +89,7 @@ export async function sendCode(
     if (!r.ok) throw rateLimited(r.retryAfterSec)
   }
 
-  const code = deps.site.demo ? DEMO_CODE : randomDigits(4)
+  const code = newCode(deps)
   const row = {
     codeHash: await hashOf(req.purpose, req.phone, code),
     expiresAt: new Date(now + CODE_TTL_SEC * 1000),
@@ -99,10 +113,42 @@ export async function sendCode(
     })
     .returning({ phone: loginCodes.phone })
   if (!saved) throw new ApiError('resend_too_soon', { retryAfterSec: RESEND_SEC })
+  const timers = { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC }
+  const text = codeSmsText(req.lang, code)
+  if (deps.telegram) {
+    const bot = { ...deps, telegram: deps.telegram.bot }
+    if (await sendToLinked(bot, { to: req.phone, text, secret: true })) return { ...timers, delivery: 'telegram' }
+    // not linked: the code waits; once the person links, a fresh one goes to the chat (`modules/telegram/webhook.ts`)
+    return { ...timers, delivery: 'telegram_link', link: await startLink(bot, { phone: req.phone, purpose: req.purpose, lang: req.lang }) }
+  }
   // written to the log as every SMS is, the code hidden
-  await deps.sms.send({ to: req.phone, text: codeSmsText(req.lang, code), secret: true })
-  const shown = req.onScreen && showsCodeOnScreen(deps)
-  return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC, ...(shown ? { code } : {}) }
+  await deps.sms.send({ to: req.phone, text, secret: true })
+  return req.onScreen && showsCodeOnScreen(deps) ? { ...timers, delivery: 'screen', code } : { ...timers, delivery: 'sms' }
+}
+
+/**
+ * The code waiting for a phone that just linked its Telegram (ADR 0029), issued afresh so it can be sent: only hashes
+ * are kept. The same limits go on; a locked or spent code stays as it is (null: nothing to send).
+ */
+export async function reissueWaitingCode(
+  deps: Pick<Deps, 'site' | 'now'> & { db: Queryable },
+  req: { phone: string; purpose: Purpose },
+): Promise<string | null> {
+  const now = deps.now()
+  const code = newCode(deps)
+  const [row] = await deps.db
+    .update(loginCodes)
+    .set({ codeHash: await hashOf(req.purpose, req.phone, code), expiresAt: new Date(now + CODE_TTL_SEC * 1000), attempts: 0 })
+    .where(
+      and(
+        eq(loginCodes.phone, req.phone),
+        eq(loginCodes.purpose, req.purpose),
+        gt(loginCodes.expiresAt, new Date(now)),
+        or(isNull(loginCodes.lockedUntil), lte(loginCodes.lockedUntil, new Date(now))),
+      ),
+    )
+    .returning({ phone: loginCodes.phone })
+  return row ? code : null
 }
 
 /**

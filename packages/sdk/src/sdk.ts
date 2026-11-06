@@ -226,13 +226,20 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   })
 
   const auth = {
-    /** Whether the sign-in shows its code on the screen: the phone step then says it's a demo (book Q-036, F-200). */
+    /**
+     * How the sign-in's code will come (`delivery`: `screen`, `sms` or `telegram`; ADR 0029): on the screen, the phone
+     * step says it's a demo (`codeOnScreen`, book Q-036, F-200).
+     */
     mode: () =>
       queryOptions({
         queryKey: keys.authMode(),
         queryFn: ({ signal }) => call(v1.auth.mode.$get(undefined, abortWith(signal))),
         staleTime: 60_000,
       }),
+    /**
+     * Sends the code; the answer's `delivery` says where it went (`SentCode`, ADR 0029): `screen` carries `code`,
+     * `telegram_link` carries the `link` the person opens in Telegram to link the number (the code follows there).
+     */
     sendCode: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof sendCodeSchema>) => call(v1.auth.code.$post({ json: body })),

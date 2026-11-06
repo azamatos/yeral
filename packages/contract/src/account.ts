@@ -17,22 +17,50 @@ import { NAME_MAX } from '@yeral/domain/names'
 
 /** `lang`: the site's language, for the SMS text and a new account's language. Codes go to mobile numbers only. */
 export const sendCodeSchema = z.object({ phone: mobileInputSchema, lang: marketLocaleSchema.optional() }).meta({ id: 'SendCode' })
-export const sendCodeResponseSchema = z.object({
+
+/**
+ * How a sign-in code reaches the person (ADR 0029): `screen`, shown in the answer at the first launch, when nothing
+ * reaches a phone (book Q-036, F-200); `sms`, sent to the phone (locally: the log); `telegram`, sent to the Telegram
+ * chat linked to the number; `telegram_link`, the number isn't linked yet: the answer carries the link to open in
+ * Telegram, where "Share my number" links it and brings the code (the code then types in as usual).
+ */
+export const codeDeliverySchema = z.enum(['screen', 'sms', 'telegram', 'telegram_link']).meta({ id: 'CodeDelivery' })
+export type CodeDelivery = z.infer<typeof codeDeliverySchema>
+
+const codeTimers = {
   /** The resend timer ("0:59"). */
   resendAfterSec: z.number().int(),
   expiresInSec: z.number().int(),
-  /** The code to show on the screen at the first launch, when no SMS reaches a phone (book Q-036, F-200); absent otherwise. */
-  code: z
-    .string()
-    .regex(/^\d{4}$/)
-    .optional(),
-})
+}
+/** One of four by `delivery` (`CodeDelivery`); the timers are in every one. */
+export const sendCodeResponseSchema = z
+  .discriminatedUnion('delivery', [
+    z.object({
+      ...codeTimers,
+      delivery: z.literal('screen'),
+      /** The code to show on the screen (the first launch, book Q-036, F-200). */
+      code: z.string().regex(/^\d{4}$/),
+    }),
+    z.object({ ...codeTimers, delivery: z.literal('sms') }),
+    z.object({ ...codeTimers, delivery: z.literal('telegram') }),
+    z.object({
+      ...codeTimers,
+      delivery: z.literal('telegram_link'),
+      /** `https://t.me/<bot>?start=<nonce>`: good for 10 minutes, for this number only. */
+      link: z.url(),
+    }),
+  ])
+  .meta({ id: 'SentCode' })
+export type SentCode = z.infer<typeof sendCodeResponseSchema>
 
 /**
- * What the sign-in screens know before a number is typed: whether the code will show on the screen. While it does, a
+ * What the sign-in screens know before a number is typed: how the code will come (`delivery`; never `telegram_link`,
+ * which depends on the number). While it shows on the screen (`codeOnScreen`, the same as `delivery === 'screen'`), a
  * number proves nothing, so the screens say it's a demo (the first launch, book Q-036, F-200).
  */
-export const authModeSchema = z.object({ codeOnScreen: z.boolean() }).meta({ id: 'AuthMode' })
+export const authModeSchema = z
+  .object({ codeOnScreen: z.boolean(), delivery: z.enum(['screen', 'sms', 'telegram']) })
+  .meta({ id: 'AuthMode' })
 
 export const verifyCodeSchema = z
   .object({

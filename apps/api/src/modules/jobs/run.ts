@@ -51,6 +51,7 @@ import { freeAlternatives } from '../bookings/offers'
 import { confirmBooking } from '../bookings/confirm'
 import { pruneIdentityChecks } from '../auth/identity'
 import { newBookingLink, pruneBookingLinks } from '../bookings/links'
+import { pruneTelegram } from '../telegram/links'
 import { hideLinkTokens } from '../../ports/sms'
 import { onlineRefusal } from '../clients/online'
 import { itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
@@ -596,6 +597,7 @@ export async function runDueJobs(
 ): Promise<{ expired: number; completed: number; recounted: number; invitesExpired: number; jobs: number }> {
   await pruneBookingLinks(deps.db, deps.now())
   await pruneIdentityChecks(deps.db, deps.now())
+  await pruneTelegram(deps.db, deps.now())
   const expired = await expireRequests(deps)
   const completed = await completeVisits(deps)
   const recounted = await recountReviews(deps)

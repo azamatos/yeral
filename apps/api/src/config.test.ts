@@ -15,6 +15,32 @@ describe('ADMIN_SECRET_KEY (ADR 0026)', () => {
   })
 })
 
+describe('TELEGRAM_* (our bot, ADR 0029)', () => {
+  it('nothing unless the token is set; with it, the secret and the username are needed too, and a bad value is named', () => {
+    const bot = {
+      TELEGRAM_BOT_TOKEN: '123456:AAHfakeTokenForTheTests0123456789abc',
+      TELEGRAM_WEBHOOK_SECRET: 'webhook-secret-for-the-tests-0123',
+      TELEGRAM_BOT_USERNAME: 'yeral_app_bot',
+    }
+    expect(loadConfig(base).telegram).toBeNull()
+    expect(loadConfig({ ...base, TELEGRAM_WEBHOOK_SECRET: bot.TELEGRAM_WEBHOOK_SECRET }).telegram).toBeNull()
+    // the compose file passes `${TELEGRAM_BOT_TOKEN:-}`: empty is unset, not a bad token
+    expect(loadConfig({ ...base, TELEGRAM_BOT_TOKEN: '', TELEGRAM_WEBHOOK_SECRET: '', TELEGRAM_BOT_USERNAME: '' }).telegram).toBeNull()
+    expect(loadConfig({ ...base, SIGN_IN_CODE_ON_SCREEN: '' }).codeOnScreen).toBe(false)
+    expect(loadConfig({ ...base, ...bot }).telegram).toEqual({
+      token: bot.TELEGRAM_BOT_TOKEN,
+      webhookSecret: bot.TELEGRAM_WEBHOOK_SECRET,
+      username: bot.TELEGRAM_BOT_USERNAME,
+    })
+    expect(() => loadConfig({ ...base, TELEGRAM_BOT_TOKEN: bot.TELEGRAM_BOT_TOKEN })).toThrow(
+      /TELEGRAM_WEBHOOK_SECRET.*TELEGRAM_BOT_USERNAME/s,
+    )
+    expect(() => loadConfig({ ...base, ...bot, TELEGRAM_BOT_TOKEN: 'not-a-token' })).toThrow(/TELEGRAM_BOT_TOKEN/)
+    expect(() => loadConfig({ ...base, ...bot, TELEGRAM_WEBHOOK_SECRET: 'short' })).toThrow(/TELEGRAM_WEBHOOK_SECRET/)
+    expect(() => loadConfig({ ...base, ...bot, TELEGRAM_BOT_USERNAME: '@yeral_app_bot' })).toThrow(/TELEGRAM_BOT_USERNAME/)
+  })
+})
+
 describe('E2E_HOOKS (the end-to-end flows, e2e/)', () => {
   it('off unless set, on outside production, refused in production', () => {
     expect(loadConfig(base).e2eHooks).toBe(false)

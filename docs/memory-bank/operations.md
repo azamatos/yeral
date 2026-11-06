@@ -82,6 +82,14 @@ for backups and accounts for error tracking and uptime checks (owner, 2026-10-22
   writes a JSON access log.
 - Sign-in codes never reach a log: the SMS log adapter writes "(sign-in code hidden)" for them.
 - SMS: every environment writes them to the log (`ports/sms.ts`) until a gateway comes with the Turkmenistan launch.
+- Our Telegram bot (ADR 0029): with `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` and `TELEGRAM_BOT_USERNAME` in
+  `/srv/yeral/.env` (all three, never in the repo), sign-in codes and the SMS port's other texts reach the phones linked
+  to the bot's chats; unlinked phones get the sign-in's `telegram_link` answer, and other texts the log. The api refuses
+  `SIGN_IN_CODE_ON_SCREEN=true` beside the token, so `.env` sets it to `false` too (`compose.yml` passes all four from
+  `.env`; it's copied from the repo at every deploy, never edited on the server). `docker compose -f /srv/yeral/compose.yml run --rm api node
+  dist/cli.js telegram-webhook` registers the webhook (`<api>/v1/telegram/webhook`, the secret, messages only); run it
+  once the bot exists and again when the api's address or the secret changes (`infra/server/README.md`). Locally
+  `pnpm --filter @yeral/api telegram:webhook`, which needs a public api address.
 - The first launch's sign-in code on the screen: `SIGN_IN_CODE_ON_SCREEN=true` (off unless set; the api refuses it
   with a gateway that delivers). With it on, anyone who types a number signs in as it (book Q-036 and its concern).
   The server's `compose.yml` has it on since 2026-10-25 (the owner), ahead of the first launch, so the business app at

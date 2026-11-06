@@ -131,6 +131,16 @@
       "request_expired": "the request's answer time ran out"
     }
   },
+  "telegram": {
+    "welcome": "This is the {brand} bot: it brings you your sign-in codes. On the site, type your number and open the link it shows.",
+    "shareNumber": "To get your {brand} codes here, share the number you typed on the site.",
+    "shareButton": "Share my number",
+    "expired": "This link has expired. Ask for a new code on the site.",
+    "noRequest": "Ask for a code on the site first, then open the link it shows.",
+    "wrongNumber": "That's not the number you typed on the site ({phone}). Share your own number, with the button, from the Telegram account that has it.",
+    "linked": "Done: your {brand} codes come here from now on.",
+    "askAgain": "Ask for a new code on the site."
+  },
   "sms": {
     "code": "{brand} code: {code}",
     "confirmed": "{brand}: {business} confirmed your booking. {weekday}, {date}, {time}. Change: {link}",

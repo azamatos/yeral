@@ -11,7 +11,7 @@ const api =
     let business = start
     return (input) => {
       const path = pathOf(input)
-      if (path === '/v1/auth/mode') return Promise.resolve(json(200, { codeOnScreen }))
+      if (path === '/v1/auth/mode') return Promise.resolve(json(200, { codeOnScreen, delivery: codeOnScreen ? 'screen' : 'sms' }))
       if (path.endsWith('/verify')) {
         business = { ...business, verification: 'verified', addressChangedAt: null }
         return Promise.resolve(new Response(null, { status: 204 }))

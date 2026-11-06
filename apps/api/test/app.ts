@@ -6,9 +6,14 @@ import type { Db } from '../src/db/client'
 import type { Deps } from '../src/deps'
 import { createLive } from '../src/modules/events/live'
 import { nullLogger } from '../src/ports/log'
+import { telegramSms } from '../src/modules/telegram/links'
 import { memorySms } from '../src/ports/sms'
 import { noGeocoder } from '../src/ports/geocoder'
 import { memoryStorage } from '../src/ports/storage'
+import { memoryTelegram } from '../src/ports/telegram'
+
+/** What the test app's webhook expects in `X-Telegram-Bot-Api-Secret-Token`. */
+export const TELEGRAM_SECRET = 'test-webhook-secret-0123456789'
 
 /** Demo clock: Wednesday 2026-10-14, 11:20 at the business. */
 export const DEMO_NOW = Date.parse('2026-10-14T06:20:00Z')
@@ -18,8 +23,9 @@ export const ORIGIN = site.urls.client
 
 /**
  * The app as the entries build it, with a settable clock and captured SMS. `demo: false` plays production (random
- * codes); `codeOnScreen` the first launch's sign-in; `smsDelivers` a gateway that reaches phones; `demoWorkspace` the
- * business app's demo workspace (book F-242).
+ * codes); `codeOnScreen` the first launch's sign-in; `smsDelivers` a gateway that reaches phones; `telegram` our bot
+ * (ADR 0029), played by `memoryTelegram`, the fallback for unlinked phones still `sms`; `demoWorkspace` the business
+ * app's demo workspace (book F-242).
  */
 export function testApp(
   db: Db,
@@ -29,6 +35,7 @@ export function testApp(
     demo?: boolean
     codeOnScreen?: boolean
     smsDelivers?: boolean
+    telegram?: boolean
     adminKey?: Uint8Array<ArrayBuffer> | null
     bookingTypes?: Deps['bookingTypes']
     demoWorkspace?: boolean
@@ -38,12 +45,13 @@ export function testApp(
 ) {
   const clock = { now: opts.now ?? DEMO_NOW }
   const sms = memorySms({ delivers: opts.smsDelivers })
+  const telegram = opts.telegram ? memoryTelegram() : null
   const storage = memoryStorage()
   const deps: Deps = {
     db,
     site: opts.demo === false ? { ...site, demo: false } : site,
     now: () => clock.now,
-    sms,
+    sms: telegram ? telegramSms(db, telegram, sms, nullLogger) : sms,
     media: (key) => `http://media.test/${key}`,
     storage,
     log: nullLogger,
@@ -56,10 +64,11 @@ export function testApp(
     e2eHooks: opts.e2eHooks ?? false,
     geocoder: opts.geocoder ?? noGeocoder,
     live: createLive(db),
+    telegram: telegram ? { bot: telegram, webhookSecret: TELEGRAM_SECRET } : null,
   }
   const app = createApp(async (c, next) => {
     c.set('deps', deps)
     await next()
   })
-  return { app, clock, sms, storage, deps }
+  return { app, clock, sms, telegram, storage, deps }
 }

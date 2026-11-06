@@ -72,7 +72,32 @@ const envSchema = z.object({
       }
     }, '32 bytes, base64')
     .optional(),
+  /**
+   * Sign-in codes through our own Telegram bot (ADR 0029), until an SMS gateway comes: the bot's token from @BotFather.
+   * With it set, the other two are needed too, and `SIGN_IN_CODE_ON_SCREEN` must be off (codes reach a phone).
+   */
+  TELEGRAM_BOT_TOKEN: z
+    .string()
+    .regex(/^\d+:[\w-]{30,}$/, 'the token @BotFather gives: <id>:<secret>')
+    .optional(),
+  /** What Telegram sends in `X-Telegram-Bot-Api-Secret-Token` with every update (`telegram-webhook` registers it). */
+  TELEGRAM_WEBHOOK_SECRET: z
+    .string()
+    .regex(/^[\w-]{16,256}$/, '16–256 of A-Z a-z 0-9 _ - (`openssl rand -hex 32`)')
+    .optional(),
+  /** The bot's username without `@`: the sign-in's link opens `https://t.me/<username>`. */
+  TELEGRAM_BOT_USERNAME: z
+    .string()
+    .regex(/^[A-Za-z]\w{4,31}$/, 'the bot’s username without @')
+    .optional(),
 })
+
+/** The Telegram bot (ADR 0029); null when `TELEGRAM_BOT_TOKEN` is unset. */
+export interface TelegramConfig {
+  token: string
+  webhookSecret: string
+  username: string
+}
 
 /** Outside production only: the admin tool works with no key set up. */
 export const DEV_ADMIN_KEY = Uint8Array.from({ length: 32 }, (_, i) => i)
@@ -100,10 +125,13 @@ export interface Config {
   geocoderUrl: string | null
   /** `ADMIN_SECRET_KEY`'s bytes; null in production until it's set (the admin tool answers `admin_unavailable`). */
   adminKey: Uint8Array<ArrayBuffer> | null
+  /** `TELEGRAM_BOT_TOKEN` and its two companions; null without the token (codes go to the log, or the screen). */
+  telegram: TelegramConfig | null
 }
 
 export function loadConfig(source: Record<string, unknown>): Config {
-  const env = parseEnv(envSchema, source)
+  // an empty value is unset (the compose file passes `${NAME:-}`), as `siteFromEnv` reads its own
+  const env = parseEnv(envSchema, Object.fromEntries(Object.entries(source).filter(([, value]) => value !== '')))
   const site = siteFromEnv(source)
   // a number of the market (@yeral/lib/site checks E.164 only): the examples store it, the screens write it
   if (site.support.phone && !E164.test(site.support.phone))
@@ -112,6 +140,8 @@ export function loadConfig(source: Record<string, unknown>): Config {
   if (env.EXAMPLE_BUSINESSES === 'true' && !examplePhone)
     throw new EnvError(['EXAMPLE_PHONE', 'YERAL_SUPPORT_PHONE'], 'the example businesses need a phone to show: one of the two')
   if (env.E2E_HOOKS === 'true' && site.env === 'production') throw new EnvError(['E2E_HOOKS'], 'the test hooks never run in production')
+  const telegramMissing = (['TELEGRAM_WEBHOOK_SECRET', 'TELEGRAM_BOT_USERNAME'] as const).filter((name) => !env[name])
+  if (env.TELEGRAM_BOT_TOKEN && telegramMissing.length) throw new EnvError(telegramMissing, 'needed with TELEGRAM_BOT_TOKEN')
   return {
     databaseUrl: env.DATABASE_URL,
     port: env.PORT ?? Number(new URL(site.urls.api).port || 3004),
@@ -132,5 +162,9 @@ export function loadConfig(source: Record<string, unknown>): Config {
       : site.env === 'production'
         ? null
         : DEV_ADMIN_KEY,
+    telegram:
+      env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_WEBHOOK_SECRET && env.TELEGRAM_BOT_USERNAME
+        ? { token: env.TELEGRAM_BOT_TOKEN, webhookSecret: env.TELEGRAM_WEBHOOK_SECRET, username: env.TELEGRAM_BOT_USERNAME }
+        : null,
   }
 }

@@ -13,6 +13,9 @@
  * `make-example <slug> [--off]` (on the server `node dist/cli.js make-example` in the api's container; the owner's D2):
  * while the sign-in code shows on the screen, one of the owner's test businesses opens to clients marked "Example", still
  * confirming as its rules say; `--off` takes the mark away and it back to "in review" (`modules/admin/examples.ts`).
+ *
+ * `telegram-webhook` (on the server `node dist/cli.js telegram-webhook`; ADR 0029): registers the bot's webhook at the
+ * api's address with `TELEGRAM_WEBHOOK_SECRET`; needs `TELEGRAM_BOT_TOKEN` (`modules/telegram/register.ts`).
  */
 import { sql } from 'drizzle-orm'
 import pg from 'pg'
@@ -21,7 +24,9 @@ import { loadConfig } from '../config'
 import { createDeps } from '../deps'
 import { inviteOrReset } from '../modules/admin/accounts'
 import { exampleArgs, ExampleRefused, makeExample } from '../modules/admin/examples'
+import { registerWebhook } from '../modules/telegram/register'
 import { createLogger } from '../ports/log'
+import { telegramBot } from '../ports/telegram'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
 import { seed, seedCatalogue, seedExamples } from './seed'
@@ -81,6 +86,13 @@ async function exampleCommand(db: ReturnType<typeof createDb>, flags: string[]) 
   }
 }
 
+/** Said on the terminal, without the token or the secret: Telegram's answer and the address registered. */
+async function telegramWebhook() {
+  if (!config.telegram) throw new Error('telegram-webhook needs TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET and TELEGRAM_BOT_USERNAME')
+  const bot = telegramBot(config.telegram.token, config.telegram.username)
+  console.warn(await registerWebhook(bot, config.site, config.telegram.webhookSecret))
+}
+
 /** A one-connection database for a command run by hand. */
 async function withDb(run: (db: ReturnType<typeof createDb>) => Promise<void>) {
   const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 1 })
@@ -94,6 +106,7 @@ async function withDb(run: (db: ReturnType<typeof createDb>) => Promise<void>) {
 async function main() {
   if (command === 'make-example') return withDb((db) => exampleCommand(db, flags))
   if (command === 'admin-invite') return withDb((db) => adminInvite(db, flags))
+  if (command === 'telegram-webhook') return telegramWebhook()
   const seeds = command === 'seed' || command === 'setup'
   // checked before anything runs: a misconfigured server gets an error, not a half-done setup
   const demo = seeds && seedMode(process.env.YERAL_ENV) === 'demo'
