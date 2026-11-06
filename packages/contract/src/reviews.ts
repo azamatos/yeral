@@ -3,7 +3,7 @@
  * reply, and reporting a review to Ýeral. The owner and administrators reply and report; a specialist reads the reviews
  * of their own visits, without the summary.
  */
-import { REVIEW_REPLY_MAX } from '@yeral/domain/lifecycle'
+import { REVIEW_REPLY_MAX, REVIEW_REPORT_TEXT_MAX } from '@yeral/domain/lifecycle'
 import { REVIEW_REPORT_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
 import { boolQuery, cursorQuerySchema, epochSchema, idSchema, langQuerySchema, listOf, slugSchema } from './common'
@@ -73,6 +73,9 @@ export const reviewReplyInputSchema = z
 
 /** "Näme üçin arz edýärsiňiz?" with an optional "Düşündiriş". */
 export const reviewReportInputSchema = z
-  .object({ reason: z.enum(REVIEW_REPORT_REASONS), text: z.string().trim().min(1).max(300).optional() })
+  .object({ reason: z.enum(REVIEW_REPORT_REASONS), text: z.string().trim().min(1).max(REVIEW_REPORT_TEXT_MAX).optional() })
   .strict()
   .meta({ id: 'ReviewReportInput' })
+
+export type TeamReview = z.infer<typeof teamReviewSchema>
+export type TeamReviews = z.infer<typeof teamReviewsSchema>

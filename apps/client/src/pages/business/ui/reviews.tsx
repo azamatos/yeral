@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import type { BusinessDetail, reviewSchema } from '@yeral/contract/catalog'
+import { ago } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { useSdk } from '@yeral/sdk/react'
 import { Avatar } from '@yeral/ui/avatar'
@@ -11,7 +12,6 @@ import { RatingDistribution } from '@yeral/ui/rating-distribution'
 import { Info } from 'lucide-react'
 import { useLocale, useTranslations } from 'use-intl'
 import type { z } from 'zod'
-import { ago } from '../model/ago'
 import { Section } from './sections'
 
 type Review = z.infer<typeof reviewSchema>

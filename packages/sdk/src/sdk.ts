@@ -1208,6 +1208,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: ({ id, ...json }: { id: string } & z.input<typeof reviewReportInputSchema>) =>
           call(w.reviews[':id'].report.$post({ param: { slug, id }, json })),
         onSuccess: () => reviewsChanged(slug, true),
+        // someone else reported it meanwhile: the list shows the check and hides Report once refreshed
+        onError: (e) => (isApiError(e, 'already_reported') ? reviewsChanged(slug, true) : undefined),
       }),
   }
 

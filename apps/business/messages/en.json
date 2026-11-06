@@ -1679,6 +1679,120 @@
       "saved": "Client added"
     }
   },
+  "reviews": {
+    "summary": {
+      "label": "Rating summary",
+      "average": "Average rating: {rating} out of 5",
+      "count": "{count, plural, one {# review} other {# reviews}}",
+      "uncounted": "{count, plural, one {# more isn’t counted while {brand} checks it} other {# more aren’t counted while {brand} checks them}}",
+      "row": "{stars, plural, one {# star} other {# stars}}: {count, plural, one {# review} other {# reviews}}",
+      "unanswered": "Not answered · {count}",
+      "allAnswered": "All reviews answered",
+      "seePage": "See it on your page"
+    },
+    "specialistIntro": "Reviews about you, from clients after their visits. The owner and admins reply to them.",
+    "filter": {
+      "label": "Filter reviews",
+      "all": "All",
+      "unanswered": "Not answered",
+      "stars": "{count, plural, one {# star} other {# stars}}",
+      "staff": "Filter by specialist",
+      "allStaff": "All specialists"
+    },
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "lowest": "Lowest rating first",
+      "highest": "Highest rating first"
+    },
+    "list": "Reviews",
+    "listAboutYou": "Reviews about you",
+    "loading": "Loading the reviews",
+    "when": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "days": "{count, plural, one {# day ago} other {# days ago}}",
+      "weeks": "{count, plural, one {# week ago} other {# weeks ago}}",
+      "months": "{count, plural, one {# month ago} other {# months ago}}",
+      "years": "{count, plural, one {# year ago} other {# years ago}}"
+    },
+    "stars": "Rating: {rating} out of 5",
+    "item": {
+      "actions": "Review by {name}: actions",
+      "report": "Report",
+      "reportHint": "If it’s false, abusive or an ad",
+      "reply": "Reply",
+      "replyTo": "Reply to {name}",
+      "change": "Change",
+      "changeTo": "Change the reply to {name}",
+      "delete": "Delete",
+      "deleteTo": "Delete the reply to {name}",
+      "justNow": "Just now"
+    },
+    "moderation": {
+      "checking": "{brand} is checking · not counted in your rating",
+      "reason": "Reason: {reason}",
+      "cleared": "{brand} kept this review",
+      "clearedHint": "It counts in your rating again and can’t be reported again.",
+      "noDecision": "No decision in 48 hours",
+      "noDecisionHint": "It counts in your rating again."
+    },
+    "reasons": {
+      "fake": "False — this client never came",
+      "insulting": "Abusive words",
+      "other_business": "About another business",
+      "spam": "Ad or spam",
+      "other": "Another reason"
+    },
+    "composer": {
+      "label": "Your reply as {business}",
+      "hint": "Everyone will see your reply. Keep it short and polite.",
+      "counter": "{count} / {max}",
+      "tooLong": "Too long: up to {max} characters.",
+      "placeholderGood": "For example: Thank you, {name}! See you again soon.",
+      "placeholderLow": "For example: We’d like to understand what happened — please call us.",
+      "cancel": "Cancel",
+      "post": "Post reply",
+      "save": "Save"
+    },
+    "toast": {
+      "posted": "Reply posted",
+      "updated": "Reply updated",
+      "deleted": "Reply deleted",
+      "undo": "Undo",
+      "reported": "Report sent · {brand} checks it within 48 hours"
+    },
+    "report": {
+      "title": "Report the review",
+      "close": "Close",
+      "why": "Why are you reporting it?",
+      "explanation": "Explanation",
+      "explanationOptional": "Explanation (optional)",
+      "placeholder": "For example: the review is about another salon",
+      "counter": "{count} / {max}",
+      "caption": "The {brand} team checks it within 48 hours. Until then the review stays visible but isn’t counted in your rating.",
+      "cancel": "Cancel",
+      "send": "Report"
+    },
+    "empty": {
+      "title": "No reviews yet",
+      "text": "Clients can leave a review after a completed visit. Their reviews show here and on your page.",
+      "seePage": "See your page",
+      "aboutYouTitle": "No reviews about you yet",
+      "aboutYouText": "Clients can leave a review after a completed visit with you. Their reviews show here.",
+      "answeredTitle": "You’ve answered every review",
+      "answeredText": "New reviews show up here.",
+      "showAll": "Show all reviews",
+      "noMatchTitle": "No reviews match these filters",
+      "noMatchText": "Try another rating or specialist.",
+      "noMatchTextOwn": "Try another rating.",
+      "clear": "Clear filters"
+    },
+    "showMore": "Show more",
+    "showing": "Showing {shown} of {total}",
+    "footnote": "You can’t delete reviews. Report one only if it’s false, abusive or an ad."
+  },
   "clientCard": {
     "title": "Client",
     "loading": "Loading the client",
