@@ -179,9 +179,9 @@ catalogs:
     '@feature-sliced/steiger-plugin':
       specifier: ^0.8.0
       version: 0.8.0
-    '@fontsource-variable/onest':
-      specifier: ^5.3.1
-      version: 5.3.1
+    '@fontsource-variable/geist':
+      specifier: ^5.3.0
+      version: 5.3.0
     '@hono/node-server':
       specifier: ^2.1.5
       version: 2.1.5
@@ -1065,9 +1065,9 @@ importers:
 
   packages/ui:
     dependencies:
-      '@fontsource-variable/onest':
+      '@fontsource-variable/geist':
         specifier: 'catalog:'
-        version: 5.3.1
+        version: 5.3.0
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -2363,8 +2363,8 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@fontsource-variable/onest@5.3.1':
-    resolution: {integrity: sha512-xaaw6G4HDB2/RczsWLD/2bnib4ykmQlTlBUN3GOEOiyErilZukQWVJG95h9zwAy0i8KY+QzDa+COPfqhI72Acw==}
+  '@fontsource-variable/geist@5.3.0':
+    resolution: {integrity: sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA==}
 
   '@formatjs/fast-memoize@3.1.7':
     resolution: {integrity: sha512-zXfhLpvA6T7+efdt9JLbBwZ00tT7NsBMDVnDu8rpHeNNv8KfRZAMo2gkG0k9lK/Nzc//3kJ9pImsfuJxk3KhUA==}
@@ -8704,7 +8704,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@fontsource-variable/onest@5.3.1': {}
+  '@fontsource-variable/geist@5.3.0': {}
 
   '@formatjs/fast-memoize@3.1.7': {}
 

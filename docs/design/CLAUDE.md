@@ -22,7 +22,8 @@ This folder (`docs/design/`) is the complete design hand-off for **yeral.app** (
 
 ## Visual rules (must match the screens)
 - White base, 1px `--n-200` dividers instead of boxed cards, ink `--n-900` text, one violet accent `--a-500` for selection, status and the primary action only.
-- Font **Onest** (Google Fonts, weights 400–800, subsets latin, latin-ext, cyrillic, cyrillic-ext). Fallback system stack.
+- Font **Geist** (v0.7, was Onest; Google Fonts, weights 400–800, subsets latin, latin-ext, cyrillic, cyrillic-ext). Fallback system stack. Figures proportional by default; `tabular-nums` only in numeric table columns, the calendar time grid and running timers. Phone numbers always grouped `+993 69 90 11 22`.
+- **v0.7 foundations win:** sizes S 32 / M 40 / L 48 for every control, Tertiary / Danger quiet buttons (no ghost), our own Select (never native), one FilterBar, tables with row links and one icon action, StatusPill + FactList, tags edited in place, ⓘ instead of hint lines, callout tones, the Telegram sign-in code — `screens/system/DS-Controls.dc.html`, `DS-Lists.dc.html`, `DS-Type.dc.html`, `COMPONENTS.md` Part 0.
 - **One gradient primary button per view** (`--primary-bg`). The round search button in the header query bar is ink. Secondary = white + 1px `--n-300`. Danger solid `#b42318` only for final destructive confirms.
 - Selection: tint (`--a-50` bg, `--a-line` border, `--a-600` text) for chips, rows, tabs, cards; solid `--a-500` for the chosen date and time slot.
 - Flat: shadows only on raised layers (popover, drawer, modal, toast). Modal 480/640 (login 400), right drawer 480, popover 280–360; all become bottom sheets under 768.

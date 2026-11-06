@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -241,7 +241,7 @@ a:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;bord
 </main>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["declined","expired","confirmed","pending","offersExpired","notFound","loginCode","success"],"default":"declined","section":"State"},"loginStep":{"editor":"enum","options":["phone","code","wrongCode"],"default":"phone","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["declined","expired","confirmed","pending","offersExpired","notFound","loginCode","success"],"default":"declined","section":"State"},"loginStep":{"editor":"enum","options":["phone","code","wrongCode"],"default":"phone","section":"State"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -273,7 +273,7 @@ class Component extends DCLogic {
   }
   renderVals() {
     const P = this.props;
-    const f = P.font ?? 'Onest';
+    const f = P.font ?? 'Geist';
     const s = this.state;
     const B = '';
     const OF = (t, range, taken) => ({ t: t, range: range, taken: !!taken });

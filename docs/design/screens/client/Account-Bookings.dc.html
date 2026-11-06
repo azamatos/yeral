@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -574,7 +574,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["list","drawer","cancel","review","declined","declinedConfirm","declinedTaken","offersExpired","expired","expiredTaken","moveWaiting","moveDeclined","moveUnanswered","moveAccepted","undoFailed"],"default":"drawer","section":"State"},"undo":{"editor":"enum","options":["works","taken","full","started","expired"],"default":"works","section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"late":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1880}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["list","drawer","cancel","review","declined","declinedConfirm","declinedTaken","offersExpired","expired","expiredTaken","moveWaiting","moveDeclined","moveUnanswered","moveAccepted","undoFailed"],"default":"drawer","section":"State"},"undo":{"editor":"enum","options":["works","taken","full","started","expired"],"default":"works","section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"late":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1880}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -625,7 +625,7 @@ class Component extends DCLogic {
     this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
   }
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const s = this.state;
     const empty = !!this.props.empty;
     const late = !!this.props.late;

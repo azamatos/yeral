@@ -32,7 +32,7 @@ const normalise = (v: string) =>
 
 // design variable → theme variable (null = deliberately not a theme value; reason in the comment)
 const MAP: Record<string, string | null> = {
-  '--font-sans': null, // family name differs: fontsource registers 'Onest Variable'
+  '--font-sans': null, // family name differs: fontsource registers 'Geist Variable'
   '--fs-display': '--text-display',
   '--lh-display': '--text-display--line-height',
   '--ls-display': '--text-display--letter-spacing',
@@ -74,10 +74,15 @@ const MAP: Record<string, string | null> = {
   '--ring-selected': '--shadow-ring-selected',
   '--switch-off-ring': '--shadow-switch-off',
   '--shadow-control': '--shadow-control',
-  '--r-input': '--radius-input',
-  '--r-btn-s': '--radius-s',
-  '--r-btn-m': '--radius-m',
-  '--r-btn-l': '--radius-l',
+  '--shadow-bar': '--shadow-bar',
+  // v0.7 controls (A3): radii and text sizes are theme values; the heights, paddings and icons are spacing classes
+  '--ctl-r-s': '--radius-ctl-s',
+  '--ctl-r-m': '--radius-ctl-m',
+  '--ctl-r-l': '--radius-ctl-l',
+  '--ctl-fs-s': '--text-ctl-s',
+  '--ctl-fs-m': '--text-ctl-m',
+  '--ctl-fs-l': '--text-ctl-l',
+  '--popover-r': '--radius-popover',
   '--r-card': '--radius-card',
   '--r-pill': '--radius-pill',
   '--r-xs': '--radius-xs',
@@ -92,8 +97,10 @@ const MAP: Record<string, string | null> = {
   '--shadow-sheet': '--shadow-sheet',
   '--scrim': '--scrim',
 }
-// spacing and component sizes are multiples of the 4px spacing unit (h-11 = 44px), not separate theme values
-const SIZE_VARS = /^--(s-\d+|btn-[sml]|input-h|row-[\w-]+|nav-h[\w-]*|sidebar-[\w]+)$/
+// spacing and component sizes are multiples of the 4px spacing unit (h-11 = 44px, the v0.7 controls h-8 / h-10 / h-12),
+// not separate theme values; icons and the popover's padding are half units (size-4.5 = 18px, p-1.5 = 6px)
+const SIZE_VARS = /^--(s-\d+|ctl-(px-)?[sml]|row-[\w-]+|tag-h[\w-]*|popover-max-h|nav-h[\w-]*|sidebar-[\w]+)$/
+const HALF_SIZE_VARS = /^--(ctl-icon-[sml]|popover-pad)$/
 const target = (name: string) =>
   MAP[name] ??
   (/^--(n|a|st|danger|ink-btn|switch|chart)(-|$)/.test(name) || name === '--a-hover' || name === '--a-line'
@@ -104,14 +111,23 @@ describe('design tokens', () => {
   const d = vars(design)
   const t = vars(theme)
 
-  it.each([...d.keys()].filter((n) => !SIZE_VARS.test(n) && MAP[n] !== null))('%s is in the theme with the same value', (name) => {
-    const to = target(name)
-    expect(to, `no mapping for ${name}: add it to MAP in tokens.test.ts`).toBeDefined()
-    expect(t.get(to!), `${name} → ${to}`).toBe(d.get(name))
-  })
+  it.each([...d.keys()].filter((n) => !SIZE_VARS.test(n) && !HALF_SIZE_VARS.test(n) && MAP[n] !== null))(
+    '%s is in the theme with the same value',
+    (name) => {
+      const to = target(name)
+      expect(to, `no mapping for ${name}: add it to MAP in tokens.test.ts`).toBeDefined()
+      expect(t.get(to!), `${name} → ${to}`).toBe(d.get(name))
+    },
+  )
 
   it('size tokens are multiples of the 4px spacing unit', () => {
     for (const [name, value] of d) if (SIZE_VARS.test(name)) expect(parseInt(value) % 4, `${name} = ${value}`).toBe(0)
+    for (const [name, value] of d) if (HALF_SIZE_VARS.test(name)) expect(parseInt(value) % 2, `${name} = ${value}`).toBe(0)
+  })
+
+  it('every design token is mapped, a size or deliberately left out', () => {
+    for (const name of d.keys())
+      expect(SIZE_VARS.test(name) || HALF_SIZE_VARS.test(name) || MAP[name] === null || target(name) !== undefined, name).toBe(true)
   })
 
   it('the phone type scale matches', () => {

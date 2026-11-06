@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -56,9 +56,8 @@ section[id]{scroll-margin-top:16px}
 .lead{margin:0;font-size:19px;line-height:28px;color:#5a5a64;max-width:520px;text-wrap:pretty}
 .sub{margin:0;font-size:17px;line-height:26px;color:#5a5a64;max-width:640px;text-wrap:pretty}
 .shd{display:flex;flex-direction:column;gap:8px}
-.hact{display:flex;gap:12px;flex-wrap:wrap}
-.dmn{display:flex;align-items:flex-start;gap:8px;max-width:460px;font-size:13px;line-height:18px;color:#5a5a64}
-.dmn svg{flex:none;margin-top:1px}
+.hact{display:flex;gap:12px 16px;flex-wrap:wrap;align-items:center}
+@media (max-width:767px){.hact{align-self:stretch}.hact .cap{flex-basis:100%}}
 .gct{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0;padding:0;list-style:none}
 .ct{display:flex;flex-direction:column;justify-content:space-between;gap:20px;min-height:120px;padding:16px;border:1px solid #e6e6ea;border-radius:16px;font-size:15px;line-height:20px;font-weight:600;color:#101014}
 .cth{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
@@ -161,7 +160,6 @@ section[id]{scroll-margin-top:16px}
 <a class="mni" href="#features" onClick="{{closeMenu}}">Features</a>
 <a class="mni" href="#how-to-start" onClick="{{closeMenu}}">How to start</a>
 <a class="mni" href="#faq" onClick="{{closeMenu}}">Questions</a>
-<a class="mni" href="B-Calendar.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Try the business app</a>
 <a class="b b-sec" href="B-Login.dc.html" style="margin-top: 16px; width: 100%">Log in</a>
 </nav>
 </sc-if>
@@ -177,15 +175,13 @@ section[id]{scroll-margin-top:16px}
 <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 16px">
 <div class="hact">
 <a class="b b-pri b-lg" href="B-Onboarding.dc.html">Start free</a>
-<a class="b b-sec b-lg" href="B-Calendar.dc.html">Try the business app</a>
-</div>
 <span class="cap">Free · No card needed</span>
-<span class="dmn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span>The business app opens a demo workspace at once, without signing in. Changes reset every night.</span></span>
+</div>
 </div>
 </div>
 
 <div class="mkw">
-<p class="sr">An example of the Ýeral Business calendar: three specialists’ day, a new request waiting for an answer, and the client’s phone showing “Booking sent”.</p>
+<p class="sr">The Ýeral Business calendar: three specialists’ day, a new request waiting for an answer, and the client’s phone showing “Booking sent”.</p>
 <div class="mk" aria-hidden="true">
 <div class="mk-cal">
 <div class="mk-hd"><span>Wed, 14 Oct</span><span class="mk-rq"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>1 request</span></div>
@@ -399,7 +395,7 @@ section[id]{scroll-margin-top:16px}
 <span class="cap" style="max-width: 260px">Online booking, a calendar and a client list for businesses that work by appointment.</span>
 <span class="cap">Book on Ýeral as a client: <a class="lk" href="Home.dc.html" style="font-weight: 600">yeral.app</a></span>
 </div>
-<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Product</span><a class="fl" href="#features">Features</a><a class="fl" href="#how-to-start">How to start</a><a class="fl" href="B-Calendar.dc.html">Try the business app</a><a class="fl" href="B-Login.dc.html">Log in</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Product</span><a class="fl" href="#features">Features</a><a class="fl" href="#how-to-start">How to start</a><a class="fl" href="B-Login.dc.html">Log in</a></div>
 <div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Contact Ýeral</span><a class="fl" href="#faq">Common questions</a><a class="fl" href="#">Call [SUPPORT PHONE]</a><a class="fl" href="#">Write on Telegram [TELEGRAM]</a></div>
 </div>
 <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e6e6ea"><span class="cap">© 2026 Ýeral</span><div style="display: flex; gap: 8px 20px; flex-wrap: wrap"><a class="fl" href="#" style="font-size: 13px">Privacy policy</a><a class="fl" href="#" style="font-size: 13px">Terms of use</a></div></div>
@@ -408,7 +404,7 @@ section[id]{scroll-margin-top:16px}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"menu":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":4020}}'>
+<script type="text/x-dc" data-dc-script data-props='{"menu":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":4020}}'>
 class Component extends DCLogic {
   // v0.6 round 3 (V06-R3-BRIEF §7): business.yeral.app signed out, English, one language (no picker), appointments only.
   constructor(props) {
@@ -419,7 +415,7 @@ class Component extends DCLogic {
     if (pp.menu !== this.props.menu) this.setState({ menu: !!this.props.menu });
   }
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const s = this.state;
     const o = s.open;
     const tg = (i) => () => {

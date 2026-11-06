@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
@@ -371,14 +371,14 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"sent":{"editor":"boolean","default":false,"section":"Flow"},"loggedIn":{"editor":"boolean","default":true,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1460}}'>
+<script type="text/x-dc" data-dc-script data-props='{"sent":{"editor":"boolean","default":false,"section":"Flow"},"loggedIn":{"editor":"boolean","default":true,"section":"Flow"},"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1440,"height":1460}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = { day: 0, sel: '0-18:30', seats: 1, sent: false, ics: false, switched: false, auth: 'phone', phone: '', phoneErr: '', code: '', codeFocus: false, codeErr: false, name: '' };
   }
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const s = this.state;
     const loggedIn = this.props.loggedIn ?? true;
     const sent = !!((this.props.sent ?? false) || s.sent);
@@ -387,7 +387,7 @@ class Component extends DCLogic {
     const val = (e) => (e && e.target ? e.target.value : '');
     const toMin = (t) => parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3), 10);
     const fmt = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
-    // day index 0 = Çarşenbe, 14 oktýabr (demo "now")
+    // day index 0 = Çarşenbe, 14 oktýabr (sample "now")
     const info = (i) => { const w = (2 + i) % 7; return { w, n: 14 + i, full: WD[w] + ', ' + (14 + i) + ' oktýabr' }; };
 
     // [time, name, trainer, level, minutes, price TMT, capacity, seats left] per day, Ça 14 → Si 20.

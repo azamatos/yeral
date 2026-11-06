@@ -24,7 +24,7 @@ export function contentSecurityPolicy(nonce: string, hosts: { api: string; tiles
     `style-src 'self' 'unsafe-inline'`,
     // uploaded photos come from the api; MapLibre draws tiles from blobs and a transparent data: pixel
     `img-src 'self' data: blob: ${hosts.api}`,
-    // Onest is bundled (@fontsource-variable/onest)
+    // Geist is bundled (@fontsource-variable/geist, under /assets/): no font host to allow
     `font-src 'self'`,
     // the api (the sdk's requests and the events stream) and OpenFreeMap (style, glyphs, sprites, tiles)
     `connect-src 'self' ${hosts.api} ${hosts.tiles}`,

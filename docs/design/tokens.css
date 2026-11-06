@@ -1,15 +1,15 @@
-/* Ýeral Web — design tokens v0.5 (16.10.2026)
+/* Ýeral Web — design tokens v0.7 (06.11.2026)
    Source of truth: canvas "Ýeral Web" → DS · Foundations / Components / Product components / Business patterns.
-   v0.4 = v0.3.1 + aliases for values the client and business screens already use (no new colours); v0.5 adds --ring-selected — see COMPONENTS.md Part 3.
-   Extends mobile DS v0.2. Font: Onest (Google Fonts) — covers Turkmen Latin + Cyrillic. */
+   v0.4 = v0.3.1 + aliases for values the client and business screens already use (no new colours); v0.5 adds --ring-selected; v0.7 (round 7): Geist replaces Onest, one control height scale (--ctl-*), option rows, popover — see COMPONENTS.md Part 3.
+   Extends mobile DS v0.2. Font: Geist (Google Fonts, v0.7) — covers Turkmen Latin + Cyrillic. Figures: proportional by default; tabular-nums only in numeric table columns, the calendar time grid and running timers. */
 
 :root {
   /* Type */
-  --font-sans: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --fs-display: 64px;  --lh-display: 68px;  --ls-display: -0.035em;  /* 700, hero only */
-  --fs-h1: 44px;       --lh-h1: 48px;       --ls-h1: -0.03em;        /* 700 */
-  --fs-h2: 32px;       --lh-h2: 38px;       --ls-h2: -0.025em;       /* 700 */
-  --fs-h3: 22px;       --lh-h3: 28px;       --ls-h3: -0.015em;       /* 600 */
+  --font-sans: 'Geist', ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;   /* v0.7 (was Onest) */
+  --fs-display: 64px;  --lh-display: 68px;  --ls-display: -0.03em;   /* 700, hero only */
+  --fs-h1: 44px;       --lh-h1: 48px;       --ls-h1: -0.025em;        /* 700 */
+  --fs-h2: 32px;       --lh-h2: 38px;       --ls-h2: -0.02em;        /* 700 */
+  --fs-h3: 22px;       --lh-h3: 28px;       --ls-h3: -0.01em;        /* 600 */
   --fs-body-l: 17px;   --lh-body-l: 26px;                            /* 400, marketing */
   --fs-body: 15px;     --lh-body: 22px;                              /* 400, UI default */
   --fs-dense: 13px;    --lh-dense: 18px;                             /* 400/500, tables */
@@ -71,12 +71,24 @@
   /* Spacing (base 4; 48/64/96 web section rhythm) */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-6: 24px; --s-8: 32px; --s-12: 48px; --s-16: 64px; --s-24: 96px;
 
-  /* Radii */
-  --r-input: 8px; --r-btn-s: 10px; --r-btn-m: 12px; --r-btn-l: 14px; --r-card: 16px; --r-pill: 999px;
+  /* Radii (v0.7: control radii follow the size → --ctl-r-*; --r-input / --r-btn-* retired) */
+  --r-card: 16px; --r-pill: 999px;
   --r-xs: 4px; --r-sm: 6px;   /* v0.4 · checkbox, bar ends, swatches / kbd, skeleton, small tiles */
 
+  /* Controls (v0.7 · A3): one height scale shared by Input, Select, Segmented, Button, IconButton, Chip.
+     S = table actions, filter chips, inside menus · M = every business desktop toolbar and form, client toolbars ·
+     L = client-site forms and main actions, every 390 field and main button. Toolbars use M and never mix sizes. */
+  --ctl-s: 32px;  --ctl-m: 40px;  --ctl-l: 48px;
+  --ctl-r-s: 8px; --ctl-r-m: 10px; --ctl-r-l: 12px;          /* Chip radius is always --r-pill */
+  --ctl-px-s: 12px; --ctl-px-m: 16px; --ctl-px-l: 20px;      /* button side padding (fields: 12 / 12 / 14) */
+  --ctl-fs-s: 13px; --ctl-fs-m: 14px; --ctl-fs-l: 16px;      /* L fields 16 px: no iOS zoom */
+  --ctl-icon-s: 16px; --ctl-icon-m: 18px; --ctl-icon-l: 20px;
+  --row-option: 36px; --row-option-touch: 48px;              /* Select / menu option rows: desktop / 390 sheet */
+  --tag-h: 28px; --tag-h-table: 24px;                        /* A8 TagChip */
+  --popover-r: 12px; --popover-pad: 6px; --popover-max-h: 320px;
+
   /* Sizes */
-  --btn-s: 36px; --btn-m: 44px; --btn-l: 52px; --input-h: 48px;
+  /* retired in v0.7: --btn-s 36 / --btn-m 44 / --btn-l 52, --input-h 48 → --ctl-*; the ghost button */
   --row-list: 56px; --row-table: 56px; --row-table-dense: 40px;
   --nav-h: 72px; --nav-h-search: 80px; --sidebar-w: 248px; --sidebar-rail: 72px;
   --modal-s: 400px; --modal-m: 480px; --modal-ml: 560px; --modal-l: 640px; --drawer-w: 480px;   /* modal-ml v0.4: review, new client, invite, special day, add class */
@@ -87,6 +99,7 @@
   --shadow-sheet: 0 -8px 24px rgba(16,16,20,.16);   /* xs bottom sheet */
   --scrim: rgba(16,16,20,.40);
   --shadow-control: 0 1px 2px rgba(16,16,20,.2);   /* v0.4 · switch knob, photo controls */
+  --shadow-bar: 0 1px 2px rgba(16,16,20,.04), 0 8px 24px rgba(16,16,20,.08);   /* v0.7 · the home SearchBar (C1) — a resting raised bar, softer than --shadow-raised */
 
   /* Charts (v0.4 aliases — categories use the accent ramp, never status colours) */
   --chart-1: #5a3ff0; --chart-2: #c3b6fb; --chart-3: #4429d6; --chart-4: #9d88f7;

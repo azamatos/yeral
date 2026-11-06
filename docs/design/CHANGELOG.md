@@ -4,6 +4,92 @@ Newest first. Each export replaces this folder; this file says what changed and 
 
 ---
 
+## v0.7 · round 7.3 — 06.11.2026 · client site (C1–C4, D) · round 7 complete
+
+**Round 7 = 7.1 foundations + 7.2 business screens + 7.3 client site.** The three "To do in the repo" lists (this entry and the two below) together have one line per item of the round-7 prompt: A1–A11, B1–B10, C1–C4 and D. Decisions: `README.md` §15 (all parts) and `business/README.md` §29.
+
+Three new English boards redraw the client-site screens the owner flagged, on the 7.1 foundations, on a new canvas page **"Client · round 7"** and in `screens/client/C7-*.dc.html`. The older client boards are still Turkmen; they keep what these don't redraw.
+
+**New boards** (`screens/client/`, fixed boards 1600 wide with 1440 / 390 frames)
+- `C7-Home.dc.html` (1600 × 12654) — C1: one SearchBar (What · Where · When) with real fields, suggestion panels under the bar (never over the button), When as chips + calendar + time of day instead of a select, location off, nothing found; 390 search card that opens a full-screen search; the results toolbar at M 40 with the day kept in the SearchBar.
+- `C7-Venue.dc.html` (1600 × 18830) — C2: the business page hero as a cover with the identity on the photo (name, rating, StatusPill, address, favourite, share), breadcrumbs with the category link, hours shown once (in About), the confirmation callout per business setting; the 390 cover that folds into a 56 px bar with a motion spec; Services · Specialists · Reviews · About as panels with no layout jump; C3: 100 services with a group index / chip rail + Groups sheet, search, one Book per row; D: Follow (later, idea only).
+- `C7-Booking.dc.html` (1600 × 23879) — C4: the flow starts from a service (→ specialist) or from a specialist (→ their services), single picks move on by themselves, Time keeps Continue, a second service comes from the summary ("Add a service"), the summary card's hierarchy (Clear as Tertiary S, Total, Pay at the place), the confirm step with a bigger business block, the Telegram code inline and a Verified phone; D: the "Something changed" notice (tick before Confirm), the Trusted client mark (client account + the client row, card and drawer on the business side).
+
+**Changed:** DS-Lists' "Where the filter bar is used" now says the client results' When lives in the header SearchBar.
+
+### To do in the repo (7.3 — one line per item)
+- **C1 Home search** — build `SearchBar` (What · Where · When segments, focus pill, suggestions panel with categories / services / businesses, Near me + districts + cities, location-off callout, WhenPicker chips + calendar + time of day), the compact header variant, the 390 SearchCard + full-screen SearchSheet, and the no-results page with "Search further away"; drop the native When select.
+- **C2 Business page** — `BusinessHero` cover (name, rating link, StatusPill, address, glass Favourite / Share, thumbnails → All photos), breadcrumbs with the category link to `/c/{category}`, 390 `CoverCollapse` (scroll-linked, transform/opacity, reduced-motion swap), `BusinessTabs` as panels (`?tab=`, no layout jump, state kept), hours only in About, the booking card callout per confirmation setting (by hand / at once); remove the Example badge and the "not a real business" notice.
+- **C3 Services at scale** — `ServicesBrowser`: sticky GroupIndex at ≥ 1280, chip rail + Groups sheet below, service search from 9 services, group headers with counts, one Book per row that opens the booking on the Specialist step.
+- **C4 Booking steps** — start from a service (Specialist step) or a specialist (their services with a done step), auto-advance on single picks, Continue only on Time, "Add a service" from the summary, the new `BookingSummary` hierarchy, the confirm step's BusinessBlock, inline Telegram code and VerifiedPhone, "Booking sent" / "Booking confirmed"; results toolbar at M 40 with the day in the SearchBar.
+- **D Trusted client** — rule (5+ completed visits on Ýeral, no no-show in 12 months), `TrustedBadge` in Account, the automatic tag on the business side (row, card, drawer, Tag filter), and the Booking rules setting "Confirm trusted clients at once" (off by default).
+- **D Something changed** — store the address / hours change date; on the confirm step show `ChangedNotice` to clients whose last completed visit was before it; require "I've seen the new address" before Confirm.
+- **D Follow (plan only)** — add to the product plan: Follow on the business page and an Updates list for followed places' news and offers; decide how it relates to Favourites before building.
+
+---
+
+## v0.7 · round 7.2 — 06.11.2026 · business screens (B1–B9)
+
+Five new boards redraw the business screens the owner flagged, on the 7.1 foundations, at real scale (21 people with 19 specialists, 100 clients with five Jahans, 100 services in 15 groups, ~300 bookings a week). They live on a new canvas page **"Business · round 7"** and in `screens/business/B7-*.dc.html`; the older business pages keep everything they don't redraw (their canvas titles point to the round-7 board). Rules: `business/README.md` §29.2; components: `COMPONENTS.md` Part 0 (7.2 table); copy: `copy/EN-GLOSSARY.md` §8.
+
+**New boards** (`screens/business/`, fixed boards 1600 wide with 1440 / 1024 / 390 frames)
+- `B7-Hours.dc.html` (1600 × 10998) — B1: a day is a list of times on one line; a break is the gap between two times (no Break row); Add break / Remove the break, Copy Monday to all days, errors on the row; a specialist's Business hours · Own shift; Admin read-only; Special day; 390; before/after.
+- `B7-Calendar.dc.html` (1600 × 14801) — B2: one M toolbar (DateNav with a compact Today, Day · Week, one PeoplePicker, Filters with Show cancelled and the colour legend, Requests with a count, New booking as the only primary) at 1440 / 1024 / 390; B3: the one-person week with time, client and service in every block (15-min blocks too) and a hover card; the team week as one timeline row per person.
+- `B7-Booking.dc.html` (1600 × 11992) — B4: the drawer with the status and the source as equal badges ("Booked by phone" = the team added it after a call), ⓘ for internal status and note, one client card (name = link, phone + copy, facts, Call and Book again as two equal buttons), footers per status, 390 sheet; B7: New booking with one client combobox (names or digits, five Jahans told apart, + New client "ja") and services by "Jeren's services · All services" + search + groups.
+- `B7-Clients.dc.html` (1600 × 18321) — B5: the clients list (segments with counts, FilterBar, sortable one-line table, copy next to the number, one New booking icon, Show 25 more that never jumps, empty / no results, specialist view, 1024, 390); B6: the client card (copy + Call + New booking, tags in place, labelled facts, alert note as a NoteRow, History with Show more, Delete client as Danger quiet, 390).
+- `B7-Team.dc.html` (1600 × 12955) — B8: bookings and requests with "Answer by" and "Answer" on one line, day groups, the bulk bar, 1024, 390 cards; B9: one team table without the invented "Management" group (Takes bookings column, one-line names, Status pills with Removed + Reactivate), the member footer, the permissions matrix with ✓ / — / Own / View and footnotes, 390 cards.
+
+**Changed:** canvas titles of B-Calendar, B-Bookings, B-Clients, B-Client, B-Team, B-Settings and B-Mobile now say which round-7 board replaces which part. DS-Lists: the Clients table's Next booking header no longer sorts; dates read "Thu, 15 Oct"; the note meta is "4 October".
+
+### To do in the repo (7.2 — one line per item)
+- **B1 Hours** — rebuild every hours editor (Settings › Hours, Team › Hours, Special day, onboarding hours) as `HoursEditor`: times on one line, Add break splits / × joins, max 3 a day, Copy Monday, row errors, narrow layout under 800 px, 15-min TimeFields; specialists' Business hours · Own shift Segmented with the business window line; drop the separate Break row.
+- **B2 Calendar toolbar** — one M row: DateNav (‹ date › + Today greyed on today), Day · Week, PeoplePicker (Everyone first, search, counts) replacing All staff / One specialist + the native select, Filters (status, Show cancelled, legend), Requests with count (hidden at 0), New booking; summary line under it; 1024 icons with badges; 390 one person at a time.
+- **B3 Week view** — one-person week blocks with time, client and service by length (Long / Medium / Short15), hover card, click → drawer; team week = TeamWeekMatrix (one timeline bar per person-day + counts); 390 week as a grouped list.
+- **B4 Booking drawer** — status + source badges of equal size (Booked online / by phone / Walk-in with tooltips), InfoTips for internal status and note, one ClientCard (name link, copy, facts, NoteRow, Call = Book again), no-show callout with Remove report, footer per status with Cancel booking as Danger quiet.
+- **B5 Clients list** — segments with counts, FilterBar (Tag, Upcoming booking, Specialist, Sort), columns Name · Phone (copy) · Tags · Visits · Last visit · Total · Next booking + one New booking icon, sortable Name / Visits / Last visit / Total, row opens the card, delete only in the card, Show 25 more without URL changes, specialist view, 1024 and 390 layouts.
+- **B6 Client card** — head with copy + Call + New booking, tags in place, labelled facts (Client since, Source, Birthday, Visits, Total with ⓘ, No-shows), NoteRow for the alert note, History with Show more that appends in place (no URL update, no scroll jump), Client settings with ⓘ, Delete client as Danger quiet.
+- **B7 New booking** — ClientCombobox (names or digits detected, Frequent clients, ≤ 8 results with last visit and visits, "+ New client “…”", known-number warning, chosen chip with Change); ServicePicker (Jeren's services · All services, search, groups, chips, not-their-service warning); drop "By phone number" and "Show all services".
+- **B8 Bookings and requests** — FilterBar on every tab, "Answer by" (TimerPill) + "Answer" (✓ tint / ✕ IconButtons) on one line, "…" only with 2+ actions, day groups with sticky heads, white BulkBar, 390 request cards.
+- **B9 Team and permissions** — one TeamTable (Name · Access level · Takes bookings · Services · Hours · Status; no Management group; one-line names), Removed + Reactivate, member footer with Remove from the team (Danger quiet); PermissionMatrix with ✓ / — / Own / View chips and footnotes, 390 cards.
+- **Separate (not drawn):** the Ýeral admin tool — login + password then the authenticator code, and Superadmin / Admin roles so an added admin can't turn off the main one (owner's readme items 1 and 24).
+
+---
+
+## v0.7 · round 7.1 — 06.11.2026 · foundations (from the owner's review of the live apps)
+
+Round 7 fixes **patterns**, not code: the live apps follow the drawn pattern and the pattern was wrong. It comes in three parts, each exported on its own: **7.1 foundations (this export)** → 7.2 business screens (B1–B9) → 7.3 client site (C1–C4, D). Three new design-system boards define the foundations; where an older board (DS-Components, DS-Patterns, DS-Business, DS-Booking, any screen) differs, **v0.7 wins** — each older DS board carries a note at the top saying so. Rules: `README.md` §15 and `business/README.md` §29 (Decisions log, round 7); components: `COMPONENTS.md` Part 0; copy: `copy/EN-GLOSSARY.md` §7; tokens: `tokens.css` v0.7. The logo is skipped (a new one is being drawn).
+
+**New boards** (`screens/system/`)
+- `DS-Type.dc.html` (1440 × 9122) — A1: why digits looked loose (Onest's tabular cell is 0.67 em, its "1" 0.36 em), Onest vs Onest + Geist digits vs Geist at 13–40 px on phones, prices, totals, hour labels, time chips, stat tiles, a table column and the code; the decision **Geist**; where tabular figures stay; the type scale in Geist; number formats.
+- `DS-Controls.dc.html` (1440 × 13218) — A3 one height scale **S 32 / M 40 / L 48** (radii 8 / 10 / 12) for Input, Select, Segmented, Button, IconButton, Chip; A4 buttons (new **Tertiary** and **Danger quiet**, IconButton outline / plain, ghost retired) + "Which button each action takes"; A2 **our own Select** (trigger states at S/M/L, list, groups, search above 8 options, multi-select filters, long time list opened at the value, 390 bottom sheets) and the **TimeField**; A9 **ⓘ InfoTip**; A11 **focus rings** (tabs, chips, links, rows).
+- `DS-Lists.dc.html` (1440 × 19312) — A5 **one FilterBar** for every list (desktop, 390 sheet, where it's used); A6 **tables** (sortable headers, the whole row opens the item, one icon action, tags column with +N, one line per row, loading / empty / no results, 390 list items); A7 **StatusPill, FactList, breadcrumbs**; A8 **tags edited in place**; A10 **callout tones, NoteRow, toasts**; B10 **the Telegram sign-in code** (every state, client modal + sheet, business login).
+
+**Changed everywhere**
+- **Font: Geist replaces Onest** on every board (Google Fonts link, the `font` tweak now Geist · Onest, `--font-sans`). Geist has Onest's cap height and x-height and is ~2 % narrower, so layouts don't move. DS · Foundations' Type section is updated.
+- **No demo anywhere:** the Example badge, the Demo banner (and the `demo` option of every `banner` tweak), the signed-out demo sidebar, DemoNote, the B-Settings `demo` tweak and **"Try the business app"** (B-Landing hero / menu / footer, B-Login phone step and no-workspace card, B-Onboarding) are removed. A person without a workspace can only create a business. Annotations say "sample" instead of "demo".
+- **Sign-in code goes to Telegram:** the on-screen code is removed from B-Login, B-Onboarding, B-Shell (change number), B-Mobile, DS-Business, DS-Patterns; the code step reads "We sent the code to your Telegram, +993 •• •• •• 30" + Open Telegram + "Send a new code in 0:42"; the phone step button is **Get the code**; resend is **Send a new code** everywhere.
+
+**Frames:** DS-Type 1440 × 9122 · DS-Controls 1440 × 13218 · DS-Lists 1440 × 19312 (new) · Main 1440 × 5630 (was 5520) · DS-Components 1440 × 5400 (was 5340) · DS-Booking 1440 × 2980 (was 2960) · DS-Patterns 1440 × 37250 (was 40500) · DS-Business 1440 × 86150 (was 86900) · B-Shell 1600 × 8820 (was 9000); every other board keeps its size (fonts swapped only).
+
+### To do in the repo (7.1 — one line per item)
+- **A1 Font** — switch `--font-sans` and the font loading to Geist 400–800 (latin, latin-ext, cyrillic, cyrillic-ext); drop Onest; apply the v0.7 heading tracking.
+- **A1 Figures** — remove `tabular-nums` everywhere except numeric table columns, the calendar time grid and running timers / countdowns (118 places today); format every phone number as `+993 69 90 11 22` (tables, cards, toasts, copy fields).
+- **A2 Select** — build `@yeral/ui` Select on the popover (desktop) and drawer (390 sheet): sizes, states, groups, search above 8 options, multi-select with counts, open scrolled to the value; replace every native `<select>` (19 screens) and the native-under-8 / Radix-above-8 split.
+- **A2 TimeField** — HH:MM field with typing ("9" → 09:00, "930" → 09:30) and the 15-min list; use it in every hours, break and shift editor.
+- **A3 Sizes** — add the `--ctl-*` tokens and give Input, Select, Segmented, Button, IconButton and Chip the shared S 32 / M 40 / L 48 heights and 8 / 10 / 12 radii; business toolbars and forms M, client forms and 390 fields L; take tabs out of toolbar rows.
+- **A4 Buttons** — add `tertiary` and `danger-quiet`, IconButton outline / plain with tooltips, loading that keeps width; retire `ghost` and `danger-ghost`; restyle the listed actions (Remove from the team, Turn off, Home, Book again, Clear, Show more, Add note, New setup link) and drop the bare-text ones (Open the client's card, By phone number, Show all services, Create a new client).
+- **A5 FilterBar** — one `FilterBar` (Search · FilterButton menus with counts · SortMenu · active chips + Clear all + result count; 390 Filters sheet) used by business Calendar, Bookings, Clients, Reviews, client Search results and the business page's Services.
+- **A6 Table** — sortable headers with `aria-sort`, row = link with hover and inset focus, one IconButton action (no "…" for a single action), tags column with "+N" popover, one-line rows with truncation + tooltip, right-aligned tabular numbers, skeleton / empty / no-results states, 390 list items.
+- **A7 Status and facts** — `StatusPill` (Open until / Closes at / Closed · opens …), `FactList` (label above value, one per line), breadcrumbs with chevrons, link-looking parents, current page ink 600, 390 back link; no more " · " run-on lines.
+- **A8 Tags** — `TagInput` in place: Enter saves at once (no form Save), suggestions with counts, Create "…", duplicate / max length, Undo toast; automatic tags outlined with an icon and not removable.
+- **A9 InfoTip** — `Field` `info` prop rendering ⓘ + popover; replace hint lines under fields (internal status first).
+- **A10 Callouts and toasts** — Callout tones Info (violet) / Success / Warning / Danger / Neutral with the icon in its own tone; "Bookings are confirmed at once" = Info + zap; `NoteRow` replaces the amber note box; toasts with icons, Undo, placement bottom-left of the content (390 bottom centre).
+- **A11 Focus** — tab focus box 12/6 px clear of the underline, chips follow the pill, links get a 2 px outline offset, rows the inset ring.
+- **B10 Telegram code** — send sign-in codes to the phone number's Telegram; rebuild `SignInCodeStep` (Get the code, masked lead, Open Telegram, 60 s countdown → Send a new code, Change number, No Telegram help, wrong / expired / too many / checking / success); remove the on-screen code everywhere (client site, business login, onboarding, change number).
+- **Demo** — remove ExampleBadge, the Demo banner kind, DemoSidebar, DemoNote, the shared demo workspace and every "demo" / "Example" / "this isn't a real business" text from the apps and Storybook.
+
+---
+
 ## v0.6 · round 3.4 — 20.10.2026 · fixes on settings and setup
 
 A small fix pass on B-Settings, B-Onboarding, their phone frames on B-Mobile and their pieces on DS · Business patterns (+ one FAQ sentence on B-Landing); everything else stays as drawn. Rules: `business/README.md` §28.5; copy in the "Round 3.4" sections of `copy/en-choices-r3-onboarding-settings.md`, `-mobile.md`, `-ds-business.md`, `-reviews-landing.md`, `-login-shell.md`.

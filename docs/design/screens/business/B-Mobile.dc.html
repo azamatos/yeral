@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#f4f4f6}
 *{box-sizing:border-box}
@@ -234,8 +234,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .cbx{width:52px;height:52px;padding:0;text-align:center;font-size:22px;font-weight:600;flex:none;font-variant-numeric:tabular-nums}
 .co{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#f4f4f6;font-size:14px;line-height:20px;color:#101014}
 .co > svg{flex:none;margin-top:1px;color:#5a5a64}
-.fcl{font-size:15px;line-height:22px;align-items:center}
-.fcd{font-size:17px;line-height:22px;font-weight:600;letter-spacing:.08em;font-variant-numeric:tabular-nums;margin-left:4px}
 .lnkb:disabled{color:#6e6e78;cursor:default}
 .fm{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:18px;color:#a3251b}
 .fm svg{flex:none;margin-top:2px}
@@ -379,7 +377,7 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <header style="display: flex; flex-direction: column; gap: 8px">
 <span class="lbl">Ýeral Business · phone layouts · 390 · v0.6 round 3</span>
 <h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">The business app on phones</h2>
-<p style="margin: 0; max-width: 1180px; font-size: 15px; line-height: 22px; color: #5a5a64">business.yeral.app under 768 px, English first. Designed at 390, must work 360–767. Everything works in the browser — no app banner, no store links. Tab bar Calendar · Bookings · Clients · More; drawers, modals and menus become bottom sheets; the calendar shows one specialist’s day. No fake status bar — the browser draws its own. Demo: Glow Studio, Wednesday 14 October, 11:20 (frame 3b: 20:45). Signed out: login (1, 1b) and the landing page (13).</p>
+<p style="margin: 0; max-width: 1180px; font-size: 15px; line-height: 22px; color: #5a5a64">business.yeral.app under 768 px, English first. Designed at 390, must work 360–767. Everything works in the browser — no app banner, no store links. Tab bar Calendar · Bookings · Clients · More; drawers, modals and menus become bottom sheets; the calendar shows one specialist’s day. No fake status bar — the browser draws its own. Sample data: Glow Studio, Wednesday 14 October, 11:20 (frame 3b: 20:45). Signed out: login (1, 1b) and the landing page (13).</p>
 </header>
 
 <div style="display: grid; grid-template-columns: repeat(4, 390px); column-gap: 24px; row-gap: 56px; align-items: start">
@@ -392,7 +390,7 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <main style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 20px; padding: 28px 16px 0">
 <div style="display: flex; flex-direction: column; gap: 8px">
 <h1 class="h1m">Log in to Ýeral Business</h1>
-<p class="lead">Enter your phone number — we’ll show you a 4-digit code. No password needed.</p>
+<p class="lead">Enter your phone number — we’ll send a 4-digit code to your Telegram. No password needed.</p>
 </div>
 <div class="fld">
 <label class="fl" for="m1-phone">Phone number</label>
@@ -400,16 +398,16 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <span id="m1-hint" class="cap">If you already book on Ýeral as a client, use that number — one account works for both.</span>
 </div>
 <div style="display: flex; flex-direction: column; gap: 12px">
-<button class="b b-pri b-lg" style="width: 100%">Send code</button>
-<p class="cap" style="margin: 0">By tapping “Send code”, you agree to the <a href="#">Terms of use</a> and the <a href="#">Privacy policy</a>.</p>
+<button class="b b-pri b-lg" style="width: 100%">Get the code</button>
+<p class="cap" style="margin: 0">By tapping “Get the code”, you agree to the <a href="#">Terms of use</a> and the <a href="#">Privacy policy</a>.</p>
 </div>
 <div class="sep"></div>
-<p class="lead" style="font-size: 14px; line-height: 20px">No business yet? <a href="B-Onboarding.dc.html" style="font-weight: 600">Start free</a> or <a href="B-Calendar.dc.html" style="font-weight: 600">try the business app</a></p>
+<p class="lead" style="font-size: 14px; line-height: 20px">No business yet? <a href="B-Onboarding.dc.html" style="font-weight: 600">Start free</a></p>
 <div style="flex: 1"></div>
 <div style="display: flex; justify-content: center; padding: 0 0 20px"><a class="flk" href="Home.dc.html">Book on Ýeral as a client<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><b>yeral.app</b></a></div>
 </main>
 </div>
-<figcaption class="fcap"><span class="ft">1 · Log in · phone · business.yeral.app/login</span><span class="cap">The shared SignInCodeStep (phone step) with the first-release copy, the default: the code shows on screen, so the lead says “we’ll show you a 4-digit code”. No language switcher (one language). Fixed +993, inputmode numeric, 16 px text so iOS doesn’t zoom; errors as on DS · Product components; “Too many codes. Try again in 42 minutes.” after 5 codes for one number in an hour. “try the business app” opens the shared demo workspace, signed out.</span></figcaption>
+<figcaption class="fcap"><span class="ft">1 · Log in · phone · business.yeral.app/login</span><span class="cap">The shared SignInCodeStep (phone step): the code goes to the number’s Telegram, so the lead says “we’ll send a 4-digit code to your Telegram”. No language switcher (one language). Fixed +993, inputmode numeric, 16 px text so iOS doesn’t zoom; errors as on DS · Product components; “Too many codes. Try again in 42 minutes.” after 5 codes for one number in an hour.</span></figcaption>
 </figure>
 
 <figure class="fig">
@@ -420,9 +418,8 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <main style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 20px; padding: 28px 16px 0">
 <div style="display: flex; flex-direction: column; gap: 8px">
 <h1 class="h1m">Enter the code</h1>
-<p class="lead">To log in with <b class="nw">+993 65 10 20 30</b>. <button class="lnkb" type="button" style="display: inline; vertical-align: baseline">Change number</button></p>
+<p class="lead">We sent the code to your Telegram, <b class="nw">+993 •• •• •• 30</b>. <button class="lnkb" type="button" style="display: inline; vertical-align: baseline">Change number</button></p>
 </div>
-<div class="co fcl" role="status"><span>Your code: <b class="fcd">4821</b></span></div>
 <div class="fld" style="gap: 8px">
 <span class="fl" id="m1b-l">Code</span>
 <div class="otp" role="group" aria-labelledby="m1b-l"><input class="inp cbx" type="text" inputmode="numeric" autocomplete="one-time-code" aria-label="Code, digit 1" value="4"><input class="inp cbx" type="text" inputmode="numeric" aria-label="Code, digit 2" value="8"><input class="inp cbx is-f" type="text" inputmode="numeric" aria-label="Code, digit 3" value=""><input class="inp cbx" type="text" inputmode="numeric" aria-label="Code, digit 4" value=""></div>
@@ -430,13 +427,14 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 </div>
 <div style="display: flex; flex-direction: column; gap: 12px">
 <button class="b b-pri b-lg" type="submit" style="width: 100%">Confirm</button>
-<button class="lnkb" type="button" disabled="{{true}}" style="min-height: 32px">Get a new code in 0:59</button>
+<a class="b b-sec b-lg" href="https://t.me/" target="_blank" rel="noopener" style="width: 100%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg>Open Telegram</a>
+<button class="lnkb" type="button" disabled="{{true}}" style="min-height: 32px; font-variant-numeric: tabular-nums">Send a new code in 0:42</button>
 </div>
 <div style="flex: 1"></div>
 <div style="display: flex; justify-content: center; padding: 0 0 20px"><a class="flk" href="Home.dc.html">Book on Ýeral as a client<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><b>yeral.app</b></a></div>
 </main>
 </div>
-<figcaption class="fcap"><span class="ft">1b · Log in · code on screen · first release</span><span class="cap">SignInCodeStep code step, first-release copy (the default): the code shows in a quiet neutral callout (role status, read once), label “Code”, lead “To log in with …”. Boxes 52 on phones, auto-check on the 4th digit + Confirm. “Get a new code” (from 0:59) replaces the code and says “Here’s a new code.” 3 wrong codes or the 5-code limit: boxes off, Confirm, resend and the code hidden, the message says when they’re back. Next: name (new people) → invite · “Continue setting up” · last used workspace.</span></figcaption>
+<figcaption class="fcap"><span class="ft">1b · Log in · code · sent to Telegram</span><span class="cap">SignInCodeStep code step: the code goes to the number’s Telegram (DS · Lists &amp; content §6); “Open Telegram” opens the app. Boxes 52 on phones, auto-check on the 4th digit + Confirm. “Send a new code” (from 0:59) says “New code sent.” 3 wrong codes or the 5-code limit: boxes off, Confirm and resend hidden, the message says when they’re back. Next: name (new people) → invite · “Continue setting up” · last used workspace.</span></figcaption>
 </figure>
 
 <figure class="fig">
@@ -497,7 +495,7 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <button class="tbi" aria-haspopup="dialog" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg><span>More</span></button>
 </nav>
 </div>
-<figcaption class="fcap"><span class="ft">2 · Calendar · day · /w/glow-studio/calendar</span><span class="cap">Owner view, one specialist per day (chips; amber dot = request). No search in the header (lists keep their own); “?” opens the legend. 1 h = 52 px, opens at now − 1 h; swipe for ±1 day. Busy elsewhere = plain reserved block over the time and its buffer, no details, not tappable (a tap under it → “Aýna is busy elsewhere 19:00–20:00. Pick another time.”). The round + opens New booking. Demo-only: the No-show and Cancelled blocks.</span></figcaption>
+<figcaption class="fcap"><span class="ft">2 · Calendar · day · /w/glow-studio/calendar</span><span class="cap">Owner view, one specialist per day (chips; amber dot = request). No search in the header (lists keep their own); “?” opens the legend. 1 h = 52 px, opens at now − 1 h; swipe for ±1 day. Busy elsewhere = plain reserved block over the time and its buffer, no details, not tappable (a tap under it → “Aýna is busy elsewhere 19:00–20:00. Pick another time.”). The round + opens New booking. Drawn to show the states: the No-show and Cancelled blocks.</span></figcaption>
 </figure>
 
 <figure class="fig">
@@ -988,7 +986,7 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <button class="tbi on" aria-haspopup="dialog" aria-expanded="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg><span>More</span></button>
 </nav>
 </div>
-<figcaption class="fcap"><span class="ft">7 · More · owner’s version</span><span class="cap">Reviews · Settings, then the account: My profile · Your Ýeral page · Open as a client · Contact Ýeral (call [SUPPORT PHONE] or write on Telegram, as a small sheet) · Log out. No Language row (one language), no Reports, no Help. A Specialist has no Settings row (hidden, not disabled) and reads reviews about her. Demo (signed out): Reviews · Settings · Log in. The workspace row opens the switcher; the tab bar stays.</span></figcaption>
+<figcaption class="fcap"><span class="ft">7 · More · owner’s version</span><span class="cap">Reviews · Settings, then the account: My profile · Your Ýeral page · Open as a client · Contact Ýeral (call [SUPPORT PHONE] or write on Telegram, as a small sheet) · Log out. No Language row (one language), no Reports, no Help. A Specialist has no Settings row (hidden, not disabled) and reads reviews about her. The workspace row opens the switcher; the tab bar stays.</span></figcaption>
 </figure>
 
 <figure class="fig">
@@ -1280,17 +1278,16 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <span class="eyb">For businesses that work by appointment</span>
 <h1 class="d40">Let your clients book online</h1>
 <p class="llead">Your calendar, requests and client list in one place. Salon, dentist, tutor or car service: start in 5 minutes.</p>
-<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 4px"><a class="b b-pri b-lg" href="B-Onboarding.dc.html" style="width: 100%">Start free</a><a class="b b-sec b-lg" href="B-Calendar.dc.html" style="width: 100%">Try the business app</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 4px"><a class="b b-pri b-lg" href="B-Onboarding.dc.html" style="width: 100%">Start free</a></div>
 <span class="cap">Free · No card needed</span>
-<span class="cap" style="display: flex; gap: 8px; align-items: flex-start; margin-top: -6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span>The business app opens a demo workspace at once, without signing in. Changes reset every night.</span></span>
 <div class="mk" aria-hidden="true">
 <div class="mkt"><span class="mkb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 11px; line-height: 14px; font-weight: 600; color: #93500a">New request</span><span class="ell" style="font-size: 13px; line-height: 18px; font-weight: 600">Ejegyz T. · Today · 15:30</span><span class="ell" style="font-size: 11px; line-height: 14px; color: #5a5a64">Women’s haircut · Aýna</span></span><span class="mkc">Confirm</span></div>
 <div class="mkc2"><span style="font-size: 12px; font-weight: 600">Wed, 14 Oct</span><span class="pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>1 request</span></div>
-<div class="mkg"><span class="bk k-d" style="position: static">09:00 Ogulşat M.</span><span class="bk k-d" style="position: static">09:30 Aýgül R.</span><span class="bk k-c" style="position: static">11:30 Gülälek N.</span><span class="bk k-c" style="position: static">11:00 Bahar A.</span></div>
+<div class="mkg"><span class="bk k-d" style="position: static">09:00 Ogulşat M.</span><span class="bk k-d" style="position: static">09:30 Aýgül R.</span><span class="bk k-c" style="position: static">11:30 Gülälek N.</span><span class="bk k-c" style="position: static">11:00 Bahar A.</span><span class="bk k-c" style="position: static">13:00 Jemal S.</span><span class="bk k-p" style="position: static">15:30 Ejegyz T.</span></div>
 </div>
 </main>
 </div>
-<figcaption class="fcap"><span class="ft">13 · Landing · business.yeral.app · 390</span><span class="cap">Signed out. Header: wordmark + Business tag, “Start free” and the menu (Features · How to start · Questions · Try the business app · Log in; no language picker). Hero buttons fill the width: Start free (main) · Try the business app — opens the shared demo workspace at once, without signing in (Demo banner). Then the calendar mock (decoration), Who it’s for, features, How to start, the free band, FAQ with Contact Ýeral, footer.</span></figcaption>
+<figcaption class="fcap"><span class="ft">13 · Landing · business.yeral.app · 390</span><span class="cap">Signed out. Header: wordmark + Business tag, “Start free” and the menu (Features · How to start · Questions · Log in; no language picker). The hero button fills the width: Start free (main), “Free · No card needed” under it. Then the calendar mock (decoration), Who it’s for, features, How to start, the free band, FAQ with Contact Ýeral, footer.</span></figcaption>
 </figure>
 
 <aside class="notes" aria-label="Phone rules">
@@ -1307,7 +1304,7 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 <li><b>Requests.</b> The timer runs only while the business is open and never past the visit’s start; a request that arrived while closed shows “By 09:30” (title “Answer by 09:30 tomorrow”). Headings count: “6 requests”, “1 request”.</li>
 <li><b>Report · one per booking.</b> Before the visit starts: Rude behaviour · Other…; from the start: No-show · Came late · Rude behaviour · Other… (No-show until 24 h after the end, then only the other three). After a Came late, Rude behaviour or Other report only No-show is offered while its window is open — it replaces that report; otherwise no Report button. A No-show: no Report button, the report box with Remove report (7 days). Only no-shows count towards Phone only.</li>
 <li><b>Money.</b> Prices are booking information: everyone who sees a booking or request sees its price, the Admin included. “See revenue” covers only sums — revenue lines, client totals, the average check: the Owner sees all; a Specialist only her own earnings line; the Admin none.</li>
-<li><b>No SMS at the first release.</b> The login code shows on screen (label “Code”, “Get a new code”); copy says “notify” / “My bookings”; an invite waits until the person signs in with their number.</li>
+<li><b>No SMS at the first release.</b> The login code goes to the number’s Telegram (label “Code”, “Send a new code”); copy says “notify” / “My bookings”; an invite waits until the person signs in with their number.</li>
 <li><b>Words.</b> “60 min”; “ · ” between date and time; “Cancel booking” cancels a booking, plain “Cancel” closes a form; “Time off”; Discard · Save; “Link and QR”.</li>
 <li><b>Touch.</b> Targets ≥ 44 px (36 px chips and links get a 44 px hit area); inputs 16 px text; phone fields inputmode numeric with a fixed +993.</li>
 <li><b>Hidden, not disabled.</b> Anything a role can’t use isn’t rendered (staff chips, Settings, sums, answer buttons, Add client for a Specialist).</li>
@@ -1317,10 +1314,10 @@ select.isel{-webkit-appearance:none;appearance:none;padding-right:40px;backgroun
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1696,"height":7454}}'>
+<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Geist","Onest"],"default":"Geist","section":"Type"},"$preview":{"width":1696,"height":7454}}'>
 class Component extends DCLogic {
   renderVals() {
-    const f = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Geist';
     const fontStack = "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif";
 
     // Calendar grid: Aýna, Wednesday 14 October, 09:00–20:00, 1 h = 52 px, 8 px top inset.
@@ -1348,7 +1345,7 @@ class Component extends DCLogic {
       noshow: ['k-n', 'No-show']
     };
     // b01–b06 from business-demo.json (English names as on B-Calendar); the No-show (Mahym D.) and
-    // Cancelled (Jahan M.) blocks are demo-only, drawn in the right half next to the live booking at the same time.
+    // Cancelled (Jahan M.) blocks are sample-only, drawn in the right half next to the live booking at the same time.
     const raw = [
       { from: '09:00', to: '10:00', client: 'Ogulşat M.', svcName: 'Women’s haircut', line2: 'Women’s haircut', st: 'completed', src: 'online' },
       { from: '10:15', to: '11:00', client: 'Merjen K.', svcName: 'Hair styling', line2: 'Hair styling', st: 'completed', src: 'phone', half: 'L' },

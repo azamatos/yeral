@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#f4f4f6}
 *{box-sizing:border-box}
@@ -71,7 +71,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .y-pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;border:1px solid transparent;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
 .y-pill.s{height:20px;padding:0 7px}
 .t-neu{background:#f4f4f6;border-color:#e6e6ea;color:#5a5a64}
-.y-exb svg{flex:none}
 .badge{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap;flex:none}
 .badge svg{flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
@@ -141,8 +140,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .ob{width:48px;height:48px;border:1px solid #d8d8de;border-radius:8px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#101014;font-variant-numeric:tabular-nums}
 .ob.f{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
 .caret{width:2px;height:22px;border-radius:1px;background:#101014}
-.fcl{display:flex;align-items:center;padding:12px 14px;border-radius:12px;background:#f4f4f6;font-size:15px;line-height:22px;color:#101014}
-.fcd{font-size:17px;line-height:22px;font-weight:600;letter-spacing:.08em;font-variant-numeric:tabular-nums;margin-left:4px}
 .stl{font-size:14px;line-height:20px;font-weight:600;color:#101014}
 .bnr{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:12px;border:1px solid transparent;font-size:14px;line-height:20px}
 .bnt{flex:1;min-width:0}
@@ -177,7 +174,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .c-acc > svg{color:#4429d6}
 .tmr{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
 .tmr svg{flex:none}
-.swd{display:flex;align-items:center;gap:10px;padding:8px}
 .mx-t{font-size:13px;line-height:18px;color:#101014;text-align:left;justify-self:start}
 .mx-c.l{justify-content:flex-start}
 .abr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m b" "r r";column-gap:12px;row-gap:6px;align-items:center;padding:10px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
@@ -191,7 +187,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .abr-no svg{flex:none}
 </style>
 </helmet>
-<div style="width: 1600px; min-height: 9000px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 56px">
+<div style="width: 1600px; min-height: 8820px; padding: 64px 80px; font-family: 'Geist', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 56px">
 
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span class="lbl">business.yeral.app · app shell · v0.6 round 3</span>
@@ -337,7 +333,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 
 <section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-bn">
-<div class="shd"><span class="lbl">Banners under the top bar · business status (one at a time, no dismiss) · then notifications</span><h2 id="s-bn" class="h2">In review · Not approved · Hidden by Ýeral · Demo · Notifications</h2></div>
+<div class="shd"><span class="lbl">Banners under the top bar · business status (one at a time, no dismiss) · then notifications</span><h2 id="s-bn" class="h2">In review · Not approved · Hidden by Ýeral · Notifications</h2></div>
 <div style="display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start">
 <div class="col" style="gap: 20px">
 <span class="lbl">1 · In review · a new business, until the Ýeral team checks it</span>
@@ -355,32 +351,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span class="lbl" style="padding-top: 8px">3 · Hidden by Ýeral · after clients’ reports</span>
 <div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path><path d="m2 2 20 20"></path></svg><span class="bnt"><b>Ýeral has hidden your page:</b> Clients reported that your page shows the wrong address. Clients can’t find or book you.</span><a class="b b-sec b-sm bna" href="#contact">Contact Ýeral</a></div>
 <span class="cap">Danger tones, no dismiss; the owner and admins see it, like Not approved. The reason is the Ýeral team’s text. “Contact Ýeral” opens the same Call / Write on Telegram menu as the account menu. The team keeps working in the calendar; clients can’t find or book the business until Ýeral shows the page again.</span>
-<span class="lbl" style="padding-top: 8px">4 · Demo · “Try the business app”, signed out</span>
-<div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnt"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm bna" href="B-Onboarding.dc.html">Create your business</a></div>
-<span class="cap">Neutral tones, flask icon (the ExampleBadge icon). “Try the business app” (B-Landing, B-Login) opens one shared demo workspace at once, without signing in — it is not a membership and never appears in anyone’s switcher. Sample data; nothing reaches any client. “Create your business” → /setup.</span>
-<span class="lbl" style="padding-top: 8px">5 · Notifications · ask</span>
+<span class="lbl" style="padding-top: 8px">4 · Notifications · ask</span>
 <div class="bnr c-acc" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span class="bnt"><b>Turn on notifications to hear new requests.</b></span><a class="b b-sec b-sm bna" href="#">Allow</a></div>
-<span class="lbl" style="padding-top: 8px">6 · Notifications · blocked in this browser</span>
+<span class="lbl" style="padding-top: 8px">5 · Notifications · blocked in this browser</span>
 <div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"></path><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path><path d="m2 2 20 20"></path></svg><span class="bnt">Notifications are blocked in this browser. Allow them in the browser’s settings.</span><button class="b b-gho b-ic" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
 <span class="cap">Shows to everyone who gets notifications in this workspace: the owner and admins hear every new request; a Specialist hears requests and time changes for her. It stays until the browser permission is decided. “Allow” opens the browser’s own prompt; allowed → the banner goes away (new requests then come as the toast + a browser notification, with sound). Blocked → the quiet line, which can be closed and stays closed in this browser. Under a business status banner when both show.</span>
-</div>
-<div class="col">
-<span class="lbl">Demo · signed out · sidebar</span>
-<div class="shell" style="height: 560px; width: 250px">
-<aside class="side" aria-label="Main menu" style="border-right: 0">
-<div class="swd"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere">Glow Studio</span><span style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span><span class="cap" style="font-size: 12px; line-height: 16px">Ashgabat</span></span></span></div>
-<div class="sdv"></div>
-<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
-<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="cnt" aria-label="6 requests">6</span></a>
-<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clients</a>
-<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
-<div style="flex: 1"></div>
-<div class="sdv"></div>
-<a class="b b-sec" href="B-Login.dc.html" style="width: 100%"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a>
-</aside>
-</div>
-<span class="cap">Only the demo workspace, with the ExampleBadge — no chevrons, no list (it isn’t a switcher here). The user block becomes “Log in” → /login. Everything else works as for an owner; screen readers hear “Glow Studio, example”.</span>
 </div>
 </div>
 </section>
@@ -625,19 +600,19 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span class="stl">1 · New number</span>
 <div class="pbox">
 <div class="fld"><label for="pc-ph">New phone number</label><div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="pc-ph" class="inp" type="tel" inputmode="numeric" value="61 05 77 32" style="font-variant-numeric: tabular-nums"></div></div>
-<div style="display: flex; justify-content: flex-end; gap: 8px"><button class="b b-gho b-sm">Cancel</button><button class="b b-sec b-sm">Send code</button></div>
+<div style="display: flex; justify-content: flex-end; gap: 8px"><button class="b b-gho b-sm">Cancel</button><button class="b b-sec b-sm">Get the code</button></div>
 </div>
-<span class="stl">2 · Code · first release (code on screen)</span>
+<span class="stl">2 · Code · sent to Telegram</span>
 <div class="pbox">
-<p class="hint" style="margin: 0">To change to <span style="white-space: nowrap; color: #101014; font-weight: 600">+993 61 05 77 32</span>.</p>
-<div class="fcl" role="status"><span>Your code: <b class="fcd">4821</b></span></div>
+<p class="hint" style="margin: 0">We sent the code to your Telegram, <span style="white-space: nowrap; color: #101014; font-weight: 600">+993 •• •• •• 32</span>.</p>
 <div class="fld" style="gap: 8px"><span class="flab" id="pc-cl">Code</span><div class="otp" role="group" aria-labelledby="pc-cl"><span class="ob">4</span><span class="ob">8</span><span class="ob f"><span class="caret"></span></span><span class="ob"></span></div><span class="hint">It checks itself after the 4th digit.</span></div>
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><button class="lnk" disabled="{{true}}" style="padding: 0">Get a new code in 0:42</button><button class="b b-gho b-sm">Cancel</button></div>
+<a class="b b-sec b-sm" href="https://t.me/" target="_blank" rel="noopener" style="align-self: flex-start"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg>Open Telegram</a>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><button class="lnk" disabled="{{true}}" style="padding: 0">Send a new code in 0:42</button><button class="b b-gho b-sm">Cancel</button></div>
 <span class="hint">Until the new number is verified you can log in with the old one.</span>
 </div>
 </div>
 <ul class="hid">
-<li>The code step is SignInCodeStep (boxes 48) with all its states; at the first release it shows the code on screen; the SMS copy is the `sms` variant for later (as in B-Login). Wrong code 0000.</li>
+<li>The code step is SignInCodeStep (boxes 48) with all its states; the code goes to the number’s Telegram (B10, DS · Lists &amp; content §6); the SMS copy is the `sms` variant for later (as in B-Login). Wrong code 0000.</li>
 <li>Verified → the row collapses and a toast says “Phone number changed”. The login phone changes for every workspace and for yeral.app; teams see the new number.</li>
 <li>A number already on another Ýeral account → field error “This number is used by another account”.</li>
 <li>Name and photo save with “Save”.</li>
@@ -647,7 +622,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </section>
 
 <section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-lf">
-<div class="shd"><span class="lbl">Leave this business → the owner is told → the remove-staff flow</span><h2 id="s-lf" class="h2">Someone leaves</h2><p class="dev" style="max-width: 1000px">Demo: Aýna leaves Glow Studio with 4 bookings and 1 request (she confirmed Ejegyz T.’s request before leaving). Her bookings stay with the business; nothing is cancelled until the owner chooses. Gülnar Öwezowa has accepted her invite and does Women’s haircut, Children’s haircut and Hair styling.</p></div>
+<div class="shd"><span class="lbl">Leave this business → the owner is told → the remove-staff flow</span><h2 id="s-lf" class="h2">Someone leaves</h2><p class="dev" style="max-width: 1000px">Sample: Aýna leaves Glow Studio with 4 bookings and 1 request (she confirmed Ejegyz T.’s request before leaving). Her bookings stay with the business; nothing is cancelled until the owner chooses. Gülnar Öwezowa has accepted her invite and does Women’s haircut, Children’s haircut and Hair styling.</p></div>
 <div style="display: grid; grid-template-columns: 440px 360px 560px; gap: 40px; align-items: start">
 <div class="col">
 <span class="lbl">1 · Aýna · confirm (Modal S)</span>
@@ -696,7 +671,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":9000}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":8820}}'>
 class Component extends DCLogic {
   renderVals() {
     // V06-R3-BRIEF §1 · fixed permissions (read-only; the same rows on B-Team and DS-Business)

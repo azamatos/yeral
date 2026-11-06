@@ -1,5 +1,7 @@
 /* Base styles of the design system: font, page defaults, focus, phone type scale, helpers. */
-@import '@fontsource-variable/onest';
+/* Geist (design v0.7, was Onest): one variable file per subset (latin, latin-ext, cyrillic, cyrillic-ext, vietnamese),
+   weight 100–900, loaded by unicode-range; bundled by Vite under /assets/, so `font-src 'self'` covers it. */
+@import '@fontsource-variable/geist';
 
 @layer base {
   html {
