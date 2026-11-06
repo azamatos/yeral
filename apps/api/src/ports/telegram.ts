@@ -49,7 +49,8 @@ export function telegramBot(token: string, username: string, fetcher: typeof fet
         signal: AbortSignal.timeout(10_000),
       })
     } catch (e) {
-      throw new TelegramError(method, 0, e instanceof Error ? e.message : String(e))
+      // a network error may word the address it failed on, token and all
+      throw new TelegramError(method, 0, (e instanceof Error ? e.message : String(e)).split(token).join('<token>'))
     }
     const answer = (await res.json().catch(() => ({ ok: false, description: 'not JSON' }))) as ApiAnswer
     if (!res.ok || !answer.ok)
@@ -74,28 +75,35 @@ export interface SentTelegram {
   replyMarkup?: ReplyMarkup
 }
 
-/** Keeps messages in memory for the tests (`sent`); a chat in `blocked` answers 403 as a person who blocked the bot does. */
+/**
+ * Keeps messages in memory for the tests (`sent`); a chat in `blocked` answers 403 as a person who blocked the bot does;
+ * `down` is the error every send fails with while Telegram is out.
+ */
 export function memoryTelegram(username = 'yeral_test_bot'): TelegramPort & {
   sent: SentTelegram[]
   blocked: Set<number>
+  down: TelegramError | null
   webhooks: { url: string; secret: string }[]
 } {
   const sent: SentTelegram[] = []
   const blocked = new Set<number>()
   const webhooks: { url: string; secret: string }[] = []
-  return {
+  const port = {
     username,
     sent,
     blocked,
+    down: null as TelegramError | null,
     webhooks,
-    sendMessage(chatId, text, replyMarkup) {
+    sendMessage(chatId: number, text: string, replyMarkup?: ReplyMarkup) {
+      if (port.down) return Promise.reject(port.down)
       if (blocked.has(chatId)) return Promise.reject(new TelegramError('sendMessage', 403, 'Forbidden: bot was blocked by the user'))
       sent.push({ chatId, text, ...(replyMarkup ? { replyMarkup } : {}) })
       return Promise.resolve()
     },
-    setWebhook(req) {
+    setWebhook(req: { url: string; secret: string }) {
       webhooks.push(req)
       return Promise.resolve({ ok: true, description: 'Webhook was set' })
     },
   }
+  return port
 }

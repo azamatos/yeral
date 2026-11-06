@@ -15,6 +15,7 @@ import { ApiError, invalid } from '../../http/errors'
 import { randomDigits, sha256Hex } from '../../lib/crypto'
 import { hit, rateLimited } from '../../lib/rate-limit'
 import { codeSmsText } from '../../notify'
+import { TelegramError } from '../../ports/telegram'
 import { sendToLinked, startLink } from '../telegram/links'
 
 /**
@@ -46,9 +47,15 @@ const hashOf = (purpose: Purpose, phone: string, code: string) => sha256Hex(`${p
 const secondsLeft = (until: Date, now: number) => Math.max(1, Math.ceil((until.getTime() - now) / 1000))
 const newCode = (deps: Pick<Deps, 'site'>) => (deps.site.demo ? DEMO_CODE : randomDigits(4))
 
-/** The sign-in's answer: the timers, and how the code reaches the person (ADR 0029). */
+/**
+ * The sign-in's answer: the timers, and how the code reaches the person (ADR 0029). `link`: the bot's chat where the
+ * code arrived («Open Telegram»), or the link that makes one.
+ */
 export type SentCode = { resendAfterSec: number; expiresInSec: number } & (
-  { delivery: 'screen'; code: string } | { delivery: 'sms' } | { delivery: 'telegram' } | { delivery: 'telegram_link'; link: string }
+  | { delivery: 'screen'; code: string }
+  | { delivery: 'sms' }
+  | { delivery: 'telegram'; link: string }
+  | { delivery: 'telegram_link'; link: string }
 )
 
 export async function sendCode(
@@ -64,6 +71,11 @@ export async function sendCode(
      * a link's holder in without the number, which the link page hides) nor a phone change's.
      */
     onScreen?: boolean
+    /**
+     * The number's Telegram is lost (a new account, a recycled number): the answer is the link to a chat even though
+     * one is stored, and sharing the contact there proves the number as the first time (ADR 0029). The same limits.
+     */
+    relink?: boolean
   },
 ): Promise<SentCode> {
   const { db } = deps
@@ -117,8 +129,24 @@ export async function sendCode(
   const text = codeSmsText(req.lang, code)
   if (deps.telegram) {
     const bot = { ...deps, telegram: deps.telegram.bot }
-    if (await sendToLinked(bot, { to: req.phone, text, secret: true })) return { ...timers, delivery: 'telegram' }
-    // not linked: the code waits; once the person links, a fresh one goes to the chat (`modules/telegram/webhook.ts`)
+    if (!req.relink) {
+      let sent: boolean
+      try {
+        sent = await sendToLinked(bot, { to: req.phone, text, secret: true })
+      } catch (e) {
+        if (!(e instanceof TelegramError)) throw e
+        // Telegram is out (not a blocked bot): the code is taken back so «Try again» isn't told to wait; the error
+        // names the method and Telegram's words, never the token (`ports/telegram.ts`)
+        await db
+          .delete(loginCodes)
+          .where(and(eq(loginCodes.phone, req.phone), eq(loginCodes.purpose, req.purpose), eq(loginCodes.codeHash, row.codeHash)))
+        deps.log.warn('telegram unavailable', { method: e.method, status: e.status, description: e.description })
+        throw new ApiError('telegram_unavailable')
+      }
+      if (sent) return { ...timers, delivery: 'telegram', link: `https://t.me/${deps.telegram.bot.username}` }
+    }
+    // not linked (or linking again): the code waits; once the person links, a fresh one goes to the chat
+    // (`modules/telegram/webhook.ts`)
     return { ...timers, delivery: 'telegram_link', link: await startLink(bot, { phone: req.phone, purpose: req.purpose, lang: req.lang }) }
   }
   // written to the log as every SMS is, the code hidden

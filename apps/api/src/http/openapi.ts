@@ -19,7 +19,9 @@ export const errors = {
   404: err('Not found'),
   409: err('Conflict (`slot_taken` with alternatives, `invalid_status` …)'),
   429: err('Too many requests (`retryAfterSec`; `rate_limited` also `retryAfterMin`)'),
-  503: err('Not here now: the admin tool (`admin_unavailable`) or the address search (`address_search_unavailable`)'),
+  503: err(
+    'Not here now: the admin tool (`admin_unavailable`), the address search (`address_search_unavailable`) or our Telegram bot (`telegram_unavailable`)',
+  ),
 } as const
 
 export const noContent = { 204: { description: 'Done' } } as const

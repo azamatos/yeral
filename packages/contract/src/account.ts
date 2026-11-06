@@ -49,7 +49,12 @@ export const sendCodeResponseSchema = z
       code: z.string().regex(/^\d{4}$/),
     }),
     z.object({ ...codeTimers, delivery: z.literal('sms') }),
-    z.object({ ...codeTimers, delivery: z.literal('telegram') }),
+    z.object({
+      ...codeTimers,
+      delivery: z.literal('telegram'),
+      /** `https://t.me/<bot>`: the chat the code arrived in, for «Open Telegram». */
+      link: z.url(),
+    }),
     z.object({
       ...codeTimers,
       delivery: z.literal('telegram_link'),

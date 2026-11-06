@@ -32,9 +32,9 @@ const sendCodeRoute = createRoute({
   method: 'post',
   path: '/auth/code',
   tags: ['auth'],
-  summary: 'Send a login code: by SMS, to the person’s Telegram, or, unlinked, the link that brings it there (`delivery`)',
+  summary: 'Send a login code: by SMS, to the person’s Telegram, or, unlinked (or `relink`), the link that brings it there (`delivery`)',
   request: jsonBody(sendCodeSchema),
-  responses: { 200: json(sendCodeResponseSchema), 400: errors[400], 429: errors[429] },
+  responses: { 200: json(sendCodeResponseSchema), 400: errors[400], 429: errors[429], 503: errors[503] },
 })
 
 const verifyRoute = createRoute({
@@ -64,7 +64,7 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
     return c.json({ codeOnScreen: showsCodeOnScreen(c.var.deps), delivery: codeDelivery(c.var.deps) }, 200)
   })
   .openapi(sendCodeRoute, async (c) => {
-    const { phone, lang } = c.req.valid('json')
+    const { phone, lang, relink } = c.req.valid('json')
     const [known] = await c.var.deps.db.select({ lang: users.lang }).from(users).where(eq(users.phone, phone))
     const res = await sendCode(c.var.deps, {
       phone,
@@ -72,6 +72,7 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
       ip: clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader),
       lang: known?.lang ?? lang ?? MARKET.defaultLanguage,
       onScreen: true,
+      relink,
     })
     return c.json(res, 200)
   })
