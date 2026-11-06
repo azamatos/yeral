@@ -17,7 +17,7 @@ import { Check, CheckCheck, Eye, ExternalLink, Info, MessageSquare, Reply, Searc
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { pageLink } from '@/shared/config/site'
+import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import type { ReviewsSearch, ReviewStars } from '../model/search'
