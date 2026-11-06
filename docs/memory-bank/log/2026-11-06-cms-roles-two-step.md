@@ -7,7 +7,7 @@
   admins); `admin-invite` makes the first account ever the superadmin and keeps its arguments. The sign-in:
   `POST /v1/admin/sign-in` takes the login and the password and answers a challenge (`admin_challenges`, 5 minutes, 5
   wrong codes, hashes only); `POST /v1/admin/sign-in/code` takes the code for it; the cms `/login` has the two steps
-  («Signed in as <login> · Change»). ADR 0026 amended, book Q-011, chapter 3 and chapter 9 (04.11.2026 row).
+  («Signing in as <login> · Change»). ADR 0026 amended, book Q-011, chapter 3 and chapter 9 (04.11.2026 row).
 - Decided (Claude, delegated): a wrong code at step 2 is `admin_code_wrong` (the setup's code too); a spent, expired or
   used challenge is `sign_in_expired` (401) and the app goes back to step 1 with its message; an account held for 10
   wrong codes in the hour answers `rate_limited` with the wait at either step (before: `sign_in_failed`), since only

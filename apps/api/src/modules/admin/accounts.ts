@@ -367,11 +367,17 @@ export async function finishSignIn(
   const tokenHash = await sha256Hex(input.challenge)
   const spend = (tx: Queryable) => tx.delete(adminChallenges).where(eq(adminChallenges.tokenHash, tokenHash))
   const result = await deps.db.transaction(async (tx): Promise<Admin | 'expired' | 'wrong'> => {
-    // the challenge held: two sign-ins with one challenge, or one code, can't both get in
+    const [found] = await tx
+      .select({ adminId: adminChallenges.adminId })
+      .from(adminChallenges)
+      .where(eq(adminChallenges.tokenHash, tokenHash))
+    if (!found) return 'expired'
+    // the account held first, then the challenge: the order a reset or a turning off holds them in (`endSessions`), so
+    // the two wait on each other instead of deadlocking. A reset or a new password meanwhile wins; two sign-ins with
+    // one challenge, or one code, can't both get in
+    const [row] = await tx.select().from(admins).where(eq(admins.id, found.adminId)).for('no key update')
     const [challenge] = await tx.select().from(adminChallenges).where(eq(adminChallenges.tokenHash, tokenHash)).for('update')
     if (!challenge) return 'expired'
-    // the account held: a reset or a new password meanwhile wins
-    const [row] = await tx.select().from(admins).where(eq(admins.id, challenge.adminId)).for('no key update')
     if (challenge.expiresAt.getTime() <= now || row?.status !== 'active' || !row.passwordHash || !row.totpSecret) {
       await spend(tx)
       return 'expired'

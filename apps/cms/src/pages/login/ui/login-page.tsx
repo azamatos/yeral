@@ -83,7 +83,7 @@ export function LoginPage() {
         title={t('login.codeTitle')}
         lead={
           <>
-            {t.rich('login.signedInAs', { login: challenge.login, b: (chunks) => <b className="font-semibold text-n-900">{chunks}</b> })}{' '}
+            {t.rich('login.signingInAs', { login: challenge.login, b: (chunks) => <b className="font-semibold text-n-900">{chunks}</b> })}{' '}
             <button type="button" onClick={change} className={textLink}>
               {t('login.change')}
             </button>

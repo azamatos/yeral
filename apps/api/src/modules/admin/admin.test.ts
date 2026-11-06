@@ -183,6 +183,21 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     expect(await challengesOf(link.id)).toHaveLength(0)
   })
 
+  it('a code and a reset at once: one waits for the other (the account is held first, then the challenge), neither fails', async () => {
+    const { secret } = await setUp(cms(), 'crossed')
+    const b = cms()
+    const started = await start(b, 'crossed')
+    const [signed, reset] = await Promise.all([
+      code(b, started, await totpAt(secret, stepOf(t.clock.now) + 1)),
+      inviteOrReset(t.deps, 'crossed', 'Crossed'),
+    ])
+    expect(reset).toMatchObject({ reset: true })
+    // in just before the reset, which then ended the session, or sent back to step 1: never a deadlock's 500
+    expect([200, 401]).toContain(signed.status)
+    if (signed.status === 401) expect(signed.json.error.code).toBe('sign_in_expired')
+    expect((await b.req('/v1/admin/me')).status).toBe(401)
+  })
+
   it('wrong codes after the right password are counted per account, from anywhere: the hour holds it', async () => {
     t = testApp(db, { trustedIpHeader: 'x-forwarded-for' })
     const alerts: string[] = []

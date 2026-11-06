@@ -24,7 +24,7 @@
     "password": "Password",
     "continue": "Continue",
     "codeTitle": "Enter the code",
-    "signedInAs": "Signed in as <b>{login}</b> ·",
+    "signingInAs": "Signing in as <b>{login}</b> ·",
     "change": "Change",
     "code": "Authenticator code",
     "codeHint": "The 6 digits in your authenticator app, or a recovery code.",
