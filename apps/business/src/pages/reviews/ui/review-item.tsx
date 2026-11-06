@@ -18,7 +18,7 @@ import { useErrorText } from '@/shared/i18n'
 import { ReplyComposer } from './reply-composer'
 
 const LINK_BUTTON =
-  'inline-flex h-8 items-center rounded-input px-2 text-dense font-semibold whitespace-nowrap focus-visible:shadow-focus focus-visible:outline-none'
+  'inline-flex h-8 items-center rounded-ctl-s px-2 text-dense font-semibold whitespace-nowrap focus-visible:shadow-focus focus-visible:outline-none'
 
 /** «Today», «Yesterday», «2 weeks ago». */
 export function useWhen() {
@@ -145,7 +145,7 @@ export function ReviewItem({
           {manage && !report && (
             <Menu>
               <MenuTrigger asChild>
-                <Button variant="ghost" size="s" iconOnly aria-label={t('item.actions', { name: r.author })}>
+                <Button variant="plain" size="s" iconOnly aria-label={t('item.actions', { name: r.author })}>
                   <Ellipsis aria-hidden />
                 </Button>
               </MenuTrigger>

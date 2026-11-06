@@ -290,7 +290,9 @@ export const Filters: Story = {
 export const Reply: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: 'Reply to Döwran S.' }))
-    const box = canvas.getByRole('textbox', { name: 'Your reply as Glow Studio' })
+    // the composer opens after the click: wait for it, not only for the element to exist
+    const box = await canvas.findByRole('textbox', { name: 'Your reply as Glow Studio' })
+    await waitFor(() => expect(box).toBeVisible())
     await expect(canvas.getByRole('button', { name: 'Post reply' })).toBeDisabled()
     await userEvent.type(box, 'Thank you, Döwran! See you again soon.')
     await expect(canvas.getByText('38 / 500')).toBeVisible()
@@ -357,7 +359,8 @@ export const Report: Story = {
     await userEvent.click(await canvas.findByRole('button', { name: 'Review by Mähri G.: actions' }))
     await userEvent.click(await page.findByRole('menuitem', { name: /Report/ }))
     const d = within(await page.findByRole('dialog', { name: 'Report the review' }))
-    await expect(d.getByText('Maral is careful and friendly. The colour lasted two weeks without a chip.')).toBeVisible()
+    // the dialog fades in: wait for it to show, not only to exist
+    await waitFor(() => expect(d.getByText('Maral is careful and friendly. The colour lasted two weeks without a chip.')).toBeVisible())
     await expect(d.getByRole('button', { name: 'Report' })).toBeDisabled()
     await userEvent.click(d.getByRole('radio', { name: 'Another reason' }))
     await expect(d.getByRole('textbox', { name: 'Explanation' })).toBeVisible()
