@@ -6,7 +6,7 @@ import { useSdk } from '@yeral/sdk/react'
 import { useEffect, useReducer, useState } from 'react'
 import { useLocale } from 'use-intl'
 import { phoneProblem } from '../lib/phone'
-import { initialSignIn, signInReducer, signInView, type SignInEvent } from './sign-in'
+import { initialSignIn, signInReducer, signInView, SUCCESS_MS, type SignInEvent } from './sign-in'
 
 /** What the api answers a right code: signed in (`me`, `isNew`), or "Is this you?" first (book Q-270). */
 export type Verified = Awaited<ReturnType<NonNullable<ReturnType<Sdk['auth']['verify']>['mutationFn']>>>
@@ -30,6 +30,8 @@ export interface CodeStepsOptions<TVerified> {
   onFailed: (error: unknown) => void
   /** Whether a right code ends the steps (they start over); false keeps them for what comes next. Default: always. */
   done?: (answer: TVerified) => boolean
+  /** A right code says «Signed in» for a moment (`SUCCESS_MS`, B10) before its answer takes effect. */
+  showSuccess?: boolean
 }
 
 /** The screen's language for a request's `lang` (an SMS's words, a new account's language), when the market offers it: the api takes no other. */
@@ -42,12 +44,32 @@ export function useRequestLanguage() {
  * The phone and code steps against a pair of requests, with the clock the waits count on: the same rules for every code
  * (book Q-157, Q-267): the sign-in (`useSignIn`) and the phone change (book C-44) alike.
  */
-export function useCodeSteps<TVerified>({ sendCode, verify: verifyOptions, onVerified, onFailed, done }: CodeStepsOptions<TVerified>) {
+export function useCodeSteps<TVerified>({
+  sendCode,
+  verify: verifyOptions,
+  onVerified,
+  onFailed,
+  done,
+  showSuccess = false,
+}: CodeStepsOptions<TVerified>) {
   const locale = useRequestLanguage()
   const [state, dispatch] = useReducer(signInReducer, initialSignIn)
   const [now, setNow] = useState(() => Date.now())
   const send = useMutation(sendCode)
-  const verify = useMutation(verifyOptions)
+  const verify = useMutation(
+    showSuccess
+      ? {
+          ...verifyOptions,
+          // «Signed in» for a moment before the answer takes effect: the request's own `onSuccess` puts `me` in the
+          // cache, and the screen moves on with it
+          onSuccess: async (...args: Parameters<NonNullable<typeof verifyOptions.onSuccess>>) => {
+            dispatch({ type: 'codeVerified' })
+            await new Promise((resolve) => setTimeout(resolve, SUCCESS_MS))
+            await verifyOptions.onSuccess?.(...args)
+          },
+        }
+      : verifyOptions,
+  )
   const view = signInView(state, now)
 
   // one ticker for the resend countdown, the lock and the hourly limit, only while one runs
@@ -83,7 +105,7 @@ export function useCodeSteps<TVerified>({ sendCode, verify: verifyOptions, onVer
             resendAfterSec: sent.resendAfterSec,
             delivery: sent.delivery,
             code: sent.delivery === 'screen' ? sent.code : undefined,
-            link: sent.delivery === 'telegram_link' ? sent.link : undefined,
+            link: sent.delivery === 'telegram' || sent.delivery === 'telegram_link' ? sent.link : undefined,
             now: moment,
           })),
         onError: (error) => {
@@ -151,5 +173,6 @@ export function useSignIn({ onVerified, onFailed }: { onVerified: (answer: Verif
     onVerified,
     onFailed,
     done: (answer) => !('isThisYou' in answer),
+    showSuccess: true,
   })
 }

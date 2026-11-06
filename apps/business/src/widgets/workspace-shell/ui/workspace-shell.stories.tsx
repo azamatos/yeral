@@ -67,6 +67,8 @@ interface Account {
   invites: InviteCard[]
   /** Numbers on other accounts: a change to one is refused. */
   taken?: string[]
+  /** Codes go through our Telegram bot (ADR 0029): the number change's code reaches the new number's chat, never the screen. */
+  telegram?: boolean
 }
 
 const MAYSA: Account = {
@@ -119,6 +121,7 @@ const fakeApi =
       if (route === 'POST /me/phone/code') {
         if (!account.me.canChangePhone) return json({ error: { code: 'phone_change_unavailable' } }, 409)
         if (account.taken?.includes(String(body.phone))) return json({ error: { code: 'phone_taken' } }, 409)
+        if (account.telegram) return json({ resendAfterSec: 59, expiresInSec: 300, delivery: 'telegram', link: 'https://t.me/yeral_bot' })
         return json({ resendAfterSec: 59, expiresInSec: 300, delivery: 'screen', code: '4821' })
       }
       if (route === 'POST /me/phone/verify') {
@@ -447,6 +450,22 @@ export const ChangeNumber: Story = {
     const toastShown = await within(document.body).findByText('Phone number changed')
     await waitFor(() => expect(toastShown).toBeVisible())
     await waitFor(() => expect(drawer.queryByLabelText('Code')).not.toBeInTheDocument())
+  },
+}
+
+/** The number change once codes go by Telegram: the code reaches the new number's chat, nothing shows on the screen. */
+export const ChangeNumberTelegram: Story = {
+  args: { server: fakeApi({ ...MAYSA, telegram: true }) },
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await userEvent.click(drawer.getByRole('button', { name: 'Change number' }))
+    await userEvent.type(drawer.getByLabelText('New phone number'), '61057732')
+    await userEvent.click(drawer.getByRole('button', { name: 'Get the code' }))
+    await expect(await drawer.findByText('+993 61 05 77 32')).toBeVisible()
+    await expect(drawer.queryByText('4821')).not.toBeInTheDocument()
+    await userEvent.keyboard('4821')
+    const toastShown = await within(document.body).findByText('Phone number changed')
+    await waitFor(() => expect(toastShown).toBeVisible())
   },
 }
 

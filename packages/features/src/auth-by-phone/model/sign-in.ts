@@ -41,7 +41,12 @@ export interface SignInState {
   limit?: { phone: string; until: number }
   /** Counts «Change number» taps: the phone field takes the focus after each. */
   changedNumber: number
+  /** The code was right: «Signed in» for a moment (`SUCCESS_MS`), then what comes next (B10). */
+  verified: boolean
 }
+
+/** How long «Signed in» shows before the steps go on by themselves (B10: 0.6 s). */
+export const SUCCESS_MS = 600
 
 export const initialSignIn: SignInState = {
   step: 'phone',
@@ -52,6 +57,7 @@ export const initialSignIn: SignInState = {
   resent: false,
   sendFailed: false,
   changedNumber: 0,
+  verified: false,
 }
 
 export type SignInEvent =
@@ -71,6 +77,7 @@ export type SignInEvent =
   | { type: 'sendRefused'; phone: string; resend: boolean; error: ApiError; now: number }
   | { type: 'codeChanged'; code: string }
   | { type: 'codeRefused'; error: ApiError; now: number }
+  | { type: 'codeVerified' }
   | { type: 'changeNumber' }
   | { type: 'tick'; now: number }
   | { type: 'reset' }
@@ -134,6 +141,8 @@ export function signInReducer(s: SignInState, e: SignInEvent): SignInState {
       if (isApiError(error, 'code_expired')) return { ...s, code: '', attemptsLeft: undefined, resent: false, codeExpired: true }
       return s
     }
+    case 'codeVerified':
+      return { ...s, verified: true, attemptsLeft: undefined, resent: false, sendFailed: false }
     case 'changeNumber':
       return {
         ...s,

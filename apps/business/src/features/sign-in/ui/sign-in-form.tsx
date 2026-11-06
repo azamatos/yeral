@@ -43,6 +43,7 @@ export function SignInForm({ signIn, labelledBy }: { signIn: SignIn; labelledBy:
         link={state.link}
         support={site.support}
         sendFailed={state.sendFailed}
+        success={state.verified}
         onRelink={signIn.relink}
         phoneRules={PHONE_RULES}
         tooManyCodes={said.tooManyCodes}

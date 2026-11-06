@@ -8,8 +8,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MARKET } from '@yeral/domain/market'
 import { COUNTRY_PREFIX, formatNational, isMobile } from '@yeral/domain/phone'
 import { useEffect, useState, type ReactNode } from 'react'
-import { expect, fn, userEvent, waitFor } from 'storybook/test'
+import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test'
 import { SignInCodeStep, type SignInCodeStepCopy, type SignInCodeStepProps } from './sign-in-code-step'
+import type { TelegramStepCopy } from './telegram-step'
 
 const TM = { prefix: COUNTRY_PREFIX, maxDigits: MARKET.phone.length, format: formatNational }
 
@@ -347,6 +348,208 @@ export const Sms: Story = {
   play: async ({ canvas }) => {
     await expect(canvas.getByLabelText('SMS code')).toBeInTheDocument()
     await expect(canvas.queryByText('4821')).not.toBeInTheDocument()
+  },
+}
+
+// ---------------------------------------------------------------- Telegram (DS-Lists → 06 · B10)
+
+const TELEGRAM: TelegramStepCopy = {
+  codeLabel: 'Sign-in code',
+  checking: 'Checking…',
+  resend: 'Send a new code',
+  resendIn: (time) => `Send a new code in ${time}`,
+  codeExpired: 'This code has expired. Get a new one.',
+  openTelegram: 'Open Telegram',
+  noTelegram: 'No Telegram on this number?',
+  noTelegramHelp: (
+    <>
+      Codes come from Telegram for now. Install Telegram, sign up with <b className="whitespace-nowrap">+993 •• •• •• 10</b>, then tap Send
+      a new code.
+    </>
+  ),
+  stillStuck: 'Still stuck? Contact Ýeral.',
+  call: 'Call',
+  writeTelegram: 'Telegram',
+  callBrand: 'Call Ýeral',
+  writeOnTelegram: 'Write on Telegram',
+  backToCode: 'Back to the code',
+  close: 'Close',
+  linkAgain: 'Linked to another Telegram? Link again',
+  linkSteps: ['Open Telegram and press Start.', 'Tap Share my number.', 'The code arrives in the chat — type it here.'],
+  sendFailed: 'Telegram didn’t answer. Try again.',
+  signedIn: 'Signed in',
+}
+
+/** The step's words once codes go by Telegram: «Get the code», «Send a new code». */
+const TG: SignInCodeStepCopy = {
+  ...EN,
+  sendCode: 'Get the code',
+  resend: 'Send a new code',
+  resendIn: (time) => `Send a new code in ${time}`,
+}
+
+/** The text on the screen: the step's hidden live region repeats every message. */
+const onScreen = (canvas: { getAllByText: (text: string) => HTMLElement[] }, text: string) =>
+  canvas.getAllByText(text).find((el) => el.checkVisibility()) ?? canvas.getAllByText(text)[0]
+
+const telegram = {
+  copy: TG,
+  delivery: 'telegram' as const,
+  telegram: TELEGRAM,
+  link: 'https://t.me/yeral_bot',
+  support: { phone: '+99365000000', telegram: 'yeral_support' },
+  shownCode: undefined,
+  resendIn: 42,
+  onRelink: fn(),
+}
+
+const tgCode = (canvas: { getByLabelText: (label: string) => HTMLElement }) => canvas.getByLabelText('Sign-in code') as HTMLInputElement
+const help = (canvas: { getByRole: (role: string, options: { name: string }) => HTMLElement }) =>
+  canvas.getByRole('button', { name: 'No Telegram on this number?' })
+
+/** The phone step says the code goes to Telegram (`sendNote`). */
+export const TelegramPhone: Story = {
+  args: { ...telegram, step: 'phone', phone: '65102030', sendNote: 'We’ll send a code to your Telegram.' },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: 'Get the code' })).toBeVisible()
+    await expect(canvas.getByText('We’ll send a code to your Telegram.')).toBeVisible()
+  },
+}
+
+/** Code sent: boxes 52 without a label or Confirm, the countdown in its 32 px slot, Secondary «Open Telegram», the help. */
+export const TelegramCodeSent: Story = {
+  args: telegram,
+  play: async ({ canvas }) => {
+    await expect(tgCode(canvas)).toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()
+    await expect(onScreen(canvas, 'Send a new code in 0:42')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+    await expect(help(canvas)).toBeVisible()
+  },
+}
+
+/** The same on a phone: boxes 56, the card without its frame. */
+export const TelegramCodeSentPhone: Story = {
+  name: 'Telegram code sent · on a phone',
+  args: { ...telegram, size: 56 },
+  globals: { viewport: { value: 'xs' } },
+}
+
+/** The first time (`telegram_link`): the three steps above the boxes; Open Telegram opens the bot's link. */
+export const TelegramLinking: Story = {
+  args: { ...telegram, delivery: 'telegram_link', link: 'https://t.me/yeral_bot?start=nonce' },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('Tap Share my number.')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+  },
+}
+
+export const TelegramLinkingPhone: Story = {
+  name: 'Telegram linking · on a phone',
+  args: { ...telegram, delivery: 'telegram_link', link: 'https://t.me/yeral_bot?start=nonce', size: 56 },
+  globals: { viewport: { value: 'xs' } },
+}
+
+export const TelegramTyping: Story = { args: { ...telegram, code: '73' } }
+
+/** At 0:00 the slot holds Tertiary S «Send a new code»; nothing below moves. */
+export const TelegramResendReady: Story = {
+  args: { ...telegram, resendIn: 0 },
+  play: async ({ canvas, args }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Send a new code' }))
+    await expect(args.onResend).toHaveBeenCalled()
+    await expect(canvas.getByRole('button', { name: 'Open Telegram' })).toBeVisible()
+  },
+}
+
+export const TelegramChecking: Story = {
+  args: { ...telegram, code: '7305', checking: true },
+  play: async ({ canvas }) => {
+    await expect(onScreen(canvas, 'Checking…')).toBeVisible()
+    await expect(tgCode(canvas)).toHaveAttribute('aria-busy', 'true')
+  },
+}
+
+/** Wrong code: red boxes, the message under them, the digits stay so typing replaces them. */
+export const TelegramWrong: Story = {
+  args: { ...telegram, code: '7304', codeError: 'Wrong code. 2 tries left.', resendIn: 31 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Wrong code. 2 tries left.')
+    await expect(tgCode(canvas)).toHaveAttribute('aria-invalid', 'true')
+  },
+}
+
+/** Expired: boxes off, Primary «Send a new code» takes Open Telegram's place and the focus. */
+export const TelegramExpired: Story = {
+  args: { ...telegram, codeExpired: true },
+  play: async ({ canvas, args }) => {
+    await expect(canvas.getByText('This code has expired. Get a new one.')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Open Telegram' })).not.toBeInTheDocument()
+    const again = canvas.getByRole('button', { name: 'Send a new code' })
+    await waitFor(() => expect(again).toHaveFocus())
+    await userEvent.click(again)
+    await expect(args.onResend).toHaveBeenCalled()
+  },
+}
+
+/** Too many codes: everything but Change number and the help is off. */
+export const TelegramTooManyCodes: Story = {
+  args: { ...telegram, tooManyCodes: TOO_MANY_CODES },
+  play: async ({ canvas }) => {
+    await expect(onScreen(canvas, TOO_MANY_CODES)).toBeVisible()
+    await expect(tgCode(canvas)).toBeDisabled()
+    await expect(canvas.queryByRole('button', { name: 'Open Telegram' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'Send a new code' })).not.toBeInTheDocument()
+    await expect(help(canvas)).toBeVisible()
+  },
+}
+
+/** Telegram didn't answer the request: the person tries again where they are. */
+export const TelegramUnavailable: Story = {
+  args: { ...telegram, sendFailed: true, resendIn: 0 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('Telegram didn’t answer. Try again.')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Send a new code' })).toBeVisible()
+  },
+}
+
+/** Success: green boxes and «Signed in»; it goes on by itself after 0.6 s. */
+export const TelegramSuccess: Story = {
+  args: { ...telegram, code: '7305', success: true },
+  play: async ({ canvas }) => {
+    await expect(onScreen(canvas, 'Signed in')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Open Telegram' })).not.toBeInTheDocument()
+    await expect(canvas.queryByRole('button', { name: 'No Telegram on this number?' })).not.toBeInTheDocument()
+  },
+}
+
+/** The help on desktop: a popover with the text, Call / Telegram, «Link again». */
+export const TelegramHelp: Story = {
+  args: { ...telegram, resendIn: 20 },
+  play: async ({ canvas, args }) => {
+    await userEvent.click(help(canvas))
+    const popover = within(await screen.findByRole('dialog', { name: 'No Telegram on this number?' }))
+    await waitFor(() => expect(popover.getByRole('link', { name: 'Call' })).toBeVisible())
+    await expect(popover.getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/yeral_support')
+    await userEvent.click(popover.getByRole('button', { name: 'Linked to another Telegram? Link again' }))
+    await expect(args.onRelink).toHaveBeenCalled()
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'No Telegram on this number?' })).not.toBeInTheDocument())
+  },
+}
+
+/** The help on a phone: a bottom sheet with full-width Call Ýeral / Write on Telegram and «Back to the code». */
+export const TelegramHelpSheet: Story = {
+  name: 'Telegram help · sheet on a phone',
+  args: { ...telegram, size: 56, resendIn: 20 },
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await userEvent.click(help(canvas))
+    const sheet = within(await screen.findByRole('dialog', { name: 'No Telegram on this number?' }))
+    await waitFor(() => expect(sheet.getByRole('link', { name: 'Call Ýeral' })).toBeVisible())
+    await expect(sheet.getByRole('link', { name: 'Write on Telegram' })).toBeVisible()
+    await userEvent.click(sheet.getByRole('button', { name: 'Back to the code' }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'No Telegram on this number?' })).not.toBeInTheDocument())
+    await waitFor(() => expect(help(canvas)).toHaveFocus())
   },
 }
 

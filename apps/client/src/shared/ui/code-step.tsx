@@ -84,6 +84,7 @@ export function CodeStep({
       onSendCode={steps.sendCode}
       sendNote={ahead === 'telegram' && !sms ? <TelegramCaption /> : undefined}
       sendFailed={state.sendFailed}
+      success={state.verified}
       code={state.code}
       onCodeChange={steps.changeCode}
       onSubmitCode={steps.submitCode}
@@ -129,6 +130,10 @@ export function useTelegramWords(phone: string): TelegramStepCopy {
     stillStuck: t('stillStuck', { brand }),
     call: t('call'),
     writeTelegram: t('write'),
+    callBrand: t('callBrand', { brand }),
+    writeOnTelegram: t('writeOnTelegram'),
+    backToCode: t('backToCode'),
+    close: t('close'),
     linkAgain: t('linkAgain'),
     linkSteps: [t('linkStep1'), t('linkStep2'), t('linkStep3')],
     sendFailed: t('sendFailed'),

@@ -24,6 +24,15 @@ const refused = (error: ApiError, opts: { phone?: string; resend?: boolean; now?
 })
 const atCode = (code?: string) => signInReducer(typed(), sent({ code }))
 
+describe('the right code', () => {
+  it('shows «Signed in» for a moment and clears the wrong code’s message; the reset ends it', () => {
+    const wrong = signInReducer(atCode(), { type: 'codeRefused', error: new ApiError(400, 'code_invalid', { attemptsLeft: 2 }), now: T })
+    const ok = signInReducer(wrong, { type: 'codeVerified' })
+    expect(ok).toMatchObject({ step: 'code', verified: true, attemptsLeft: undefined })
+    expect(signInReducer(ok, { type: 'reset' }).verified).toBe(false)
+  })
+})
+
 describe('the phone step', () => {
   it('keeps the error until the number changes', () => {
     const s = signInReducer(typed('651020'), { type: 'phoneInvalid', error: 'incomplete' })

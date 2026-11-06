@@ -1,8 +1,10 @@
 import { CheckIcon, CircleHelpIcon, MessageCircleIcon, PhoneIcon, SendIcon } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode, type RefObject } from 'react'
 import { cn } from '../../lib/cn'
+import { useMediaQuery } from '../../lib/use-media-query'
 import { Button } from '../button'
 import { CodeInput } from '../code-input'
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTrigger } from '../drawer'
 import { FieldMessage } from '../field'
 import { Popover, PopoverContent, PopoverTrigger } from '../popover'
 import { Spinner } from '../spinner'
@@ -32,6 +34,14 @@ export type TelegramStepCopy = {
   call: string
   /** «Telegram» — write to Ýeral. */
   writeTelegram: string
+  /** «Call Ýeral» — the help sheet's button on a phone. */
+  callBrand: string
+  /** «Write on Telegram» — the help sheet's button on a phone. */
+  writeOnTelegram: string
+  /** «Back to the code» — closes the help sheet. */
+  backToCode: string
+  /** «Close» — the help sheet's close button. */
+  close: string
   /** «Linked to another Telegram? Link again» — asks for a new link. */
   linkAgain?: string
   /** `telegram_link`: the three steps in Telegram — «Press Start», «Tap Share my number», «The code arrives in the chat». */
@@ -101,6 +111,8 @@ export function TelegramStep({
   const wrong = Boolean(codeError) && !blocked
   const newCodeRef = useRef<HTMLButtonElement>(null)
   const [helpOpen, setHelpOpen] = useState(false)
+  // the help is a sheet on a phone, a popover from 768 (B10)
+  const onPhone = useMediaQuery('(max-width: 767px)')
 
   // the lock is over or the code ran out: the only way on is a new code
   useEffect(() => {
@@ -112,6 +124,19 @@ export function TelegramStep({
     else window.location.assign('tg://')
   }
   const message = tooManyCodes ?? locked ?? (codeExpired ? copy.codeExpired : sendFailed ? copy.sendFailed : wrong ? codeError : undefined)
+  // the number's Telegram is lost: a new link, proved by the contact as the first time
+  const relink = onRelink && copy.linkAgain && !linking && (
+    <button
+      type="button"
+      className="hit cursor-pointer self-start text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
+      onClick={() => {
+        setHelpOpen(false)
+        onRelink()
+      }}
+    >
+      {copy.linkAgain}
+    </button>
+  )
 
   return (
     <>
@@ -181,63 +206,100 @@ export function TelegramStep({
       )}
       {!success && (
         <div className="flex justify-center">
-          <Popover open={helpOpen} onOpenChange={setHelpOpen}>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className={cn(
-                  'text-n-700 hit inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs text-small font-medium whitespace-nowrap',
-                  'hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none',
-                  helpOpen && 'text-n-900',
-                )}
+          {onPhone ? (
+            <Drawer open={helpOpen} onOpenChange={setHelpOpen}>
+              <DrawerTrigger asChild>
+                <HelpButton open={helpOpen}>{copy.noTelegram}</HelpButton>
+              </DrawerTrigger>
+              <DrawerContent aria-describedby={undefined}>
+                <DrawerHeader title={copy.noTelegram} closeLabel={copy.close} />
+                <div className="flex flex-col gap-4 px-4 pt-4 pb-[34px] text-body">
+                  <p className="m-0 text-n-900">{copy.noTelegramHelp}</p>
+                  <p className="m-0 text-n-600">{copy.stillStuck}</p>
+                  <div className="flex flex-col gap-3">
+                    {support?.phone && (
+                      <Button asChild variant="secondary" size="l" className="w-full">
+                        <a href={`tel:${support.phone}`}>
+                          <PhoneIcon size={20} aria-hidden />
+                          {copy.callBrand}
+                        </a>
+                      </Button>
+                    )}
+                    {support?.telegram && (
+                      <Button asChild variant="secondary" size="l" className="w-full">
+                        <a href={`https://t.me/${support.telegram}`} target="_blank" rel="noreferrer">
+                          <MessageCircleIcon size={20} aria-hidden />
+                          {copy.writeOnTelegram}
+                        </a>
+                      </Button>
+                    )}
+                    <DrawerClose asChild>
+                      <Button type="button" variant="ghost" size="l" className="w-full">
+                        {copy.backToCode}
+                      </Button>
+                    </DrawerClose>
+                  </div>
+                  {relink}
+                </div>
+              </DrawerContent>
+            </Drawer>
+          ) : (
+            <Popover open={helpOpen} onOpenChange={setHelpOpen}>
+              <PopoverTrigger asChild>
+                <HelpButton open={helpOpen}>{copy.noTelegram}</HelpButton>
+              </PopoverTrigger>
+              <PopoverContent
+                side="top"
+                align="center"
+                aria-label={copy.noTelegram}
+                className="flex w-[280px] flex-col gap-2.5 p-3 text-[13px] leading-[18px]"
               >
-                <CircleHelpIcon size={16} className="text-n-600" aria-hidden />
-                {copy.noTelegram}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="center"
-              aria-label={copy.noTelegram}
-              className="flex w-[280px] flex-col gap-2.5 p-3 text-[13px] leading-[18px]"
-            >
-              <span>{copy.noTelegramHelp}</span>
-              <span>{copy.stillStuck}</span>
-              {(support?.phone || support?.telegram) && (
-                <span className="flex gap-2">
-                  {support.phone && (
-                    <Button asChild variant="secondary" size="s">
-                      <a href={`tel:${support.phone}`}>
-                        <PhoneIcon size={16} aria-hidden />
-                        {copy.call}
-                      </a>
-                    </Button>
-                  )}
-                  {support.telegram && (
-                    <Button asChild variant="secondary" size="s">
-                      <a href={`https://t.me/${support.telegram}`} target="_blank" rel="noreferrer">
-                        <MessageCircleIcon size={16} aria-hidden />
-                        {copy.writeTelegram}
-                      </a>
-                    </Button>
-                  )}
-                </span>
-              )}
-              {onRelink && copy.linkAgain && !linking && (
-                <button
-                  type="button"
-                  className="hit cursor-pointer self-start text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
-                  onClick={() => {
-                    setHelpOpen(false)
-                    onRelink()
-                  }}
-                >
-                  {copy.linkAgain}
-                </button>
-              )}
-            </PopoverContent>
-          </Popover>
+                <span>{copy.noTelegramHelp}</span>
+                <span>{copy.stillStuck}</span>
+                {(support?.phone || support?.telegram) && (
+                  <span className="flex gap-2">
+                    {support.phone && (
+                      <Button asChild variant="secondary" size="s">
+                        <a href={`tel:${support.phone}`}>
+                          <PhoneIcon size={16} aria-hidden />
+                          {copy.call}
+                        </a>
+                      </Button>
+                    )}
+                    {support.telegram && (
+                      <Button asChild variant="secondary" size="s">
+                        <a href={`https://t.me/${support.telegram}`} target="_blank" rel="noreferrer">
+                          <MessageCircleIcon size={16} aria-hidden />
+                          {copy.writeTelegram}
+                        </a>
+                      </Button>
+                    )}
+                  </span>
+                )}
+                {relink}
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       )}
     </>
+  )
+}
+
+/** «No Telegram on this number?» — opens the help. */
+function HelpButton({ open, ...props }: ComponentProps<'button'> & { open: boolean }) {
+  return (
+    <button
+      type="button"
+      {...props}
+      className={cn(
+        'text-n-700 hit inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs text-small font-medium whitespace-nowrap',
+        'hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none',
+        open && 'text-n-900',
+      )}
+    >
+      <CircleHelpIcon size={16} className="text-n-600" aria-hidden />
+      {props.children}
+    </button>
   )
 }
