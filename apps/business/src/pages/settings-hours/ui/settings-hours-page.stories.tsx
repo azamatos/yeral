@@ -14,6 +14,12 @@ import { PageStory, pickDate } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { SettingsHoursPage } from './settings-hours-page'
 
+/** Types a time into a time field (design v0.7 · A2) and commits it with Enter. */
+async function typeTime(field: HTMLElement, time: string) {
+  await userEvent.tripleClick(field)
+  await userEvent.keyboard(`${time}{Enter}`)
+}
+
 const me: Me = {
   id: 'u-maysa',
   name: 'Maýsa Annaýewa',
@@ -250,7 +256,7 @@ export const BookingsOutside: Story = {
 export const Invalid: Story = {
   play: async ({ canvas }) => {
     // Sunday closes at 18:00
-    await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Sunday: opens' }), '18:00')
+    await typeTime(await canvas.findByRole('combobox', { name: 'Sunday: opens' }), '18:00')
     await expect(canvas.getByRole('alert')).toHaveTextContent('Opening and closing can’t be at the same time.')
     await expect(within(canvas.getByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' })).toBeDisabled()
   },
@@ -345,8 +351,8 @@ export const SpecialDayProblems: Story = {
     await userEvent.keyboard('{Escape}')
     await pickDate(modal, 'Date', weekdayAhead(12))
     await userEvent.click(modal.getByRole('radio', { name: 'Different hours' }))
-    await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Opens' }), '20:00')
-    await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Closes' }), '10:00')
+    await typeTime(modal.getByRole('combobox', { name: 'Opens' }), '20:00')
+    await typeTime(modal.getByRole('combobox', { name: 'Closes' }), '10:00')
     await expect(await modal.findByText(/opens\. Pick an earlier time\.$/)).toBeVisible()
     await expect(modal.getByRole('button', { name: 'Add' })).toBeDisabled()
   },

@@ -13,6 +13,12 @@ import { PageStory, pickDate } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { SettingsTeamPage } from './settings-team-page'
 
+/** Types a time into a time field (design v0.7 · A2) and commits it with Enter. */
+async function typeTime(field: HTMLElement, time: string) {
+  await userEvent.tripleClick(field)
+  await userEvent.keyboard(`${time}{Enter}`)
+}
+
 const me: Me = {
   id: 'u-maysa',
   name: 'Maýsa Annaýewa',
@@ -708,7 +714,7 @@ export const DrawerHours: Story = {
     await expect(drawer.getByText('5 days · Family trip')).toBeVisible()
     // Sunday the business is closed: no shift opens it
     await expect(drawer.getByRole('switch', { name: 'Sunday: works' })).toBeDisabled()
-    await userEvent.selectOptions(drawer.getByRole('combobox', { name: 'Monday: ends' }), '20:00')
+    await typeTime(drawer.getByRole('combobox', { name: 'Monday: ends' }), '20:00')
     await userEvent.click(drawer.getByRole('button', { name: 'Monday: add a break' }))
     await expect(drawer.getByRole('combobox', { name: 'Monday: break starts' })).toBeVisible()
     await userEvent.click(drawer.getByRole('button', { name: 'Save' }))

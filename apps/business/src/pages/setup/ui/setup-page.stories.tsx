@@ -14,6 +14,12 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { LAUNCH_CATEGORIES, PageStory } from '@/shared/storybook'
 import { SetupPage } from './setup-page'
 
+/** Types a time into a time field (design v0.7 · A2) and commits it with Enter. */
+async function typeTime(field: HTMLElement, time: string) {
+  await userEvent.tripleClick(field)
+  await userEvent.keyboard(`${time}{Enter}`)
+}
+
 const city = { id: 'ashgabat', name: 'Ashgabat' }
 const cities = [
   { ...city, lat: 37.9601, lng: 58.3261 },
@@ -802,7 +808,7 @@ export const Hours: Story = {
     await expect(canvas.getByRole('switch', { name: 'Same hours Monday to Friday' })).toBeChecked()
     await expect(canvas.getAllByText('Same as Monday')).toHaveLength(4)
     await expect(canvas.getByRole('combobox', { name: 'Tuesday: closes' })).toBeDisabled()
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Monday: closes' }), '18:00')
+    await typeTime(canvas.getByRole('combobox', { name: 'Monday: closes' }), '18:00')
     await expect(canvas.getByRole('combobox', { name: 'Friday: closes' })).toHaveDisplayValue('18:00')
     await userEvent.click(canvas.getByRole('button', { name: 'Monday: add a break' }))
     await expect(canvas.getByRole('combobox', { name: 'Monday: break starts' })).toHaveDisplayValue('13:00')
@@ -825,13 +831,13 @@ export const HoursPastMidnight: Story = {
     const opens = await canvas.findByRole('combobox', { name: 'Sunday: opens' })
     const closes = canvas.getByRole('combobox', { name: 'Sunday: closes' })
     const cont = canvas.getByRole('button', { name: 'Continue' })
-    await userEvent.selectOptions(opens, '18:00')
+    await typeTime(opens, '18:00')
     await expect(canvas.getByRole('alert')).toHaveTextContent('Opening and closing can’t be at the same time.')
     await expect(cont).toBeDisabled()
     await expect(cont).toHaveAccessibleDescription('Check the times.')
-    await userEvent.selectOptions(closes, '10:00')
+    await typeTime(closes, '10:00')
     await expect(canvas.getByRole('alert')).toHaveTextContent('Closes after Monday opens. Pick an earlier time.')
-    await userEvent.selectOptions(closes, '02:00')
+    await typeTime(closes, '02:00')
     await expect(canvas.getByText('until 02:00, next day')).toBeVisible()
     await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
     await expect(cont).toBeEnabled()
