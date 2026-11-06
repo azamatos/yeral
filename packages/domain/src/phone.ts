@@ -71,8 +71,13 @@ export function formatNational(raw: string): string {
   return groups.join(' ')
 }
 
-/** '+993 65 12 34 56'; partial input is grouped as far as it goes. */
+/**
+ * '+993 65 12 34 56' (DS-Type 06: always grouped, in lists, tables, cards, toasts and copy fields); partial input is
+ * grouped as far as it goes. A number of another country ('+7 …') isn't regrouped as this market's: it's shown as given.
+ */
 export function formatPhone(raw: string): string {
+  const typed = raw.trim()
+  if (typed.startsWith('+') && !COUNTRY.startsWith(typed.replace(/\D/g, '').slice(0, COUNTRY.length))) return typed
   return [COUNTRY_PREFIX, formatNational(raw)].filter(Boolean).join(' ')
 }
 

@@ -22,6 +22,23 @@ describe('Turkmen phones (the market of the first launch)', () => {
     expect(formatNational('651')).toBe('65 1')
   })
 
+  it('shows every number one way: +993 69 90 11 22 (DS-Type 06)', () => {
+    // stored E.164, a number typed with the trunk 8, one with dashes, one already grouped: the same text on the screen
+    for (const raw of ['+99369901122', '8 69 90 11 22', '69-90-11-22', '+993 69 90 11 22', ' +993  69 90 11 22 ']) {
+      expect(formatPhone(raw)).toBe('+993 69 90 11 22')
+    }
+    // an incomplete number is grouped as far as it goes, never padded
+    expect(formatPhone('+993699')).toBe('+993 69 9')
+    expect(formatPhone('+99369901')).toBe('+993 69 90 1')
+    // a number of another country is shown as given, not regrouped as a Turkmen one
+    expect(formatPhone('+7 916 123 45 67')).toBe('+7 916 123 45 67')
+    expect(formatPhone('+79161234567')).toBe('+79161234567')
+    expect(isPhone('+79161234567')).toBe(false)
+    // the country code typed partly is still this market's
+    expect(formatPhone('+9')).toBe('+993')
+    expect(formatPhone('+')).toBe('+993')
+  })
+
   it('drops the country code or the trunk 8 while typing, not only on a full number', () => {
     expect(nationalDigits('+993 65 12')).toBe('6512')
     expect(formatPhone('+993 65 12')).toBe('+993 65 12')
