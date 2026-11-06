@@ -1114,7 +1114,10 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   // a client's record shows on their pages, the calendar's blocks and the requests
   const clientsChanged = (slug: string) => invalidate(keys.clients(slug), keys.calendar(slug), keys.requests(slug))
   const clients = {
-    /** "Müşderiler" (book B-32): pages of the clients the reader sees, the most recently seen first. */
+    /**
+     * "Müşderiler" (book B-32): pages of the clients the reader sees, the most recently seen first unless `sort` and
+     * `dir` say otherwise; each page carries the chips' `counts` for the same `q`.
+     */
     list: (slug: string, p: Partial<Omit<z.output<typeof clientListQuerySchema>, 'cursor'>> = {}) => {
       const query = clean(p)
       return infiniteQueryOptions({

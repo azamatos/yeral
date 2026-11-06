@@ -90,7 +90,15 @@ const answer = async (request: Request, level: Workspace['level'], none: boolean
           .filter((r) => !q || r.name?.toLowerCase().includes(q))
           .filter((r) => !segment || r.segments.includes(segment as never))
           .map((r) => (level === 'specialist' ? { ...r, total: null, avgCheck: null } : r))
-    return json({ items, cursor: null })
+    const shown = none ? [] : rows.filter((r) => !q || r.name?.toLowerCase().includes(q))
+    const counts = {
+      all: shown.length,
+      regular: shown.filter((r) => r.segments.includes('regular')).length,
+      new: shown.filter((r) => r.segments.includes('new')).length,
+      lapsed: shown.filter((r) => r.segments.includes('lapsed')).length,
+      flagged: shown.filter((r) => r.segments.includes('flagged')).length,
+    }
+    return json({ items, total: items.length, cursor: null, counts })
   }
   if (route === 'POST /w/glow-studio/clients') {
     await request.json()

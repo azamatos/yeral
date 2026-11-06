@@ -10,6 +10,7 @@ import {
   type clientListQuerySchema,
   type clientLookupQuerySchema,
   type ClientRow,
+  type ClientSegmentCounts,
   type clientMatchSchema,
 } from '@yeral/contract/clients'
 import { effectiveStatus } from '@yeral/domain/lifecycle'
@@ -26,7 +27,18 @@ import { itemsOfBookings, stateOf } from '../bookings/repo'
 import { complaintAuthors, complaintOf, teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { likeOf, phoneLike, wordStartLikes } from '../catalog/search'
 import { rulesOf } from '../settings/service'
-import { alertNotesOf, avgCheckOf, bookingsByIds, clientFacts, doneAt, ownOnly, phoneOnlyOf, withStaff, type ClientFacts } from './facts'
+import {
+  alertNotesOf,
+  avgCheckOf,
+  bookingsByIds,
+  clientFacts,
+  doneAt,
+  ownOnly,
+  phoneOnlyOf,
+  segmentCounts,
+  withStaff,
+  type ClientFacts,
+} from './facts'
 
 interface Business {
   id: string
@@ -56,10 +68,15 @@ export async function clientList(
   actor: Actor,
   q: ListQuery,
   now: number,
-): Promise<{ items: ClientRow[]; total: number; cursor: string | null }> {
+): Promise<{ items: ClientRow[]; total: number; cursor: string | null; counts: ClientSegmentCounts }> {
   const offset = Number(q.cursor ?? 0) || 0
-  const [{ rows, total }, rules] = await all(db, [
-    () => clientFacts(db, business.id, actor, now, { where: searchOf(q.q), segment: q.segment, limit: q.limit, offset }),
+  const sums = seesSums(actor)
+  // no totals, no order by them: a reader without "See revenue" gets the usual order
+  const sort = q.sort === 'total' && !sums ? 'recent' : q.sort
+  const where = searchOf(q.q)
+  const [{ rows, total }, counts, rules] = await all(db, [
+    () => clientFacts(db, business.id, actor, now, { where, segment: q.segment, sort, dir: q.dir, limit: q.limit, offset }),
+    () => segmentCounts(db, business.id, actor, now, { where }),
     () => rulesOf(db, business.id),
   ])
   const [phoneOnly, next] = await all(db, [
@@ -75,7 +92,6 @@ export async function clientList(
         rows.flatMap((f) => (f.nextId ? [f.nextId] : [])),
       ),
   ])
-  const sums = seesSums(actor)
   return {
     items: rows.map((f) => {
       const n = next.find((b) => b.id === f.nextId)
@@ -103,6 +119,7 @@ export async function clientList(
     }),
     total,
     cursor: offset + q.limit < total ? String(offset + q.limit) : null,
+    counts,
   }
 }
 
@@ -272,6 +289,7 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
     since: localOf(c.createdAt.getTime()).date,
     stats: {
       visits: facts.visits,
+      total: seesSums(actor) ? facts.total : null,
       avgCheck: seesSums(actor) ? avgCheckOf(facts) : null,
       lastVisit: facts.lastVisit,
       noShows: facts.noShows,
@@ -279,6 +297,7 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
     notes: notes.map(({ note, by }) => ({ id: note.id, text: note.text, alert: note.alert, by, at: note.createdAt.getTime() })),
     upcoming: ahead.map(view),
     history: history.map(view),
+    historyCount: past.length,
     moreHistory: past.length > history.length,
     // the same `by` as the calendar booking's complaint: a specialist removes their own by id (B-28)
     reports: reported.map(({ row }) => ({ code: row.code, date: row.date, ...complaintOf(row, authors)! })),

@@ -72,7 +72,7 @@ export const card = (patch: Partial<ClientCard> = {}, stats: Partial<ClientCard[
   tags: ['VIP'],
   segments: ['regular'],
   since: '2024-03-02',
-  stats: { visits: 12, avgCheck: 145, lastVisit: addDays(DAY, -9), noShows: 1, ...stats },
+  stats: { visits: 12, total: 1740, avgCheck: 145, lastVisit: addDays(DAY, -9), noShows: 1, ...stats },
   notes: [
     { id: id(8), text: 'Allergic to ammonia dyes', alert: true, by: 'Maýsa', at: NOW - 86_400_000 },
     { id: id(9), text: 'Prefers mornings', alert: false, by: 'Maýsa', at: NOW - 86_400_000 },
@@ -84,6 +84,7 @@ export const card = (patch: Partial<ClientCard> = {}, stats: Partial<ClientCard[
     visit(2, 30, 'Hair colouring', 'noshow', 250),
     visit(3, 62, 'Hair colouring', 'completed', 250),
   ],
+  historyCount: 12,
   moreHistory: true,
   reports: [],
   settings: { phoneOnly: false, phoneOnlyByCount: false, noReminders: false },

@@ -64,13 +64,14 @@ const card: ClientCard = {
   tags: ['VIP'],
   segments: ['regular'],
   since: '2024-03-02',
-  stats: { visits: 12, avgCheck: 145, lastVisit: addDays(DAY, -30), noShows: 1 },
+  stats: { visits: 12, total: 1740, avgCheck: 145, lastVisit: addDays(DAY, -30), noShows: 1 },
   notes: [
     { id: 'n-1', text: 'She can only come in the morning.', alert: false, by: 'Selbi', at: epochOf('2026-07-03', 600) },
     { id: 'n-2', text: 'Use ammonia-free colour — allergy.', alert: true, by: 'Aýna', at: epochOf('2026-08-12', 600) },
   ],
   upcoming: [],
   history: [booking('YR-30001', addDays(DAY, -30), 'completed', 'Haircut'), booking('YR-30002', addDays(DAY, -60), 'noshow')],
+  historyCount: 2,
   moreHistory: false,
   reports: [
     {
