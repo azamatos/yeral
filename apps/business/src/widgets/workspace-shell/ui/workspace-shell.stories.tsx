@@ -119,7 +119,7 @@ const fakeApi =
       if (route === 'POST /me/phone/code') {
         if (!account.me.canChangePhone) return json({ error: { code: 'phone_change_unavailable' } }, 409)
         if (account.taken?.includes(String(body.phone))) return json({ error: { code: 'phone_taken' } }, 409)
-        return json({ resendAfterSec: 59, expiresInSec: 300, code: '4821' })
+        return json({ resendAfterSec: 59, expiresInSec: 300, delivery: 'screen', code: '4821' })
       }
       if (route === 'POST /me/phone/verify') {
         if (body.code !== '4821') return json({ error: { code: 'code_invalid', details: { attemptsLeft: 2 } } }, 400)

@@ -240,7 +240,7 @@ const fakeApi =
       const body = (request.method === 'GET' ? {} : await request.json().catch(() => ({}))) as Record<string, unknown>
       const route = `${request.method} ${path}`
 
-      if (route === 'GET /auth/mode') return json({ codeOnScreen: showCode })
+      if (route === 'GET /auth/mode') return json({ codeOnScreen: showCode, delivery: showCode ? 'screen' : 'sms' })
       if (route === 'POST /auth/code') {
         // 5 codes an hour for one number (book Q-267)
         if (sent >= 5) return refuse(429, 'rate_limited', { retryAfterSec: 2520, retryAfterMin: 42 })
@@ -250,7 +250,11 @@ const fakeApi =
         sentAt = Date.now()
         sent += 1
         wrong = 0
-        return json({ resendAfterSec: 59, expiresInSec: 300, ...(showCode ? { code: CODES[(sent - 1) % CODES.length] } : {}) })
+        return json({
+          resendAfterSec: 59,
+          expiresInSec: 300,
+          ...(showCode ? { delivery: 'screen', code: CODES[(sent - 1) % CODES.length] } : { delivery: 'sms' }),
+        })
       }
       if (route === 'POST /auth/verify') {
         if (wrong >= 3) return refuse(429, 'too_many_attempts', { retryAfterSec: lockSec })
