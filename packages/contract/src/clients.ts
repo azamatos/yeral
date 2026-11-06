@@ -63,13 +63,50 @@ export const clientRowSchema = z
   })
   .meta({ id: 'ClientRow' })
 
-/** "Müşderiler": the most recently seen first. `q` finds a name, or digits anywhere in the number. */
+/**
+ * What the list sorts by: `recent` (the most recently seen first: the latest booking's day, ahead or past, else the day
+ * the business added them), the name, the completed visits, the last visit, "Total" or the next booking. Ties keep the
+ * same order on every page; a client without the thing (no last visit, no booking ahead, no name) comes last either
+ * way, while `visits` and `total` count a client without a visit as 0 (first ascending).
+ */
+export const CLIENT_SORTS = ['recent', 'name', 'visits', 'lastVisit', 'total', 'nextBooking'] as const
+export type ClientSort = (typeof CLIENT_SORTS)[number]
+export const SORT_DIRS = ['asc', 'desc'] as const
+export type SortDir = (typeof SORT_DIRS)[number]
+/** Each sort's own direction without `dir`: the biggest, latest or soonest first; names A to Z. */
+export const CLIENT_SORT_DIR: Record<ClientSort, SortDir> = {
+  recent: 'desc',
+  name: 'asc',
+  visits: 'desc',
+  lastVisit: 'desc',
+  total: 'desc',
+  nextBooking: 'asc',
+}
+
+/**
+ * "Müşderiler": the most recently seen first unless `sort` says otherwise. `q` finds a name, or digits anywhere in the
+ * number. `total` sorts as `recent` for a reader without "See revenue" (they get no totals).
+ */
 export const clientListQuerySchema = cursorQuerySchema.extend({
   q: z.string().trim().max(80).optional(),
   /** A chip; "Ählisi" (all) without one. */
   segment: z.enum(CLIENT_SEGMENTS).optional(),
+  sort: z.enum(CLIENT_SORTS).optional(),
+  /** The sort's own direction without it (`CLIENT_SORT_DIR`). */
+  dir: z.enum(SORT_DIRS).optional(),
 })
-export const clientListSchema = listOf(clientRowSchema).meta({ id: 'ClientList' })
+/** How many clients each chip would show for the same `q`: "Ählisi" and the four segments. */
+export const clientSegmentCountsSchema = z
+  .object({
+    all: z.number().int(),
+    regular: z.number().int(),
+    new: z.number().int(),
+    lapsed: z.number().int(),
+    flagged: z.number().int(),
+  })
+  .meta({ id: 'ClientSegmentCounts' })
+export type ClientSegmentCounts = z.infer<typeof clientSegmentCountsSchema>
+export const clientListSchema = listOf(clientRowSchema).extend({ counts: clientSegmentCountsSchema }).meta({ id: 'ClientList' })
 
 /** The new-booking drawer looks a number up from this many of its digits, a name from this many letters. */
 export const LOOKUP_MIN_DIGITS = 3
@@ -166,6 +203,8 @@ export const clientCardSchema = z
     since: ymdSchema,
     stats: z.object({
       visits: z.number().int(),
+      /** "Total": what the completed visits cost; null without "See revenue". */
+      total: moneySchema.nullable(),
       /** null without "See revenue", or before a completed visit. */
       avgCheck: moneySchema.nullable(),
       lastVisit: ymdSchema.nullable(),
@@ -174,8 +213,9 @@ export const clientCardSchema = z
     notes: z.array(clientNoteSchema),
     /** Waiting requests and confirmed visits ahead, the soonest first. */
     upcoming: z.array(clientBookingSchema),
-    /** Everything else, the newest first. */
+    /** Everything else, the newest first: the newest `history` of `historyCount`. */
     history: z.array(clientBookingSchema),
+    historyCount: z.number().int(),
     moreHistory: z.boolean(),
     reports: z.array(clientReportSchema),
     settings: z.object({

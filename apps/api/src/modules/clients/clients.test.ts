@@ -146,7 +146,12 @@ describe('clients (book B-32, B-34)', () => {
     return b
   }
   const list = async (b: ReturnType<typeof browser>, query: string) =>
-    (await b.req(`${W}/clients?${query}`)).json as { items: Row[]; total: number; cursor: string | null }
+    (await b.req(`${W}/clients?${query}`)).json as {
+      items: Row[]
+      total: number
+      cursor: string | null
+      counts: Record<'all' | 'regular' | 'new' | 'lapsed' | 'flagged', number>
+    }
 
   it('the most recently seen first, by number or name, with the chips; the owner sees totals, an administrator doesn’t', async () => {
     const maysa = await as(MAYSA)
@@ -287,5 +292,131 @@ describe('clients (book B-32, B-34)', () => {
     } finally {
       await db.update(services).set({ archived: false }).where(eq(services.id, haircut))
     }
+  })
+
+  describe('sorted, counted and paged (the owner’s #11, #31)', () => {
+    const DAY = 86_400_000
+    let a: string
+    let b: string
+    let c: string
+    let d: string
+    let e: string
+    /** Ties, and the ones without the thing, come by id. */
+    const byId = (...ids: string[]) => [...ids].sort()
+    const ids = (page: { items: Row[] }) => page.items.map((x) => x.id)
+    /** Each sort's order, the sort's own direction first. */
+    const orders = (): [string, string[]][] => [
+      ['sort=recent', [e, a, d, b, c]],
+      ['sort=recent&dir=asc', [c, b, d, a, e]],
+      ['sort=visits', [a, b, ...byId(c, e), d]],
+      ['sort=visits&dir=asc', [d, ...byId(c, e), b, a]],
+      ['sort=name', [d, ...byId(c, e), a, b]],
+      ['sort=name&dir=desc', [a, ...byId(c, e), d, b]],
+      ['sort=lastVisit', [a, b, ...byId(c, e), d]],
+      ['sort=lastVisit&dir=asc', [...byId(c, e), b, a, d]],
+      ['sort=total', [a, ...byId(b, c, e), d]],
+      ['sort=total&dir=asc', [d, ...byId(b, c, e), a]],
+      ['sort=nextBooking', [a, e, ...byId(b, c, d)]],
+      ['sort=nextBooking&dir=desc', [e, a, ...byId(b, c, d)]],
+    ]
+
+    beforeAll(async () => {
+      const made = await db
+        .insert(clients)
+        .values([
+          { businessId: glowId, phone: '+99365910001', name: 'Sort Regular', createdAt: new Date(DEMO_NOW - 200 * DAY) },
+          { businessId: glowId, phone: '+99365910002', name: null, createdAt: new Date(DEMO_NOW - 20 * DAY) },
+          { businessId: glowId, phone: '+99365910003', name: 'Sort Lapsed', createdAt: new Date(DEMO_NOW - 300 * DAY) },
+          { businessId: glowId, phone: '+99365910004', name: 'Sort Empty', createdAt: new Date(DEMO_NOW - DAY) },
+          { businessId: glowId, phone: '+99365910005', name: 'Sort Lapsed', createdAt: new Date(DEMO_NOW - 250 * DAY) },
+        ])
+        .returning()
+      ;[a, b, c, d, e] = made.map((x) => x.id) as [string, string, string, string, string]
+      // a: regular, three visits with Maral (300), one ahead in 3 days
+      await booking({ clientId: a, date: addDays(TODAY, -100), status: 'completed', staffId: maralId, serviceId: manicure })
+      await booking({ clientId: a, date: addDays(TODAY, -40), status: 'completed', staffId: maralId, serviceId: manicure })
+      await booking({ clientId: a, date: addDays(TODAY, -5), status: 'completed', staffId: maralId, serviceId: manicure })
+      await booking({ clientId: a, date: addDays(TODAY, 3), status: 'confirmed', staffId: maralId, serviceId: manicure })
+      // b: new, unnamed, two visits with Aýna, one without a price (80)
+      await booking({ clientId: b, date: addDays(TODAY, -10), status: 'completed', staffId: aynaId, serviceId: haircut, price: 80 })
+      await booking({ clientId: b, date: addDays(TODAY, -12), status: 'completed', staffId: aynaId, serviceId: haircut, price: null })
+      // c and e: lapsed twins with the same name, one visit 90 days ago (80); c reported, e with a visit ahead in 9 days
+      await booking({
+        clientId: c,
+        date: addDays(TODAY, -90),
+        status: 'completed',
+        staffId: aynaId,
+        serviceId: haircut,
+        price: 80,
+        complaint: 'late',
+      })
+      await booking({ clientId: e, date: addDays(TODAY, -90), status: 'completed', staffId: aynaId, serviceId: haircut, price: 80 })
+      await booking({ clientId: e, date: addDays(TODAY, 9), status: 'confirmed', staffId: aynaId, serviceId: haircut })
+      // d: added yesterday, nothing yet
+    })
+
+    it('each sort both ways: ties by id, the ones without the thing last; the usual order without a sort', async () => {
+      const maysa = await as(MAYSA)
+      expect(ids(await list(maysa, 'q=659100'))).toEqual([e, a, d, b, c])
+      for (const [query, order] of orders()) expect(ids(await list(maysa, `q=659100&${query}`)), query).toEqual(order)
+      expect((await maysa.req(`${W}/clients?sort=phone`)).status).toBe(400)
+      expect((await maysa.req(`${W}/clients?sort=name&dir=up`)).status).toBe(400)
+    })
+
+    it('a page at a time keeps each sort’s order: the second page follows the first', async () => {
+      const maysa = await as(MAYSA)
+      for (const [query, order] of orders()) {
+        const first = await list(maysa, `q=659100&limit=2&${query}`)
+        expect(ids(first), query).toEqual(order.slice(0, 2))
+        const second = await list(maysa, `q=659100&limit=2&${query}&cursor=${first.cursor}`)
+        expect(ids(second), query).toEqual(order.slice(2, 4))
+        expect(ids(await list(maysa, `q=659100&limit=2&${query}&cursor=${second.cursor}`)), query).toEqual(order.slice(4))
+      }
+    })
+
+    it('the chips’ counts: for the search, whatever chip is on; without a search, the whole list’s', async () => {
+      const maysa = await as(MAYSA)
+      const counts = { all: 5, regular: 1, new: 1, lapsed: 2, flagged: 1 }
+      expect((await list(maysa, 'q=659100')).counts).toEqual(counts)
+      const lapsed = await list(maysa, 'q=659100&segment=lapsed')
+      expect(ids(lapsed)).toEqual([e, c])
+      expect(lapsed.counts).toEqual(counts)
+      // a chip and a sort together: the chip's rows in the sort's order, the counts still the search's
+      const lapsedAsc = await list(maysa, 'q=659100&segment=lapsed&sort=recent&dir=asc')
+      expect(ids(lapsedAsc)).toEqual([c, e])
+      expect(lapsedAsc.total).toBe(2)
+      expect(lapsedAsc.counts).toEqual(counts)
+      expect(ids(await list(maysa, 'q=659100&segment=lapsed&sort=nextBooking&dir=desc'))).toEqual([e, c])
+      const whole = await list(maysa, '')
+      expect(whole.counts.all).toBe(whole.total)
+      expect(whole.counts.all).toBeGreaterThan(5)
+      for (const segment of ['regular', 'new', 'lapsed', 'flagged'] as const)
+        expect((await list(maysa, `segment=${segment}`)).total, segment).toBe(whole.counts[segment])
+    })
+
+    it('a specialist sorts and counts her own clients only; without "See revenue" the total stays hidden and sorts as usual', async () => {
+      const maral = await as(MARAL)
+      for (const [query] of orders()) {
+        const mine = await list(maral, `q=659100&${query}`)
+        expect(ids(mine), query).toEqual([a])
+        expect(mine.counts, query).toEqual({ all: 1, regular: 1, new: 0, lapsed: 0, flagged: 0 })
+      }
+      const selbi = await as(SELBI)
+      const byTotal = await list(selbi, 'q=659100&sort=total')
+      expect(ids(byTotal)).toEqual([e, a, d, b, c])
+      expect(byTotal.items.every((x) => x.total === null)).toBe(true)
+      // the direction goes with the sort: not the oldest first, which would be `recent` ascending
+      expect(ids(await list(selbi, 'q=659100&sort=total&dir=asc'))).toEqual([e, a, d, b, c])
+      expect(ids(await list(selbi, 'q=659100&sort=name&dir=desc'))).toEqual([a, ...byId(c, e), d, b])
+    })
+
+    it('the card: what the completed visits cost, and how many bookings the history holds', async () => {
+      const maysa = await as(MAYSA)
+      const card = (await maysa.req(`${W}/clients/${a}?lang=en&history=2`)).json
+      expect(card).toMatchObject({ stats: { visits: 3, total: 300, avgCheck: 100 }, historyCount: 3, moreHistory: true })
+      expect(card.history).toHaveLength(2)
+      const selbi = await as(SELBI)
+      expect((await selbi.req(`${W}/clients/${a}?lang=en`)).json.stats).toMatchObject({ visits: 3, total: null, avgCheck: null })
+    })
   })
 })

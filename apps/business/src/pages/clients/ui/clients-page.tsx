@@ -60,8 +60,9 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
     return () => clearTimeout(timer)
   })
 
+  // the sort and its direction ride in the address (`?sort&dir`); the headers that set them come with the table redesign
   const list = useInfiniteQuery({
-    ...sdk.clients.list(slug, { q: search.q, segment: search.segment }),
+    ...sdk.clients.list(slug, { q: search.q, segment: search.segment, sort: search.sort, dir: search.dir }),
     placeholderData: keepPreviousData,
   })
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
