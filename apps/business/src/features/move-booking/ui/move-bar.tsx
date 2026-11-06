@@ -30,7 +30,7 @@ export function MoveBar({ booking: b, onBack }: { booking: CalendarBooking; onBa
           b: (chunks) => <b className="font-semibold">{chunks}</b>,
         })}
       </span>
-      <Button variant="tertiary" size="s" className="min-w-0 text-a-200 hover:bg-ink-btn-hover hover:text-a-200" onClick={onBack}>
+      <Button variant="inverse-ghost" size="s" className="text-a-200 hover:text-a-200" onClick={onBack}>
         {t('back')}
       </Button>
     </div>

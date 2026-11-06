@@ -101,7 +101,8 @@ export function Button({
       aria-busy={loading || undefined}
       // a caller's own `aria-disabled` (a trigger that stays focusable while off) stands too
       aria-disabled={loading || props['aria-disabled'] || undefined}
-      aria-label={loading && loadingLabel ? loadingLabel : props['aria-label']}
+      // while loading the visible label stays part of the name; it is replaced only when nothing visible is left
+      aria-label={loading && loadingLabel && (iconOnly || loadingText) ? loadingLabel : props['aria-label']}
       onClick={(e) => {
         if (loading) e.preventDefault()
         else onClick?.(e)
@@ -110,13 +111,13 @@ export function Button({
     >
       {loading ? (
         <>
-          <Spinner className="size-4" />
+          {/* the spinner takes the icon's size (16 / 18 / 20), so the width stays */}
+          <Spinner className={(size ?? 'm') === 's' ? 'size-4' : size === 'l' ? 'size-5' : 'size-4.5'} />
           {loadingText ?? (
             // the label stays; the leading icon gives its place to the spinner
-            <span className="contents [&>svg:first-child]:hidden" aria-hidden={iconOnly || undefined}>
-              {iconOnly ? null : children}
-            </span>
+            <span className="contents [&>svg:first-child]:hidden">{iconOnly ? null : children}</span>
           )}
+          {loadingLabel && !iconOnly && !loadingText && <span className="sr-only">{loadingLabel}</span>}
         </>
       ) : (
         children

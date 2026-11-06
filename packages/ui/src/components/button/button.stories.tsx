@@ -222,7 +222,7 @@ export const Loading: Story = {
   ),
   play: async ({ args, canvas }) => {
     const rest = canvas.getByRole('button', { name: 'New booking' })
-    const busy = canvas.getAllByRole('button', { name: 'Ýüklenýär' })[0]!
+    const busy = canvas.getAllByRole('button', { name: /Ýüklenýär/ })[0]!
     await expect(busy.getBoundingClientRect().width).toBe(rest.getBoundingClientRect().width)
     await expect(busy).toHaveTextContent('New booking')
     await userEvent.click(busy)

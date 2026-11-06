@@ -37,7 +37,7 @@ export const Sizes: Story = {
     </div>
   ),
   play: async ({ canvas }) => {
-    const groups = canvas.getAllByRole('group', { name: 'Gün' })
+    const groups = canvas.getAllByRole('radio', { name: 'Ertir' }).map((r) => r.closest('[data-size]')!)
     await expect(groups[0]!.getBoundingClientRect().height).toBe(32)
     await expect(groups[1]!.getBoundingClientRect().height).toBe(40)
     await expect(groups[2]!.getBoundingClientRect().height).toBe(48)

@@ -63,6 +63,11 @@ export const KeyboardFocus: Story = {
         <TabsTrigger value="past">Past</TabsTrigger>
         <TabsTrigger value="off">Cancelled</TabsTrigger>
       </TabsList>
+      {['today', 'up', 'past', 'off'].map((v) => (
+        <TabsContent key={v} value={v} className="pt-6">
+          {v}
+        </TabsContent>
+      ))}
     </Tabs>
   ),
   play: async ({ canvas }) => {

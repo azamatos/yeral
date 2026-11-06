@@ -57,7 +57,7 @@ export const Invalid: Story = {
 export const Saving: Story = {
   args: { saving: true },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('button', { name: 'Saving' })).toHaveAttribute('aria-busy', 'true')
+    await expect(canvas.getByRole('button', { name: /Saving/ })).toHaveAttribute('aria-busy', 'true')
     await expect(canvas.getByRole('button', { name: 'Discard' })).toBeDisabled()
   },
 }
