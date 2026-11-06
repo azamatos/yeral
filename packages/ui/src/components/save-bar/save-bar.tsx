@@ -57,7 +57,7 @@ export function SaveBar({
     >
       <span className="text-body font-semibold text-n-900">{message}</span>
       <div className="flex flex-wrap gap-2 max-sm:flex-1 max-sm:[&>*]:flex-1">
-        <Button type="button" variant="ghost" disabled={saving} onClick={onDiscard} className="disabled:bg-transparent">
+        <Button type="button" variant="tertiary" disabled={saving} onClick={onDiscard} className="disabled:bg-transparent">
           {discardLabel}
         </Button>
         <Button

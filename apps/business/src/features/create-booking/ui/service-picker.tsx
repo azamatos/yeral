@@ -2,6 +2,7 @@ import type { Menu } from '@yeral/contract/services'
 import { localized } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
 import { Checkbox } from '@yeral/ui/checkbox'
+import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
 import { useLocale, useTranslations } from 'use-intl'
 import { totalOf, type MenuService } from '../model/new-booking'
 
@@ -40,13 +41,17 @@ export function ServicePicker({
       <div className="flex items-center justify-between gap-3">
         <span className="text-small font-medium text-n-900">{t('title')}</span>
         {onToggleAll && (
-          <button
-            type="button"
-            className="cursor-pointer border-0 bg-transparent p-0 text-small font-semibold text-a-600 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
-            onClick={onToggleAll.toggle}
+          <Segmented
+            size="m"
+            value={onToggleAll.all ? 'all' : 'only'}
+            onValueChange={(v) => {
+              if ((v === 'all') !== onToggleAll.all) onToggleAll.toggle()
+            }}
+            aria-label={t('title')}
           >
-            {onToggleAll.all ? t('onlyOf', { name: onToggleAll.name }) : t('showAll')}
-          </button>
+            <SegmentedItem value="only">{t('onlyOf', { name: onToggleAll.name })}</SegmentedItem>
+            <SegmentedItem value="all">{t('showAll')}</SegmentedItem>
+          </Segmented>
         )}
       </div>
       {groups.map((g) => (

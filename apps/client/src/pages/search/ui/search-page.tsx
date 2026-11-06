@@ -236,7 +236,7 @@ export function SearchPage({ category }: { category?: Category }) {
                   </Button>
                 )}
                 {filtered(address) && (
-                  <Button variant="secondary" size="s" onClick={clear}>
+                  <Button variant="tertiary" size="s" onClick={clear}>
                     {t('clearFilters')}
                   </Button>
                 )}
@@ -252,7 +252,7 @@ export function SearchPage({ category }: { category?: Category }) {
                   id={`row-${card.slug}`}
                   onMouseEnter={() => setHot(card.slug)}
                   onMouseLeave={() => setHot(null)}
-                  className={cn('-mx-3 rounded-l px-3', hot === card.slug && 'bg-a-50')}
+                  className={cn('-mx-3 rounded-card px-3', hot === card.slug && 'bg-a-50')}
                 >
                   <BusinessRow card={card} />
                 </div>

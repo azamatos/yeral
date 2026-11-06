@@ -46,7 +46,7 @@ export function ReasonModal({
             <ModalClose asChild>
               <Button>{t('cancel')}</Button>
             </ModalClose>
-            <Button type="submit" variant="danger" loading={pending}>
+            <Button type="submit" variant="danger-quiet" loading={pending}>
               {action}
             </Button>
           </ModalActions>

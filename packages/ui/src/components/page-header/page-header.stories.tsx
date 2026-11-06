@@ -53,7 +53,7 @@ export const DrillDown: Story = {
       title="Aýna Myradowa"
       subtitle="Stylist"
       actions={
-        <Button asChild variant="ghost" size="s">
+        <Button asChild variant="tertiary" size="s">
           <a href="#calendar">
             <CalendarDays aria-hidden />
             Open her calendar
@@ -109,7 +109,7 @@ export const Russian: Story = {
       title="Айна Мырадова"
       subtitle="Стилист-колорист"
       actions={
-        <Button variant="ghost" size="s">
+        <Button variant="tertiary" size="s">
           Открыть её календарь
         </Button>
       }

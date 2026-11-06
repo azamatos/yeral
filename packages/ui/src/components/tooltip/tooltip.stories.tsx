@@ -14,7 +14,7 @@ const meta = {
   args: {
     content: 'Only no-shows count towards Phone only.',
     children: (
-      <Button variant="ghost" iconOnly aria-label="Phone only">
+      <Button variant="plain" iconOnly aria-label="Phone only">
         <CircleHelp />
       </Button>
     ),
@@ -37,7 +37,7 @@ export const RailLabel: Story = {
     variant: 'label',
     content: 'Bookings · 6 requests',
     children: (
-      <Button variant="ghost" iconOnly aria-label="Bookings, 6 requests">
+      <Button variant="plain" iconOnly aria-label="Bookings, 6 requests">
         <CalendarDays />
       </Button>
     ),

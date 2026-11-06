@@ -32,7 +32,7 @@ export function LanguageSwitcher({
     <Menu>
       <MenuTrigger
         className={cn(
-          'inline-flex h-10 cursor-pointer items-center gap-2 rounded-s border-0 bg-transparent px-3 text-body font-medium text-n-900 uppercase hover:bg-group',
+          'inline-flex h-10 cursor-pointer items-center gap-2 rounded-ctl-m border-0 bg-transparent px-3 text-body font-medium text-n-900 uppercase hover:bg-group',
           'focus-visible:shadow-focus focus-visible:outline-none',
           className,
         )}

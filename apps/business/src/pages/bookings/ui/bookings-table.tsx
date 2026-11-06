@@ -58,7 +58,7 @@ function RowMenu({
   return (
     <Menu>
       <MenuTrigger asChild>
-        <Button variant="ghost" size="s" iconOnly aria-label={t('label', { name: words.name(r) })}>
+        <Button variant="plain" size="s" iconOnly aria-label={t('label', { name: words.name(r) })}>
           <Ellipsis aria-hidden />
         </Button>
       </MenuTrigger>
@@ -113,7 +113,7 @@ export function BookingsTable({
             <button
               type="button"
               onClick={() => onOpen(r)}
-              className="flex w-full cursor-pointer flex-col gap-1 rounded-m border border-n-200 bg-n-0 p-3 text-left focus-visible:shadow-focus focus-visible:outline-none"
+              className="flex w-full cursor-pointer flex-col gap-1 rounded-ctl-l border border-n-200 bg-n-0 p-3 text-left focus-visible:shadow-focus focus-visible:outline-none"
             >
               <span className="flex items-center justify-between gap-2">
                 <span className="min-w-0 truncate text-small font-semibold text-n-900">{words.name(r)}</span>

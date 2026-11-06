@@ -59,7 +59,7 @@ export function HowWasItCard({
         >
           <div className="flex items-start gap-3">
             {visit.business.photo ? (
-              <img src={visit.business.photo.url} alt="" className="size-12 flex-none rounded-s object-cover" />
+              <img src={visit.business.photo.url} alt="" className="size-12 flex-none rounded-ctl-m object-cover" />
             ) : (
               <Avatar name={visit.business.name} size={48} shape="square" tone="neutral" decorative />
             )}
@@ -71,12 +71,12 @@ export function HowWasItCard({
               <span className="text-dense text-n-600">{visitLine(visit, fmt)}</span>
             </div>
             <Button
-              variant="ghost"
+              variant="plain"
               iconOnly
               size="s"
               aria-label={t('close')}
               disabled={close.isPending}
-              className="-mt-1 -mr-2 flex-none rounded-s"
+              className="-mt-1 -mr-2 flex-none rounded-ctl-m"
               onClick={() => close.mutate(visit.code, { onError: (error) => toast(errorText(error)) })}
             >
               <X />

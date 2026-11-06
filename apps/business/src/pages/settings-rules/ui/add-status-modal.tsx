@@ -143,11 +143,11 @@ export function AddStatusModal({
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-dense font-semibold text-n-900">{t('preview')}</span>
-            <div className="flex flex-wrap items-center gap-4 rounded-m bg-n-50 p-4">
+            <div className="flex flex-wrap items-center gap-4 rounded-ctl-l bg-n-50 p-4">
               {/* a confirmed calendar block with the chip in its corner (B-Settings `.pvb`) */}
               <div
                 aria-hidden
-                className="relative flex w-52 flex-col gap-0.5 rounded-input border border-a-line bg-a-50 py-2 pr-8 pl-2.5 text-dense text-n-900"
+                className="relative flex w-52 flex-col gap-0.5 rounded-ctl-s border border-a-line bg-a-50 py-2 pr-8 pl-2.5 text-dense text-n-900"
               >
                 <span className="flex items-center gap-1.5 font-semibold">
                   <Check strokeWidth={2} className="size-3.5 text-a-600" />

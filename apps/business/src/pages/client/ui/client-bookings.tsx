@@ -66,7 +66,7 @@ export function ClientUpcoming({
               key={b.code}
               slug={slug}
               booking={b}
-              className="-mx-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-m p-3 text-small text-n-900 no-underline hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none sm:grid-cols-[120px_minmax(0,1fr)_auto_20px]"
+              className="-mx-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-ctl-l p-3 text-small text-n-900 no-underline hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none sm:grid-cols-[120px_minmax(0,1fr)_auto_20px]"
             >
               <span className="flex flex-col max-sm:col-span-2">
                 <span className="font-semibold">{fmt.relativeShortDate(b.date, today(now))}</span>

@@ -213,7 +213,7 @@ function GroupNameField({
           if (e.key === 'Escape') cancel()
         }}
       />
-      <Button variant="ghost" size={size} disabled={pending} onClick={cancel}>
+      <Button variant="tertiary" size={size} disabled={pending} onClick={cancel}>
         {t('cancel')}
       </Button>
       <Button variant="secondary" size={size} disabled={!text} loading={pending} loadingLabel={savingLabel} onClick={save}>
@@ -375,7 +375,7 @@ function Group({
         <span className="flex-1" />
         <Actions>
           <MenuTrigger asChild>
-            <Button ref={actions} variant="ghost" iconOnly aria-label={t('groupActions', { name })} className="size-9">
+            <Button ref={actions} variant="plain" iconOnly aria-label={t('groupActions', { name })} className="size-9">
               <Ellipsis />
             </Button>
           </MenuTrigger>
@@ -566,7 +566,7 @@ function ServiceRow({
       <div className="relative z-1 flex justify-end">
         <Actions>
           <MenuTrigger asChild>
-            <Button ref={actions} variant="ghost" iconOnly aria-label={t('rowActions', { name })} className="size-9">
+            <Button ref={actions} variant="plain" iconOnly aria-label={t('rowActions', { name })} className="size-9">
               <Ellipsis />
             </Button>
           </MenuTrigger>

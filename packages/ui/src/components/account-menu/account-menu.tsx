@@ -145,7 +145,7 @@ export function AccountMenu({
           ref={trigger}
           aria-label={triggerLabel}
           className={cn(
-            'inline-flex size-11 flex-none cursor-pointer items-center justify-center rounded-m border-0 bg-transparent hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group',
+            'inline-flex size-11 flex-none cursor-pointer items-center justify-center rounded-ctl-l border-0 bg-transparent hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group',
             className,
           )}
         >
@@ -166,7 +166,7 @@ export function AccountMenu({
         <DropdownMenu.Trigger
           ref={trigger}
           aria-label={triggerLabel}
-          className="inline-flex size-9 flex-none cursor-pointer items-center justify-center rounded-s border-0 bg-transparent text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group"
+          className="inline-flex size-9 flex-none cursor-pointer items-center justify-center rounded-ctl-m border-0 bg-transparent text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group"
         >
           <Ellipsis aria-hidden className="size-4.5" />
         </DropdownMenu.Trigger>

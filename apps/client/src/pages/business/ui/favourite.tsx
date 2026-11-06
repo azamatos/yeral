@@ -28,7 +28,7 @@ export function FavouriteButton({ slug, wide = false }: { slug: string; wide?: b
   return (
     <>
       <Button
-        variant={wide ? 'ghost' : on ? 'tint' : 'secondary'}
+        variant={wide ? 'tertiary' : on ? 'tint' : 'secondary'}
         iconOnly={!wide}
         aria-pressed={on}
         aria-label={wide ? undefined : label}

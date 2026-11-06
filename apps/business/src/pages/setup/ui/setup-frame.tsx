@@ -41,7 +41,7 @@ export function useStepName() {
 function Lockup({ height }: { height: number }) {
   const t = useTranslations()
   return (
-    <Link to="/" className="flex flex-none items-center gap-2.5 rounded-s focus-visible:shadow-focus focus-visible:outline-none">
+    <Link to="/" className="flex flex-none items-center gap-2.5 rounded-ctl-m focus-visible:shadow-focus focus-visible:outline-none">
       <Logo alt={t('common.brand')} height={height} />
       <span className="inline-flex h-5.5 items-center rounded-pill border border-a-line bg-a-50 px-2 text-micro font-semibold text-a-600">
         {t('app.tag')}

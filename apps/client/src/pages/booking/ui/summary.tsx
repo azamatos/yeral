@@ -47,7 +47,7 @@ export function Summary({
   return (
     <div className="flex flex-col gap-5 rounded-card border border-n-200 bg-n-0 p-6">
       <div className="flex items-center gap-3.5">
-        {photo && <img src={photo.url} alt="" className="block size-14 flex-none rounded-s object-cover" />}
+        {photo && <img src={photo.url} alt="" className="block size-14 flex-none rounded-ctl-m object-cover" />}
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[16px] leading-[22px] font-semibold">{detail.name}</span>
           {detail.rating !== null && detail.reviewsCount > 0 && (

@@ -179,7 +179,7 @@ export function TimeRangeField({
         </span>
       )}
       {remove && (
-        <Button variant="ghost" size="s" iconOnly aria-label={remove.label} disabled={disabled} onClick={remove.onClick}>
+        <Button variant="plain" size="s" iconOnly aria-label={remove.label} disabled={disabled} onClick={remove.onClick}>
           <X aria-hidden strokeWidth={1.75} />
         </Button>
       )}

@@ -6,7 +6,7 @@ export function RecoveryCodes({ codes }: { codes: string[] }) {
   const t = useTranslations('recovery')
   return (
     <div className="flex flex-col gap-3">
-      <ul aria-label={t('label')} className="grid grid-cols-2 gap-x-6 gap-y-1.5 rounded-m bg-group p-4 font-mono text-small text-n-900">
+      <ul aria-label={t('label')} className="grid grid-cols-2 gap-x-6 gap-y-1.5 rounded-ctl-l bg-group p-4 font-mono text-small text-n-900">
         {codes.map((code) => (
           <li key={code}>{code}</li>
         ))}

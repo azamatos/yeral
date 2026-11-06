@@ -66,7 +66,7 @@ function ReviewCard({ review }: { review: AdminReview }) {
   const { report } = review
   const waiting = report && !review.clearedAt && !review.removed
   return (
-    <article className="flex max-w-180 flex-col gap-3 rounded-m border border-n-200 p-4">
+    <article className="flex max-w-180 flex-col gap-3 rounded-ctl-l border border-n-200 p-4">
       <header className="flex flex-col gap-0.5">
         <h2 className="text-body font-semibold text-n-900">{review.business.name}</h2>
         <span className="text-dense text-n-600">{t('about', { what: review.what })}</span>
@@ -124,7 +124,7 @@ function Decide({ id }: { id: string }) {
       >
         {t('keep')}
       </Button>
-      <Button size="s" variant="danger" onClick={() => setRemoving(true)}>
+      <Button size="s" variant="danger-quiet" onClick={() => setRemoving(true)}>
         {t('remove')}
       </Button>
       {removing && (

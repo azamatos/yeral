@@ -222,7 +222,7 @@ export function MapFrame({
       {...props}
       ref={frame}
       className={cn(
-        'relative isolate h-45 overflow-hidden rounded-m bg-n-100 select-none',
+        'relative isolate h-45 overflow-hidden rounded-ctl-l bg-n-100 select-none',
         onMapClick && !overlay && 'cursor-crosshair',
         className,
       )}
@@ -239,7 +239,7 @@ export function MapFrame({
       {!overlay && size.width > 0 && <FrameContext value={{ view: { ...camera, ...size }, frame }}>{children}</FrameContext>}
       {/* above the veil, as the board draws them: zooming a waiting map does no harm */}
       {controls && (
-        <div className="absolute top-3 right-3 z-3 flex flex-col overflow-hidden rounded-m border border-n-200 bg-n-0 shadow-raised">
+        <div className="absolute top-3 right-3 z-3 flex flex-col overflow-hidden rounded-ctl-l border border-n-200 bg-n-0 shadow-raised">
           <ControlButton label={controls.zoomIn} onClick={() => zoomBy(1)}>
             <Plus aria-hidden strokeWidth={2} />
           </ControlButton>
@@ -337,7 +337,7 @@ export function MapPinHandle({
           'absolute z-1 cursor-grab touch-none border-0 p-0 outline-none active:cursor-grabbing',
           area
             ? 'size-37.5 -translate-1/2 rounded-pill border-[1.5px] border-solid border-a-500/45 bg-a-500/14 focus-visible:shadow-focus'
-            : 'flex h-11.5 w-10 -translate-x-1/2 -translate-y-full items-start justify-center rounded-m bg-transparent drop-shadow-[0_4px_6px_rgba(16,16,20,0.28)] focus-visible:shadow-focus',
+            : 'flex h-11.5 w-10 -translate-x-1/2 -translate-y-full items-start justify-center rounded-ctl-l bg-transparent drop-shadow-[0_4px_6px_rgba(16,16,20,0.28)] focus-visible:shadow-focus',
         )}
         style={{ left: p.x, top: p.y }}
         onClick={(e) => e.stopPropagation()}

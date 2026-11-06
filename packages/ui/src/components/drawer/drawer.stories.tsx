@@ -18,7 +18,9 @@ function BookingDetail({ defaultOpen, scrim }: { defaultOpen?: boolean; scrim?: 
           title="Glow Studio"
           subtitle="Bitarap Türkmenistan şaýoly 247"
           closeLabel="Ýap"
-          leading={<img src="/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="" className="size-12 flex-none rounded-m object-cover" />}
+          leading={
+            <img src="/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="" className="size-12 flex-none rounded-ctl-l object-cover" />
+          }
         />
         <DrawerBody>
           <StatusBadge status="pending">Garaşylýar</StatusBadge>
@@ -42,7 +44,7 @@ function BookingDetail({ defaultOpen, scrim }: { defaultOpen?: boolean; scrim?: 
             <Phone />
             Jaň et
           </Button>
-          <Button variant="danger">Ýazylyşy ýatyr</Button>
+          <Button variant="danger-quiet">Ýazylyşy ýatyr</Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

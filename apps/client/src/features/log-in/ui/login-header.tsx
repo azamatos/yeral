@@ -8,7 +8,7 @@ export function LoginHeader({ title, children }: { title: ReactNode; children?: 
   const t = useTranslations('login')
   return (
     <ModalHeader
-      media={<img src={brand.icon} alt="" width={40} height={40} className="block size-10 rounded-s" />}
+      media={<img src={brand.icon} alt="" width={40} height={40} className="block size-10 rounded-ctl-m" />}
       title={title}
       closeLabel={t('close')}
     >

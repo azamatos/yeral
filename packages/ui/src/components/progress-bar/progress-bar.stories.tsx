@@ -37,7 +37,7 @@ export const Goal: Story = {
 export const Flow: Story = {
   args: { variant: 'flow', label: 'Setup steps', value: 4, max: 8, valueText: 'Step 4 of 8' },
   render: (args) => (
-    <div className="overflow-hidden rounded-m border border-n-200">
+    <div className="overflow-hidden rounded-ctl-l border border-n-200">
       <div className="flex h-14 items-center gap-3 px-5 text-small font-semibold">
         <span>
           <span className="text-n-500">4 / 8</span> · Hours

@@ -105,7 +105,7 @@ function Frame({
       {...link}
       style={{ ...style, paddingRight: 8 + icons.count * 18 + (timer ? 60 : 0) }}
       className={cn(
-        'absolute right-1 left-1 z-4 flex cursor-pointer flex-col items-stretch justify-start gap-px overflow-hidden rounded-input py-1 pl-2 text-left text-n-900',
+        'absolute right-1 left-1 z-4 flex cursor-pointer flex-col items-stretch justify-start gap-px overflow-hidden rounded-ctl-s py-1 pl-2 text-left text-n-900',
         'hover:brightness-[.97] focus-visible:shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-a-400)] focus-visible:outline-none',
         look,
         half === 'right' && 'left-[52%]',

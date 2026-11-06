@@ -305,7 +305,7 @@ function MemberEditor({
   }
 
   const readOnlyNote = (
-    <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+    <p className="m-0 flex items-start gap-2.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900">
       <Info aria-hidden className="mt-px size-4.5 flex-none" strokeWidth={1.75} />
       {t('roNote')}
     </p>
@@ -391,7 +391,7 @@ function MemberEditor({
 
           <TabsContent value="hours" className="flex flex-col gap-5">
             {!owner && (
-              <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+              <p className="m-0 flex items-start gap-2.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900">
                 <Info aria-hidden className="mt-px size-4.5 flex-none" strokeWidth={1.75} />
                 {t('roHours')}
               </p>
@@ -432,7 +432,7 @@ function MemberEditor({
             {ownerRow ? (
               <div className="flex flex-col gap-2.5">
                 <span className="text-dense font-semibold text-n-900">{t('level')}</span>
-                <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+                <p className="m-0 flex items-start gap-2.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900">
                   <Lock aria-hidden className="mt-px size-4.5 flex-none" strokeWidth={1.75} />
                   {t('ownerLevel')}
                 </p>
@@ -453,7 +453,7 @@ function MemberEditor({
                     ]}
                   />
                 </Field>
-                <p className="m-0 -mt-2 flex items-start gap-2 rounded-s bg-group px-3 py-2.5 text-dense text-n-600">
+                <p className="m-0 -mt-2 flex items-start gap-2 rounded-ctl-m bg-group px-3 py-2.5 text-dense text-n-600">
                   <Info aria-hidden className="mt-px size-4 flex-none" strokeWidth={1.75} />
                   {words(form.level === 'admin' ? 'adminMeans' : 'specialistMeans')}
                 </p>
@@ -487,7 +487,7 @@ function MemberEditor({
                       />
                     </div>
                     {form.app && was.app && invited && (
-                      <div role="status" className="flex flex-col gap-1.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+                      <div role="status" className="flex flex-col gap-1.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900">
                         <span className="inline-flex items-center gap-2 font-semibold text-st-pending-ink">
                           <span aria-hidden className="size-1.5 rounded-pill bg-st-pending-dot" />
                           {t('invited')}
@@ -512,7 +512,7 @@ function MemberEditor({
                       </div>
                     )}
                     {!form.app && (
-                      <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+                      <p className="m-0 flex items-start gap-2.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900">
                         <Lock aria-hidden className="mt-px size-4.5 flex-none" strokeWidth={1.75} />
                         {t('noAppNote', { name })}
                       </p>
@@ -551,7 +551,7 @@ function MemberEditor({
       {/* «Remove from the team» on the left beside the owner's Save (B-Team `.drw-f`); otherwise the footer's own */}
       <DrawerFooter className={owner && !ownerRow ? 'justify-between [&>*]:flex-none' : undefined}>
         {owner && !ownerRow && (
-          <Button variant="danger-ghost" aria-haspopup="dialog" disabled={saving} onClick={() => setRemoving(true)}>
+          <Button variant="danger-quiet" aria-haspopup="dialog" disabled={saving} onClick={() => setRemoving(true)}>
             {t('remove')}
           </Button>
         )}

@@ -18,10 +18,10 @@ export function BusinessTile({ card }: { card: BusinessCard }) {
           src={card.photo.url}
           alt=""
           loading="lazy"
-          className="aspect-[4/3] w-full rounded-m bg-n-100 object-cover transition-[filter] group-hover:brightness-95"
+          className="aspect-[4/3] w-full rounded-ctl-l bg-n-100 object-cover transition-[filter] group-hover:brightness-95"
         />
       ) : (
-        <span aria-hidden className="aspect-[4/3] w-full rounded-m bg-n-100" />
+        <span aria-hidden className="aspect-[4/3] w-full rounded-ctl-l bg-n-100" />
       )}
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-0.5">
@@ -29,7 +29,7 @@ export function BusinessTile({ card }: { card: BusinessCard }) {
             <Link
               to="/$lang/b/$slug"
               params={{ lang, slug: card.slug }}
-              className="text-n-900 no-underline group-hover:underline after:absolute after:inset-0 after:rounded-m focus-visible:outline-none focus-visible:after:shadow-focus"
+              className="text-n-900 no-underline group-hover:underline after:absolute after:inset-0 after:rounded-ctl-l focus-visible:outline-none focus-visible:after:shadow-focus"
             >
               {card.name}
             </Link>

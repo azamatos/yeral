@@ -133,7 +133,7 @@ function ChangeLink({ slug }: { slug: string }) {
       <PageAddressField label={t('changeTitle')} value={value} onChange={setValue} state={state} autoFocus />
       <p className="m-0 text-dense text-n-600">{t('changeNote')}</p>
       <div className="flex flex-wrap gap-2">
-        <Button variant="ghost" size="s" disabled={move.isPending} onClick={close}>
+        <Button variant="tertiary" size="s" disabled={move.isPending} onClick={close}>
           {t('cancel')}
         </Button>
         <Button size="s" disabled={value === slug || !savable(state)} loading={move.isPending} loadingLabel={t('saving')} onClick={save}>

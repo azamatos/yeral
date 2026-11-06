@@ -120,7 +120,7 @@ export function StatusLegend({
   const titleRef = useRef<HTMLHeadingElement>(null)
   const trigger = (
     <Button
-      variant="ghost"
+      variant="plain"
       size="s"
       iconOnly
       aria-label={title}
@@ -136,7 +136,7 @@ export function StatusLegend({
         <div className="flex min-h-13 flex-none items-center gap-2 pr-1 pl-4">
           <SheetTitle className="m-0 min-w-0 flex-1 text-[17px] leading-6 font-semibold tracking-[-0.01em]">{title}</SheetTitle>
           <SheetClose asChild>
-            <Button variant="ghost" size="m" iconOnly aria-label={closeLabel}>
+            <Button variant="plain" size="m" iconOnly aria-label={closeLabel}>
               <X />
             </Button>
           </SheetClose>
@@ -171,7 +171,7 @@ export function StatusLegend({
             {title}
           </h2>
           <PopoverClose asChild>
-            <Button variant="ghost" size="s" iconOnly aria-label={closeLabel} className="-mr-1.5">
+            <Button variant="plain" size="s" iconOnly aria-label={closeLabel} className="-mr-1.5">
               <X />
             </Button>
           </PopoverClose>

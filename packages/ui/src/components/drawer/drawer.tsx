@@ -136,7 +136,7 @@ export function DrawerHeader({
         </>
       )}
       <Dialog.Close asChild>
-        <Button variant="ghost" iconOnly aria-label={closeLabel} className="size-9 rounded-s">
+        <Button variant="plain" iconOnly aria-label={closeLabel} className="size-9 rounded-ctl-m">
           <X />
         </Button>
       </Dialog.Close>

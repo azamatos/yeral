@@ -77,7 +77,7 @@ export function DeleteClientModal({
                   <BookingLink
                     slug={slug}
                     booking={b}
-                    className="flex items-center justify-between gap-3 rounded-m border border-n-200 p-3 text-small text-n-900 no-underline hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none"
+                    className="flex items-center justify-between gap-3 rounded-ctl-l border border-n-200 p-3 text-small text-n-900 no-underline hover:bg-n-50 focus-visible:shadow-focus focus-visible:outline-none"
                   >
                     <span className="flex min-w-0 flex-col">
                       <span className="font-semibold">

@@ -205,12 +205,18 @@ export function ComboboxList({ className }: { className?: string }) {
   const row = (i: number, on: boolean) =>
     cn(
       'flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left text-n-900 [&>svg]:flex-none [&>svg]:text-n-600',
-      address ? 'min-h-14 rounded-input [&>svg]:size-5' : 'min-h-13 text-small not-first:border-t not-first:border-n-200',
+      address ? 'min-h-14 rounded-ctl-s [&>svg]:size-5' : 'min-h-13 text-small not-first:border-t not-first:border-n-200',
       on && (address ? 'bg-group shadow-focus-inset' : 'bg-n-50 shadow-focus-inset'),
       !on && (address ? 'hover:bg-group' : 'hover:bg-n-50'),
     )
   return (
-    <div className={cn('flex flex-col border border-n-200 bg-n-0', address ? 'rounded-m p-1.5' : 'overflow-hidden rounded-m', className)}>
+    <div
+      className={cn(
+        'flex flex-col border border-n-200 bg-n-0',
+        address ? 'rounded-ctl-l p-1.5' : 'overflow-hidden rounded-ctl-l',
+        className,
+      )}
+    >
       {section && <div className="px-3 pt-2.5 pb-1 text-label text-n-600 uppercase">{section}</div>}
       {options.length === 0 && empty && (
         <div role="status" className={cn('p-3 text-dense text-n-600', section && 'border-t border-n-200')}>

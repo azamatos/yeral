@@ -214,7 +214,7 @@ export function TelegramStep({
                 ) : resendIn > 0 ? (
                   <span>{copy.resendIn(formatCountdown(resendIn))}</span>
                 ) : (
-                  <Button type="button" variant="ghost" size="s" className="-ms-2" onClick={onResend}>
+                  <Button type="button" variant="tertiary" size="s" className="-ms-2" onClick={onResend}>
                     {copy.resend}
                   </Button>
                 )}
@@ -253,7 +253,7 @@ export function TelegramStep({
                       </Button>
                     )}
                     <DrawerClose asChild>
-                      <Button type="button" variant="ghost" size="l" className="w-full">
+                      <Button type="button" variant="tertiary" size="l" className="w-full">
                         {copy.backToCode}
                       </Button>
                     </DrawerClose>

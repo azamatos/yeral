@@ -73,7 +73,7 @@ function Locked({ picked }: { picked: Picked }) {
   const m = useTranslations('booking.move')
   const fmt = useFmt()
   return (
-    <div className="flex flex-col gap-2.5 rounded-m bg-n-50 p-4">
+    <div className="flex flex-col gap-2.5 rounded-ctl-l bg-n-50 p-4">
       {picked.map((s) => (
         <div key={s.id} className="flex items-start gap-2.5">
           <Lock aria-hidden className="mt-0.5 size-4 flex-none text-n-600" strokeWidth={1.75} />
@@ -183,7 +183,7 @@ export function MovePage() {
       start={start}
       middle={middle}
       end={
-        <Button asChild variant="ghost" iconOnly aria-label={t('close')}>
+        <Button asChild variant="plain" iconOnly aria-label={t('close')}>
           <Link {...back}>
             <X aria-hidden className="size-[22px]" />
           </Link>
@@ -192,7 +192,7 @@ export function MovePage() {
     />
   )
   const backLink = (
-    <Button asChild variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5">
+    <Button asChild variant="tertiary" className="-ml-2.5 min-w-0 pr-4 pl-2.5">
       <Link {...back}>
         <ChevronLeft aria-hidden />
         {t('back')}
@@ -343,7 +343,7 @@ export function MovePage() {
         index === 0 ? (
           backLink
         ) : (
-          <Button variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(MOVE_STEPS[index - 1] ?? 'staff', false)}>
+          <Button variant="tertiary" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(MOVE_STEPS[index - 1] ?? 'staff', false)}>
             <ChevronLeft aria-hidden />
             {t('back')}
           </Button>
@@ -404,7 +404,7 @@ export function MovePage() {
                   />
                   <OldNew before={before} after={after} />
                   {!instant && (
-                    <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900 md:hidden">
+                    <p className="m-0 flex items-start gap-2.5 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-900 md:hidden">
                       <Clock aria-hidden className="mt-px size-4.5 flex-none text-st-pending-ink" strokeWidth={2} />
                       {m('keeps')}
                     </p>
@@ -486,7 +486,7 @@ function MoveSent({
           </Link>
         }
         end={
-          <Button asChild variant="ghost" iconOnly aria-label={t('close')}>
+          <Button asChild variant="plain" iconOnly aria-label={t('close')}>
             <Link to="/$lang/account/bookings/$code" params={{ lang, code: b.code }}>
               <X aria-hidden className="size-[22px]" />
             </Link>
@@ -514,7 +514,7 @@ function MoveSent({
         </div>
         <div className="flex flex-col overflow-hidden rounded-card border border-n-200">
           <div className="flex items-center gap-3.5 border-b border-n-200 px-6 py-5 max-sm:px-5">
-            {detail.photos[0] && <img src={detail.photos[0].url} alt="" className="block size-12 flex-none rounded-s object-cover" />}
+            {detail.photos[0] && <img src={detail.photos[0].url} alt="" className="block size-12 flex-none rounded-ctl-m object-cover" />}
             <div className="flex min-w-0 flex-col gap-0.5">
               <span className="text-[16px] leading-[22px] font-semibold">{detail.name}</span>
               <span className="text-dense text-n-600">{detail.category.name}</span>

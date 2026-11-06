@@ -172,7 +172,7 @@ function StatusRow({
       </span>
       {!status.preset && (
         <Button
-          variant="ghost"
+          variant="plain"
           iconOnly
           aria-label={t('delete', { name })}
           loading={remove.isPending}

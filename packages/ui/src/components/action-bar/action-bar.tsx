@@ -39,7 +39,7 @@ export function ActionBar({
           aria-haspopup="dialog"
           aria-expanded={expanded}
           onClick={onExpand}
-          className="flex h-13 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-s border-0 bg-transparent p-0 text-left text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
+          className="flex h-13 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-ctl-m border-0 bg-transparent p-0 text-left text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
         >
           <span className="flex min-w-0 flex-col">{children}</span>
           <ChevronUp aria-hidden className="size-4.5 flex-none" />

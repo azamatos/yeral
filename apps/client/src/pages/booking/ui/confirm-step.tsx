@@ -59,7 +59,7 @@ export function ConfirmStep({
       {taken && (
         <div
           role="alert"
-          className="mt-5 flex flex-col gap-3 rounded-m border border-st-pending-line bg-st-pending-bg p-4 text-st-pending-ink"
+          className="mt-5 flex flex-col gap-3 rounded-ctl-l border border-st-pending-line bg-st-pending-bg p-4 text-st-pending-ink"
         >
           <span className="text-body font-semibold">{taken.length > 0 ? t('taken') : t('takenNone')}</span>
           <div className="flex flex-wrap items-center gap-2">

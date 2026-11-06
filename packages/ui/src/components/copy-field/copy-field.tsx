@@ -97,7 +97,7 @@ export function CopyField({ value, display, variant = 'field', label, copy, shar
         <span ref={text} className="text-body font-medium text-n-900">
           {display ?? value}
         </span>
-        <Button variant="ghost" size="s" iconOnly aria-label={label} title={label} onClick={() => void copyValue()}>
+        <Button variant="plain" size="s" iconOnly aria-label={label} title={label} onClick={() => void copyValue()}>
           {copied ? check : <Copy aria-hidden />}
         </Button>
         {children}

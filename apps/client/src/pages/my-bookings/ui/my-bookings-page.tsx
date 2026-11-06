@@ -84,7 +84,7 @@ export function MyBookingsPage() {
         <div className="flex flex-col gap-4 pt-5" aria-hidden>
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex gap-5">
-              <Skeleton className="size-24 rounded-m" />
+              <Skeleton className="size-24 rounded-ctl-l" />
               <div className="flex flex-1 flex-col gap-2 pt-1">
                 <Skeleton className="h-5 w-48" />
                 <Skeleton className="h-4 w-64" />

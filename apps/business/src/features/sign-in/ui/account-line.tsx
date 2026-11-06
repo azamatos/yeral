@@ -27,7 +27,7 @@ export function AccountLine({
         {t.rich('you', { who, b: (chunks) => <b>{chunks}</b> })}
       </span>
       {ghost ? (
-        <Button variant="ghost" className="-mr-3" loading={busy} onClick={onOtherNumber}>
+        <Button variant="tertiary" className="-mr-3" loading={busy} onClick={onOtherNumber}>
           <LogOut aria-hidden />
           {t('otherNumber')}
         </Button>

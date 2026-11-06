@@ -7,7 +7,7 @@ import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
 import { Pill } from '@yeral/ui/pill'
-import { ChevronRight, Phone, TriangleAlert } from 'lucide-react'
+import { Phone, TriangleAlert } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
@@ -42,7 +42,21 @@ export function ClientBlock({
       <div className="flex items-start gap-3">
         <Avatar name={client.name ?? ''} size={40} letters={1} tone="tint" decorative />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-[16px] leading-[22px] font-semibold text-n-900">{name}</span>
+          {/* the name is the Link to the card (A4): no bare «Open the client's card» */}
+          {client.id ? (
+            <Link
+              to="/w/$slug/clients/$id"
+              params={{ slug, id: client.id }}
+              className={cn(
+                'self-start text-[16px] leading-[22px] font-semibold text-n-900',
+                'no-underline hover:underline hover:underline-offset-3 focus-visible:rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-a-400',
+              )}
+            >
+              {name}
+            </Link>
+          ) : (
+            <span className="text-[16px] leading-[22px] font-semibold text-n-900">{name}</span>
+          )}
           {client.phone && <span className="text-dense text-n-600">{fmt.phone(client.phone)}</span>}
           {card && (
             <span className="flex flex-wrap items-center gap-1.5 pt-1">
@@ -55,9 +69,10 @@ export function ClientBlock({
               {card.settings.phoneOnly && <Pill tone="warning">{t('phoneOnly')}</Pill>}
             </span>
           )}
-          <span className="flex flex-wrap gap-2 pt-2.5">
+          {/* Call and Book again: two equal Secondary M (A4) */}
+          <span className="flex gap-2 pt-2.5">
             {client.phone && (
-              <Button asChild variant="secondary" size="s">
+              <Button asChild variant="secondary" className="flex-1">
                 {/* named by what it shows, the rest hidden: the visible word starts the name in every language (axe) */}
                 <a href={`tel:${client.phone}`}>
                   <Phone aria-hidden />
@@ -66,23 +81,13 @@ export function ClientBlock({
               </Button>
             )}
             {onBookAgain && (
-              <Button variant="ghost" size="s" onClick={onBookAgain}>
+              <Button variant="secondary" className="flex-1" onClick={onBookAgain}>
                 {t('bookAgain')}
               </Button>
             )}
           </span>
         </span>
       </div>
-      {client.id && (
-        <Link
-          to="/w/$slug/clients/$id"
-          params={{ slug, id: client.id }}
-          className="inline-flex items-center gap-1 self-start pl-13 text-small font-semibold text-a-600 no-underline hover:underline focus-visible:shadow-focus focus-visible:outline-none"
-        >
-          {t('openCard')}
-          <ChevronRight aria-hidden className="size-4" />
-        </Link>
-      )}
     </div>
   )
 }

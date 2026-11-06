@@ -53,7 +53,7 @@ function ServiceGroup({
           {name}
         </span>
         <span className="text-dense text-n-600">{t('groupCount', { n, total: ids.length })}</span>
-        <label className="-mr-2.5 ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-input px-2.5 text-dense font-semibold text-n-900 hover:bg-group">
+        <label className="-mr-2.5 ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-ctl-s px-2.5 text-dense font-semibold text-n-900 hover:bg-group">
           <Checkbox
             aria-label={t('allAria', { group: name })}
             checked={all}
@@ -69,7 +69,7 @@ function ServiceGroup({
         </label>
       </div>
       {items.map((item) => (
-        <label key={item.id} className="-mx-2 flex min-h-12 cursor-pointer items-center gap-3 rounded-s px-2 py-1.5 hover:bg-n-50">
+        <label key={item.id} className="-mx-2 flex min-h-12 cursor-pointer items-center gap-3 rounded-ctl-m px-2 py-1.5 hover:bg-n-50">
           <Checkbox
             checked={selected.includes(item.id)}
             onChange={() => onChange(selected.includes(item.id) ? selected.filter((i) => i !== item.id) : [...selected, item.id])}

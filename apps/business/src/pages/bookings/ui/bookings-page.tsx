@@ -150,7 +150,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
           ]}
         />
         {filtered && (
-          <Button variant="ghost" size="s" onClick={clear}>
+          <Button variant="tertiary" size="s" onClick={clear}>
             {t('clear')}
           </Button>
         )}
@@ -175,7 +175,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
             title={t('nothing')}
             description={t('nothingHint')}
             action={
-              <Button variant="secondary" size="s" onClick={clear}>
+              <Button variant="tertiary" size="s" onClick={clear}>
                 {t('clearFilters')}
               </Button>
             }

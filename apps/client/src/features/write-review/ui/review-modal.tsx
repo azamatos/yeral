@@ -149,7 +149,7 @@ function ReviewForm({
         media={
           <div className="flex min-w-0 flex-1 items-center gap-3">
             {b.business.photo ? (
-              <img src={b.business.photo.url} alt="" className="size-12 flex-none rounded-s object-cover" />
+              <img src={b.business.photo.url} alt="" className="size-12 flex-none rounded-ctl-m object-cover" />
             ) : (
               <Avatar name={b.business.name} size={48} shape="square" tone="neutral" decorative />
             )}
@@ -213,7 +213,7 @@ function ReviewForm({
       )}
       <ModalActions>
         <ModalClose asChild>
-          <Button variant="ghost" disabled={busy}>
+          <Button variant="tertiary" disabled={busy}>
             {written ? t('cancel') : t('later')}
           </Button>
         </ModalClose>

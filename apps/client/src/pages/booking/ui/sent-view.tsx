@@ -93,7 +93,7 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
       </div>
       <div className="overflow-hidden rounded-card border border-n-200 bg-n-0">
         <div className="flex items-center gap-3.5 border-b border-n-200 px-6 py-5">
-          {b.business.photo && <img src={b.business.photo.url} alt="" className="block size-12 flex-none rounded-s object-cover" />}
+          {b.business.photo && <img src={b.business.photo.url} alt="" className="block size-12 flex-none rounded-ctl-m object-cover" />}
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="text-[16px] leading-[22px] font-semibold">{b.business.name}</span>
             <span className="text-dense text-n-600">{b.business.category}</span>

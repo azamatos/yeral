@@ -27,7 +27,7 @@ export function Tooltip({
           sideOffset={variant === 'label' ? 8 : 6}
           collisionPadding={8}
           className={cn(
-            'z-70 rounded-input bg-n-900 text-micro font-medium text-white shadow-raised data-[state=delayed-open]:animate-fade-in',
+            'z-70 rounded-ctl-s bg-n-900 text-micro font-medium text-white shadow-raised data-[state=delayed-open]:animate-fade-in',
             variant === 'label' ? 'px-2 py-1 whitespace-nowrap' : 'max-w-59 px-2.5 py-2',
           )}
         >

@@ -26,7 +26,7 @@ export function BottomTabBar({ className, style, ...props }: ComponentProps<'nav
 }
 
 const item = cn(
-  'relative m-0 flex h-15.75 min-w-0 cursor-pointer flex-col items-center justify-center gap-0.75 rounded-m border-0 bg-transparent p-0 text-[11px] leading-3.5 font-semibold text-n-600 no-underline',
+  'relative m-0 flex h-15.75 min-w-0 cursor-pointer flex-col items-center justify-center gap-0.75 rounded-ctl-l border-0 bg-transparent p-0 text-[11px] leading-3.5 font-semibold text-n-600 no-underline',
   'hover:text-n-900 focus-visible:shadow-focus-inset focus-visible:outline-none aria-[current=page]:text-a-600 aria-expanded:text-a-600',
   "[&>svg]:flex-none [&>svg:not([class*='size-'])]:size-5.5",
 )

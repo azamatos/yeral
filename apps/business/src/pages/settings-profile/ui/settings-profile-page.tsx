@@ -185,7 +185,7 @@ function SentBack({ slug, reason, owner, unsaved }: { slug: string; reason: stri
   const send = useMutation(sdk.settings.sendForReview(slug))
   const titleId = useId()
   return (
-    <div role="region" aria-labelledby={titleId} className="mb-6 flex flex-col gap-2.5 rounded-m border border-danger-line bg-n-0 p-4">
+    <div role="region" aria-labelledby={titleId} className="mb-6 flex flex-col gap-2.5 rounded-ctl-l border border-danger-line bg-n-0 p-4">
       <div className="flex items-start gap-2.5 text-body font-semibold text-danger-ink">
         <CircleAlert aria-hidden className="mt-px size-5 flex-none" />
         <span id={titleId}>{t('title')}</span>
@@ -207,7 +207,7 @@ function SentBack({ slug, reason, owner, unsaved }: { slug: string; reason: stri
             {t('send')}
           </Button>
         )}
-        <Button asChild size="s" variant="ghost">
+        <Button asChild size="s" variant="tertiary">
           <a href={`#${PHOTOS_ANCHOR}`}>{t('toPhotos')}</a>
         </Button>
       </div>

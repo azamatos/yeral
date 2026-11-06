@@ -43,7 +43,7 @@ export function ChangePhone({ phone, canChange }: { phone: string; canChange: bo
       <div
         role="group"
         aria-labelledby="profile-phone"
-        className="flex h-11 items-center gap-2 rounded-input border border-n-200 bg-n-50 pr-2 pl-3.5 text-body text-n-900"
+        className="flex h-11 items-center gap-2 rounded-ctl-s border border-n-200 bg-n-50 pr-2 pl-3.5 text-body text-n-900"
       >
         <span className="font-medium">{formatPhone(phone)}</span>
         <span className="flex-1" />
@@ -96,7 +96,7 @@ function NewNumber({ current, onClose }: { current: string; onClose: () => void 
   const said = useCodeStepWords(steps)
 
   return (
-    <div className="mt-2 flex flex-col gap-4 rounded-m border border-n-200 p-4">
+    <div className="mt-2 flex flex-col gap-4 rounded-ctl-l border border-n-200 p-4">
       {state.step === 'code' && state.sentTo && (
         <p className="m-0 text-dense text-n-600">
           {t.rich('shell.profile.changeTo', {

@@ -18,7 +18,7 @@ export function MenuContent({ className, sideOffset = 8, align = 'end', ...props
         collisionPadding={16}
         {...props}
         className={cn(
-          'z-65 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-m border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
+          'z-65 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-ctl-l border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
           className,
         )}
       />
@@ -35,7 +35,7 @@ export function MenuSubContent({ className, sideOffset = 6, ...props }: Componen
         collisionPadding={16}
         {...props}
         className={cn(
-          'z-65 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-m border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
+          'z-65 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-ctl-l border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
           className,
         )}
       />
@@ -44,7 +44,7 @@ export function MenuSubContent({ className, sideOffset = 6, ...props }: Componen
 }
 
 const itemClass = cn(
-  'flex h-10 w-full cursor-pointer items-center gap-3 rounded-input px-3 text-left text-body text-n-900 outline-none select-none',
+  'flex h-10 w-full cursor-pointer items-center gap-3 rounded-ctl-s px-3 text-left text-body text-n-900 outline-none select-none',
   'data-highlighted:bg-group data-disabled:cursor-not-allowed data-disabled:text-n-500',
   "[&_svg]:flex-none [&_svg]:text-n-600 [&_svg:not([class*='size-'])]:size-[18px]",
 )
@@ -96,7 +96,7 @@ export interface MenuLink {
 
 /** The account menu's row (B-Shell `.mi`: 40 min, 14/20, icon 18): a link row and the rows built like it. */
 export const menuRowClass = cn(
-  'flex min-h-10 cursor-pointer items-center gap-2.5 rounded-input px-2.5 py-1.5 text-small text-n-900 no-underline outline-none select-none',
+  'flex min-h-10 cursor-pointer items-center gap-2.5 rounded-ctl-s px-2.5 py-1.5 text-small text-n-900 no-underline outline-none select-none',
   'focus-visible:shadow-focus-inset data-highlighted:bg-group [&>svg]:size-4.5 [&>svg]:flex-none [&>svg]:text-n-600',
 )
 

@@ -34,7 +34,7 @@ export function MoreSheet({
 }
 
 const row = cn(
-  'm-0 flex min-h-12 w-full cursor-pointer items-center gap-3.5 rounded-s border-0 bg-transparent px-3 text-left text-[15px] leading-5 font-medium text-n-900 no-underline',
+  'm-0 flex min-h-12 w-full cursor-pointer items-center gap-3.5 rounded-ctl-m border-0 bg-transparent px-3 text-left text-[15px] leading-5 font-medium text-n-900 no-underline',
   'hover:bg-n-50 hover:text-n-900 focus-visible:shadow-focus-inset focus-visible:outline-none',
   "[&>svg]:flex-none [&>svg]:text-n-600 [&>svg:not([class*='size-'])]:size-5",
 )

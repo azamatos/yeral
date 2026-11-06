@@ -103,7 +103,7 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
   const menu = (r: ClientRow) => (
     <Menu>
       <MenuTrigger asChild>
-        <Button variant="ghost" size="s" iconOnly aria-label={t('actions', { name: name(r) })}>
+        <Button variant="plain" size="s" iconOnly aria-label={t('actions', { name: name(r) })}>
           <Ellipsis aria-hidden />
         </Button>
       </MenuTrigger>
@@ -155,7 +155,7 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
               title={t('nothing')}
               description={t('nothingHint')}
               action={
-                <Button variant="secondary" size="s" onClick={clear}>
+                <Button variant="tertiary" size="s" onClick={clear}>
                   {t('clearFilters')}
                 </Button>
               }
@@ -174,7 +174,7 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
         ) : phone ? (
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {rows.map((r) => (
-              <li key={r.id} className="flex items-center gap-2 rounded-m border border-n-200 bg-n-0 p-3">
+              <li key={r.id} className="flex items-center gap-2 rounded-ctl-l border border-n-200 bg-n-0 p-3">
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   {nameLink(r, 'truncate text-small font-semibold')}
                   {r.phone && <span className="text-dense text-n-600">{fmt.phone(r.phone)}</span>}

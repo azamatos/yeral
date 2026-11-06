@@ -54,7 +54,7 @@ export const WithCancel: Story = {
   args: {
     back: undefined,
     start: (
-      <Button variant="ghost" size="l">
+      <Button variant="tertiary" size="l">
         Cancel
       </Button>
     ),

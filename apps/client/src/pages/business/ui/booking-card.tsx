@@ -267,7 +267,7 @@ export function BookingCard({
                 type="button"
                 aria-label={t('card.remove', { name: s.name })}
                 onClick={() => onRemove(s.id)}
-                className="-mt-1.5 -mr-2 inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-input border-0 bg-transparent text-n-600 hover:bg-group hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
+                className="-mt-1.5 -mr-2 inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-ctl-s border-0 bg-transparent text-n-600 hover:bg-group hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
               >
                 <X aria-hidden className="size-4" strokeWidth={1.75} />
               </button>
@@ -295,7 +295,7 @@ export function BookingCard({
             {t('card.continue')}
           </BookLink>
         </div>
-        <Button variant="ghost" className="-mt-2 w-full" onClick={onClear}>
+        <Button variant="tertiary" className="-mt-2 w-full" onClick={onClear}>
           {t('card.clear')}
         </Button>
         <span className="text-center text-dense text-n-600">{t('card.payAtPlace')}</span>

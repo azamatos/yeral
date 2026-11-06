@@ -18,7 +18,7 @@ export function CompactSearch({
       type="button"
       {...props}
       className={cn(
-        'flex h-11 w-full max-w-110 cursor-pointer items-center gap-2.5 rounded-m border border-n-300 bg-n-0 pr-1.5 pl-3.5 text-left hover:bg-n-50',
+        'flex h-11 w-full max-w-110 cursor-pointer items-center gap-2.5 rounded-ctl-l border border-n-300 bg-n-0 pr-1.5 pl-3.5 text-left hover:bg-n-50',
         className,
       )}
     >
@@ -27,7 +27,7 @@ export function CompactSearch({
         {query}
         {details && <span className="font-normal text-n-500"> · {details}</span>}
       </span>
-      <span className="inline-flex h-8 flex-none items-center rounded-input bg-group px-2.5 text-dense font-semibold text-n-900">
+      <span className="inline-flex h-8 flex-none items-center rounded-ctl-s bg-group px-2.5 text-dense font-semibold text-n-900">
         {actionLabel}
       </span>
     </button>

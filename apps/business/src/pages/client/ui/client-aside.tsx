@@ -25,7 +25,7 @@ export function ClientAside({ slug, card, manage, onDelete }: { slug: string; ca
   return (
     <aside
       aria-labelledby={headingId}
-      className="flex min-w-0 flex-[1_1_320px] flex-col gap-3 rounded-l border border-n-200 p-5 min-[1240px]:max-w-80"
+      className="flex min-w-0 flex-[1_1_320px] flex-col gap-3 rounded-card border border-n-200 p-5 min-[1240px]:max-w-80"
     >
       <h2 id={headingId} className="m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900">
         {manage ? t('title') : t('details')}
@@ -42,7 +42,7 @@ export function ClientAside({ slug, card, manage, onDelete }: { slug: string; ca
       </div>
       {manage && (
         <div className="border-t border-n-200 pt-2">
-          <Button variant="danger-ghost" size="s" className="-ml-2.5" onClick={onDelete}>
+          <Button variant="danger-quiet" size="s" className="-ml-2.5" onClick={onDelete}>
             <Trash2 aria-hidden />
             {t('delete')}
           </Button>

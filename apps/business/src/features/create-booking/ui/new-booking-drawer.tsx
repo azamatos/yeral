@@ -295,7 +295,7 @@ export function NewBookingDrawer({
           <section className="flex flex-col gap-2.5">
             <span className={SECTION_TITLE}>{t('specialist')}</span>
             {specialist ? (
-              <div className="flex items-center gap-2.5 rounded-m border border-n-200 p-3">
+              <div className="flex items-center gap-2.5 rounded-ctl-l border border-n-200 p-3">
                 <Avatar name={people[0]?.name ?? ''} src={people[0]?.photo?.url} size={32} letters={1} tone="tint" decorative />
                 <span className="flex min-w-0 flex-col">
                   <span className="text-small font-semibold text-n-900">{people[0]?.name}</span>
