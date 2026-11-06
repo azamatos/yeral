@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { extendTailwindMerge } from 'tailwind-merge'
 
-const RADII = ['xs', 'sm', 'input', 's', 'm', 'l', 'card', 'pill']
+const RADII = ['xs', 'sm', 'input', 's', 'm', 'l', 'card', 'pill', 'ctl-s', 'ctl-m', 'ctl-l', 'popover']
 
 // tailwind-merge needs to know the design's custom scales, or it would treat `text-small` (size) and `text-n-600` (colour) as the same group.
 const twMerge = extendTailwindMerge({
@@ -16,7 +16,27 @@ const twMerge = extendTailwindMerge({
       container: ['marketplace', 'booking', 'text', 'modal-s', 'modal-m', 'modal-ml', 'modal-l', 'drawer', 'popover', 'popover-l'],
     },
     classGroups: {
-      'font-size': [{ text: ['display', 'h1', 'h2', 'h3', 'body-l', 'body', 'dense', 'button', 'button-l', 'label', 'small', 'micro'] }],
+      'font-size': [
+        {
+          text: [
+            'display',
+            'h1',
+            'h2',
+            'h3',
+            'body-l',
+            'body',
+            'dense',
+            'button',
+            'button-l',
+            'label',
+            'small',
+            'micro',
+            'ctl-s',
+            'ctl-m',
+            'ctl-l',
+          ],
+        },
+      ],
       shadow: [
         {
           shadow: [

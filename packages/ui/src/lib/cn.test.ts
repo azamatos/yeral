@@ -8,6 +8,13 @@ describe('cn', () => {
     expect(cn('rounded-card', 'rounded-xs')).toBe('rounded-xs')
   })
 
+  it('knows the control scale (v0.7 · A3): its text sizes stay beside a colour, its radii beside each other', () => {
+    expect(cn('text-ctl-l', 'text-n-900')).toBe('text-ctl-l text-n-900')
+    expect(cn('text-ctl-s text-n-900', 'text-ctl-m')).toBe('text-n-900 text-ctl-m')
+    expect(cn('rounded-ctl-m', 'rounded-ctl-l')).toBe('rounded-ctl-l')
+    expect(cn('rounded-m', 'rounded-popover')).toBe('rounded-popover')
+  })
+
   it('knows the radius scale on every side and corner', () => {
     expect(cn('rounded-t-card', 'rounded-t-xs')).toBe('rounded-t-xs')
     expect(cn('rounded-bl-input', 'rounded-bl-sm')).toBe('rounded-bl-sm')

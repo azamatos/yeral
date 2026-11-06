@@ -3,7 +3,7 @@ import { useId, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Button } from '../button'
 import { FieldMessage } from '../field'
-import { Select } from '../select'
+import { TimeField } from '../time-field'
 
 /**
  * A stretch of a business day as `@yeral/domain/hours` keeps it: minutes from the day's midnight, `close` after `open`
@@ -15,31 +15,18 @@ const DAY = 1440
 const pad2 = (n: number) => String(n).padStart(2, '0')
 const clock = (min: number) => `${pad2(Math.floor(min / 60))}:${pad2(min % 60)}`
 
-/** The pickers' times for a step: opening 00:00 to the last step before 24:00, closing one step on to 24:00. */
-const lists = new Map<number, { opens: number[]; closes: number[] }>()
-function timesFor(step: number) {
-  let times = lists.get(step)
-  if (!times) {
-    const opens: number[] = []
-    for (let m = 0; m < DAY; m += step) opens.push(m)
-    times = { opens, closes: [...opens.slice(1), DAY] }
-    lists.set(step, times)
-  }
-  return times
-}
-
-/** A list with the value in it: a time off the step (a shift saved at 09:15) still shows as it is. */
-const withValue = (list: number[], value: number) => (list.includes(value) ? list : [...list, value].sort((a, b) => a - b))
-
 /** The day's minute a closing time of day gives: after the opening, the next day's when it comes at or before it. */
 function closeAt(open: number, time: number) {
   const base = open >= DAY ? DAY : 0
   return base + time + (time <= open - base ? DAY : 0)
 }
 
+/** One of the two times: opening 00:00 to the last step before 24:00, closing one step on to 24:00. */
 function Picker({
   value,
-  options,
+  closing,
+  step,
+  size,
   label,
   invalid,
   describedBy,
@@ -47,7 +34,9 @@ function Picker({
   onChange,
 }: {
   value: number
-  options: number[]
+  closing?: boolean
+  step: number
+  size: 'm' | 'l'
   label: string
   invalid: boolean
   describedBy?: string
@@ -55,22 +44,21 @@ function Picker({
   onChange: (time: number) => void
 }) {
   return (
-    <Select
-      size="s"
-      className="w-26 flex-none"
+    <TimeField
+      size={size}
+      step={step}
+      min={closing ? step : 0}
+      max={closing ? DAY : DAY - step}
+      wrapperClassName="flex-none"
+      className={size === 'l' ? 'w-26' : 'w-24'}
       aria-label={label}
+      title={label}
       invalid={invalid}
       aria-describedby={describedBy}
       disabled={disabled}
       value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
-    >
-      {options.map((m) => (
-        <option key={m} value={m}>
-          {clock(m)}
-        </option>
-      ))}
-    </Select>
+      onValueChange={onChange}
+    />
   )
 }
 
@@ -97,14 +85,16 @@ export type TimeRangeFieldProps = {
   disabled?: boolean
   /** Minutes between the options: the hours pass the contract's `HOURS_STEP` (30, book Q-128). */
   step?: number
+  /** The fields' height: M 40 (96 wide, business forms) or L 48 (104 wide, a phone). */
+  size?: 'm' | 'l'
   /** More in the row after the pill (a day's «+ Break» link). */
   children?: ReactNode
   className?: string
 }
 
 /**
- * TimeRangeField (DS-Patterns → Inputs, B-Settings hours, B-Onboarding step 4, the special-day modal): two 40 × 104
- * native selects with an en dash, opening 00:00–23:30 and closing 00:30–24:00 in `step` minutes. A closing time at or
+ * TimeRangeField (DS-Controls → 04 Time field «Range»; B-Settings hours, B-Onboarding step 4, the special-day modal):
+ * two TimeFields (M 40 × 96) with an en dash, opening 00:00–23:30 and closing 00:30–24:00 in `step` minutes. A closing time at or
  * before the opening time is the next day's, and the slate pill with a moon says so: the same time on both is a full
  * day, which the hours refuse («Opening and closing can't be at the same time»). Checking a range against its
  * neighbours (the part after midnight must end before the next day opens) is the screen's; it passes the message.
@@ -121,6 +111,7 @@ export function TimeRangeField({
   error,
   disabled,
   step = 30,
+  size = 'm',
   children,
   className,
 }: TimeRangeFieldProps) {
@@ -128,7 +119,7 @@ export function TimeRangeField({
   const labelId = `${id}-label`
   const messageId = `${id}-message`
   const pillId = `${id}-next-day`
-  const { opens, closes } = timesFor(step > 0 && DAY % step === 0 ? step : 30)
+  const every = step > 0 && DAY % step === 0 ? step : 30
   const inside = dayStart !== undefined
   // a break's times read as times of day; a day's closing past midnight as the next day's
   const base = !inside && value.open >= DAY ? DAY : 0
@@ -152,7 +143,8 @@ export function TimeRangeField({
       )}
       <Picker
         value={openTime}
-        options={withValue(opens, openTime)}
+        step={every}
+        size={size}
         label={fromLabel}
         invalid={invalid}
         describedBy={describe(invalid && messageId)}
@@ -168,7 +160,9 @@ export function TimeRangeField({
       </span>
       <Picker
         value={closeTime}
-        options={withValue(closes, closeTime)}
+        closing
+        step={every}
+        size={size}
         label={toLabel}
         invalid={invalid}
         describedBy={describe(!!pill && pillId, invalid && messageId)}
