@@ -80,7 +80,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | Area | MVP | Later | Never |
 |---|---|---|---|
 | Client · discovery (home, search, map, categories, business page) | 29 | 9 | 0 |
-| Client · booking (per type) | 12 | 5 | 0 |
+| Client · booking (per type) | 13 | 5 | 0 |
 | Client · after booking (my bookings, cancel, move, reviews, SMS link page) | 14 | 4 | 1 |
 | Client · account | 9 | 1 | 0 |
 | Business · access (login, workspaces, invites, levels, permissions, ownership) | 12 | 2 | 0 |
@@ -97,7 +97,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | System (jobs, SMS, live updates, search indexing, SEO, i18n) | 11 | 3 | 0 |
 | Platform (hosting, own server, Storybook, monitoring) | 9 | 1 | 1 |
 | Later and non-goals | 0 | 25 | 2 |
-| **All** | **156** | **84** | **4** |
+| **All** | **157** | **84** | **4** |
 
 ## Client · discovery (home, search, map, categories, business page)
 
@@ -154,6 +154,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-043 | Inline login in the flow | Logged-out clients enter phone → SMS code → name on the confirm step. | MVP | drawn (Booking, Booking-Table, Booking-Class) | api built | Same as F-073. |
 | F-044 | Note to the business | Optional note on the confirm step; the client can edit it until the business answers. | MVP | drawn (Booking · confirm) | built (api, `PATCH …/note`) |  |
 | F-045 | Slot taken meanwhile | Banner "Bu wagt ýaňy alyndy" with the 3 nearest free times; sending stays disabled until a new time is picked. | MVP | drawn (Booking · slotTaken) | built (api 409 `slot_taken` + alternatives; database exclusion constraints) |  |
+| F-245 | Something changed since the last visit | A client whose last completed visit to a business was before it moved, changed its week's hours or its phone number sees one Warning notice on the confirm step: the new address with the old one as "Was: …", the booking day's hours, the new number. A new address must be ticked ("I've seen the new address") before the booking goes; hours and the phone only inform. Told once per change: the client's own booking made since counts as seen. Guests and clients with no visit there never see it. | MVP | drawn (C7-Booking D1 `ChangedNotice`) | built 07.11.2026 (api `changedSinceLastVisit` on the business page, `hoursChangedAt` / `phoneChangedAt`; client `ChangedNotice` on Confirm) | The owner's idea 2 (04.11.2026). Old hours aren't kept, so hours show without "Was"; two moves since the visit show the latest one's "Was". |
 | F-046 | Sent screen | "Sent, waiting" with status, summary, hold-time sentence ("Jogap bermese, {N} minutdan soň…"); instant businesses show "Ýazylyş tassyklandy". | MVP | drawn (Booking · sent, confirmMode) | api built (status, hold); screen not built | Round 6 A2 sentence. |
 | F-047 | Add to calendar | "Senenama goş" downloads an `.ics` file. | MVP | drawn (Booking · sent) | not built |  |
 | F-048 | Instant confirmation | A business may confirm online bookings at once instead of by hand. | MVP | drawn (Booking · confirmMode, B-Settings) | built (domain, api) | Owner decision 14.10.2026. |
