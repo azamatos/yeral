@@ -142,6 +142,7 @@ export async function updateProfile(
       ...(recategorized ? { categoryId, kind: category!.name } : {}),
       ...location,
       ...(moved ? { addressChangedAt: new Date(now) } : {}),
+      ...(!draft && rest.phone !== undefined && rest.phone !== row.phone ? { phoneChangedAt: new Date(now) } : {}),
       ...(pageMoved ? (movedBack ? { movedAt: null, movedFrom: null } : { movedAt: new Date(now), movedFrom: from }) : {}),
     }
     if (!Object.keys(set).length) return profileView(deps, row, lang)

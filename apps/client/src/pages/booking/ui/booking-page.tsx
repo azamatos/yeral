@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { slotTakenDetailsSchema } from '@yeral/contract/errors'
-import { today } from '@yeral/domain/time'
+import { dow, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
@@ -14,6 +14,7 @@ import { toast } from '@yeral/ui/toast'
 import { ChevronLeft, X } from 'lucide-react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { ChangedNotice } from '@/entities/business'
 import { parseServiceIds, pickedServices, selectionTotal, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { useErrorText } from '@/shared/i18n'
 import { TermsNote, wrap } from '@/shared/ui'
@@ -84,9 +85,13 @@ export function BookingPage() {
   const step = locked ? 'confirm' : currentStep(search.step, choice, steps)
   const index = steps.indexOf(step)
   const signedIn = Boolean(me.data?.firstName)
+  // what changed since the client's last visit here (book F-245): a new address waits for its tick before sending
+  const changed = signedIn ? detail.changedSinceLastVisit : null
+  const [seen, setSeen] = useState(false)
+  const mustTick = step === 'confirm' && Boolean(changed?.address) && !seen
   // the alert speaks for the time it was about: one chosen since (an offered one, another step) leaves it behind
   const taken = conflict && conflict.date === date && conflict.time === search.time ? conflict : null
-  const done = !locked && !taken && stepDone(step, choice, steps) && (step !== 'confirm' || signedIn)
+  const done = !locked && !taken && stepDone(step, choice, steps) && (step !== 'confirm' || (signedIn && !mustTick))
   const total = selectionTotal(picked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
   const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug }, search: { services: serviceIdsParam(ids) } }
@@ -203,7 +208,9 @@ export function BookingPage() {
       : step === 'confirm'
         ? taken
           ? t('confirm.pickNew')
-          : t('confirm.needNumber')
+          : signedIn && mustTick
+            ? t('confirm.tickAddress')
+            : t('confirm.needNumber')
         : t('summary.pickService')
   // only Time (once a time is chosen) and Confirm have a primary; the single-pick steps move on by themselves
   const action = stepHasAction(step) && (step === 'confirm' || done)
@@ -230,6 +237,19 @@ export function BookingPage() {
       cta={withCta ? cta : null}
       hint={withCta && !done && step === 'confirm' ? hint : null}
       confirm={step === 'confirm'}
+      notice={
+        step === 'confirm' && changed ? (
+          <ChangedNotice
+            name={detail.name}
+            changed={changed}
+            address={detail.address}
+            hours={date !== null ? { weekday: dow(date), hours: detail.hours[dow(date)] ?? null } : null}
+            phone={detail.phone}
+            seen={seen}
+            onSeen={setSeen}
+          />
+        ) : null
+      }
       onClear={locked ? undefined : clear}
       onAdd={locked || step === 'services' ? undefined : () => go('services', true)}
       onRemove={locked ? undefined : (id) => set({ services: serviceIdsParam(ids.filter((s) => s !== id)), time: undefined })}

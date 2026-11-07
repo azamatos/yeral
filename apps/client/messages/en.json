@@ -537,7 +537,21 @@
       "late": "If you're more than {minutes} min late, the booking may be cancelled.",
       "pay": "Pay at the place.",
       "send": "Send booking",
-      "needNumber": "First confirm your phone number."
+      "needNumber": "First confirm your phone number.",
+      "tickAddress": "Tick “I’ve seen the new address” to send."
+    },
+    "changed": {
+      "moved": "{name} has moved since your last visit",
+      "movedAndHours": "{name} has moved and changed its hours",
+      "hours": "New hours since your last visit",
+      "hoursAndPhone": "New hours and phone number since your last visit",
+      "phone": "New phone number since your last visit",
+      "newAddress": "New address:",
+      "was": "Was: {address}",
+      "weekday": "{day, select, 0 {Mondays:} 1 {Tuesdays:} 2 {Wednesdays:} 3 {Thursdays:} 4 {Fridays:} 5 {Saturdays:} other {Sundays:}}",
+      "closed": "closed",
+      "newPhone": "Phone:",
+      "seen": "I’ve seen the new address"
     },
     "sent": {
       "pageTitle": "Booking sent",

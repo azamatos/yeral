@@ -14,6 +14,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusiness, loadBusy, nextFreeFor, type BusinessRow } from '../availability/context'
 import { buildCards } from './cards'
+import { changedSinceLastVisit } from './changed'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, isPublic, openOf, photoOf, priceFromOf, publicPrice, publicRow, takesOpenTypes, text } from './map'
 import { bookOnlineFor } from '../clients/online'
@@ -108,8 +109,8 @@ export async function visibleBusiness(deps: Deps, slug: string, viewerId: string
 }
 
 /**
- * `viewer`: who is signed in, so the page knows whether they may book here online (book A7, Q-154) and whether they
- * may see it while it's in review (their own business, F-032).
+ * `viewer`: who is signed in, so the page knows whether they may book here online (book A7, Q-154), whether they
+ * may see it while it's in review (their own business, F-032), and what changed since their last visit (F-245).
  */
 export async function businessDetail(
   deps: Deps,
@@ -129,6 +130,7 @@ export async function businessDetail(
   const extra = Promise.all([
     typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now),
     preview ? Promise.resolve(false) : bookOnlineFor(db, lb, viewer?.phone ?? null),
+    changedSinceLastVisit(db, b, viewer, now),
   ])
   extra.catch(() => undefined)
   const [[category], cities] = await Promise.all([db.select().from(categories).where(eq(categories.id, b.categoryId)), loadCities(db)])
@@ -180,7 +182,7 @@ export async function businessDetail(
     )
   ).map((x) => x.card)
 
-  const [typicalMinutes, bookOnline] = await extra
+  const [typicalMinutes, bookOnline, changed] = await extra
 
   return {
     slug: b.slug,
@@ -198,6 +200,7 @@ export async function businessDetail(
     entranceNote: b.hideExactAddress ? null : b.entranceNote,
     hideExactAddress: b.hideExactAddress,
     movedAt: newAddressSince(b.movedAt?.getTime() ?? null, now),
+    changedSinceLastVisit: changed,
     geo: geoOf(b),
     distanceM: position ? distanceM(position, b) : null,
     phone: b.phone,

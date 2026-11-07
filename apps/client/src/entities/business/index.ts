@@ -1,4 +1,5 @@
 export { useCardLine } from './ui/business-meta'
 export { BusinessRow } from './ui/business-row'
 export { BusinessTile } from './ui/business-tile'
+export { ChangedNotice, type ChangedSinceLastVisit } from './ui/changed-notice'
 export { TimeChips } from './ui/time-chips'

@@ -52,6 +52,7 @@ export const GLOW: BusinessDetail = {
   entranceNote: 'The door beside the shopping centre, lift to the 2nd floor',
   hideExactAddress: false,
   movedAt: null,
+  changedSinceLastVisit: null,
   geo: { lat: 37.9601, lng: 58.3261, approximate: false },
   distanceM: 3000,
   phone: '+99312456789',
