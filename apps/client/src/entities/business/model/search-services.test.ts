@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { matchIn, searchServices } from './services'
+import { matchIn, searchServices } from './search-services'
 
 const service = (id: string, name: string, description: string | null = null) => ({
   id,

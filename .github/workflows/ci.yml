@@ -155,10 +155,12 @@ jobs:
           if echo "$out" | grep -qi '^content-encoding:'; then echo 'the stream came compressed'; exit 1; fi
           echo "$out" | grep -q '^event: ready'
       - name: End-to-end flows
-        # Chromium resolves *.localhost to this machine, so the flows reach the stack through Caddy like a visitor
-        run: pnpm e2e
+        # Chromium resolves *.localhost to this machine, so the flows reach the stack through Caddy like a visitor;
+        # Playwright's list reporter streams (turbo would group the task's output until it ends, and a run the job's
+        # limit cancels would leave none)
+        run: pnpm e2e --log-order=stream
       - name: Playwright report and traces
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@v6
         with:
           name: playwright-report

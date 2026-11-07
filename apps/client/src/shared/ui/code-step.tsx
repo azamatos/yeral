@@ -16,6 +16,7 @@ import { site } from '@/shared/config'
 export function CodeStep({
   steps,
   sms = false,
+  inline = false,
   words,
   phoneHint,
   phoneError,
@@ -23,6 +24,8 @@ export function CodeStep({
   steps: CodeSteps
   /** Codes go by SMS (the phone change): no code on the screen, the SMS words. */
   sms?: boolean
+  /** Inside a page's section (the booking's confirm step, C7-Booking C4.5): Get the code as a Secondary S beside the field, no full-width primary. */
+  inline?: boolean
   words?: Partial<SignInCodeStepCopy>
   phoneHint?: ReactNode
   /** A refusal of the number the screen knows (`phone_taken`): shown before the steps' own checks. */
@@ -71,6 +74,7 @@ export function CodeStep({
       step={step}
       size={48}
       sms={sms}
+      layout={inline ? 'inline' : 'page'}
       copy={copy}
       delivery={delivery}
       telegram={{ ...telegramWords, ...(words?.codeLabel ? { codeLabel: words.codeLabel } : {}) }}

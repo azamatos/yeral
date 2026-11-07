@@ -15,6 +15,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   timeout: 120_000,
+  // the whole run stops and reports before CI's 30-minute job limit cancels it (a cancelled job keeps no output)
+  globalTimeout: process.env.CI ? 20 * 60_000 : 0,
   // the push channel (ADR 0028) shows the other side's change within a few seconds
   expect: { timeout: 15_000 },
   // the HTML report with the traces: `pnpm --filter @yeral/e2e exec playwright show-report`; CI uploads it on failure

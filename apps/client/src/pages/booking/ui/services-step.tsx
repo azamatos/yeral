@@ -42,6 +42,7 @@ export function ServicesStep({
   const theirs = named ? servicesOf(detail.serviceGroups, named) : []
   const only = named !== null && missing.length === 0 && theirs.length > 0
   const count = theirs.reduce((n, g) => n + g.services.length, 0)
+  const all = detail.serviceGroups.reduce((n, g) => n + g.services.length, 0)
   return (
     <>
       {first && named && (
@@ -80,7 +81,13 @@ export function ServicesStep({
             })}
           </Callout>
         )}
-        <ServicePicker groups={only ? theirs : detail.serviceGroups} picked={ids} onToggle={onToggle} groupHeading="h2" />
+        <ServicePicker
+          groups={only ? theirs : detail.serviceGroups}
+          picked={ids}
+          onToggle={onToggle}
+          groupHeading="h2"
+          searchLabel={only ? t('searchTheirs', { name: named.name, count }) : t('search', { count: all })}
+        />
       </div>
     </>
   )

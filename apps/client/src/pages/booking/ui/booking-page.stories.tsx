@@ -9,6 +9,8 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { AYJEMAL, businessApi, GLOW, PageStory } from '@/shared/storybook'
 import { BookingPage } from './booking-page'
 
+const body = within(document.body)
+
 const routes = {
   '/$lang/b/$slug': () => <p>Business page</p>,
   '/$lang/b/$slug/book': BookingPage,
@@ -33,7 +35,7 @@ export const Services: Story = {
     await expect(summary.getByText('No service chosen yet.')).toBeVisible()
     await expect(summary.queryByRole('button', { name: 'Continue' })).toBeNull()
     await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio')
-    await userEvent.click(canvas.getByRole('button', { name: 'Select: Women’s haircut' }))
+    await userEvent.click(canvas.getByRole('button', { name: /^Women’s haircut/ }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a specialist' })).toBeVisible()
     // the service's price and the total; still no action on a single-pick step
     await waitFor(() => expect(summary.getAllByText('80 TMT')).toHaveLength(2))
@@ -59,8 +61,8 @@ export const WithSpecialist: Story = {
     await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio')
     await expect(canvas.getByRole('button', { name: 'Change the specialist' })).toBeVisible()
     await expect(canvas.getByText(/^Maral does \d+ services?$/)).toBeVisible()
-    await expect(canvas.queryByRole('button', { name: 'Select: Women’s haircut' })).toBeNull()
-    await userEvent.click(canvas.getByRole('button', { name: 'Select: Manicure' }))
+    await expect(canvas.queryByRole('button', { name: /^Women’s haircut/ })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: /^Manicure/ }))
     // the pick moves on to the time, no specialist step between
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
@@ -75,13 +77,13 @@ export const ChangeSpecialist: Story = {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
     const steps = within(canvas.getByRole('navigation', { name: 'Booking steps' }))
     await userEvent.click(steps.getByRole('button', { name: 'Specialist' }))
-    const group = within(await canvas.findByRole('radiogroup', { name: 'Specialist' }))
-    await expect(group.getByRole('radio', { name: /Maral/ })).toHaveAttribute('aria-checked', 'true')
+    const group = within(await canvas.findByRole('group', { name: 'Specialist' }))
+    await expect(group.getByRole('button', { name: /^Maral/ })).toHaveAttribute('aria-pressed', 'true')
     // the choice open again: the step reads as the step, not as done
     await expect(steps.getByRole('button', { name: '1 Specialist' })).toHaveAttribute('aria-current', 'step')
     // the business page keeps nothing picked (Venue v0.7 · C3)
     await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio')
-    await userEvent.click(group.getByRole('radio', { name: /Maral/ }))
+    await userEvent.click(group.getByRole('button', { name: /^Maral/ }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
   },
 }
@@ -121,18 +123,20 @@ export const WithSpecialistNotTheirs: Story = {
   },
 }
 
-/** Step 2: anyone with the earliest time, the people who do the haircut, the others disabled with why; a pick moves on. */
+/** Step 2 (C4.1 rows): anyone with the earliest time, then only who does the haircut, each a button with a chevron; a pick moves on. */
 export const Specialist: Story = {
   args: { path: '/en/b/glow-studio/book?services=s1&step=staff' },
   play: async ({ canvas }) => {
-    const group = within(await canvas.findByRole('radiogroup', { name: 'Specialist' }))
-    await expect(group.getByRole('radio', { name: /Any specialist/ })).toHaveAttribute('aria-checked', 'true')
-    await expect(await group.findByText('Earliest free time: Today 15:30')).toBeVisible()
-    await expect(group.getByRole('radio', { name: /Maral/ })).toBeDisabled()
-    await expect(group.getAllByText("Doesn't do the selected service")).toHaveLength(3)
+    const group = within(await canvas.findByRole('group', { name: 'Specialist' }))
+    await expect(canvas.getByText('1 specialist does Women’s haircut')).toBeVisible()
+    await expect(group.getByRole('button', { name: /^Any specialist/ })).toHaveAttribute('aria-pressed', 'true')
+    await expect((await group.findAllByText('Today 15:30')).length).toBeGreaterThan(0)
+    // nobody who doesn't do the haircut is listed
+    await expect(group.queryByRole('button', { name: /^Maral/ })).toBeNull()
+    await expect(group.getAllByRole('button')).toHaveLength(2)
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
     await expect(summary.queryByRole('button', { name: 'Continue' })).toBeNull()
-    await userEvent.click(group.getByRole('radio', { name: /Aýna/ }))
+    await userEvent.click(group.getByRole('button', { name: /^Aýna/ }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
     await waitFor(() => expect(summary.getByText('Aýna')).toBeVisible())
     await expect(summary.getByRole('button', { name: 'Change the specialist' })).toBeVisible()
@@ -144,7 +148,26 @@ export const NoOneDoesAll: Story = {
   args: { path: '/en/b/glow-studio/book?services=s1,s5&step=staff' },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText(/No one specialist does all the selected services/)).toBeVisible()
-    await expect(canvas.getByRole('radio', { name: /Aýna/ })).toBeDisabled()
+    const group = within(canvas.getByRole('group', { name: 'Specialist' }))
+    await expect(group.getAllByRole('button')).toHaveLength(1)
+  },
+}
+
+/** The services step with 12 services: the search (from 9) narrows the groups, keeps their counts; nothing found says so. */
+export const ServicesSearch: Story = {
+  play: async ({ canvas }) => {
+    const search = await canvas.findByRole('searchbox', { name: 'Search 12 services' })
+    await expect(canvas.getByRole('heading', { level: 2, name: 'Nails 3' })).toBeVisible()
+    await userEvent.type(search, 'mani')
+    await expect(canvas.getByRole('heading', { level: 2, name: 'Nails 2' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: /^Pedicure/ })).toBeNull()
+    await expect(canvas.queryByRole('heading', { level: 2, name: /^Hair/ })).toBeNull()
+    await userEvent.clear(search)
+    await userEvent.type(search, 'xyz')
+    await expect(canvas.getByText('Nothing matches “xyz”.')).toBeVisible()
+    // the empty state's own Clear search (the field's × has the same name)
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Clear search' }).at(-1)!)
+    await expect(canvas.getByRole('heading', { level: 2, name: 'Nails 3' })).toBeVisible()
   },
 }
 
@@ -165,20 +188,31 @@ export const Time: Story = {
 }
 
 /**
- * A second service comes from the summary (C7-Booking C4.4): «Add a service» opens the services, a pick goes back to
- * the time (the specialist is answered), × shows from two services; Clear starts over and Undo puts it all back.
+ * A second service comes from the summary (C7-Booking C4.4): «Add a service» opens the popover with the services,
+ * their duration and price, the one in the booking «Added»; the search narrows it; a pick keeps the chosen time (it
+ * still fits) and the range grows, × shows from two services; Clear starts over and Undo puts it all back.
  */
-export const AddServiceAndClear: Story = {
-  args: { path: '/en/b/glow-studio/book?services=s1&staff=any&step=time' },
+export const AddServiceFromSummary: Story = {
+  args: { path: `/en/b/glow-studio/book?services=s1&staff=any&step=time&date=${today()}&time=930` },
   play: async ({ canvas }) => {
     const summary = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await expect(await summary.findByText(/· 15:30–16:30$/)).toBeVisible()
     await expect(summary.queryByRole('button', { name: 'Remove Women’s haircut' })).toBeNull()
     await userEvent.click(summary.getByRole('button', { name: 'Add a service' }))
-    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: 'Select: Manicure' }))
-    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
-    await waitFor(() => expect(summary.getByRole('button', { name: 'Remove Manicure' })).toBeVisible())
+    const list = within(await body.findByRole('listbox', { name: 'All services' }))
+    await expect(list.getByRole('option', { name: /^Women’s haircut/ })).toHaveAttribute('aria-selected', 'true')
+    // the popover fades in
+    await waitFor(() => expect(list.getByRole('option', { name: /^Manicure 60 min · 70 TMT/ })).toBeVisible())
+    await userEvent.type(body.getByRole('searchbox', { name: 'Search 12 services' }), 'mani')
+    await expect(list.queryByRole('option', { name: /^Pedicure/ })).toBeNull()
+    await userEvent.click(list.getByRole('option', { name: /^Manicure/ }))
+    await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+    // still the time step, the time kept, the range now 2 h
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await expect(await summary.findByText(/· 15:30–17:30$/)).toBeVisible()
+    await expect(summary.getByRole('button', { name: 'Remove Manicure' })).toBeVisible()
+    await expect(summary.getByRole('button', { name: 'Continue' })).toBeEnabled()
     await userEvent.click(summary.getByRole('button', { name: 'Clear the booking' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
     await userEvent.click(await within(document.body).findByRole('button', { name: 'Undo' }))
@@ -232,19 +266,49 @@ export const Phone: Story = {
   },
 }
 
-/** Phone, the time step: the strip scrolls, the bar names the chosen time. */
+/** Phone, the time step: the strip scrolls, the bar's second line is the chosen time. */
 export const PhoneTime: Story = {
   globals: { viewport: { value: 'xs' } },
   args: { path: `/en/b/glow-studio/book?services=s1&step=time&date=${today()}&time=930` },
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
-    await expect(await bar.findByText('1 service · 80 TMT · 15:30')).toBeVisible()
+    await expect(await bar.findByText('1 service · 80 TMT')).toBeVisible()
+    await expect(await bar.findByText(/· 15:30–16:30$/)).toBeVisible()
+  },
+}
+
+/**
+ * Phone (C4.4 «390 · the bottom bar and its sheets»): the bar's left part opens the summary as a sheet (Clear beside
+ * the close, Continue in the footer); «Add a service» in it opens its own sheet, a tap adds the service and comes back
+ * with the new total; Continue goes on to the confirmation.
+ */
+export const PhoneSheet: Story = {
+  globals: { viewport: { value: 'xs' } },
+  args: { path: `/en/b/glow-studio/book?services=s1&staff=any&step=time&date=${today()}&time=930` },
+  play: async ({ canvas }) => {
+    const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
+    await expect(await bar.findByText(/· 15:30–16:30$/)).toBeVisible()
+    await userEvent.click(bar.getByRole('button', { name: /^1 service · 80 TMT/ }))
+    const sheet = within(await body.findByRole('dialog', { name: 'Your booking' }))
+    // the sheet slides in
+    await waitFor(() => expect(sheet.getByText('Women’s haircut')).toBeVisible())
+    await expect(sheet.getByRole('button', { name: 'Clear the booking' })).toBeVisible()
+    await userEvent.click(sheet.getByRole('button', { name: 'Add a service' }))
+    const add = within(await body.findByRole('dialog', { name: 'Add a service' }))
+    await waitFor(() => expect(add.getByRole('searchbox', { name: 'Search 12 services' })).toBeVisible())
+    await userEvent.click(add.getByRole('option', { name: /^Manicure/ }))
+    await waitFor(() => expect(body.queryByRole('dialog', { name: 'Add a service' })).toBeNull())
+    await waitFor(() => expect(sheet.getByText('150 TMT')).toBeVisible())
+    await expect(sheet.getByRole('button', { name: 'Remove Manicure' })).toBeVisible()
+    await userEvent.click(sheet.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Confirm your booking' })).toBeVisible()
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
   },
 }
 
 const confirm = `/en/b/glow-studio/book?services=s1&staff=st-ayna&step=confirm&date=${today()}&time=930`
 
-/** Step 4 signed out: «Confirm your number» opens the login; Send booking waits for it. */
+/** Step 4 signed out (C4.5): the phone field with Secondary «Get the code» in place; Send booking waits for the number. */
 export const ConfirmSignedOut: Story = {
   args: { path: confirm },
   play: async ({ canvas }) => {
@@ -252,8 +316,36 @@ export const ConfirmSignedOut: Story = {
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
     await expect(summary.getByRole('button', { name: 'Send booking' })).toBeDisabled()
     await expect(summary.getByText('First confirm your phone number.')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Confirm your number' })).toBeVisible()
+    await expect(canvas.getByLabelText('Phone number')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Get the code' })).toBeVisible()
     await expect(canvas.getByText(/up to 2 h before/)).toBeVisible()
+  },
+}
+
+/**
+ * The number done in place (C4.5): the code step opens under «Enter the code» with its lead, checks itself on the 4th
+ * digit; a new number then reads as a filled verified field and gives its name; the account row follows, Send booking
+ * turns on by itself, and «Not you?» asks for the number again.
+ */
+export const ConfirmInlineCode: Story = {
+  args: { path: confirm },
+  play: async ({ canvas }) => {
+    const summary = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await userEvent.type(await canvas.findByLabelText('Phone number'), '63774512{Enter}')
+    await expect(await canvas.findByRole('heading', { level: 2, name: 'Enter the code' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Change number' })).toBeVisible()
+    await expect(await canvas.findByText(/^Your code:/)).toBeVisible()
+    await userEvent.keyboard('4821')
+    await expect(await canvas.findByRole('group', { name: 'Phone number, verified' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Change the number' })).toBeVisible()
+    await userEvent.type(canvas.getByLabelText('First name'), 'Gülälek')
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByText('Gülälek')).toBeVisible()
+    await expect(canvas.getByText('Verified')).toBeVisible()
+    await waitFor(() => expect(summary.getByRole('button', { name: 'Send booking' })).toBeEnabled())
+    await userEvent.click(canvas.getByRole('button', { name: 'Not you?' }))
+    await expect(await canvas.findByLabelText('Phone number')).toBeVisible()
+    await waitFor(() => expect(summary.getByRole('button', { name: 'Send booking' })).toBeDisabled())
   },
 }
 
@@ -262,10 +354,13 @@ export const ConfirmAndSend: Story = {
   args: { path: confirm, server: businessApi({ signedIn: AYJEMAL }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Aýjemal Gurbanowa')).toBeVisible()
-    // the number with a «Verified» badge (#50); the booking card with the bigger business block (#51)
+    // the number with a «Verified» badge (#50); the booking card with the bigger business block (#51) and the day's pill
     await expect(canvas.getByText('Verified')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Not you?' })).toBeVisible()
     const card = within(canvas.getByRole('complementary', { name: 'Your booking' }))
     await expect(card.getByRole('heading', { level: 2, name: 'Glow Studio' })).toBeVisible()
+    await expect(card.getByText(/^Open on \w{3} · \d\d:\d\d–\d\d:\d\d$/)).toBeVisible()
+    await expect(card.getByText('Glow Studio usually confirms within 15 min.')).toBeVisible()
     await expect(card.getByRole('link', { name: 'Get directions' })).toBeVisible()
     await expect(card.getByText('Date and time')).toBeVisible()
     await userEvent.type(canvas.getByRole('textbox', { name: /Note for the business/ }), 'Long hair')

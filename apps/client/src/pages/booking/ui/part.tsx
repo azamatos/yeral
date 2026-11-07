@@ -5,11 +5,14 @@ import type { ReactNode, Ref } from 'react'
 export function Part({
   title,
   titleRef,
+  lead,
   className,
   children,
 }: {
   title?: string
   titleRef?: Ref<HTMLHeadingElement>
+  /** A line under the heading (the code step's «We sent the code to…»). */
+  lead?: ReactNode
   className?: string
   children: ReactNode
 }) {
@@ -20,6 +23,7 @@ export function Part({
           {title}
         </h2>
       )}
+      {lead && <p className="m-0 -mt-1 text-body text-n-600 [&_b]:font-semibold [&_b]:text-n-900">{lead}</p>}
       {children}
     </section>
   )

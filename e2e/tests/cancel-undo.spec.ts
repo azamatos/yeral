@@ -1,7 +1,7 @@
 import type { Locator } from '@playwright/test'
 import { expect, test } from '../src/test'
 import { bookAndConfirm, bookingRow, chooseAndSignIn, confirmAsOwner, openBookingDrawer, openMyBookings, sendBooking } from '../src/booking'
-import { signInWithCode } from '../src/sign-in'
+import { enterShownCode } from '../src/sign-in'
 import { clientName, freshPhone } from '../src/stack'
 
 /**
@@ -51,12 +51,14 @@ test('Undo fails once another client has taken the time', async ({ browser }) =>
   const other = freshPhone()
   const second = await (await browser.newContext()).newPage()
   await second.goto(url)
-  // rendered on the server: the first click retries until React has taken the page over
+  // the number is confirmed in place (design v0.7 · C4.5); rendered on the server, the first try retries until React
+  // has taken the page over
   await expect(async () => {
-    await second.getByRole('button', { name: 'Confirm your number' }).click()
-    await expect(second.getByRole('dialog')).toBeVisible({ timeout: 1_000 })
+    await second.getByRole('textbox', { name: 'Phone number' }).fill(other)
+    await second.getByRole('button', { name: 'Get the code' }).click()
+    await expect(second.getByText('Your code:')).toBeVisible({ timeout: 1_000 })
   }).toPass()
-  await signInWithCode(second.getByRole('dialog'), other, clientName(other))
+  await enterShownCode(second, clientName(other))
   await sendBooking(second)
 
   // the drawer's own Undo (the toast's is gone by now): refused, with the reason

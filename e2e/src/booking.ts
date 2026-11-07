@@ -46,7 +46,7 @@ export interface Chosen {
 /**
  * The client books a service from the salon's page (its row's «Book» opens the booking on the specialist step, design
  * v0.7 · C3), adds a second one on the services step, picks a specialist (anyone, or the first named one) and the
- * first free time, then signs in on the confirm step.
+ * first free time, then confirms the number in place on the confirm step (design v0.7 · C4.5).
  */
 export async function chooseAndSignIn(page: Page, phone: string, opts: { staff?: 'any' | 'first' } = {}): Promise<Chosen> {
   await page.goto(`${CLIENT_URL}/en/b/${SALON.slug}`)
@@ -55,30 +55,31 @@ export async function chooseAndSignIn(page: Page, phone: string, opts: { staff?:
     .getByRole('link', { name: /^Book / })
     .first()
     .click()
-  await expect(page.getByRole('radio', { name: 'Any specialist' })).toBeVisible()
-  // the second service comes from the services step (the summary's «Add a service», C7-Booking, isn't built yet):
-  // Back opens it with the first one picked, and one more pick moves on by itself
+  const specialists = page.getByRole('group', { name: 'Specialist' })
+  await expect(specialists.getByRole('button', { name: /^Any specialist/ })).toBeVisible()
+  // the second service comes from the services step (the summary's «Add a service» does the same from 1024): Back
+  // opens it with the first one picked (its row shows the check, `aria-pressed`), and one more pick moves on by itself.
+  // The rows are the step's only buttons, inside `main`: to Playwright a button without `aria-pressed` (the header's
+  // steps, the summary's) counts as `pressed: false` too, so the page as a whole would give the stepper's first step
+  const main = page.getByRole('main')
   await page.getByRole('button', { name: 'Back' }).click()
-  await expect(page.getByRole('button', { name: /^Selected: / })).toHaveCount(1)
-  await page
-    .getByRole('button', { name: /^Select: / })
-    .first()
-    .click()
+  await expect(main.getByRole('button', { pressed: true })).toHaveCount(1)
+  await main.getByRole('button', { pressed: false }).first().click()
 
-  // a pick moves on by itself (design v0.7 · C4, the owner's #39): no Continue on the specialist step, and a click on
-  // the specialist already chosen («Any specialist» by default) moves on too — check() would do nothing there
+  // a pick moves on by itself (design v0.7 · C4, the owner's #39): the rows are buttons with a chevron, «Any
+  // specialist» first, then only the people who do every picked service; no Continue on the specialist step
   if (opts.staff === 'first')
-    await page
-      .getByRole('radio', { name: /^(?!Any specialist)/ })
+    await specialists
+      .getByRole('button', { name: /^(?!Any specialist)/ })
       .first()
       .click()
-  else await page.getByRole('radio', { name: 'Any specialist' }).click()
+  else await specialists.getByRole('button', { name: /^Any specialist/ }).click()
 
   const time = await pickFirstFreeTime(page)
   await page.getByRole('button', { name: 'Continue' }).click()
 
-  await page.getByRole('button', { name: 'Confirm your number' }).click()
-  await signInWithCode(page.getByRole('dialog'), phone, clientName(phone))
+  // the phone field, the code the screen shows and the name, all in place
+  await signInWithCode(page, phone, clientName(phone))
   await expect(page.getByText('Verified', { exact: true })).toBeVisible()
   const url = page.url()
   const date = new URL(url).searchParams.get('date')

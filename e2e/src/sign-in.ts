@@ -9,6 +9,11 @@ import { expect, type Locator, type Page } from '@playwright/test'
 export async function signInWithCode(within: Locator | Page, phone: string, firstName?: string): Promise<void> {
   await within.getByRole('textbox', { name: 'Phone number' }).fill(phone)
   await within.getByRole('button', { name: 'Get the code' }).click()
+  await enterShownCode(within, firstName)
+}
+
+/** The code the screen shows, typed in; a number seen for the first time then gives its name. */
+export async function enterShownCode(within: Locator | Page, firstName?: string): Promise<void> {
   const shown = within.getByText('Your code:')
   await expect(shown).toBeVisible()
   const code = (await shown.textContent())?.match(/\d{4}/)?.[0]
