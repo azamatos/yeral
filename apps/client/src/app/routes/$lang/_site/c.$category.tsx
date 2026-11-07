@@ -7,6 +7,8 @@ import { pageHead } from '@/shared/lib'
 // A category's page (book C-05): the search with its category, also a landing page for search engines; unknown is the 404.
 export const Route = createFileRoute('/$lang/_site/c/$category')({
   validateSearch: searchAddress,
+  // the header's compact SearchBar refines this page in place, the category kept (C7-Home C1)
+  staticData: { searchHeader: 'results' },
   loaderDeps: ({ search }) => search,
   loader: async ({ context, params, deps }) => {
     const lang = siteLocale(params.lang)

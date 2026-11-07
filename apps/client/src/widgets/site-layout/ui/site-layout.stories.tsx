@@ -121,3 +121,42 @@ export const Phone: Story = {
 export const PhoneSignedOut: Story = {
   globals: { viewport: { value: 'xs' } },
 }
+
+/** The search header (C7-Home C1 `.hdr.sr2`): 80 high over the whole width, the compact bar's slot after the logo, the nav as ever. */
+export const SearchHeader: Story = {
+  args: {
+    routes: {
+      '/$lang': () => (
+        <SiteLayout search={<div role="search" aria-label="Search" />} wide>
+          <div className="h-60" />
+        </SiteLayout>
+      ),
+    },
+  },
+  play: async ({ canvas }) => {
+    const bar = await canvas.findByRole('search', { name: 'Search' })
+    await expect(bar.parentElement!.getBoundingClientRect().height).toBe(80)
+    await expect(canvas.getByRole('link', { name: 'Ýeral home' })).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'For business' })).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Log in' })).toBeVisible()
+  },
+}
+
+/** The results page on the phone: the slot with Back and the summary field takes the row's place. */
+export const PhoneSearchHeader: Story = {
+  globals: { viewport: { value: 'xs' } },
+  args: {
+    routes: {
+      '/$lang': () => (
+        <SiteLayout search={<div role="search" aria-label="Search" />} phoneSearch={<button type="button">Edit search</button>} wide>
+          <div className="h-60" />
+        </SiteLayout>
+      ),
+    },
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('button', { name: 'Edit search' })).toBeVisible()
+    await expect(canvas.queryByRole('link', { name: 'Ýeral home' })).toBeNull()
+    await expect(canvas.queryByRole('search')).toBeNull()
+  },
+}

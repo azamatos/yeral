@@ -202,11 +202,7 @@
     "openSettings": "Open settings",
     "helpTitle": "Allow your location",
     "helpText": "Open your browser's settings for this site, allow location, then reload the page.",
-    "close": "Close",
-    "where": "Where?",
-    "nearMe": "Near me",
-    "list": "Places",
-    "nothing": "No place found"
+    "close": "Close"
   },
   "businessCard": {
     "line": "{category} · {distance}",
@@ -218,10 +214,8 @@
   },
   "search": {
     "title": "Search",
-    "box": "Service, place or specialist",
     "categories": "Categories",
     "all": "All",
-    "day": "Which day",
     "sort": "Sort",
     "near": "Places near you",
     "nearName": "{name} near you",
@@ -231,11 +225,6 @@
       "tomorrow": "{n, plural, one {# place} other {# places}} · free time tomorrow",
       "week": "{n, plural, one {# place} other {# places}} · free time this week",
       "date": "{n, plural, one {# place} other {# places}} · free time on {date}"
-    },
-    "days": {
-      "today": "Today",
-      "tomorrow": "Tomorrow",
-      "week": "This week"
     },
     "sorts": {
       "recommended": "Recommended",
@@ -925,6 +914,7 @@
     "nextMonth": "Next month",
     "sheetTitle": "Search",
     "back": "Back",
+    "editSearch": "Edit search:",
     "showPlaces": "{n, plural, one {Show # place} other {Show # places}}",
     "showAllPlaces": "Show places"
   }

@@ -15,8 +15,9 @@ export const Route = createFileRoute('/$lang/_site/b/$slug')({
   validateSearch: z.object({
     tab: z.enum(['specialists', 'reviews', 'about']).optional().catch(undefined),
   }),
-  // the phone opens on the cover with its own Back (Venue v0.7 · C2): no site header under 768
-  staticData: { phoneHeader: 'none' },
+  // the header carries the compact SearchBar (C7-Home C1); the phone opens on the cover with its own Back (Venue v0.7
+  // · C2): no site header under 768
+  staticData: { phoneHeader: 'none', searchHeader: 'new' },
   loader: async ({ context, params }) => {
     const lang = siteLocale(params.lang)
     // the first reviews come with the page, read alongside it, once: a failure doesn't hold the page up with retries

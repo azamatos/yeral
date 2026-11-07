@@ -9,28 +9,27 @@ import { ChipRadioGroup } from '@yeral/ui/chip'
 import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
 import { EmptyState } from '@yeral/ui/empty-state'
-import { Input } from '@yeral/ui/input'
 import type { MapArea } from '@yeral/ui/map-frame'
 import { useMediaQuery } from '@yeral/ui/media-query'
-import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { List, Map as MapIcon, MapPin, SearchX } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BusinessRow } from '@/entities/business'
-import { LocationBanner, placeAddress, usePlace, WhereField, type Place } from '@/features/pick-place'
+import { askToEditPlace, LocationBanner, placeAddress, usePlace } from '@/features/pick-place'
 import { useSdk } from '@yeral/sdk/react'
 import { wrap } from '@/shared/ui'
-import { apiSearch, canWiden, CLEARED, dayOf, DAYS, filtered, WIDEST_RADIUS_KM, type Day, type SearchAddress } from '../model/search'
+import { apiSearch, canWiden, CLEARED, dayOf, filtered, WIDEST_RADIUS_KM, type SearchAddress } from '../model/search'
 import { ResultsMap } from './results-map'
 import { ResultsToolbar } from './results-toolbar'
 
 /**
  * Search (book C-03, board Search; the toolbar from C7-Home C4) and a category's page (C-05: the same page with its
- * category, its heading and its intro): the box, the category chips, the day, then the heading and the results toolbar
- * (Distance · Rating · Price · Open now · Women only · Sort, the active chips, the count), the rows and Show more. Only places with a free time
- * on the day are listed (Q-150). From 1024 the map sits beside the list (C-04), a row and its pin lighting each other;
- * under it a floating Map opens it over the page, with the places as cards under it.
+ * category, its heading and its intro): the category chips, then the heading and the results toolbar (Distance ·
+ * Rating · Price · Open now · Women only · Sort, the active chips, the count), the rows and Show more. The words, the
+ * place and the day live in the site header's compact SearchBar (C7-Home C1), which refines the address in place.
+ * Only places with a free time on the day are listed (Q-150). From 1024 the map sits beside the list (C-04), a row
+ * and its pin lighting each other; under it a floating Map opens it over the page, with the places as cards under it.
  */
 export function SearchPage({ category }: { category?: Category }) {
   const t = useTranslations('search')
@@ -46,19 +45,9 @@ export function SearchPage({ category }: { category?: Category }) {
   const [hot, setHot] = useState<string | null>(null)
   const [mapOpen, setMapOpen] = useState(false)
   const located = usePlace()
-  const whereInput = useRef<HTMLInputElement>(null)
   // the address says where when it can (a shared link); otherwise what this browser kept
   const addressed = !!(address.near || address.city || address.area)
   const searched = addressed ? address : { ...address, ...placeAddress(located.place) }
-
-  // the box writes to the address after a pause in the typing
-  const [typed, setTyped] = useState(address.what ?? '')
-  useEffect(() => {
-    const what = typed.trim() || undefined
-    if (what === address.what) return
-    const timer = setTimeout(() => go({ what }), 250)
-    return () => clearTimeout(timer)
-  })
 
   const list = useInfiniteQuery({
     ...sdk.catalog.search(apiSearch({ ...searched, cat: category?.id ?? address.cat }, lang, today(now))),
@@ -82,10 +71,6 @@ export function SearchPage({ category }: { category?: Category }) {
   const empty = !list.isPending && rows.length === 0
   // the words found nothing (C7-Home `SearchNoResults`): the toolbar goes, the spelling and a wider search are offered
   const noMatch = empty && !!address.what
-  const place = (next: Place) => {
-    located.pick(next)
-    go({ near: undefined, city: undefined, area: undefined, r: undefined, ...placeAddress(next) })
-  }
 
   const pick = (id: string) => {
     const search = (prev: SearchAddress) => ({ ...prev, cat: undefined })
@@ -117,44 +102,12 @@ export function SearchPage({ category }: { category?: Category }) {
   return (
     <div className="flex items-start">
       <div className={`${wrap} flex flex-col gap-5 pt-6 pb-20 max-sm:pt-4 max-sm:pb-14 md:mx-0 md:max-w-205 md:flex-[1_1_0] md:px-8`}>
-        <div className="flex flex-col gap-3">
-          <Input
-            aria-label={t('box')}
-            placeholder={t('box')}
-            className="w-full sm:max-w-120"
-            value={typed}
-            onChange={(e) => setTyped(e.target.value)}
-          />
-          <WhereField
-            inputRef={whereInput}
-            place={located.place}
-            // a client field: L 48, as the search box above it (A3 Sizes)
-            size="l"
-            className="w-full sm:max-w-120"
-            onPick={place}
-            onNearMe={() => void located.askBrowser()}
-          />
-          <ChipRadioGroup
-            aria-label={t('categories')}
-            value={category?.id ?? address.cat ?? 'all'}
-            onValueChange={pick}
-            options={[{ value: 'all', label: t('all') }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
-          />
-          {/* the day is part of the search (C7-Home C4): with the fields, not in the toolbar; a calendar day from Home shows as none */}
-          <Segmented
-            aria-label={t('day')}
-            size="l"
-            className="self-start"
-            value={day === 'date' ? '' : day}
-            onValueChange={(next) => next && go({ day: next === 'today' ? undefined : (next as Day), date: undefined })}
-          >
-            {DAYS.map((d) => (
-              <SegmentedItem key={d} value={d}>
-                {t(`days.${d}`)}
-              </SegmentedItem>
-            ))}
-          </Segmented>
-        </div>
+        <ChipRadioGroup
+          aria-label={t('categories')}
+          value={category?.id ?? address.cat ?? 'all'}
+          onValueChange={pick}
+          options={[{ value: 'all', label: t('all') }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
+        />
 
         <h1 className="m-0 text-[28px] leading-[34px] font-bold tracking-[-0.02em] text-n-900">{title}</h1>
         {!noMatch && (
@@ -172,7 +125,8 @@ export function SearchPage({ category }: { category?: Category }) {
           denied={located.denied}
           locating={located.locating}
           onAllow={() => void located.askBrowser()}
-          onType={() => whereInput.current?.focus()}
+          // the Where field is the header's
+          onType={askToEditPlace}
         />
 
         {category?.intro && <p className="m-0 max-w-160 text-body text-n-600">{category.intro}</p>}
@@ -210,13 +164,8 @@ export function SearchPage({ category }: { category?: Category }) {
                   </Button>
                 )}
                 {noMatch && (
-                  <Button
-                    variant="tertiary"
-                    onClick={() => {
-                      setTyped('')
-                      go({ what: undefined })
-                    }}
-                  >
+                  // the header's bar takes the address again (`HeaderSearch` remounts on a new one)
+                  <Button variant="tertiary" onClick={() => go({ what: undefined })}>
                     {t('clearSearch')}
                   </Button>
                 )}

@@ -6,7 +6,7 @@ import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
 import { LanguageSwitcher } from '@yeral/ui/language-switcher'
 import { NavLink } from '@yeral/ui/nav-link'
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { site } from '@/shared/config'
 import { SITE_LOCALES } from '@/shared/i18n'
@@ -17,13 +17,23 @@ import { AccountMenu, visibleAccountTrigger } from './account-menu'
 // the login comes over the page only when someone opens it: its steps stay out of every page's first download
 const LoginModal = lazy(() => import('@/features/log-in').then((m) => ({ default: m.LoginModal })))
 
+export type SiteHeaderProps = {
+  /** The compact SearchBar after the logo (C7-Home C1 `.hdr.sr2`: 28 logo, 32 apart), at 768 and wider. */
+  search?: ReactNode
+  /** On the phone, the row's place is taken by this (the results page's Back + summary field). */
+  phoneSearch?: ReactNode
+  /** The results page's header runs the whole width (80 high, 32 at the sides), as its list and map do. */
+  wide?: boolean
+}
+
 /**
  * The marketing header (Home, Auth «Logged-in header», States 09): the logo home, «For business», the language (none
  * with one language) and «Log in», or the avatar and its menu once someone is signed in. 72 high; 56 with a 24 logo on
- * phones (Mobile frame 1), where «For business» goes (Home `.hide-xs`). A page with its own bar on the phone (the
- * business page's cover with Back, Venue v0.7) has no header there (`staticData.phoneHeader`).
+ * phones (Mobile frame 1), where «For business» goes (Home `.hide-xs`). With `search`, the search header (C7-Home
+ * C1): the compact SearchBar after the logo. A page with its own bar on the phone (the business page's cover with
+ * Back, Venue v0.7) has no header there (`staticData.phoneHeader`).
  */
-export function SiteHeader() {
+export function SiteHeader({ search, phoneSearch, wide }: SiteHeaderProps) {
   const t = useTranslations()
   const locale = useLocale()
   const sdk = useSdk()
@@ -49,15 +59,25 @@ export function SiteHeader() {
 
   return (
     <header className={cn('border-b border-n-200 bg-n-0', noPhoneHeader && 'max-sm:hidden')}>
-      <div className={`${wrap} flex h-18 items-center gap-4 max-sm:h-14`}>
+      {phoneSearch && <div className="sm:hidden">{phoneSearch}</div>}
+      <div
+        className={cn(
+          wrap,
+          'flex h-18 items-center gap-4 max-sm:h-14',
+          search && 'gap-8',
+          wide && 'h-20 max-w-none px-8',
+          phoneSearch && 'max-sm:hidden',
+        )}
+      >
         <Link
           to="/$lang"
           params={{ lang: locale }}
           aria-label={t('site.home', { brand })}
           className="flex flex-none rounded-ctl-m focus-visible:shadow-focus focus-visible:outline-none"
         >
-          <Logo alt={brand} height={30} className="max-sm:h-6! max-sm:w-auto" />
+          <Logo alt={brand} height={search ? 28 : 30} className="max-sm:h-6! max-sm:w-auto" />
         </Link>
+        {search}
         <div className="flex-1" />
         <nav ref={navRef} className="flex items-center gap-1">
           <NavLink href={site.urls.business} className="max-sm:hidden">

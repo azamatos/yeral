@@ -1,6 +1,7 @@
 import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { getGlobalStartContext } from '@tanstack/react-start'
+import type { SearchHeaderMode } from '@/widgets/search-bar'
 import { createSiteApi } from './site-api'
 import { routeTree } from '../routeTree.gen'
 
@@ -36,5 +37,10 @@ declare module '@tanstack/react-router' {
   interface StaticDataRouteOption {
     /** The page keeps its own top bar on the phone (the business page's cover with Back): the site header goes under 768. */
     phoneHeader?: 'none'
+    /**
+     * The site header carries the compact SearchBar (C7-Home C1): `results` = the page lists what the address says, so
+     * a search refines it in place (and the phone's header is Back + the summary field); `new` = a search starts here.
+     */
+    searchHeader?: SearchHeaderMode
   }
 }
