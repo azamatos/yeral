@@ -1,44 +1,59 @@
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import type { ClientRow } from '@yeral/contract/clients'
+import { CLIENT_SORT_DIR, type ClientRow, type ClientSort } from '@yeral/contract/clients'
 import { CLIENT_SEGMENTS, type ClientSegment } from '@yeral/domain/clients'
 import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { ChipRadioGroup } from '@yeral/ui/chip'
 import { useClock } from '@yeral/ui/clock'
-import { cn } from '@yeral/ui/cn'
 import { EmptyState } from '@yeral/ui/empty-state'
 import { Input } from '@yeral/ui/input'
 import { useMediaQuery } from '@yeral/ui/media-query'
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@yeral/ui/menu'
 import { Spinner } from '@yeral/ui/spinner'
-import { CellNote, Table, TableCell, TableColumnHeader, TableHeader, TableRow } from '@yeral/ui/table'
+import {
+  CellNote,
+  Table,
+  TableCell,
+  TableColumnHeader,
+  TableFrame,
+  TableHeader,
+  TableIconAction,
+  TableRow,
+  TableRowLink,
+  TableSortHeader,
+  TableTags,
+  TruncatedText,
+  type SortState,
+} from '@yeral/ui/table'
 import { toast } from '@yeral/ui/toast'
-import { Ellipsis, Plus, SearchX, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { CalendarPlus, Copy, Plus, SearchX, Users } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
-import { ClientTags } from '@/entities/client'
+import { useClientTagChips } from '@/entities/client'
 import { useSdk } from '@/shared/api'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import type { ClientsSearch } from '../model/search'
 import { AddClientModal } from './add-client-modal'
 
-const COLUMNS = 'minmax(200px,1.5fr) minmax(130px,1fr) 80px minmax(110px,.8fr) minmax(90px,.7fr) minmax(150px,1fr) 44px'
-const NO_TOTAL = 'minmax(200px,1.5fr) minmax(130px,1fr) 80px minmax(110px,.8fr) minmax(150px,1fr) 44px'
+// DS-Lists A6 `.tr`: Name · Phone · Tags · Visits · Last visit · Total · Next booking · one icon (cells pad 8 each side)
+const COLUMNS = 'minmax(160px,1.3fr) 184px minmax(184px,1.5fr) 72px 112px 112px 160px 48px'
+const NO_TOTAL = 'minmax(160px,1.3fr) 184px minmax(184px,1.5fr) 72px 112px 160px 48px'
 
 /**
- * The clients list (B-Clients, book B-32, B-33): the search, the segment chips, the rows with their tags (Phone only and
- * Reported first), visits, last visit, Total for those who see revenue, the next booking; add a client. A specialist
- * reads the clients who've booked with them.
+ * The clients list (B7-Clients B5, DS-Lists A6): the search, the segment chips with their counts, one line per client —
+ * the name is the row's link to the card, the number with its copy icon, the tags with «+N», visits, last visit, Total
+ * for those who see revenue, the next booking — and one «New booking» icon; delete lives in the card. The headers sort
+ * through the address (`?sort&dir`). On a phone the rows are 68-high list items. A specialist reads the clients who've
+ * booked with them.
  */
 export function ClientsPage() {
   const { workspace } = useWorkspace()
   if (!workspace) return null
-  return <Clients key={workspace.slug} slug={workspace.slug} manage={workspace.level !== 'specialist'} />
+  return <Clients key={workspace.slug} slug={workspace.slug} />
 }
 
-function Clients({ slug, manage }: { slug: string; manage: boolean }) {
+function Clients({ slug }: { slug: string }) {
   const t = useTranslations('clients')
   const sections = useTranslations('shell.sections')
   const fmt = useFmt()
@@ -47,6 +62,7 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
   const navigate = useNavigate()
   const search: ClientsSearch = useSearch({ strict: false })
   const phone = useMediaQuery('(max-width: 767px)')
+  const tagChips = useClientTagChips()
   const todayDate = today(now)
   const go = (patch: Partial<ClientsSearch>) =>
     void navigate({ to: '.', search: (prev: ClientsSearch) => ({ ...prev, ...patch }), replace: true })
@@ -60,65 +76,52 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
     return () => clearTimeout(timer)
   })
 
-  // the sort and its direction ride in the address (`?sort&dir`); the headers that set them come with the table redesign
   const list = useInfiniteQuery({
     ...sdk.clients.list(slug, { q: search.q, segment: search.segment, sort: search.sort, dir: search.dir }),
     placeholderData: keepPreviousData,
   })
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
+  const counts = list.data?.pages[0]?.counts
   const filtered = !!(search.q || search.segment)
   // the api sends no Total to those who don't see revenue
   const seesTotal = rows.some((r) => r.total !== null)
   const book = (id: string) => void navigate({ to: '/w/$slug/calendar', params: { slug }, search: { panel: 'new', client: id } })
-  const copy = (r: ClientRow) => {
-    if (!r.phone) return
-    void navigator.clipboard.writeText(r.phone).then(() => toast(t('copied')))
-  }
+  const copy = (number: string) => void navigator.clipboard.writeText(fmt.phone(number)).then(() => toast(t('copied')))
   const clear = () => {
     setTyped('')
     go({ q: undefined, segment: undefined })
   }
 
+  // the first click gives the column's natural order (A → Z, the most and the newest first), the second reverses it
+  const sortBy = search.sort ?? 'recent'
+  const dir = search.dir ?? CLIENT_SORT_DIR[sortBy]
+  const sortOf = (col: ClientSort): SortState => (sortBy !== col ? 'none' : dir === 'asc' ? 'ascending' : 'descending')
+  const sort = (col: ClientSort) => {
+    if (sortBy !== col) return go({ sort: col, dir: undefined })
+    const flipped = dir === 'asc' ? 'desc' : 'asc'
+    go({ dir: flipped === CLIENT_SORT_DIR[col] ? undefined : flipped })
+  }
+
   if (list.isError && !list.data) throw list.error
 
-  const tags = (r: ClientRow) => (
-    <span className="flex flex-wrap gap-1">
-      <ClientTags phoneOnly={r.phoneOnly} segments={r.segments} tags={r.tags} />
-    </span>
-  )
   const name = (r: ClientRow) => r.name ?? t('unnamed')
-  const open = (r: ClientRow, search: { remove?: true } = {}) =>
-    void navigate({ to: '/w/$slug/clients/$id', params: { slug, id: r.id }, search })
-  const nameLink = (r: ClientRow, className: string) => (
-    <Link
-      to="/w/$slug/clients/$id"
-      params={{ slug, id: r.id }}
-      className={cn('text-n-900 no-underline hover:underline focus-visible:shadow-focus focus-visible:outline-none', className)}
-    >
-      {name(r)}
-    </Link>
-  )
   const next = (r: ClientRow) =>
-    r.next ? t('next', { day: fmt.relativeShortDate(r.next.date, todayDate), time: fmt.time(r.next.start) }) : ''
-  const menu = (r: ClientRow) => (
-    <Menu>
-      <MenuTrigger asChild>
-        <Button variant="plain" size="s" iconOnly aria-label={t('actions', { name: name(r) })}>
-          <Ellipsis aria-hidden />
-        </Button>
-      </MenuTrigger>
-      <MenuContent align="end">
-        <MenuItem onSelect={() => open(r)}>{t('openCard')}</MenuItem>
-        <MenuItem onSelect={() => book(r.id)}>{t('book')}</MenuItem>
-        {r.phone && <MenuItem onSelect={() => copy(r)}>{t('copy')}</MenuItem>}
-        {manage && (
-          <MenuItem className="text-danger-ink" onSelect={() => open(r, { remove: true })}>
-            {t('delete')}
-          </MenuItem>
-        )}
-      </MenuContent>
-    </Menu>
+    r.next ? t('next', { day: fmt.relativeShortDate(r.next.date, todayDate), time: fmt.time(r.next.start) }) : '—'
+  const last = (r: ClientRow) => (r.lastVisit ? fmt.relativeShortDate(r.lastVisit, todayDate) : '—')
+  const sortHeader = (col: ClientSort, label: ReactNode, numeric = false) => (
+    <TableSortHeader sort={sortOf(col)} onSort={() => sort(col)} numeric={numeric}>
+      {label}
+    </TableSortHeader>
   )
+  // the phone's list item shows the sorted column's value on the right (Last visit when it's the usual order)
+  const fact = (r: ClientRow) =>
+    sortBy === 'visits'
+      ? t('visitsCount', { count: r.visits })
+      : sortBy === 'total' && r.total !== null
+        ? fmt.money(r.total)
+        : sortBy === 'nextBooking'
+          ? next(r)
+          : last(r)
 
   return (
     <WorkspacePage
@@ -142,7 +145,15 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
           aria-label={t('segmentsLabel')}
           value={search.segment ?? 'all'}
           onValueChange={(value) => go({ segment: value === 'all' ? undefined : (value as ClientSegment) })}
-          options={[{ value: 'all', label: t('all') }, ...CLIENT_SEGMENTS.map((value) => ({ value, label: t(`segments.${value}`) }))]}
+          options={(['all', ...CLIENT_SEGMENTS] as const).map((value) => ({
+            value,
+            label: (
+              <>
+                {value === 'all' ? t('all') : t(`segments.${value}`)}
+                {counts && <span className="text-n-500 tabular-nums">{fmt.number(counts[value])}</span>}
+              </>
+            ),
+          }))}
         />
         {list.isPending ? (
           <div className="flex justify-center py-16">
@@ -152,7 +163,7 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
           filtered ? (
             <EmptyState
               icon={<SearchX aria-hidden />}
-              title={t('nothing')}
+              title={search.q ? t('nothingQuery', { q: search.q }) : t('nothing')}
               description={t('nothingHint')}
               action={
                 <Button variant="tertiary" size="s" onClick={clear}>
@@ -164,54 +175,97 @@ function Clients({ slug, manage }: { slug: string; manage: boolean }) {
             <EmptyState
               icon={<Users aria-hidden />}
               title={t('empty')}
+              description={t('emptyHint')}
               action={
-                <Button size="s" onClick={() => go({ modal: 'add' })}>
-                  {t('add.title')}
+                <Button onClick={() => go({ modal: 'add' })}>
+                  <Plus aria-hidden />
+                  {t('addClient')}
                 </Button>
               }
             />
           )
         ) : phone ? (
-          <ul className="m-0 flex list-none flex-col gap-2 p-0">
+          <ul aria-label={t('table')} className="m-0 flex list-none flex-col p-0">
             {rows.map((r) => (
-              <li key={r.id} className="flex items-center gap-2 rounded-ctl-l border border-n-200 bg-n-0 p-3">
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  {nameLink(r, 'truncate text-small font-semibold')}
-                  {r.phone && <span className="text-dense text-n-600">{fmt.phone(r.phone)}</span>}
-                  {tags(r)}
-                </span>
-                {menu(r)}
+              <li key={r.id} className="border-b border-n-200 last:border-b-0">
+                <Link
+                  to="/w/$slug/clients/$id"
+                  params={{ slug, id: r.id }}
+                  className="flex h-17 flex-col justify-center gap-1 px-1 text-n-900 no-underline focus-visible:shadow-focus-inset focus-visible:outline-none active:bg-n-50"
+                >
+                  <span className="flex items-baseline gap-3">
+                    <span className="min-w-0 flex-1 truncate text-body font-medium">{name(r)}</span>
+                    <span className="shrink-0 text-dense text-n-500">{fact(r)}</span>
+                  </span>
+                  <span className="truncate text-dense text-n-500">
+                    {[r.phone ? fmt.phone(r.phone) : t('noNumber'), t('visitsCount', { count: r.visits })].join(' · ')}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
         ) : (
-          <Table columns={seesTotal ? COLUMNS : NO_TOTAL} aria-label={t('table')}>
-            <TableHeader>
-              <TableColumnHeader>{t('columns.client')}</TableColumnHeader>
-              <TableColumnHeader>{t('columns.phone')}</TableColumnHeader>
-              <TableColumnHeader numeric>{t('columns.visits')}</TableColumnHeader>
-              <TableColumnHeader>{t('columns.last')}</TableColumnHeader>
-              {seesTotal && <TableColumnHeader numeric>{t('columns.total')}</TableColumnHeader>}
-              <TableColumnHeader>{t('columns.next')}</TableColumnHeader>
-              <TableColumnHeader>
-                <span className="sr-only">{t('columns.actions')}</span>
-              </TableColumnHeader>
-            </TableHeader>
-            {rows.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell className="flex-col items-start gap-1">
-                  {nameLink(r, 'font-semibold')}
-                  {tags(r)}
-                </TableCell>
-                <TableCell>{r.phone ? fmt.phone(r.phone) : <CellNote>{t('noNumber')}</CellNote>}</TableCell>
-                <TableCell numeric>{r.visits}</TableCell>
-                <TableCell>{r.lastVisit ? fmt.relativeShortDate(r.lastVisit, todayDate) : ''}</TableCell>
-                {seesTotal && <TableCell numeric>{r.total !== null ? fmt.money(r.total) : ''}</TableCell>}
-                <TableCell>{next(r)}</TableCell>
-                <TableCell>{menu(r)}</TableCell>
-              </TableRow>
-            ))}
-          </Table>
+          <TableFrame className="rounded-m">
+            <Table columns={seesTotal ? COLUMNS : NO_TOTAL} aria-label={t('table')}>
+              <TableHeader>
+                {sortHeader('name', t('columns.name'))}
+                <TableColumnHeader>{t('columns.phone')}</TableColumnHeader>
+                <TableColumnHeader>{t('columns.tags')}</TableColumnHeader>
+                {sortHeader('visits', t('columns.visits'), true)}
+                {sortHeader('lastVisit', t('columns.last'))}
+                {seesTotal && sortHeader('total', t('columns.total'), true)}
+                {sortHeader('nextBooking', t('columns.next'))}
+                <TableColumnHeader>
+                  <span className="sr-only">{t('columns.actions')}</span>
+                </TableColumnHeader>
+              </TableHeader>
+              {rows.map((r) => (
+                <TableRow key={r.id} className="h-14 min-h-0">
+                  <TableCell className="py-0">
+                    <TableRowLink asChild>
+                      <Link to="/w/$slug/clients/$id" params={{ slug, id: r.id }}>
+                        <TruncatedText>{name(r)}</TruncatedText>
+                      </Link>
+                    </TableRowLink>
+                  </TableCell>
+                  <TableCell className="flex-row items-center gap-1 py-0">
+                    {r.phone ? (
+                      <>
+                        <span className="whitespace-nowrap">{fmt.phone(r.phone)}</span>
+                        <TableIconAction label={t('copy')} onClick={() => copy(r.phone!)}>
+                          <Copy aria-hidden />
+                        </TableIconAction>
+                      </>
+                    ) : (
+                      <CellNote>{t('noNumber')}</CellNote>
+                    )}
+                  </TableCell>
+                  <TableCell className="py-0">
+                    <TableTags moreLabel={(count) => t('moreTags', { count })}>
+                      {tagChips({ phoneOnly: r.phoneOnly, segments: r.segments, tags: r.tags })}
+                    </TableTags>
+                  </TableCell>
+                  <TableCell numeric className="py-0">
+                    {fmt.number(r.visits)}
+                  </TableCell>
+                  <TableCell className="py-0">{last(r)}</TableCell>
+                  {seesTotal && (
+                    <TableCell numeric className="py-0">
+                      {r.total !== null ? fmt.money(r.total) : ''}
+                    </TableCell>
+                  )}
+                  <TableCell className="py-0">
+                    <TruncatedText>{next(r)}</TruncatedText>
+                  </TableCell>
+                  <TableCell className="py-0">
+                    <TableIconAction label={t('bookFor', { name: name(r) })} onClick={() => book(r.id)}>
+                      <CalendarPlus aria-hidden />
+                    </TableIconAction>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </Table>
+          </TableFrame>
         )}
         {list.hasNextPage && (
           <Button variant="secondary" className="self-center" loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>

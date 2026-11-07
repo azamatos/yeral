@@ -10,7 +10,6 @@ import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { PhoneInput } from '@yeral/ui/phone-input'
 import { Select } from '@yeral/ui/select'
-import { TagInput } from '@yeral/ui/tag-input'
 import { toast } from '@yeral/ui/toast'
 import { useState, type FormEvent } from 'react'
 import { useTranslations } from 'use-intl'
@@ -19,7 +18,7 @@ import { useErrorText } from '@/shared/i18n'
 
 /**
  * The head in edit mode (B-Client `edit`, book B-34 step 6): name, number (read-only when a Ýeral account holds it),
- * birthday, how they found you, the team's tags. The tags worked out from the bookings aren't here to change.
+ * birthday, how they found you. The tags are edited in place in the head (A8), not here.
  */
 export function ClientEdit({ slug, card, today, onDone }: { slug: string; card: ClientCard; today: string; onDone: () => void }) {
   const t = useTranslations('clientCard.edit')
@@ -33,7 +32,6 @@ export function ClientEdit({ slug, card, today, onDone }: { slug: string; card: 
   const [digits, setDigits] = useState(card.phone ? nationalDigits(card.phone) : '')
   const [birthday, setBirthday] = useState(card.birthday ?? '')
   const [source, setSource] = useState<ClientSource | ''>(card.source ?? '')
-  const [tags, setTags] = useState<string[]>(card.tags)
 
   // a record whose number passed to someone else has none, and may stay so
   const numberOk = card.account || digits.length === PHONE_RULES.maxDigits || (!card.phone && !digits)
@@ -47,7 +45,6 @@ export function ClientEdit({ slug, card, today, onDone }: { slug: string; card: 
         name: name.trim() || null,
         birthday: birthday || null,
         source: source || null,
-        tags,
         ...(number && number !== card.phone ? { phone: number } : {}),
       },
       {
@@ -92,16 +89,6 @@ export function ClientEdit({ slug, card, today, onDone }: { slug: string; card: 
             />
           </Field>
         </div>
-        <TagInput
-          aria-label={add('tags')}
-          options={card.tags}
-          value={tags}
-          onChange={setTags}
-          caption={t('tagsCaption')}
-          addLabel={add('addTag')}
-          newTagLabel={add('newTag')}
-          addButtonLabel={add('addTagButton')}
-        />
         <div className="flex justify-end gap-2">
           <Button type="button" variant="tertiary" onClick={onDone}>
             {t('cancel')}
