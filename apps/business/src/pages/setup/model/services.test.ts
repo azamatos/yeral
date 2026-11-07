@@ -85,8 +85,8 @@ describe('the services step (B-Onboarding step 5)', () => {
       services: [{ id: 's1', durationMin: 60, priceType: 'fixed', priceAmount: 80 }],
     })
     form = { ...form, rows: form.rows.map((r) => ({ ...r, name: 'Haircut' })) }
-    // the market's languages only: the catalogue's others aren't the business's to send
-    expect(servicesInput(form, 'en').groups[0]!.services[0]!.name).toEqual({ en: 'Haircut' })
+    // the market's languages only: the catalogue's Turkmen stays with the business's new English
+    expect(servicesInput(form, 'en').groups[0]!.services[0]!.name).toEqual({ tk: 'Aýal saç kesimi', en: 'Haircut' })
     // a new service joins the menu's «New services», no second one
     expect(
       withNewRow(form, 'New services')

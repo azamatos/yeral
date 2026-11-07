@@ -58,8 +58,8 @@ describe('account', () => {
   it('profile: language and SMS switches', async () => {
     const b = browser(t.app)
     await b.login('+99365222001', 'Nurana')
-    // only the market's languages can be chosen: Russian comes with the Turkmenistan launch
-    expect((await b.req('/v1/me', { method: 'PATCH', body: { lang: 'ru' } })).status).toBe(400)
+    // only the market's languages can be chosen
+    expect((await b.req('/v1/me', { method: 'PATCH', body: { lang: 'de' } })).status).toBe(400)
     const res = await b.req('/v1/me', { method: 'PATCH', body: { lang: 'en', notifications: { reminderDay: false } } })
     expect(res.json).toMatchObject({
       lang: 'en',

@@ -7,7 +7,8 @@ const keys = (o: object, prefix = ''): string[] =>
   Object.entries(o).flatMap(([k, v]) => (typeof v === 'object' && v !== null ? keys(v as object, `${prefix}${k}.`) : [`${prefix}${k}`]))
 
 describe('client messages', () => {
-  it.each(MARKET_LOCALES)('%s, a language the market offers, has every key of the English source', (locale) => {
+  // SITE_LOCALES until the site has its Turkmen and Russian; then MARKET_LOCALES again (every market language, ADR 0022)
+  it.each(SITE_LOCALES)('%s, a language the site offers, has every key of the English source', (locale) => {
     const own = CLIENT_MESSAGES[locale]
     expect(own, `apps/client/messages/${locale}.json`).toBeDefined()
     expect(keys(own ?? {}).sort()).toEqual(keys(en).sort())
@@ -32,8 +33,9 @@ describe('client messages', () => {
 })
 
 describe('site locales', () => {
-  it("are the market's languages, the main one among them", () => {
-    expect(SITE_LOCALES).toEqual(MARKET_LOCALES)
+  it("are the market's languages the site has words for, the main one among them", () => {
+    // every market language once the site has its Turkmen and Russian: then `toEqual(MARKET_LOCALES)`
+    expect(MARKET_LOCALES.filter((l) => SITE_LOCALES.includes(l))).toEqual(SITE_LOCALES)
     expect(SITE_LOCALES).toContain(DEFAULT_LOCALE)
   })
 

@@ -412,10 +412,10 @@ describe('the admin tool’s businesses (book F-179)', () => {
     await db.insert(users).values({ phone: '+99365970004', name: 'Aýna', lang: 'en', lastSeenAt: new Date(DEMO_NOW) })
     expect((await add('Ayna Nails', { phone: '+99365970004', name: 'Someone Else' })).status).toBe(201)
     expect((await db.select().from(users).where(eq(users.phone, '+99365970004')))[0]!.name).toBe('Aýna')
-    // the language is one of the market's (English alone for now)
-    expect((await add('Russian Nails', { phone: '+99365970005', name: 'Olga', lang: 'ru' })).status).toBe(400)
-    expect((await add('English Nails', { phone: '+99365970005', name: 'Olga', lang: 'en' })).status).toBe(201)
-    expect((await db.select().from(users).where(eq(users.phone, '+99365970005')))[0]!.lang).toBe('en')
+    // the language is one of the market's
+    expect((await add('German Nails', { phone: '+99365970005', name: 'Olga', lang: 'de' })).status).toBe(400)
+    expect((await add('Russian Nails', { phone: '+99365970005', name: 'Olga', lang: 'ru' })).status).toBe(201)
+    expect((await db.select().from(users).where(eq(users.phone, '+99365970005')))[0]!.lang).toBe('ru')
   })
 
   it('only the Ýeral team', async () => {

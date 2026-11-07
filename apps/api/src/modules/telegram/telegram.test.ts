@@ -123,7 +123,10 @@ describe('sign-in codes through our Telegram bot (ADR 0029)', () => {
   it('/start without a nonce says what the bot is for, in the market’s language; an unknown, expired or spent nonce is refused', async () => {
     const t = testApp(db, { telegram: true })
     const bot = t.telegram!
+    // a Telegram in a language the market offers is answered in it; any other gets the market's main language
     await webhook(t, start(1004, undefined, 'ru'))
+    expect(bot.sent.at(-1)).toEqual({ chatId: 1004, text: expect.stringMatching(/^Это бот Ýeral: /) })
+    await webhook(t, start(1004, undefined, 'de'))
     expect(bot.sent.at(-1)).toEqual({ chatId: 1004, text: expect.stringMatching(/^This is the Ýeral bot: /) })
     await webhook(t, start(1004, 'no-such-nonce'))
     expect(bot.sent.at(-1)).toEqual({ chatId: 1004, text: 'This link has expired. Ask for a new code on the site.' })

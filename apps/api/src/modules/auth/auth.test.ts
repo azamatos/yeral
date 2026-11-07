@@ -27,8 +27,8 @@ describe('phone login (ADR 0019)', () => {
     expect(res.json).toEqual({ resendAfterSec: 59, expiresInSec: 300, delivery: 'sms' })
     // in the language of the page, else the market's main one (book Q-292)
     expect(t.sms.sent.at(-1)).toEqual({ to: '+99365000001', text: 'Ýeral code: 1234', secret: true })
-    // a language the market doesn't offer can't be chosen (English-only first launch)
-    expect((await browser(t.app).req('/v1/auth/code', { body: { phone: '+99365000011', lang: 'tk' } })).status).toBe(400)
+    // a language the market doesn't offer can't be chosen
+    expect((await browser(t.app).req('/v1/auth/code', { body: { phone: '+99365000011', lang: 'de' } })).status).toBe(400)
     const again = await b.req('/v1/auth/code', { body: { phone: '+99365000001' } })
     expect(again.status).toBe(429)
     expect(again.json.error).toMatchObject({ code: 'resend_too_soon', details: { retryAfterSec: 59 } })

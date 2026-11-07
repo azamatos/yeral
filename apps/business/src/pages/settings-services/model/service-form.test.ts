@@ -51,9 +51,9 @@ describe('the service drawer', () => {
     expect(updateInput(form, service, 'en')).toBeNull()
     // the same people in another order is no change
     expect(updateInput({ ...form, staffIds: ['maral', 'aya'] }, service, 'en')).toBeNull()
-    // the market speaks English: a starter's other languages stay out of what's sent (the api refuses them)
+    // the market's other languages stay in what's sent (a language outside the market would be refused by the api)
     expect(updateInput({ ...form, name: 'Colouring', buffer: 'rule', priceType: 'hidden', amount: '' }, service, 'en')).toEqual({
-      name: { en: 'Colouring' },
+      name: { en: 'Colouring', tk: 'Saç boýamak' },
       bufferMin: null,
       priceType: 'hidden',
       priceAmount: 0,
