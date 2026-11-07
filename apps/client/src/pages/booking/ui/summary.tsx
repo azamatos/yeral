@@ -4,27 +4,29 @@ import { useFmt } from '@yeral/i18n'
 import { directionsUrl } from '@yeral/lib/links'
 import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
+import { Pill } from '@yeral/ui/pill'
 import { Price } from '@yeral/ui/price'
 import { Rating } from '@yeral/ui/rating'
 import { textLink } from '@yeral/ui/text-link'
-import { CalendarCheck, CalendarDays, Lock, MapPin, Navigation, Plus, User, Wallet, X } from 'lucide-react'
+import { CalendarCheck, CalendarDays, Lock, MapPin, Navigation, User, Wallet, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { calendarAt } from '@/shared/lib'
+import { dayHours } from '../model/flow'
 
 type Service = BusinessDetail['serviceGroups'][number]['services'][number]
 
-const divider = <div aria-hidden className="my-5 h-px flex-none bg-n-200" />
-
 /**
  * The booking's card beside the steps from 1024 (C7-Booking C4.4 `BookingSummary`): «Your booking» with Clear
- * (Tertiary S), the business, the picked services (× from two up) and «Add a service», the specialist and the time
- * with Change, the total with its duration and «Pay at the place» under it, then the step's primary, only on the steps
- * that have one (Time, Confirm). Gaps 12 inside a group, 20 around the dividers, 4 from the total to the pay line, 24
- * before the action. On Confirm (`confirm`, C4.5) it's the booking card: the business bigger (photo 120, name, rating,
- * address with «Get directions»), the booking as facts, the total and «Confirm booking». The page works out the total
- * and the name once for the card and the bar. In move mode (`move`, C-30) the services are locked with the way to
- * change them, and the previous time stands above the new one.
+ * (Tertiary S), the business, the picked services (× from two up) and «Add a service» (`add`, the page's popover or
+ * sheet), the specialist and the time with Change, the total with its duration and «Pay at the place» under it, then
+ * the step's primary, only on the steps that have one (Time, Confirm). Gaps 12 inside a group, 20 around the dividers,
+ * 4 from the total to the pay line, 24 before the action. A time the new total no longer fits (`stale`) turns the
+ * time row amber with why. In the phone's sheet (`sheet`) the same body without the card and its header, 16 around
+ * the dividers. On Confirm (`confirm`, C4.5) it's the booking card: the business bigger (photo 120, name, rating, the
+ * booking day's StatusPill, address with «Get directions»), the booking as facts, the total and «Confirm booking» with
+ * one line under it (`after`). The page works out the total and the name once for the card and the bar. In move mode
+ * (`move`, C-30) the services are locked with the way to change them, and the previous time stands above the new one.
  */
 export function Summary({
   detail,
@@ -33,13 +35,16 @@ export function Summary({
   staffName,
   date,
   time,
+  stale,
   cta,
   hint,
+  after,
   move,
   confirm = false,
+  sheet = false,
   notice,
+  add,
   onClear,
-  onAdd,
   onRemove,
   onChangeStaff,
   onChangeTime,
@@ -50,15 +55,21 @@ export function Summary({
   staffName: string | null
   date: string | null
   time: number | null
+  /** The chosen start the new total no longer fits (C4.4 «The added service no longer fits the time»). */
+  stale?: number | null
   cta: ReactNode
   hint: string | null
+  /** On Confirm, the quiet line under the action: «Glow Studio usually confirms within 15 minutes.» */
+  after?: string | null
   /** The booking's time now («Thursday, 15 October · 14:30–15:30»). */
   move?: { before: string }
   confirm?: boolean
+  sheet?: boolean
   /** On Confirm: what changed since the client's last visit (`ChangedNotice`), at the head of the card. */
   notice?: ReactNode
+  /** «Add a service» (`AddService`), under the services. */
+  add?: ReactNode
   onClear?: () => void
-  onAdd?: () => void
   onRemove?: (id: string) => void
   onChangeStaff?: () => void
   onChangeTime?: () => void
@@ -67,6 +78,7 @@ export function Summary({
   const fmt = useFmt()
   const photo = detail.photos[0]
   const timed = date !== null && time !== null
+  const divider = <div aria-hidden className={cn('h-px flex-none bg-n-200', sheet ? 'my-4' : 'my-5')} />
   // a start past midnight reads on the next calendar day
   const whenText = (date: string, time: number) =>
     t('summary.when', { date: fmt.weekdayDate(calendarAt(date, time).date), range: fmt.timeRange(time, time + total.minutes) })
@@ -101,21 +113,28 @@ export function Summary({
         </div>
       ))}
       {move && <span className="text-dense text-n-600">{t('move.locked')}</span>}
-      {onAdd && picked.length > 0 && (
-        <Button variant="tertiary" size="s" className="w-full justify-start px-2.5" onClick={onAdd}>
-          <Plus aria-hidden />
-          {t('summary.add')}
-        </Button>
-      )}
+      {add && picked.length > 0 && add}
     </div>
   )
 
-  const row = (icon: ReactNode, label: string, value: ReactNode, change?: { label: string; onClick: () => void }, strong = false) => (
-    <div className="[&>svg]:text-n-700 flex min-w-0 items-center gap-3 [&>svg]:size-4 [&>svg]:flex-none">
+  const row = (
+    icon: ReactNode,
+    label: string,
+    value: ReactNode,
+    change?: { label: string; onClick: () => void },
+    strong = false,
+    warn = false,
+  ) => (
+    <div
+      className={cn(
+        'flex min-w-0 items-center gap-3 [&>svg]:size-4 [&>svg]:flex-none',
+        warn ? '[&>svg]:text-st-pending-ink' : '[&>svg]:text-n-700',
+      )}
+    >
       {icon}
       <span className="flex min-w-0 flex-1 flex-col">
         {label && <span className="text-[12px] leading-4 text-n-600">{label}</span>}
-        <span className={cn('truncate text-small', strong && 'font-semibold')}>{value}</span>
+        <span className={cn('truncate text-small', strong && 'font-semibold', warn && 'text-st-pending-ink')}>{value}</span>
       </span>
       {change && (
         <Button variant="tertiary" size="s" aria-label={change.label} onClick={change.onClick}>
@@ -124,6 +143,7 @@ export function Summary({
       )}
     </div>
   )
+  const changeTime = onChangeTime && { label: t('summary.changeTime'), onClick: onChangeTime }
   const who = staffName && (
     <div className="flex flex-col gap-3">
       {row(
@@ -139,8 +159,24 @@ export function Summary({
           move ? <CalendarCheck aria-hidden strokeWidth={1.75} /> : <CalendarDays aria-hidden strokeWidth={1.75} />,
           move ? '' : t('summary.dateTime'),
           move ? t('move.after', { when: whenText(date, time) }) : whenText(date, time),
-          onChangeTime && { label: t('summary.changeTime'), onClick: onChangeTime },
+          changeTime,
           Boolean(move),
+        )}
+      {/* the time no longer fits the total: amber, with why; Continue waits (C4.4 state 4) */}
+      {!timed &&
+        date !== null &&
+        stale !== null &&
+        stale !== undefined &&
+        row(
+          <CalendarDays aria-hidden strokeWidth={1.75} />,
+          t('summary.dateTime'),
+          <>
+            {t('summary.when', { date: fmt.weekdayDate(calendarAt(date, stale).date), range: fmt.time(stale) })}
+            <span className="block text-dense whitespace-normal">{t('summary.tooShort', { duration: fmt.duration(total.minutes) })}</span>
+          </>,
+          changeTime,
+          false,
+          true,
         )}
     </div>
   )
@@ -169,10 +205,13 @@ export function Summary({
     <div className="mt-6 flex flex-col gap-2">
       {cta}
       {hint && <span className="text-center text-dense text-n-600">{hint}</span>}
+      {!hint && after && <span className="text-center text-dense [text-wrap:pretty] text-n-600">{after}</span>}
     </div>
   )
 
-  if (confirm)
+  if (confirm) {
+    const hours = date !== null ? dayHours(detail, date) : null
+    const day = date !== null ? fmt.weekdayAbbr(date) : ''
     return (
       <div className="flex flex-col rounded-card border border-n-200 bg-n-0 p-6 max-sm:p-4">
         {notice && <div className="mb-4">{notice}</div>}
@@ -189,6 +228,25 @@ export function Summary({
             {detail.rating !== null && detail.reviewsCount > 0 && (
               <Rating value={fmt.rating(detail.rating)} count={fmt.number(detail.reviewsCount)} className="text-small" />
             )}
+            {/* the booking day's StatusPill (C4.5 «Open on Fri · 09:00–20:00») */}
+            {date !== null &&
+              (hours ? (
+                <Pill
+                  tone="success"
+                  icon={<i aria-hidden className="size-1.5 rounded-pill bg-st-completed-dot" />}
+                  className="mt-0.5 gap-1.5 pr-2.5"
+                >
+                  {t('summary.openOn', { day, hours: fmt.timeRange(hours.open, hours.close) })}
+                </Pill>
+              ) : (
+                <Pill
+                  tone="slate"
+                  icon={<i aria-hidden className="size-1.5 rounded-pill bg-st-cancelled-dot" />}
+                  className="mt-0.5 gap-1.5 pr-2.5"
+                >
+                  {t('summary.closedOn', { day })}
+                </Pill>
+              ))}
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-1">
@@ -238,6 +296,39 @@ export function Summary({
         {action}
       </div>
     )
+  }
+
+  const head = (
+    <div className={cn('flex min-w-0 items-center gap-3', !sheet && 'mt-3')}>
+      {photo && <img src={photo.url} alt="" className="block size-12 flex-none rounded-ctl-m object-cover" />}
+      <span className="flex min-w-0 flex-col">
+        <span className="text-[15px] leading-5 font-semibold">{detail.name}</span>
+        <span className="truncate text-dense text-n-600">{detail.address}</span>
+      </span>
+    </div>
+  )
+  const body = (
+    <>
+      {divider}
+      {services}
+      {who && (
+        <>
+          {divider}
+          {who}
+        </>
+      )}
+      <div aria-hidden className={cn('mb-4 h-px flex-none bg-n-200', sheet ? 'mt-4' : 'mt-5')} />
+      {totalBlock}
+    </>
+  )
+
+  if (sheet)
+    return (
+      <div className="flex flex-col">
+        {head}
+        {body}
+      </div>
+    )
 
   return (
     <div className="flex flex-col rounded-card border border-n-200 bg-n-0 px-6 pt-4 pb-6">
@@ -249,23 +340,8 @@ export function Summary({
           </Button>
         )}
       </div>
-      <div className="mt-3 flex min-w-0 items-center gap-3">
-        {photo && <img src={photo.url} alt="" className="block size-12 flex-none rounded-ctl-m object-cover" />}
-        <span className="flex min-w-0 flex-col">
-          <span className="text-[15px] leading-5 font-semibold">{detail.name}</span>
-          <span className="truncate text-dense text-n-600">{detail.address}</span>
-        </span>
-      </div>
-      {divider}
-      {services}
-      {who && (
-        <>
-          {divider}
-          {who}
-        </>
-      )}
-      <div aria-hidden className="mt-5 mb-4 h-px flex-none bg-n-200" />
-      {totalBlock}
+      {head}
+      {body}
       {action}
     </div>
   )

@@ -9,7 +9,8 @@ import { OptionList, SelectLayer, useSheet } from '@yeral/ui/select'
 import { List, Search, SearchX, X } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { GROUPS_FROM, SEARCH_FROM, searchServices, type GroupResult, type Match, type ServiceMatch } from '../model/services'
+import { searchServices, type GroupResult, type Match, type ServiceMatch } from '@/entities/business'
+import { GROUPS_FROM, SEARCH_FROM } from '../model/services'
 import type { BookingState } from './business-page'
 
 type Detail = BusinessDetail

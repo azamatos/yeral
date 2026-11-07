@@ -5,7 +5,7 @@ import { useRef, useState } from 'react'
 import { expect, screen, userEvent, waitFor } from 'storybook/test'
 import { Button } from '../button'
 import { StatusBadge } from '../status-badge'
-import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from './drawer'
+import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger, SheetHeader } from './drawer'
 
 function BookingDetail({ defaultOpen, scrim }: { defaultOpen?: boolean; scrim?: 'always' | 'auto' }) {
   return (
@@ -69,6 +69,32 @@ export const PhoneSheet: Story = {
   name: 'Open on a phone (bottom sheet)',
   args: { defaultOpen: true },
   globals: { viewport: { value: 'xs' } },
+}
+
+/** A phone's sheet with the 52-px `SheetHeader` (C7-Booking `.shh`): the title names the dialog, a small action sits beside the close. */
+export const SheetWithHeader: Story = {
+  globals: { viewport: { value: 'xs' } },
+  render: () => (
+    <Drawer defaultOpen>
+      <DrawerContent aria-describedby={undefined}>
+        <SheetHeader title="Your booking" closeLabel="Close">
+          <Button variant="tertiary" size="s">
+            Clear
+          </Button>
+        </SheetHeader>
+        <DrawerBody>
+          <p className="m-0 text-body">Women’s haircut · 60 min · 80 TMT</p>
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
+  ),
+  play: async () => {
+    const dialog = await screen.findByRole('dialog', { name: 'Your booking' })
+    await waitFor(() => expect(dialog).toBeVisible())
+    await expect(screen.getByRole('button', { name: 'Clear' })).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  },
 }
 
 /** The business app (`scrim="auto"`): from 1280 no scrim, the page beside it stays usable; below 1280 it dims as before. */

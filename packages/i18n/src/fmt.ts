@@ -86,6 +86,8 @@ export function createFmt(locale: Locale) {
     weekday: (date: string) => t(`weekdays.${weekdayOf(date)}`),
     /** `Th`: only week headers and date strips («Fr 16», COMPONENTS.md); running text takes `shortWeekdayDate` */
     weekdayShort: (date: string) => t(`weekdaysShort.${weekdayOf(date)}`),
+    /** `Fri`: the weekday alone in running text («Open on Fri · 09:00–20:00») */
+    weekdayAbbr: (date: string) => t(`weekdaysAbbr.${weekdayOf(date)}`),
     /** `Fri, 16 Oct`: a date in running text, the weekday in three letters (its own template, for the proofread) */
     shortWeekdayDate: (date: string) => t('weekdayDateShort', { weekday: t(`weekdaysAbbr.${weekdayOf(date)}`), date: fmt.shortDate(date) }),
     /** `Today`, `Tomorrow`, otherwise `Fri, 16 Oct` (lists of bookings ahead; a past day is a date too). */

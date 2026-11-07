@@ -5,11 +5,13 @@ import {
   chosenStaff,
   currentMoveStep,
   currentStep,
+  dayHours,
   isOwnTime,
   moveRefusal,
   namedSpecialist,
   notDoneBy,
   partOfDay,
+  specialistsDoingAll,
   reachedStep,
   servicesOf,
   slotsByPart,
@@ -180,5 +182,47 @@ describe('move mode', () => {
     expect(moveRefusal(new ApiError(404, 'not_found', { staffId: 'any' }), 'any')).toBeNull()
     expect(moveRefusal(new ApiError(409, 'slot_taken'), 'ayna')).toBeNull()
     expect(moveRefusal(new TypeError('offline'), 'ayna')).toBeNull()
+  })
+})
+
+describe('who does every picked service', () => {
+  const detail = {
+    specialists: [
+      { id: 'a', serviceIds: ['s1', 's2'] },
+      { id: 'b', serviceIds: ['s2'] },
+    ],
+  }
+  it('lists only the people who do them all, in the team order', () => {
+    expect(specialistsDoingAll(detail, ['s2']).map((s) => s.id)).toEqual(['a', 'b'])
+    expect(specialistsDoingAll(detail, ['s1', 's2']).map((s) => s.id)).toEqual(['a'])
+    expect(specialistsDoingAll(detail, ['s3'])).toEqual([])
+  })
+  it('lists nobody with nothing picked', () => {
+    expect(specialistsDoingAll(detail, [])).toEqual([])
+  })
+})
+
+describe('the hours on the booking day', () => {
+  const week = [
+    { open: 540, close: 1200 },
+    { open: 540, close: 1200 },
+    null,
+    { open: 540, close: 1200 },
+    { open: 540, close: 1200 },
+    { open: 600, close: 1080 },
+    null,
+  ]
+  it('reads the week', () => {
+    // 2026-10-16 is a Friday, 2026-10-18 a Sunday
+    expect(dayHours({ hours: week, specialDays: [] }, '2026-10-16')).toEqual({ open: 540, close: 1200 })
+    expect(dayHours({ hours: week, specialDays: [] }, '2026-10-18')).toBeNull()
+  })
+  it('lets a special day win, open or closed', () => {
+    const specialDays = [
+      { date: '2026-10-16', name: 'Inventory', hours: null },
+      { date: '2026-10-18', name: 'Open Sunday', hours: { open: 660, close: 960 } },
+    ]
+    expect(dayHours({ hours: week, specialDays }, '2026-10-16')).toBeNull()
+    expect(dayHours({ hours: week, specialDays }, '2026-10-18')).toEqual({ open: 660, close: 960 })
   })
 })

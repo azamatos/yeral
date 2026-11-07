@@ -37,8 +37,8 @@ export const Specialist: Story = {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Change the time' })).toBeVisible()
     await expect(canvas.getByText('YR-48190')).toBeVisible()
     await expect(canvas.getAllByText('To change services, cancel the booking and book again.')[0]).toBeVisible()
-    const group = within(canvas.getByRole('radiogroup', { name: 'Specialist' }))
-    await expect(group.getByRole('radio', { name: /Aýna/ })).toHaveAttribute('aria-checked', 'true')
+    const group = within(canvas.getByRole('group', { name: 'Specialist' }))
+    await expect(group.getByRole('button', { name: /^Aýna/ })).toHaveAttribute('aria-pressed', 'true')
     await expect(group.getByText('Current')).toBeVisible()
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
     await expect(summary.getByText(/^Previous time: /)).toBeVisible()
@@ -104,7 +104,7 @@ export const CantMoveOnline: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText("This booking can't be moved online.")).toBeVisible()
     await expect(canvas.getByText(/A service of this booking is no longer booked online/)).toBeVisible()
-    await expect(canvas.queryByRole('radiogroup', { name: 'Specialist' })).toBeNull()
+    await expect(canvas.queryByRole('group', { name: 'Specialist' })).toBeNull()
     await expect(canvas.getByRole('link', { name: 'Go to my bookings' })).toHaveAttribute('href', '/en/account/bookings')
   },
 }
@@ -120,9 +120,10 @@ export const SpecialistLeft: Story = {
     }),
   },
   play: async ({ canvas }) => {
-    const group = within(await canvas.findByRole('radiogroup', { name: 'Specialist' }))
-    await expect(group.getByRole('radio', { name: /Any specialist/ })).toHaveAttribute('aria-checked', 'true')
-    await expect(group.getByRole('radio', { name: /Aýna/ })).toBeDisabled()
+    const group = within(await canvas.findByRole('group', { name: 'Specialist' }))
+    await expect(group.getByRole('button', { name: /^Any specialist/ })).toHaveAttribute('aria-pressed', 'true')
+    // only who does the booking's services is listed (C7-Booking C4.1)
+    await expect(group.queryByRole('button', { name: /^Aýna/ })).toBeNull()
     const toast = await within(document.body).findByText('Aýna no longer does these services. The new time is with any specialist.')
     await waitFor(() => expect(toast).toBeVisible())
   },
@@ -132,10 +133,10 @@ export const SpecialistLeft: Story = {
 export const SpecialistGone: Story = {
   args: { server: moveApi({ details: { 'YR-48190': { reschedule: null } }, business: { moveRead: { staffGone: 'st-ayna' } } }) },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('radiogroup', { name: 'Specialist' })).toBeVisible()
+    await expect(await canvas.findByRole('group', { name: 'Specialist' })).toBeVisible()
     // the address changes to anyone (the step renders again: ask for the group afresh)
-    const group = () => within(canvas.getByRole('radiogroup', { name: 'Specialist' }))
-    await waitFor(() => expect(group().getByRole('radio', { name: /Any specialist/ })).toHaveAttribute('aria-checked', 'true'))
+    const group = () => within(canvas.getByRole('group', { name: 'Specialist' }))
+    await waitFor(() => expect(group().getByRole('button', { name: /^Any specialist/ })).toHaveAttribute('aria-pressed', 'true'))
     await expect(group().getByText('Current')).toBeVisible()
     // the toast is SpecialistLeft's check: the toaster keeps a story's toasts alive into the next one
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))

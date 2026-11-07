@@ -1,5 +1,5 @@
 import { DAY_MINUTES } from '@yeral/domain/hours'
-import { isYmd } from '@yeral/domain/time'
+import { dow, isYmd } from '@yeral/domain/time'
 import { isApiError } from '@yeral/sdk'
 import { z } from 'zod'
 
@@ -123,6 +123,30 @@ export function chosenStaff(
 export function namedSpecialist<S extends { id: string }>(detail: { specialists: readonly S[] }, staff: string | undefined): S | null {
   if (!staff || staff === 'any') return null
   return detail.specialists.find((s) => s.id === staff) ?? null
+}
+
+/** The specialists who do every picked service (C7-Booking C4.1 «Only people who do the service are listed»). */
+export function specialistsDoingAll<S extends { serviceIds: readonly string[] }>(
+  detail: { specialists: readonly S[] },
+  serviceIds: readonly string[],
+): S[] {
+  return detail.specialists.filter((s) => doesAll(s, serviceIds))
+}
+
+/**
+ * The business's hours on the booking's day for the confirm card's StatusPill (C7-Booking C4.5 «Open on Fri ·
+ * 09:00–20:00»): a special day's hours when it has one for the date, else the week's; null when closed.
+ */
+export function dayHours(
+  detail: {
+    hours: readonly ({ open: number; close: number } | null)[]
+    specialDays: readonly { date: string; hours: { open: number; close: number } | null }[]
+  },
+  date: string,
+): { open: number; close: number } | null {
+  const special = detail.specialDays.find((d) => d.date === date)
+  if (special) return special.hours
+  return detail.hours[dow(date)] ?? null
 }
 
 /** The picked services the specialist doesn't do, in the order picked. */

@@ -1,88 +1,107 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
-import { Chip } from '@yeral/ui/chip'
 import { cn } from '@yeral/ui/cn'
-import { Check } from 'lucide-react'
+import { SEARCH_FROM } from '@yeral/ui/select'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { searchServices } from '@/entities/business'
+import { Highlight } from './add-service'
+import { PickList, PickRow } from './pick-row'
+import { ServiceSearch } from './service-search'
 
 /**
- * The services to pick from on the booking's first step (Booking `step=services`, C-12; the business page books one
- * service per row instead, Venue v0.7 · C3): the groups' chips filter the list (not scroll; «All» first), each
- * group's services with their duration and price (a price kept for the place in grey), and «Select» / «Selected» on
- * each row. The page gives the heading above it; `groupHeading` is the level its groups' names take under that heading.
+ * The services to pick from on the booking's services step (Booking `step=services`, C-12; C7-Booking C4.2): the
+ * groups one after another with their counts, each service a row (name, duration, an optional one-line description,
+ * the price at the right, a chevron); a tap tints the row for 150 ms and the page moves on (`onToggle`; one in the
+ * booking already shows the check and comes off). Search from 9 services (M; L on a phone) in names and descriptions,
+ * case and accents aside; nothing found says so with «Clear search». The page gives the heading above it;
+ * `groupHeading` is the level its groups' names take under that heading.
  */
 export function ServicePicker({
   groups,
   picked,
   onToggle,
   groupHeading,
+  searchLabel,
 }: {
   groups: BusinessDetail['serviceGroups']
   picked: readonly string[]
   onToggle: (id: string) => void
   groupHeading: 'h2' | 'h3'
+  /** The search's placeholder: «Search 20 services», «Search Jeren’s 20 services». */
+  searchLabel: string
 }) {
-  const t = useTranslations('services')
+  const t = useTranslations('booking.services')
+  const words = useTranslations('services')
   const fmt = useFmt()
-  const [chosen, setGroup] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
   const listed = groups.filter((g) => g.services.length > 0)
-  // a chip whose group went (its services removed meanwhile) lets go: «All» again
-  const group = listed.some((g) => g.id === chosen) ? chosen : null
-  const shown = listed.filter((g) => group === null || g.id === group)
+  const count = listed.reduce((n, g) => n + g.services.length, 0)
+  const searchable = count >= SEARCH_FROM
+  const result = searchServices(listed, searchable ? query : '')
+  const shown = result.groups.filter((g) => g.services.length > 0)
   const Heading = groupHeading
-  if (shown.length === 0) return <p className="m-0 text-body text-n-600">{t('none')}</p>
+  if (listed.length === 0) return <p className="m-0 text-body text-n-600">{words('none')}</p>
   return (
     <>
-      {listed.length > 1 && (
-        <div role="group" aria-label={t('groups')} className="-m-1 flex [scrollbar-width:none] gap-2 overflow-x-auto p-1">
-          <Chip selected={group === null} aria-pressed={group === null} onClick={() => setGroup(null)}>
-            {t('all')}
-          </Chip>
-          {listed.map((g) => (
-            <Chip key={g.id} selected={group === g.id} aria-pressed={group === g.id} onClick={() => setGroup(g.id)}>
-              {g.name}
-            </Chip>
+      {searchable && (
+        <ServiceSearch
+          value={query}
+          onChange={setQuery}
+          label={searchLabel}
+          clearLabel={t('clearSearch')}
+          className="w-90 max-sm:w-full"
+          size="m"
+        />
+      )}
+      {shown.length === 0 ? (
+        <div className="flex flex-col items-start gap-3">
+          <p className="m-0 text-body text-n-600">{t('noMatch', { query: query.trim() })}</p>
+          <Button variant="tertiary" size="s" className="-ml-2.5" onClick={() => setQuery('')}>
+            {t('clearSearch')}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          {shown.map((g) => (
+            <section key={g.group.id} className="flex flex-col gap-3">
+              <Heading className="m-0 flex items-baseline gap-2 text-[17px] leading-6 font-semibold">
+                {g.group.name}
+                <span className="text-small font-normal text-n-600">{g.services.length}</span>
+              </Heading>
+              <PickList>
+                {g.services.map(({ service: s, name, description }) => {
+                  const on = picked.includes(s.id)
+                  return (
+                    <PickRow key={s.id} compact pressed={on} onPick={() => onToggle(s.id)}>
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate text-[15px] leading-5 font-medium">
+                          <Highlight text={s.name} match={name} />
+                        </span>
+                        <span className="text-n-700 text-dense">{fmt.duration(s.durationMin)}</span>
+                        {s.description && (
+                          <span className="truncate text-dense text-n-600">
+                            <Highlight text={s.description} match={description} />
+                          </span>
+                        )}
+                      </span>
+                      <span
+                        className={cn(
+                          'text-[15px] leading-5 font-semibold whitespace-nowrap',
+                          s.price.type === 'hidden' && 'font-medium text-n-600',
+                        )}
+                      >
+                        {fmt.price(s.price)}
+                      </span>
+                    </PickRow>
+                  )
+                })}
+              </PickList>
+            </section>
           ))}
         </div>
       )}
-      <div className="flex flex-col gap-5">
-        {shown.map((g) => (
-          <section key={g.id} className="flex flex-col">
-            <Heading className="m-0 pt-1 pb-3 text-[18px] leading-6 font-semibold">{g.name}</Heading>
-            {g.services.map((s) => {
-              const on = picked.includes(s.id)
-              return (
-                <div key={s.id} className="flex items-center gap-4 border-t border-n-200 py-4">
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className="text-[16px] leading-[22px] font-semibold">{s.name}</span>
-                    {s.description && <span className="text-dense text-n-600">{s.description}</span>}
-                    <span className="text-small text-n-600">
-                      {fmt.duration(s.durationMin)} ·{' '}
-                      <span className={cn(s.price.type === 'hidden' ? 'font-medium text-n-600' : 'font-semibold text-n-900')}>
-                        {fmt.price(s.price)}
-                      </span>
-                    </span>
-                  </div>
-                  <Button
-                    size="s"
-                    variant={on ? 'tint' : 'secondary'}
-                    aria-pressed={on}
-                    // the words seen stay in the name screen readers hear (axe: label-content-name-mismatch)
-                    aria-label={on ? t('selectedLabel', { name: s.name }) : t('selectLabel', { name: s.name })}
-                    className="min-w-28 flex-none"
-                    onClick={() => onToggle(s.id)}
-                  >
-                    {on && <Check strokeWidth={2} />}
-                    {on ? t('selected') : t('select')}
-                  </Button>
-                </div>
-              )
-            })}
-          </section>
-        ))}
-      </div>
     </>
   )
 }

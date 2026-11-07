@@ -144,6 +144,34 @@ export function DrawerHeader({
   )
 }
 
+/**
+ * A bottom sheet's header (C7-Booking `.shh`, the Select's sheet): 52 high, the title 16/24 600 (a `Dialog.Title`, so
+ * the sheet is named by it), the sheet's own small actions (`children`: Clear) and the close button at the right.
+ */
+export function SheetHeader({
+  title,
+  closeLabel,
+  children,
+  className,
+}: {
+  title: ReactNode
+  closeLabel: string
+  children?: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={cn('flex h-13 flex-none items-center gap-1 pr-1.5 pl-4', className)}>
+      <Dialog.Title className="m-0 min-w-0 flex-1 truncate text-ctl-l leading-6 font-semibold text-n-900">{title}</Dialog.Title>
+      {children}
+      <Dialog.Close asChild>
+        <Button variant="plain" iconOnly aria-label={closeLabel} className="size-10 rounded-ctl-m">
+          <X />
+        </Button>
+      </Dialog.Close>
+    </div>
+  )
+}
+
 export function DrawerBody({ className, ...props }: ComponentProps<'div'>) {
   return <div {...props} className={cn('flex flex-1 flex-col gap-6 overflow-y-auto px-4 py-5 sm:p-6', className)} />
 }
