@@ -337,6 +337,13 @@
       "when": 1793982888008,
       "tag": "0047_telegram_links",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1794037327915,
+      "tag": "0048_business_changed_at",
+      "breakpoints": true
     }
   ]
 }

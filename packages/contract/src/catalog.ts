@@ -346,6 +346,18 @@ export const businessDetailSchema = z
     hideExactAddress: z.boolean(),
     /** When the business moved here, for 30 days after: the page says "New address" (book Q-215). */
     movedAt: epochSchema.nullable(),
+    /**
+     * What changed since the signed-in client's last completed visit here, told once on the booking's confirmation
+     * (book F-245): a new address (`was`: the one it moved from, when kept; ticked before sending), new week hours, a
+     * new phone number. Null for a guest, a client with no visit here, or nothing new.
+     */
+    changedSinceLastVisit: z
+      .object({
+        address: z.object({ was: z.string().nullable() }).nullable(),
+        hours: z.boolean(),
+        phone: z.boolean(),
+      })
+      .nullable(),
     geo: geoSchema,
     distanceM: z.number().int().min(0).nullable(),
     phone: phoneSchema,

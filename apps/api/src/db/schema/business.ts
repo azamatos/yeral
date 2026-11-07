@@ -132,6 +132,13 @@ export const businesses = pgTable(
     movedAt: ts(),
     /** Where it moved from (`movedAt`). */
     movedFrom: jsonb().$type<AddressTold>(),
+    /**
+     * When the week's opening hours last changed (book F-245, "Something changed"): a client whose last visit here was
+     * before it is told on the booking's confirmation.
+     */
+    hoursChangedAt: ts(),
+    /** When the phone number last changed (book F-245), told as `hoursChangedAt` is. */
+    phoneChangedAt: ts(),
     verificationReason: text(),
     /** Finished or sent again after a rejection (book Q-274): the review queue's order. */
     sentForReviewAt: ts(),

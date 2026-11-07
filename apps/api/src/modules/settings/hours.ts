@@ -51,6 +51,9 @@ const sameDay = (a: DateException, b: DateException) =>
   (a.hours ?? null)?.open === (b.hours ?? null)?.open &&
   (a.hours ?? null)?.close === (b.hours ?? null)?.close
 
+const dayKey = (d: BusinessHours['hours'][number]) => (d ? `${d.open}-${d.close}-${d.break?.start ?? ''}-${d.break?.end ?? ''}` : '')
+const sameWeek = (a: BusinessHours['hours'], b: BusinessHours['hours']) => a.map(dayKey).join() === b.map(dayKey).join()
+
 /**
  * The week and the special days as the domain checks them (`weekHoursErrors`, `specialDayErrors`, `nightOverlaps`). A
  * one-off day that has ended is dropped when it was saved before (the list never fills up with them) and refused when
@@ -183,7 +186,8 @@ export async function updateHours(
     const next = checkChange(change, b.exceptions, today(now))
     const affected = await affectedBy(tx, businessId, b, next, now)
     if (affected.length && !change.affected) throw new ApiError('bookings_affected', await detailsOf(tx, affected, { lang, now }))
-    await saveHours(tx, businessId, next)
+    // a new week (not a special day) is what a client back after a visit hears of (book F-245)
+    await saveHours(tx, businessId, next, sameWeek(b.hours, next.hours) ? null : new Date(now))
     await emit(tx, { type: 'business.updated', businessId })
     const cancelled = change.affected === 'cancel' && affected.length ? await cancelWithOffers(tx, businessId, affected, next, now) : 0
     return { ...viewOf(next), cancelled }

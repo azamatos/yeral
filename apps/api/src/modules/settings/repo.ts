@@ -23,9 +23,9 @@ export async function bookingsAhead(db: Queryable, businessId: string, now: numb
     )
 }
 
-export async function saveHours(db: Queryable, businessId: string, next: BusinessHours): Promise<void> {
+export async function saveHours(db: Queryable, businessId: string, next: BusinessHours, weekChangedAt: Date | null): Promise<void> {
   await db
     .update(businesses)
-    .set({ hours: next.hours, exceptions: [...next.exceptions] })
+    .set({ hours: next.hours, exceptions: [...next.exceptions], ...(weekChangedAt ? { hoursChangedAt: weekChangedAt } : {}) })
     .where(eq(businesses.id, businessId))
 }
