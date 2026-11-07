@@ -238,7 +238,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const auth = {
     /**
      * How the sign-in's code will come (`delivery`: `screen`, `sms` or `telegram`; ADR 0029): on the screen, the phone
-     * step says it's a demo (`codeOnScreen`, book Q-036, F-200).
+     * step says so (`codeOnScreen`, book Q-036, F-200).
      */
     mode: () =>
       queryOptions({
@@ -270,16 +270,6 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: () => call(v1.auth.logout.$post()),
         onSuccess: signedOut,
-      }),
-  }
-
-  /** The business app's demo workspace (book F-242). */
-  const demo = {
-    /** "Try the business app": a day in the demo workspace as its owner; whoever was signed in is signed out. */
-    start: () =>
-      mutationOptions({
-        mutationFn: () => call(v1.demo.session.$post()),
-        onSuccess: signedIn,
       }),
   }
 
@@ -1279,7 +1269,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
 
   const admin = createAdmin(client, queryClient)
 
-  return { admin, auth, demo, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, setup, links }
+  return { admin, auth, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, setup, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

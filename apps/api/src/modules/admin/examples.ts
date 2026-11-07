@@ -37,7 +37,6 @@ export async function makeExample(
   return db.transaction(async (tx) => {
     const [b] = await tx.select().from(businesses).where(eq(businesses.slug, slug)).for('no key update')
     if (!b) throw new ExampleRefused(`no business at ${slug} (its page address now)`)
-    if (b.sandbox) throw new ExampleRefused(`${slug} is the business app's demo workspace`)
     // a team that signs in: the seeded examples have none, and stay as they are
     const [owner] = await tx
       .select({ id: staff.id })

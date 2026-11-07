@@ -435,7 +435,6 @@ describe('account', () => {
         '/v1/businesses/{slug}/tables',
         '/v1/categories',
         '/v1/cities',
-        '/v1/demo/session',
         '/v1/events',
         '/v1/events/stream',
         '/v1/health',

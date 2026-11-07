@@ -68,7 +68,7 @@ export type SentCode = z.infer<typeof sendCodeResponseSchema>
 /**
  * What the sign-in screens know before a number is typed: how the code will come (`delivery`; never `telegram_link`,
  * which depends on the number). While it shows on the screen (`codeOnScreen`, the same as `delivery === 'screen'`), a
- * number proves nothing, so the screens say it's a demo (the first launch, book Q-036, F-200).
+ * number proves nothing, so the screens say the code shows here (the first launch, book Q-036, F-200).
  */
 export const authModeSchema = z
   .object({ codeOnScreen: z.boolean(), delivery: z.enum(['screen', 'sms', 'telegram']) })
@@ -116,11 +116,6 @@ export const meSchema = z
      * Q-036), when `/me/phone/code` answers `phone_change_unavailable`.
      */
     canChangePhone: z.boolean(),
-    /**
-     * One of the demo workspace's own accounts (book F-242): the visitor tries the demo workspace only, the apps show
-     * the Demo frame ("Log in" for the account block, the Demo banner), and every number typed must be a made-up one.
-     */
-    demo: z.boolean(),
   })
   .meta({ id: 'Me' })
 export type Me = z.infer<typeof meSchema>

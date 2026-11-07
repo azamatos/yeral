@@ -1,9 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { AccountMenu } from '@yeral/ui/account-menu'
-import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
 import { SideNav, SideNavDivider, SideNavItem } from '@yeral/ui/side-nav'
-import { ExternalLink, Headset, LogIn, LogOut, User } from 'lucide-react'
+import { ExternalLink, Headset, LogOut, User } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { useContactYeral } from '@/features/contact-yeral'
 import { sectionsFor } from '../model/sections'
@@ -27,7 +26,7 @@ export function ShellSidebar({
 }) {
   const t = useTranslations('shell')
   const contact = useContactYeral()
-  const { slug, me, workspace } = useWorkspace()
+  const { slug, workspace } = useWorkspace()
   const account = useAccount()
   if (!workspace) return null
   const requests = workspace.requestsToAnswer
@@ -62,42 +61,28 @@ export function ShellSidebar({
       </SideNav>
       <div className="flex-1" />
       {!collapsed && <SideNavDivider />}
-      {/* the demo has no account of its own to show: only the way out (B-Shell's DemoSidebar) */}
-      {me?.demo ? (
-        <Button
-          iconOnly={collapsed}
-          aria-label={collapsed ? t('account.logIn') : undefined}
-          loading={account.leaving}
-          onClick={account.logout}
-          className={collapsed ? undefined : 'self-stretch'}
-        >
-          <LogIn aria-hidden />
-          {!collapsed && t('account.logIn')}
-        </Button>
-      ) : (
-        <AccountMenu
-          variant={collapsed ? 'rail' : 'block'}
-          name={account.name}
-          phone={account.phone}
-          menuLabel={t('account.menu')}
-          triggerLabel={collapsed ? t('account.triggerOf', { name: account.name }) : t('account.trigger')}
-          items={[
-            { id: 'profile', label: t('account.profile'), icon: <User />, onSelect: onProfile, opensDialog: true },
-            {
-              id: 'client',
-              label: t('account.openAsClient'),
-              icon: <ExternalLink />,
-              hint: account.client.host,
-              href: account.client.href,
-              external: true,
-            },
-            // no way to reach Ýeral set: no row (a submenu with no links would open empty)
-            ...(contact.links.length ? [{ id: 'contact', label: contact.title, icon: <Headset />, links: contact.links }] : []),
-            { id: 'logout', label: t('account.logout'), icon: <LogOut />, danger: true, onSelect: account.logout },
-          ]}
-          className={collapsed ? undefined : 'self-stretch'}
-        />
-      )}
+      <AccountMenu
+        variant={collapsed ? 'rail' : 'block'}
+        name={account.name}
+        phone={account.phone}
+        menuLabel={t('account.menu')}
+        triggerLabel={collapsed ? t('account.triggerOf', { name: account.name }) : t('account.trigger')}
+        items={[
+          { id: 'profile', label: t('account.profile'), icon: <User />, onSelect: onProfile, opensDialog: true },
+          {
+            id: 'client',
+            label: t('account.openAsClient'),
+            icon: <ExternalLink />,
+            hint: account.client.host,
+            href: account.client.href,
+            external: true,
+          },
+          // no way to reach Ýeral set: no row (a submenu with no links would open empty)
+          ...(contact.links.length ? [{ id: 'contact', label: contact.title, icon: <Headset />, links: contact.links }] : []),
+          { id: 'logout', label: t('account.logout'), icon: <LogOut />, danger: true, onSelect: account.logout },
+        ]}
+        className={collapsed ? undefined : 'self-stretch'}
+      />
     </aside>
   )
 }

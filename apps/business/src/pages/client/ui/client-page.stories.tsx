@@ -23,7 +23,6 @@ const me: Me = {
   notifications: { confirmation: true, reminderDay: true, reminder2h: true, reviewAsk: false },
   hasBusiness: true,
   canChangePhone: true,
-  demo: false,
   photo: null,
 }
 const STAFF = '00000000-0000-4000-8000-000000000002'

@@ -48,7 +48,7 @@ describe.each<[string, Market]>([['Turkmenistan', TURKMENISTAN]])('market %s', (
     }
   })
 
-  it('keeps an unused prefix for the demo workspace: valid numbers (book F-242)', () => {
+  it('keeps an unused prefix nobody holds: valid numbers', () => {
     const { unusedPrefix, valid, length } = market.phone
     expect(unusedPrefix).toMatch(/^\d+$/)
     expect(valid.test(unusedPrefix.padEnd(length, '0'))).toBe(true)

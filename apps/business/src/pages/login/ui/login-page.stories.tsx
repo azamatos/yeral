@@ -28,7 +28,6 @@ const person = (phone: string, firstName: string | null, surname: string | null 
   notifications,
   hasBusiness: false,
   canChangePhone: true,
-  demo: false,
   photo: null,
 })
 
@@ -527,11 +526,9 @@ export const CodeNotShown: Story = {
     await sendCode(canvas, '65102030')
     await expect(canvas.queryByText('Your code:')).not.toBeInTheDocument()
     await expect(canvas.getByRole('button', { name: /Send a new code in 0:5\d/ })).toBeDisabled()
-    // no demo note once codes go by SMS (nor on the code step), and the usual hint
-    await expect(canvas.queryByText(/This is a demo/)).not.toBeInTheDocument()
+    // the usual hint once codes go by SMS
     await userEvent.click(canvas.getByRole('button', { name: 'Change number' }))
     const phone = await canvas.findByLabelText('Phone number')
-    await expect(canvas.queryByText(/This is a demo/)).not.toBeInTheDocument()
     await expect(phone).toHaveAccessibleDescription(
       'If you already book on Ýeral as a client, use that number — one account works for both.',
     )

@@ -11,7 +11,7 @@ export const CMS_URL = (process.env.E2E_CMS_URL ?? 'http://cms.yeral.localhost')
 export const API_URL = (process.env.E2E_API_URL ?? 'http://api.yeral.localhost').replace(/\/$/, '')
 
 /**
- * The demo seed's salon (apps/api/src/db/seed/demo-data.ts): verified, so clients may book it, and confirming by
+ * The local seed's salon (apps/api/src/db/seed/demo-data.ts): verified, so clients may book it, and confirming by
  * hand (`confirmMode: 'manual'`, hold 30 min), so a booking waits for the owner. Its owner signs in with the seed's
  * number and the code on the screen.
  */

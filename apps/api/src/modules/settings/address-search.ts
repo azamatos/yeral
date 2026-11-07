@@ -34,9 +34,10 @@ export async function searchAddress(
   // an answer kept from an earlier search costs the geocoder nothing, so it isn't counted
   const kept = deps.geocoder.cached(q, opts)
   if (kept) return { items: kept }
-  // every visitor of the demo workspace is its one demo owner: they're told apart by their address only
-  const limits: [string, number][] = [[`geo:ip:${ip}`, ADDRESS_SEARCHES_PER_ADDRESS_HOUR]]
-  if (!user.demo) limits.push([`geo:user:${user.id}`, ADDRESS_SEARCHES_PER_HOUR])
+  const limits: [string, number][] = [
+    [`geo:ip:${ip}`, ADDRESS_SEARCHES_PER_ADDRESS_HOUR],
+    [`geo:user:${user.id}`, ADDRESS_SEARCHES_PER_HOUR],
+  ]
   for (const [key, limit] of limits) {
     const r = await hit(deps.db, key, limit, 3600, deps.now())
     if (!r.ok) throw rateLimited(r.retryAfterSec)

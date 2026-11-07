@@ -34,8 +34,7 @@ export async function adminReviews(db: Queryable, view: AdminReviewView): Promis
     .select({ r: reviews, business: { id: businesses.id, slug: businesses.slug, name: businesses.name } })
     .from(reviews)
     .innerJoin(businesses, eq(businesses.id, reviews.businessId))
-    // the demo workspace's reviews are in no queue: what visitors do there isn't the team's to decide (book F-242)
-    .where(and(VIEWS[view].where, eq(businesses.sandbox, false)))
+    .where(VIEWS[view].where)
     .orderBy(...VIEWS[view].order, asc(reviews.id))
     .limit(ADMIN_LIST_MAX)
   const people = [...new Set(rows.flatMap(({ r }) => (r.reportedBy ? [r.reportedBy] : [])))]

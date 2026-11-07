@@ -92,16 +92,9 @@ describe('make-example (the owner’s D2): one of the owner’s test businesses 
       .select({ id: staff.businessId })
       .from(staff)
       .where(and(eq(staff.level, 'owner'), isNotNull(staff.userId)))
-    const [nobody] = await db
-      .select()
-      .from(businesses)
-      .where(and(notInArray(businesses.id, owned), eq(businesses.sandbox, false)))
-      .limit(1)
+    const [nobody] = await db.select().from(businesses).where(notInArray(businesses.id, owned)).limit(1)
     expect(nobody).toBeDefined()
     for (const on of [true, false]) await expect(makeExample(db, shows, nobody!.slug, on)).rejects.toThrow(/no owner who signs in/)
-    // the demo workspace
-    const [sandbox] = await db.select().from(businesses).where(eq(businesses.sandbox, true))
-    if (sandbox) await expect(makeExample(db, shows, sandbox.slug, true)).rejects.toThrow(/demo workspace/)
     // still being set up, closed, hidden, or the team's verdict given
     const at = new Date(DEMO_NOW)
     for (const [change, refusal] of [

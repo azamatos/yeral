@@ -166,7 +166,6 @@ export const Example: Story = {
     // nothing marks it any more (owner's review, #40): no badge in the name, no notice
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
     await expect(canvas.queryByText('Example')).toBeNull()
-    await expect(canvas.queryByText(/This isn’t a real business|This isn't a real business/)).toBeNull()
     await expect(within(canvas.getByRole('complementary', { name: 'Booking' })).getByText('Bookings are confirmed at once')).toBeVisible()
     // About says so too, without a wait
     const about = within(canvas.getByRole('region', { name: 'About' }))

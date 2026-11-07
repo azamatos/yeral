@@ -30,11 +30,6 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
                   {chunks}
                 </Link>
               ),
-              demo: (chunks) => (
-                <Link to="/try" className={textLink}>
-                  {chunks}
-                </Link>
-              ),
             })}
           </p>
         </>

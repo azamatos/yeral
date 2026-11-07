@@ -24,8 +24,7 @@ export const ORIGIN = site.urls.client
 /**
  * The app as the entries build it, with a settable clock and captured SMS. `demo: false` plays production (random
  * codes); `codeOnScreen` the first launch's sign-in; `smsDelivers` a gateway that reaches phones; `telegram` our bot
- * (ADR 0029), played by `memoryTelegram`, the fallback for unlinked phones still `sms`; `demoWorkspace` the business
- * app's demo workspace (book F-242).
+ * (ADR 0029), played by `memoryTelegram`, the fallback for unlinked phones still `sms`.
  */
 export function testApp(
   db: Db,
@@ -38,7 +37,6 @@ export function testApp(
     telegram?: boolean
     adminKey?: Uint8Array<ArrayBuffer> | null
     bookingTypes?: Deps['bookingTypes']
-    demoWorkspace?: boolean
     e2eHooks?: boolean
     geocoder?: Deps['geocoder']
   } = {},
@@ -60,7 +58,6 @@ export function testApp(
     adminKey: opts.adminKey === undefined ? DEV_ADMIN_KEY : opts.adminKey,
     // every kind, so the table and class paths stay tested; the first launch's rule has its own test
     bookingTypes: opts.bookingTypes ?? BOOKING_TYPES,
-    demoWorkspace: opts.demoWorkspace ?? false,
     e2eHooks: opts.e2eHooks ?? false,
     geocoder: opts.geocoder ?? noGeocoder,
     live: createLive(db),

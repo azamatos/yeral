@@ -21,7 +21,7 @@ import { sendToLinked, startLink } from '../telegram/links'
 /**
  * Whether the plain sign-in shows its code on the screen: the first launch's switch is on and no SMS reaches a phone
  * (book Q-036, F-200). `/auth/code` puts the code in its answer by it, and `/auth/mode` tells the screens ahead, so the
- * demo note and the code never disagree.
+ * on-screen lead and the code never disagree.
  */
 export const showsCodeOnScreen = (deps: Pick<Deps, 'codeOnScreen' | 'sms'>): boolean => deps.codeOnScreen && !deps.sms.delivers
 

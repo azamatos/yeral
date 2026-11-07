@@ -22,9 +22,6 @@ export type SetupNeed = (typeof SETUP_NEEDS)[number]
 /** The page address's longest name part; a number after it keeps addresses apart ("glow-studio-2"). */
 export const SLUG_MAX = 48
 
-/** The business app's demo workspace's address (`/w/demo`, book F-242): no business gets it, "Demo" is `demo-2`. */
-export const DEMO_SLUG = 'demo'
-
 /** A page address a business writes itself: 3 to `SLUG_MAX` characters (chapter 9, 25.10.2026). */
 export const SLUG_MIN = 3
 
@@ -48,7 +45,6 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   'c',
   'cms',
   'contact',
-  DEMO_SLUG,
   'help',
   'home',
   'login',

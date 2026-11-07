@@ -59,19 +59,18 @@ export async function specialistAccounts(db: Queryable, staffIds: readonly strin
  * The phone's client at this business (B-23): its record, found by the number, or a new one with the name typed in.
  * An account's name never fills it: a number alone mustn't tell a business who holds it. The booking joins the
  * number's account unless it went unused for 6 months: the number may be someone else's now, and it joins after "Is
- * this you?" at their next sign-in (book Q-270). A record not yet linked is linked as an online booking links it. In the
- * demo workspace nothing joins an account (book F-242).
+ * this you?" at their next sign-in (book Q-270). A record not yet linked is linked as an online booking links it.
  */
 export async function phoneClient(
   tx: Queryable,
-  business: { id: string; sandbox: boolean },
+  business: { id: string },
   phone: string,
   name: string | undefined,
   now: number,
   bookingId: string,
 ) {
   const businessId = business.id
-  const holder = await accountFor(tx, business, phone, now)
+  const holder = await accountFor(tx, phone, now)
   const [record] = await tx
     .insert(clients)
     // an undo removes a record its booking made: made at the booking's instant, held by no other booking

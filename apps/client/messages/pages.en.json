@@ -9,10 +9,7 @@
       },
       {
         "heading": "Where it stands",
-        "paragraphs": [
-          "{brand} is in development. The businesses on it are examples, and no booking here is real. You can try the whole loop: book as a client, then open the business app and answer as a business.",
-          "It's being built for Turkmenistan first."
-        ]
+        "paragraphs": ["{brand} is in development.", "It's being built for Turkmenistan first."]
       },
       {
         "heading": "Who runs it",
@@ -65,7 +62,7 @@
       {
         "heading": "The site is in development",
         "paragraphs": [
-          "{brand} is in development. The businesses here are examples, the sign-in code shows on the screen instead of arriving by SMS, and no SMS is sent. Anyone who types a phone number can sign in as that number, so please don't put anything real or private here, and don't use a number you wouldn't want someone else to type.",
+          "{brand} is in development. The sign-in code shows on the screen instead of arriving by SMS, and no SMS is sent. Anyone who types a phone number can sign in as that number, so please don't put anything real or private here, and don't use a number you wouldn't want someone else to type.",
           "This policy will change before {brand} opens for real, and each market gets its own version, checked by a lawyer there."
         ]
       },
@@ -130,7 +127,7 @@
       {
         "heading": "The site is in development",
         "paragraphs": [
-          "{brand} is in development. The businesses here are examples and a booking with one is not real: nobody is expecting you. The service may change, stop or lose data at any time, and we make no promise that it works."
+          "{brand} is in development. The service may change, stop or lose data at any time, and we make no promise that it works."
         ]
       },
       {

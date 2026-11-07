@@ -8,7 +8,6 @@ import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
 import { splitName } from '@yeral/domain/names'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
-import { DEMO_SLUG } from '@yeral/domain/setup'
 import { inviteExpiresAt } from '@yeral/domain/team'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
 import { and, eq, getTableName, inArray, is, isNotNull, ne, notInArray, sql } from 'drizzle-orm'
@@ -18,7 +17,7 @@ import type { Db, Queryable } from '../client'
 import * as t from '../schema'
 import { CATEGORIES } from './categories'
 import { CITIES } from './cities'
-import { codeMaker, DEMO_CODES, seededCodes } from './codes'
+import { codeMaker } from './codes'
 import {
   AYJEMAL_BOOKINGS,
   BUSINESSES,
@@ -88,30 +87,8 @@ interface Ctx {
   example?: boolean
   /** The phone an example shows: Ýeral's support phone (`YERAL_SUPPORT_PHONE`), or `EXAMPLE_PHONE`. */
   examplePhone?: string
-  /** A design number as it's stored: as it is, or in the demo workspace the market's unused range's (`demoPhones`). */
+  /** A design number as it's stored. */
   phone: (designPhone: string) => string
-  /** The business app's demo workspace (book F-242): its accounts are demo accounts and its numbers nobody's. */
-  sandbox?: boolean
-}
-
-/** The demo workspace's page address (book F-242), which no business gets; it's nobody's page: it's never public. */
-export const SANDBOX_SLUG = DEMO_SLUG
-
-/**
- * The design's numbers moved to the market's unused range (`MARKET.phone.unusedPrefix`): the design's may be real
- * people's (book F-242). Each keeps its last digits; two that would meet are a mistake in the data.
- */
-export function demoPhones(): (designPhone: string) => string {
-  const { countryCode, unusedPrefix } = MARKET.phone
-  const from = new Map<string, string>()
-  return (designPhone) => {
-    const national = designPhone.slice(countryCode.length + 1)
-    const phone = `+${countryCode}${unusedPrefix}${national.slice(unusedPrefix.length)}`
-    const before = from.get(phone)
-    if (before && before !== designPhone) throw new Error(`${before} and ${designPhone} both become ${phone} in the demo workspace`)
-    from.set(phone, designPhone)
-    return phone
-  }
 }
 
 async function user(ctx: Ctx, designPhone: string, name: string | null): Promise<string> {
@@ -120,37 +97,13 @@ async function user(ctx: Ctx, designPhone: string, name: string | null): Promise
   if (known) return known
   // the demo's one-field names, in the account's two (book Q-156)
   const { first, surname } = splitName(name)
-  let id: string | undefined
-  if (ctx.sandbox) {
-    // the demo workspace's accounts outlive its nightly remake, so the visitors' sessions in them go on
-    const [held] = await ctx.db.select({ id: t.users.id, demo: t.users.demo }).from(t.users).where(eq(t.users.phone, phone))
-    if (held && !held.demo) throw new Error(`the demo workspace's number ${phone} is a real account's`)
-    // whatever a visitor changed in it goes back: the name, the photo, the language, the SMS switches
-    if (held)
-      await ctx.db
-        .update(t.users)
-        .set({
-          name: first,
-          surname,
-          photo: null,
-          lang: MARKET.defaultLanguage,
-          notifyConfirmation: true,
-          notifyReminderDay: true,
-          notifyReminder2h: true,
-        })
-        .where(eq(t.users.id, held.id))
-    id = held?.id
-  }
-  if (!id) {
-    const [row] = await ctx.db
-      .insert(t.users)
-      .values({ phone, name: first, surname, lang: MARKET.defaultLanguage, demo: !!ctx.sandbox })
-      .returning({ id: t.users.id })
-    if (!row) throw new Error('user insert failed')
-    id = row.id
-  }
-  ctx.users.set(phone, id)
-  return id
+  const [row] = await ctx.db
+    .insert(t.users)
+    .values({ phone, name: first, surname, lang: MARKET.defaultLanguage })
+    .returning({ id: t.users.id })
+  if (!row) throw new Error('user insert failed')
+  ctx.users.set(phone, row.id)
+  return row.id
 }
 
 interface SeededBusiness {
@@ -170,7 +123,7 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
   const [biz] = await db
     .insert(t.businesses)
     .values({
-      slug: ctx.sandbox ? SANDBOX_SLUG : def.slug,
+      slug: def.slug,
       name: def.name,
       categoryId: def.category,
       kind: def.kind,
@@ -212,9 +165,6 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       verification: 'verified',
       tableRequests: def.tableRequests ?? [],
       demo: true,
-      sandbox: !!ctx.sandbox,
-      // the demo workspace's last remake: the jobs make it again after the next 04:00
-      ...(ctx.sandbox ? { createdAt: new Date(ctx.now) } : {}),
     })
     .returning({ id: t.businesses.id, sittingMinutes: t.businesses.tableSittingMinutes })
   if (!biz) throw new Error('business insert failed')
@@ -256,8 +206,6 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
     if (!row) throw new Error('staff insert failed')
     staffIds.set(s.key, { id: row.id, name: s.name })
     if (signInPhone && invited) {
-      // in the demo workspace a demo account holds the invited number too, so nobody signs in to its invite (F-242)
-      if (ctx.sandbox) await user(ctx, signInPhone, s.fullName ?? s.name)
       // sent two days before the demo day, so it shows as pending with five days left
       const sentAt = ctx.now - 2 * 86_400_000
       await db.insert(t.invites).values({
@@ -341,17 +289,8 @@ function lifecycle(
       ? ctx.now - (biz.holdMinutes - (b.hold ?? biz.holdMinutes)) * 60_000
       : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
   return {
-    // the demo shows `hold` minutes still to go, whenever it's seeded; in the demo workspace, made at 04:00, a request
-    // waits until its visit, and one whose visit is already past for the hold time, so visitors can answer the
-    // design's requests all day (book F-242)
-    holdUntil:
-      b.status === 'pending'
-        ? new Date(
-            ctx.sandbox
-              ? Math.max(startEpoch, ctx.now + biz.holdMinutes * 60_000)
-              : Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch),
-          )
-        : null,
+    // the seed shows `hold` minutes still to go, whenever it's seeded
+    holdUntil: b.status === 'pending' ? new Date(Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch)) : null,
     createdAt: new Date(createdAt),
     confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
     // answered by the business ten minutes after it was sent (book Q-113)
@@ -579,7 +518,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
 /**
  * Glow Studio's working data (the business app's demo): the client list and notes, the demo day's bookings and
  * requests, the past visits and the reviews. `holder`: the account a design number's bookings join (Aýjemal's in
- * development; none in the demo workspace).
+ * development).
  */
 async function seedGlow(ctx: Ctx, glow: SeededBusiness, holder: (designPhone: string) => string | null): Promise<void> {
   const { db } = ctx
@@ -869,59 +808,4 @@ async function seedYogaAndParahat(ctx: Ctx, biz: (slug: string) => SeededBusines
       hold: r.hold,
     })
   }
-}
-
-/** Generated codes the demo workspace may take: all looked up in the table before it's made. */
-const SANDBOX_CODES = 2000
-
-/**
- * The business app's demo workspace (book F-242), made from scratch: the one there goes first, with everything
- * visitors added to it, then the design's Glow Studio comes back with its team, clients, today's bookings and
- * requests, the past visits and the reviews, its dates on today. Every number is in the market's unused range, and
- * each one a team member signs in or is invited with is a demo account's: kept from night to night (the visitors'
- * sessions in them go on), whatever a visitor changed in it put back. Nothing joins a real account. Booking codes skip
- * those live bookings hold. `uploads`: the photo keys visitors put in it, to drop from the disk once this commits.
- */
-export async function seedSandbox(db: Db, opts: { now: number }): Promise<{ businessId: string; uploads: string[] }> {
-  return db.transaction(async (tx) => {
-    const team = await tx
-      .select({ photo: t.staff.photo })
-      .from(t.staff)
-      .innerJoin(t.businesses, eq(t.businesses.id, t.staff.businessId))
-      .where(eq(t.businesses.sandbox, true))
-    const accounts = await tx.select({ photo: t.users.photo }).from(t.users).where(eq(t.users.demo, true))
-    const gone = await tx
-      .delete(t.businesses)
-      .where(eq(t.businesses.sandbox, true))
-      .returning({ photos: t.businesses.photos, logo: t.businesses.logo })
-    const uploads = [
-      ...gone.flatMap((b) => [...b.photos, ...(b.logo ? [b.logo] : [])]),
-      ...[...team, ...accounts].flatMap((x) => (x.photo ? [x.photo] : [])),
-    ].map((p) => p.key)
-    // the codes it may take: the demo's own and the first generated ones, less those live bookings hold
-    const candidates = [...DEMO_CODES, ...Array.from({ length: SANDBOX_CODES }, seededCodes())]
-    const held = await tx.select({ code: t.bookings.code }).from(t.bookings).where(inArray(t.bookings.code, candidates))
-    const generated = seededCodes()
-    let drawn = 0
-    const next = () => {
-      if (++drawn > SANDBOX_CODES) throw new Error(`the demo workspace takes more than ${SANDBOX_CODES} generated booking codes`)
-      return generated()
-    }
-    const ctx: Ctx = {
-      db: tx,
-      now: opts.now,
-      ...demoDates(opts.now),
-      code: codeMaker(next, new Set(held.map((b) => b.code))),
-      users: new Map(),
-      clients: new Map(),
-      phone: demoPhones(),
-      sandbox: true,
-    }
-    const def = BUSINESSES.find((b) => b.slug === 'glow-studio')
-    if (!def) throw new Error('the design has no Glow Studio')
-    const glow = await seedBusiness(ctx, def)
-    await seedGlow(ctx, glow, () => null)
-    await tx.execute(fillTold(glow.id))
-    return { businessId: glow.id, uploads }
-  })
 }

@@ -97,20 +97,18 @@ export function takenNow(e: unknown): boolean {
  * A new page address (the business step, Link and QR): the business's own is no change; one breaking the rules is
  * `invalid`, another business's, now or before, `taken`. After the setup is finished the old address joins the
  * business's old ones, which keep opening its page (an old one taken back leaves them), up to
- * `PAGE_ADDRESS_MOVES_PER_DAY` moves a day; a draft's goes, nobody having seen it. Never the demo workspace's. The
- * team's switchers hear the business changed.
+ * `PAGE_ADDRESS_MOVES_PER_DAY` moves a day; a draft's goes, nobody having seen it. The team's switchers hear the
+ * business changed.
  */
 export async function setAddress(deps: Deps, businessId: string, slug: string): Promise<{ slug: string }> {
   try {
     return await deps.db.transaction(async (tx) => {
       const [b] = await tx
-        .select({ slug: businesses.slug, setupStep: businesses.setupStep, sandbox: businesses.sandbox })
+        .select({ slug: businesses.slug, setupStep: businesses.setupStep })
         .from(businesses)
         .where(eq(businesses.id, businessId))
         .for('update')
       if (!b) throw new ApiError('not_found')
-      // the demo workspace is everyone's (`/w/demo`, F-242): one visitor doesn't move it for the rest
-      if (b.sandbox) throw new ApiError('forbidden')
       // its own address stands, whatever rules came after it was made
       if (b.slug === slug) return { slug }
       if (slugProblem(slug)) throw invalid({ path: ['slug'], code: 'invalid' })

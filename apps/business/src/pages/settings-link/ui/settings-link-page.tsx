@@ -42,8 +42,7 @@ export function SettingsLinkPage() {
         </SettingsSectionTitle>
         <PageLinkField slug={workspace.slug} label={tl('title')} />
         {MARKET_LOCALES.length > 1 ? <p className="m-0 text-dense text-n-600">{tl('noLanguage')}</p> : null}
-        {/* the shared demo workspace keeps its address (`/w/demo`): one visitor doesn't move it for the rest */}
-        {workspace.status !== 'demo' && <ChangeLink key={workspace.slug} slug={workspace.slug} />}
+        <ChangeLink key={workspace.slug} slug={workspace.slug} />
       </SettingsSection>
 
       <SettingsSection aria-labelledby={qrTitle}>
@@ -147,7 +146,6 @@ function ChangeLink({ slug }: { slug: string }) {
 /**
  * Where the page stands (B-Settings `.lsb`): Live; In review (only the team sees it); Not approved, with the Ýeral
  * team's reason and «Fix and send again» in the business profile; Hidden by Ýeral, with the reason and Contact Ýeral.
- * The shared demo workspace is never public and says nothing here (its banner says it).
  */
 function PageState({ status, reason, slug }: { status: Workspace['status']; reason: string | null; slug: string }) {
   const t = useTranslations()

@@ -13,7 +13,7 @@ import { DeclinedLine } from './declined-line'
 
 /**
  * "You don't have a workspace yet" (B-Login `step=empty`, book B-09): create a business, or ask for an invite. After
- * declining an invite it says so on top. "Try the business app" waits for the demo workspace (P2 step 6).
+ * declining an invite it says so on top.
  */
 export function NoWorkspaceStep({
   who,

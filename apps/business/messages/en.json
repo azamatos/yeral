@@ -101,10 +101,6 @@
       "close": "Close",
       "cancel": "Cancel",
       "confirm": "Leave {business}"
-    },
-    "demo": {
-      "text": "A workspace to try {brand}. Changes reset every night.",
-      "create": "Create your business"
     }
   },
   "login": {
@@ -118,7 +114,7 @@
     "incomplete": "The number is incomplete — it needs {digits} digits.",
     "notMobile": "Codes go to mobile numbers only. Enter a number starting with {starts}.",
     "tooManyCodes": "Too many codes. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
-    "noBusiness": "No business yet? <start>Start free</start> or <demo>try the business app</demo>",
+    "noBusiness": "No business yet? <start>Start free</start>",
     "codeTitle": "Enter the code",
     "codeLead": "To log in with <b>{phone}</b>.",
     "changeNumber": "Change number",
@@ -2414,12 +2410,5 @@
       "confirm": "Cancel booking",
       "done": "Booking cancelled · the client is notified"
     }
-  },
-  "try": {
-    "tabTitle": "Try the business app",
-    "opening": "Opening a workspace to try {brand}…",
-    "offTitle": "The workspace to try {brand} isn't open right now",
-    "offLead": "Try again later, or log in to your own business.",
-    "logIn": "Log in"
   }
 }

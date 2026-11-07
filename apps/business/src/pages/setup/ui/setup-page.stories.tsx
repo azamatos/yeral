@@ -62,7 +62,6 @@ const maysa: Me = {
   notifications: { confirmation: true, reminderDay: true, reminder2h: true, reviewAsk: false },
   hasBusiness: false,
   canChangePhone: true,
-  demo: false,
   photo: null,
 }
 

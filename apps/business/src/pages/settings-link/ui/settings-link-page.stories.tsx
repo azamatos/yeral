@@ -23,7 +23,6 @@ const me: Me = {
   notifications: { confirmation: true, reminderDay: true, reminder2h: true, reviewAsk: false },
   hasBusiness: true,
   canChangePhone: true,
-  demo: false,
   photo: null,
 }
 
@@ -229,15 +228,6 @@ export const TakenMeanwhile: Story = {
     await expect(canvas.getByRole('button', { name: 'Save link' })).toBeDisabled()
     await expect(within(document.body).getAllByText('Another business has this address.').length).toBeGreaterThanOrEqual(2)
     await expect(moves).toEqual([])
-  },
-}
-
-/** The shared demo workspace keeps its address: no «Change link». */
-export const Demo: Story = {
-  args: { server: fakeApi(glow('demo')) },
-  play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('textbox', { name: 'Your page link' })).toBeVisible()
-    await expect(canvas.queryByRole('button', { name: 'Change link' })).toBeNull()
   },
 }
 
