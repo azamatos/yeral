@@ -52,15 +52,22 @@ export const Confirmed: Story = {
   play: async () => {
     const d = within(await open())
     await expect(d.getByText('Confirmed')).toBeVisible()
-    await expect(d.getByText('Online')).toBeVisible()
+    await expect(d.getByText('Booked online')).toBeVisible()
     await expect(d.getByText('Gözel Annaýewa')).toBeVisible()
-    await expect(await d.findByText('12 visits · average check 145 TMT')).toBeVisible()
-    await expect(d.getByText('1 no-show')).toBeVisible()
+    // the client card (v0.7 · B4): the number with its copy button, the tags, the facts, the alert note with its meta
+    await expect(d.getByRole('button', { name: 'Copy the number' })).toBeVisible()
+    await expect(await d.findByText('Regular')).toBeVisible()
+    await expect(d.getByText('VIP')).toBeVisible()
+    await expect(d.getByText('Visits').nextElementSibling).toHaveTextContent('12')
+    await expect(d.getByText('Last visit').nextElementSibling).toHaveTextContent('5 Oct')
+    await expect(d.getByText('No-shows').nextElementSibling).toHaveTextContent('1')
+    await expect(d.queryByText(/average check/)).toBeNull()
     await expect(d.getByText('Allergic to ammonia dyes')).toBeVisible()
+    await expect(d.getByText('Maýsa · 13 Oct · Shown when booking')).toBeVisible()
     await expect(d.queryByText('Prefers mornings')).toBeNull()
     await expect(d.getByRole('link', { name: 'Call Gözel Annaýewa, +993 65 10 20 30' })).toHaveAttribute('href', 'tel:+99365102030')
     // the client's name is the link to the card (v0.7 · A4)
-    await expect(d.getAllByRole('link').find((l) => l.getAttribute('href')?.includes('/clients/'))).toBeVisible()
+    await expect(d.getByRole('link', { name: 'Gözel Annaýewa' })).toHaveAttribute('href', expect.stringContaining('/clients/'))
     await expect(d.getByText('Women’s haircut', { selector: 'dd' })).toBeVisible()
     await expect(d.getByText('Aýna')).toBeVisible()
     await expect(d.getByText(/ · 10:00–11:00$/)).toBeVisible()
@@ -68,7 +75,11 @@ export const Confirmed: Story = {
     await expect(d.getByText('120 TMT', { selector: 'dd' })).toBeVisible()
     await expect(d.getByText('“Could you use the same colour as last time?”')).toBeVisible()
     await expect(d.getByRole('textbox', { name: 'Internal note' })).toHaveValue('')
-    await expect(d.getByText('Only your team sees it · saved automatically')).toBeVisible()
+    // nothing typed: no «Saved» line; the ⓘ says who sees it
+    await expect(d.queryByText('Saved')).toBeNull()
+    await userEvent.click(d.getByRole('button', { name: 'About the internal note' }))
+    await waitFor(() => expect(page.getByText('Only your team sees it. It saves as you type.')).toBeVisible())
+    await userEvent.keyboard('{Escape}')
     // the visits: the booking open isn't among them; a no-show reads as one
     const visits = d.getAllByRole('listitem')
     await expect(visits).toHaveLength(3)
@@ -86,7 +97,12 @@ export const InternalStatus: Story = {
   play: async ({ canvas }) => {
     const d = within(await open())
     const select = await d.findByRole('combobox', { name: 'Internal status' })
-    await expect(d.getByText('Only the team sees it · the booking status doesn’t change')).toBeVisible()
+    // the hint line is gone: the ⓘ next to the label says it (v0.7 · A9)
+    await expect(d.queryByText(/Only the team sees it/)).toBeNull()
+    await userEvent.click(d.getByRole('button', { name: 'About the internal status' }))
+    await waitFor(() => expect(page.getByText('Only your team sees it. It doesn’t change the booking status.')).toBeVisible())
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(page.queryByText('Only your team sees it. It doesn’t change the booking status.')).toBeNull())
     await userEvent.click(select)
     const list = await page.findByRole('listbox')
     await expect(
@@ -124,8 +140,8 @@ export const NoteAutosave: Story = {
     const d = within(await open())
     const note = d.getByRole('textbox', { name: 'Internal note' })
     await userEvent.type(note, 'Colour 7.1')
-    await expect(d.getByText('Only your team sees it · saving…')).toBeVisible()
-    await expect(await d.findByText('Only your team sees it · saved', {}, { timeout: 3000 })).toBeVisible()
+    await expect(d.getByText('Saving…')).toBeVisible()
+    await expect(await d.findByText('Saved', {}, { timeout: 3000 })).toBeVisible()
     await expect(note).toHaveValue('Colour 7.1')
     // the whole note, once
     await expect(noteCalls.map((c) => c.body)).toEqual([{ note: 'Colour 7.1' }])
@@ -138,7 +154,7 @@ export const NoteSaved: Story = {
   play: async () => {
     const d = within(await open())
     await expect(d.getByRole('textbox', { name: 'Internal note' })).toHaveValue('Colour 7.1, no ammonia')
-    await expect(d.getByText('Only your team sees it · saved')).toBeVisible()
+    await expect(d.getByText('Saved')).toBeVisible()
   },
 }
 
@@ -154,12 +170,12 @@ export const WithActions: Story = {
   },
 }
 
-/** An administrator without «See revenue»: the client's line has no average check (the api leaves it out). */
+/** An administrator without «See revenue»: the same card (no sums in the drawer for anyone, v0.7 · B4). */
 export const Administrator: Story = {
   args: { routes: { '/': drawer('admin') }, server: fakeApi({ card: card({}, { avgCheck: null }) }) },
   play: async () => {
     const d = within(await open())
-    await expect(await d.findByText('12 visits')).toBeVisible()
+    await expect((await d.findByText('Visits')).nextElementSibling).toHaveTextContent('12')
     await expect(d.queryByText(/average check/)).toBeNull()
   },
 }
@@ -193,7 +209,7 @@ export const WalkInNoCard: Story = {
   },
 }
 
-/** A phone booking of a client who may only book by phone. */
+/** A phone booking («Booked by phone», its tooltip on hover) of a client who may only book by phone: the tag with its ⓘ. */
 export const ByPhonePhoneOnly: Story = {
   args: {
     server: fakeApi({
@@ -203,8 +219,11 @@ export const ByPhonePhoneOnly: Story = {
   },
   play: async () => {
     const d = within(await open())
-    await expect(d.getByText('By phone')).toBeVisible()
+    await userEvent.hover(d.getByText('Booked by phone'))
+    await waitFor(() => expect(page.getByRole('tooltip')).toHaveTextContent('The team added it after a call'))
     await expect(await d.findByText('Phone only')).toBeVisible()
+    await userEvent.click(d.getByRole('button', { name: 'About Phone only' }))
+    await waitFor(() => expect(page.getByText(/Online booking is off for this client.*It turned on after their no-shows\./)).toBeVisible())
   },
 }
 
@@ -248,19 +267,21 @@ export const NoShow: Story = {
   },
   play: async () => {
     const d = within(await open())
-    await expect(await d.findByText('2 no-shows')).toBeVisible()
+    await expect((await d.findByText('No-shows')).nextElementSibling).toHaveTextContent('2')
     // the badge, and the earlier no-show in the visits
     await expect(d.getAllByText('No-show')).toHaveLength(2)
   },
 }
 
-/** A client with no past visits: when she last came isn't known, so «No earlier visits». */
+/** A client with no past visits: the facts read Visits 0 · Last visit —, no No-shows; «No earlier visits». */
 export const FirstVisit: Story = {
   args: { server: fakeApi({ card: card({ history: [] }, { visits: 0, avgCheck: null, lastVisit: null, noShows: 0 }) }) },
   play: async () => {
     const d = within(await open())
     await expect(await d.findByText('No earlier visits')).toBeVisible()
-    await expect(d.getByText('0 visits')).toBeVisible()
+    await expect(d.getByText('Visits').nextElementSibling).toHaveTextContent('0')
+    await expect(d.getByText('Last visit').nextElementSibling).toHaveTextContent('—')
+    await expect(d.queryByText('No-shows')).toBeNull()
   },
 }
 
@@ -276,10 +297,11 @@ export const Gone: Story = {
 /** On a phone the drawer is a bottom sheet; everything stays in reach. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
-  args: { server: fakeApi({ internal: true }) },
+  args: { routes: { '/': drawer('owner', { bookAgain: true }) }, server: fakeApi({ internal: true }) },
   play: async () => {
     const d = within(await open())
-    await expect(await d.findByText('12 visits · average check 145 TMT')).toBeVisible()
+    await expect((await d.findByText('Visits')).nextElementSibling).toHaveTextContent('12')
+    await expect(d.getByRole('button', { name: 'Book again' })).toBeVisible()
     await expect(d.getByRole('combobox', { name: 'Internal status' })).toBeVisible()
   },
 }
