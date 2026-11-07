@@ -221,7 +221,7 @@ export function SearchSheet({
         )}
         <div className="flex flex-none gap-2 border-t border-n-200 bg-n-0 px-4 pt-3 pb-[30px]">
           {active === 'when' && (
-            <Button variant="ghost" size="l" onClick={() => onWhen(ANY_TIME)}>
+            <Button variant="tertiary" size="l" onClick={() => onWhen(ANY_TIME)}>
               {t('clear')}
             </Button>
           )}

@@ -89,7 +89,7 @@ export function WhenPanel({
       </div>
       {!touch && (
         <div className="-mx-4 -mb-4 flex items-center justify-between gap-2 border-t border-n-200 px-4 py-2">
-          <Button variant="ghost" size="s" onClick={() => onChange(ANY_TIME)}>
+          <Button variant="tertiary" size="s" onClick={() => onChange(ANY_TIME)}>
             {t('clear')}
           </Button>
           <span className="text-dense text-n-600">{label(when)}</span>
