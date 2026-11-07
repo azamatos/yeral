@@ -1,1 +1,1 @@
-export { ClientAutoTags, useClientTagChips } from './ui/client-tags'
+export { ClientAutoTags, TrustedTag, useClientTagChips } from './ui/client-tags'

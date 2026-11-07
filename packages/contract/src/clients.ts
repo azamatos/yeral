@@ -49,6 +49,11 @@ export const clientRowSchema = z
     tags: z.array(z.string()),
     /** New · Regular · Lapsed · Reported, worked out from the bookings; none before a first visit. */
     segments: z.array(z.enum(CLIENT_SEGMENTS)),
+    /**
+     * "Trusted on Ýeral" (design v0.7 · D): the account has 5 or more completed visits on Ýeral and no no-show or
+     * report in the last 12 months. The mark only: the business never sees the visits elsewhere.
+     */
+    trusted: z.boolean(),
     /** "Phone only": online booking is closed for them (by hand or after the no-show limit, B-35). */
     phoneOnly: z.boolean(),
     /** Completed visits. */
@@ -91,11 +96,16 @@ export type ClientUpcoming = (typeof CLIENT_UPCOMING)[number]
 
 const tagFilterSchema = z.string().trim().min(1).max(CLIENT_TAG_MAX)
 
+/** The tags Ýeral sets, which the Tag filter lists under "Automatic": Trusted (design v0.7 · D). */
+export const CLIENT_AUTO_TAGS = ['trusted'] as const
+export type ClientAutoTag = (typeof CLIENT_AUTO_TAGS)[number]
+
 /**
  * "Müşderiler": the most recently seen first unless `sort` says otherwise. `q` finds a name, or digits anywhere in the
- * number; `tag` (repeated for several) keeps the clients with any of these tags, whatever their case; `upcoming` those
- * with or without a booking ahead. The filters combine. `total` sorts as `recent` for a reader without "See revenue"
- * (they get no totals).
+ * number; `tag` (repeated for several) keeps the clients with any of these tags, whatever their case, and `auto` the
+ * clients with that automatic tag — one Tag filter, so a client with any of them stays; `upcoming` those with or
+ * without a booking ahead. The filters combine. `total` sorts as `recent` for a reader without "See revenue" (they get
+ * no totals).
  */
 export const clientListQuerySchema = cursorQuerySchema.extend({
   q: z.string().trim().max(80).optional(),
@@ -105,6 +115,8 @@ export const clientListQuerySchema = cursorQuerySchema.extend({
     .union([tagFilterSchema, z.array(tagFilterSchema).max(CLIENT_TAG_FILTER_MAX)])
     .transform((v) => (Array.isArray(v) ? v : [v]))
     .optional(),
+  /** The Tag filter's "Automatic" group: the clients with the Trusted mark. */
+  auto: z.enum(CLIENT_AUTO_TAGS).optional(),
   upcoming: z.enum(CLIENT_UPCOMING).optional(),
   sort: z.enum(CLIENT_SORTS).optional(),
   /** The sort's own direction without it (`CLIENT_SORT_DIR`). */
@@ -132,6 +144,8 @@ export const clientListSchema = listOf(clientRowSchema)
     upcoming: clientUpcomingCountsSchema,
     /** Every tag on the clients the reader sees, the most held first; a count can be 0 under the other filters. */
     tags: z.array(clientTagCountSchema),
+    /** The Tag menu's "Automatic" group: how many clients hold each of Ýeral's tags under the other filters. */
+    auto: z.object({ trusted: z.number().int() }),
     /** The clients the reader sees with no filter at all: "24 of 100 clients". */
     everyone: z.number().int(),
   })
@@ -228,6 +242,8 @@ export const clientCardSchema = z
     source: z.enum(CLIENT_SOURCES).nullable(),
     tags: z.array(z.string()),
     segments: z.array(z.enum(CLIENT_SEGMENTS)),
+    /** "Trusted on Ýeral" (design v0.7 · D): the mark only, as on the row. */
+    trusted: z.boolean(),
     /** "mart 2024-den bäri": when the business first had them. */
     since: ymdSchema,
     stats: z.object({

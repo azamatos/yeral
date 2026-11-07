@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { clientSegments, clientStats, isOnlineBlocked, reachesNoShowLimit, segmentsOf, type ClientVisit } from './clients'
+import {
+  clientSegments,
+  clientStats,
+  isOnlineBlocked,
+  reachesNoShowLimit,
+  segmentsOf,
+  TRUSTED_MIN_VISITS,
+  TRUSTED_STRIKE_DAYS,
+  trustedStanding,
+  type ClientVisit,
+} from './clients'
 
 const TODAY = '2026-10-14'
 const visit = (date: string, price = 80, status: ClientVisit['status'] = 'completed'): ClientVisit => ({ date, price, status })
@@ -61,5 +71,30 @@ describe('online booking block (book Q-127)', () => {
     expect(reachesNoShowLimit(1, { blockAfterNoShows: 1 })).toBe(true)
     expect(reachesNoShowLimit(4, { blockAfterNoShows: 5 })).toBe(false)
     expect(reachesNoShowLimit(9, { blockAfterNoShows: 0 })).toBe(false)
+  })
+})
+
+describe('trusted client (design v0.7 · D)', () => {
+  const facts = (visits: number, visitsSince: number, lastStrike: string | null) => ({ visits, visitsSince, lastStrike })
+
+  it.each([
+    ['five visits, no strike', facts(5, 5, null), { state: 'trusted', visits: 5, pausedSince: null }],
+    ['four visits, no strike: almost there', facts(4, 4, null), { state: 'almost', visits: 4, pausedSince: null }],
+    [
+      'a strike within 12 months pauses it, the count starts again',
+      facts(9, 2, '2026-09-02'),
+      { state: 'paused', visits: 2, pausedSince: '2026-09-02' },
+    ],
+    ['five visits after the strike bring it back', facts(9, 5, '2026-09-02'), { state: 'trusted', visits: 5, pausedSince: null }],
+    ['a strike a year ago is forgotten: every visit counts', facts(6, 1, '2025-10-14'), { state: 'trusted', visits: 6, pausedSince: null }],
+    ['a strike one day short of a year still counts', facts(6, 1, '2025-10-15'), { state: 'paused', visits: 1, pausedSince: '2025-10-15' }],
+    ['nothing yet', facts(0, 0, null), { state: 'almost', visits: 0, pausedSince: null }],
+  ] as const)('%s', (_, f, standing) => {
+    expect(trustedStanding(f, TODAY)).toEqual(standing)
+  })
+
+  it('the constants the business reads: 5 visits, 12 months', () => {
+    expect(TRUSTED_MIN_VISITS).toBe(5)
+    expect(TRUSTED_STRIKE_DAYS).toBe(365)
   })
 })

@@ -1,6 +1,14 @@
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { CLIENT_SORT_DIR, CLIENT_SORTS, type ClientRow, type ClientSort, type SortDir } from '@yeral/contract/clients'
+import {
+  CLIENT_AUTO_TAGS,
+  CLIENT_SORT_DIR,
+  CLIENT_SORTS,
+  type ClientAutoTag,
+  type ClientRow,
+  type ClientSort,
+  type SortDir,
+} from '@yeral/contract/clients'
 import { CLIENT_SEGMENTS, type ClientSegment } from '@yeral/domain/clients'
 import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
@@ -39,6 +47,8 @@ import { AddClientModal } from './add-client-modal'
 // DS-Lists A6 `.tr`: Name · Phone · Tags · Visits · Last visit · Total · Next booking · one icon (cells pad 8 each side)
 const COLUMNS = 'minmax(160px,1.3fr) 184px minmax(184px,1.5fr) 72px 112px 112px 160px 48px'
 const NO_TOTAL = 'minmax(160px,1.3fr) 184px minmax(184px,1.5fr) 72px 112px 160px 48px'
+/** An automatic tag's value in the Tag menu, apart from the team's tags (a team tag can't start so: it has no colon). */
+const AUTO = 'auto:'
 /** The Sort menu's words for a sort the other way round from its own direction. */
 const REVERSED = {
   recent: 'recentAsc',
@@ -93,6 +103,7 @@ function Clients({ slug }: { slug: string }) {
       q: search.q,
       segment: search.segment,
       tag: search.tag,
+      auto: search.auto,
       upcoming: search.upcoming,
       sort: search.sort,
       dir: search.dir,
@@ -102,14 +113,14 @@ function Clients({ slug }: { slug: string }) {
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
   const first = list.data?.pages[0]
   const counts = first?.counts
-  const filtered = !!(search.q || search.segment || search.tag || search.upcoming)
+  const filtered = !!(search.q || search.segment || search.tag || search.auto || search.upcoming)
   // the api sends no Total to those who don't see revenue
   const seesTotal = rows.some((r) => r.total !== null)
   const book = (id: string) => void navigate({ to: '/w/$slug/calendar', params: { slug }, search: { panel: 'new', client: id } })
   const copy = (number: string) => void navigator.clipboard.writeText(fmt.phone(number)).then(() => toast(t('copied')))
   const clear = () => {
     setTyped('')
-    go({ q: undefined, segment: undefined, tag: undefined, upcoming: undefined })
+    go({ q: undefined, segment: undefined, tag: undefined, auto: undefined, upcoming: undefined })
   }
 
   // the first click gives the column's natural order (A → Z, the most and the newest first), the second reverses it
@@ -145,14 +156,28 @@ function Clients({ slug }: { slug: string }) {
       .filter((tag) => !tagCounts.some((x) => x.name.toLowerCase() === tag.toLowerCase()))
       .map((tag) => ({ value: tag, label: tag, meta: fmt.number(0) })),
   ]
+  // the one Tag menu (v0.7 · D): Ýeral's automatic tags first (Trusted with its count), then the team's own; the
+  // automatic one travels in the address as `auto`, apart from the team's `tag`
+  const autoValue = (auto: ClientAutoTag) => `${AUTO}${auto}`
+  const tagValues = [...(search.auto ? [autoValue(search.auto)] : []), ...chosenTags]
   const filters: FilterDef[] = [
     {
       id: 'tag',
       label: f('tag'),
       multiple: true,
-      options: tagOptions,
-      value: chosenTags,
-      onValueChange: (tag) => go({ tag: tag.length ? tag : undefined }),
+      options: [
+        {
+          label: f('automatic'),
+          options: CLIENT_AUTO_TAGS.map((auto) => ({ value: autoValue(auto), label: t(auto), meta: fmt.number(first?.auto[auto] ?? 0) })),
+        },
+        ...(tagOptions.length ? [{ label: f('yourTags'), options: tagOptions }] : []),
+      ],
+      value: tagValues,
+      onValueChange: (values) => {
+        const auto = CLIENT_AUTO_TAGS.find((a) => values.includes(autoValue(a)))
+        const tag = values.filter((v) => !v.startsWith(AUTO))
+        go({ tag: tag.length ? tag : undefined, auto })
+      },
     },
     {
       id: 'upcoming',
@@ -239,7 +264,7 @@ function Clients({ slug }: { slug: string }) {
           count={countText}
           onClearAll={() => {
             setTyped('')
-            go({ q: undefined, tag: undefined, upcoming: undefined })
+            go({ q: undefined, tag: undefined, auto: undefined, upcoming: undefined })
           }}
         />
         {list.isPending ? (
@@ -329,7 +354,7 @@ function Clients({ slug }: { slug: string }) {
                   </TableCell>
                   <TableCell className="py-0">
                     <TableTags moreLabel={(count) => t('moreTags', { count })}>
-                      {tagChips({ phoneOnly: r.phoneOnly, segments: r.segments, tags: r.tags })}
+                      {tagChips({ trusted: r.trusted, phoneOnly: r.phoneOnly, segments: r.segments, tags: r.tags })}
                     </TableTags>
                   </TableCell>
                   <TableCell numeric className="py-0">

@@ -7,7 +7,6 @@ import {
   canClientRestore,
   canEditNote,
   canWriteReview,
-  initialStatus,
   keptCancelReason,
   offerPast,
   reviewEditableUntil,
@@ -25,7 +24,7 @@ import { assertOpenAt, assertStaffFree, loadBusiness, lockedHours, type LoadedBu
 import { visitWhat } from '../catalog/map'
 import { isCounted, shiftRating } from '../reviews/rating'
 import { onlineRefusal } from '../clients/online'
-import { assertOnlineBooking, assertWaitingRoom, rebook } from './create'
+import { assertOnlineBooking, assertWaitingRoom, onlineStatus, rebook } from './create'
 import { bookedServices, dropPendingMove } from './engine'
 import { offerTarget, offersOf } from './offers'
 import { type BookingRow, guard, isSlotConflict, itemsOf, lockBooking, pgCode, restoreStateOf, setStatus, stateOf } from './repo'
@@ -152,7 +151,7 @@ export async function rescheduleBooking(
     if (to.date === locked.date && to.start === locked.start && (to.staffId == null || to.staffId === booked.staffId)) return locked
     await assertOnlineBooking(tx, lb, user)
     await rebook(deps, user, locked, to, {
-      status: initialStatus('web', lb.rules.confirmMode),
+      status: await onlineStatus(tx, lb, user, deps.now()),
       rescheduleOf: locked.id,
       db: tx,
       booked,
@@ -197,7 +196,7 @@ export async function acceptAlternative(deps: Deps, user: User, b: BookingRow, s
       b,
       // with its named specialist only (book Q-159): busy now, it's taken (409 slot_taken)
       offerTarget(slot),
-      { status: source === 'expired' ? initialStatus('web', lb.rules.confirmMode) : 'confirmed', alternativeOf: b.id },
+      { status: source === 'expired' ? await onlineStatus(deps.db, lb, user, deps.now()) : 'confirmed', alternativeOf: b.id },
     )
     return row
   } catch (e) {

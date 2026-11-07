@@ -33,6 +33,11 @@ export interface BookingRules {
   askCancelReason: boolean
   /** After this many no-shows a client can book only by phone; 0 = never. */
   blockAfterNoShows: number
+  /**
+   * "Confirm trusted clients at once" (design v0.7 · D): in manual mode a trusted client's request (`trustedStanding`)
+   * is confirmed at once, like an instant business's; off by default, and nothing in instant mode.
+   */
+  confirmTrustedAtOnce: boolean
 }
 
 /**
@@ -67,6 +72,7 @@ export const DEFAULT_RULES: BookingRules = {
   cancelWindowMinutes: 120,
   askCancelReason: true,
   blockAfterNoShows: 2,
+  confirmTrustedAtOnce: false,
 }
 
 /** Problems with a rules object, by field; empty when valid. */

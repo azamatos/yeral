@@ -17,6 +17,7 @@ const FIELDS = [
   'cancelWindowMinutes',
   'askCancelReason',
   'blockAfterNoShows',
+  'confirmTrustedAtOnce',
 ] as const
 
 type Rules = Pick<BookingRules, (typeof FIELDS)[number]>
@@ -52,15 +53,17 @@ export function bufferIsOther(form: RulesForm): boolean {
 }
 
 /**
- * Only what changed goes to `PATCH …/settings/rules`; nothing changed sends nothing. In instant mode the hold and who
- * answers are hidden, so a change made there before switching isn't sent; a buffer «Other…» can't save yet stays as
- * stored.
+ * Only what changed goes to `PATCH …/settings/rules`; nothing changed sends nothing. In instant mode the hold, who
+ * answers and «Confirm trusted clients at once» are hidden, so a change made there before switching isn't sent; a
+ * buffer «Other…» can't save yet stays as stored.
  */
 export function rulesUpdate(form: RulesForm, stored: RulesForm): Partial<Rules> | null {
   const shown: Rules = {
     ...form,
     bufferMinutes: bufferOf(form) ?? stored.bufferMinutes,
-    ...(form.confirmMode === 'manual' ? {} : { holdMinutes: stored.holdMinutes, requestAnswerers: stored.requestAnswerers }),
+    ...(form.confirmMode === 'manual'
+      ? {}
+      : { holdMinutes: stored.holdMinutes, requestAnswerers: stored.requestAnswerers, confirmTrustedAtOnce: stored.confirmTrustedAtOnce }),
   }
   const changes: Partial<Rules> = {}
   for (const k of FIELDS) if (shown[k] !== stored[k]) Object.assign(changes, { [k]: shown[k] })

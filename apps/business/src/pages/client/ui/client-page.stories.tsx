@@ -62,6 +62,7 @@ const card: ClientCard = {
   source: 'instagram',
   tags: ['VIP'],
   segments: ['regular'],
+  trusted: false,
   since: '2024-03-02',
   stats: { visits: 12, total: 1740, avgCheck: 145, lastVisit: addDays(DAY, -30), noShows: 1 },
   notes: [
@@ -270,6 +271,16 @@ export const EditNumber: Story = {
     const phone = canvas.getByRole('textbox', { name: 'Phone' })
     await userEvent.type(phone, '{Backspace}')
     await expect(canvas.getByRole('button', { name: 'Save' })).toBeDisabled()
+  },
+}
+
+/** Trusted (v0.7 · D): the automatic tag first in the head, read-only like the others. */
+export const Trusted: Story = {
+  args: { server: fakeApi({ start: { ...card, trusted: true } }) },
+  play: async ({ canvas }) => {
+    const trusted = await canvas.findByText('Trusted')
+    await expect(trusted).toHaveAttribute('title', 'Trusted on Ýeral: 5 or more visits, no missed bookings')
+    await expect(canvas.queryByRole('button', { name: 'Remove tag Trusted' })).toBeNull()
   },
 }
 

@@ -187,6 +187,24 @@ export const StoredOtherBuffer: Story = {
   },
 }
 
+/** «Confirm trusted clients at once» (v0.7 · D): off by default, with an ⓘ instead of a hint; on, it's saved alone. */
+export const ConfirmTrusted: Story = {
+  play: async ({ canvas }) => {
+    const trusted = await canvas.findByRole('switch', { name: 'Confirm trusted clients at once' })
+    await expect(trusted).not.toBeChecked()
+    await userEvent.click(canvas.getByRole('button', { name: 'About Confirm trusted clients at once' }))
+    const about = await screen.findByText(
+      'Trusted clients have 5 or more visits on Ýeral and no missed bookings in the last 12 months. With this on, their requests are confirmed at once, without the wait. Off until you turn it on.',
+    )
+    // the popover pops in: visible once its animation ends
+    await waitFor(() => expect(about).toBeVisible())
+    await userEvent.keyboard('{Escape}')
+    await userEvent.click(trusted)
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(saved).toEqual([{ confirmTrustedAtOnce: true }]))
+  },
+}
+
 /** Lateness is the same for every business: a fixed row, no control. Instant mode from the start shows no hold. */
 export const Instant: Story = {
   args: { server: fakeApi({ rules: { confirmMode: 'instant', cancelWindowMinutes: null } }) },
@@ -194,6 +212,8 @@ export const Instant: Story = {
     await expect(await canvas.findByText('Clients may be up to 15 min late')).toBeVisible()
     await expect(canvas.getByText('Fixed')).toBeVisible()
     await expect(canvas.queryByRole('combobox', { name: 'Hold requests for' })).toBeNull()
+    // nothing to confirm at once when every booking already is
+    await expect(canvas.queryByRole('switch', { name: 'Confirm trusted clients at once' })).toBeNull()
     await expect(canvas.getByRole('combobox', { name: 'Clients can cancel for free' })).toHaveTextContent('Any time')
   },
 }

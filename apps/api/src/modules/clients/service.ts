@@ -75,7 +75,7 @@ export async function clientList(
   // no totals, no order by them: a reader without "See revenue" gets the usual order, its direction included
   const order = q.sort === 'total' && !sums ? {} : { sort: q.sort, dir: q.dir }
   const search = searchOf(q.q)
-  const tagged = taggedSql(q.tag)
+  const tagged = taggedSql(q.tag, q.auto, now)
   const [{ rows, total }, facets, rules] = await all(db, [
     () =>
       clientFacts(db, business.id, actor, now, {
@@ -111,6 +111,7 @@ export async function clientList(
         phone: f.client.phone,
         tags: f.client.tags,
         segments: f.segments,
+        trusted: f.trusted,
         phoneOnly: phoneOnly.on.has(f.client.id),
         visits: f.visits,
         lastVisit: f.lastVisit,
@@ -296,6 +297,7 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
     source: c.source,
     tags: c.tags,
     segments: facts.segments,
+    trusted: facts.trusted,
     since: localOf(c.createdAt.getTime()).date,
     stats: {
       visits: facts.visits,

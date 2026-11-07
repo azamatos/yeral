@@ -296,6 +296,13 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: (body: z.input<typeof updateMeSchema>) => call(v1.me.$patch({ json: body })),
         onSuccess: (data) => forThePerson(data.id, () => queryClient.setQueryData(keys.me(), data)),
       }),
+    /** "Trusted on Ýeral" (design v0.7 · D): the mark, how far the person is from it, or that it's paused. */
+    trusted: () =>
+      queryOptions({
+        queryKey: keys.trusted(),
+        queryFn: ({ signal }) => call(v1.me.trusted.$get(undefined, abortWith(signal))),
+        staleTime: 60_000,
+      }),
     /** "Profilim": the person's photo (book B-12); the app makes it smaller first. */
     setPhoto: () =>
       mutationOptions({

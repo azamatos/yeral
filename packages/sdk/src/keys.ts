@@ -45,6 +45,8 @@ export const keys = {
   /** "How was it?": under the person's bookings, so a booking event refreshes it; their own actions refresh `howWasItAll`. */
   howWasIt: (lang: Locale) => ['bookings', 'how-was-it', lang] as const,
   howWasItAll: () => ['bookings', 'how-was-it'] as const,
+  /** "Trusted on Ýeral" (design v0.7 · D): under the person's bookings, since a visit or a no-show changes it. */
+  trusted: () => ['bookings', 'trusted'] as const,
   /** Under `bookings`: a booking change or event refreshes the link page too. */
   link: (token: string, lang: Locale) => ['bookings', 'link', token, lang] as const,
   bookingLists: () => ['bookings', 'list'] as const,

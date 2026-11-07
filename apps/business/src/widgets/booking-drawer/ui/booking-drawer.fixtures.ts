@@ -71,6 +71,7 @@ export const card = (patch: Partial<ClientCard> = {}, stats: Partial<ClientCard[
   source: 'instagram',
   tags: ['VIP'],
   segments: ['regular'],
+  trusted: true,
   since: '2024-03-02',
   stats: { visits: 12, total: 1740, avgCheck: 145, lastVisit: addDays(DAY, -9), noShows: 1, ...stats },
   notes: [

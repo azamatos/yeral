@@ -12,16 +12,20 @@ export const tagChipVariants = cva(
         m: 'h-7 gap-1.5 px-2.5 text-[13px] leading-4 [&_svg]:size-3.5',
         s: 'h-6 gap-1 px-2 text-micro [&_svg]:size-3',
       },
-      /** own: the team's tag, filled; automatic: set by Ýeral from visits, outlined with a leading icon; reported: the danger outline. */
+      /**
+       * own: the team's tag, filled; automatic: set by Ýeral from visits, outlined with a leading icon; reported: the
+       * danger outline; trusted: the completed tones (v0.7 · D), the positive twin of reported.
+       */
       kind: {
         own: 'border-transparent bg-n-100 text-n-900',
         automatic: 'border-n-300 bg-n-0 text-n-900 [&_svg]:text-n-600',
         reported: 'border-danger-line bg-n-0 text-danger-ink [&_svg]:text-danger-ink',
+        trusted: 'border-st-completed-line bg-n-0 font-semibold text-st-completed-ink [&_svg]:text-st-completed-ink',
       },
     },
     compoundVariants: [
-      { kind: ['automatic', 'reported'], size: 'm', className: 'pl-2' },
-      { kind: ['automatic', 'reported'], size: 's', className: 'pl-1.5' },
+      { kind: ['automatic', 'reported', 'trusted'], size: 'm', className: 'pl-2' },
+      { kind: ['automatic', 'reported', 'trusted'], size: 's', className: 'pl-1.5' },
     ],
     defaultVariants: { size: 'm', kind: 'own' },
   },
@@ -46,7 +50,7 @@ export type TagChipProps = Omit<ComponentProps<'span'>, 'children'> &
  * a n-300 circle; the × is its own button (`removeLabel`), so the chip itself stays text.
  */
 export function TagChip({ size, kind, icon, onRemove, removeLabel, highlight, className, children, ...props }: TagChipProps) {
-  const removable = !!onRemove && kind !== 'automatic' && kind !== 'reported'
+  const removable = !!onRemove && (!kind || kind === 'own')
   return (
     <span
       {...props}

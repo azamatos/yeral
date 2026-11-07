@@ -132,7 +132,7 @@ function ClientTagsInPlace({ slug, card, manage }: { slug: string; card: ClientC
       maxTags={CLIENT_TAGS_MAX}
       suggestions={suggestions}
       onOpenChange={setOpen}
-      before={<ClientAutoTags phoneOnly={card.settings.phoneOnly} segments={card.segments} size="m" />}
+      before={<ClientAutoTags trusted={card.trusted} phoneOnly={card.settings.phoneOnly} segments={card.segments} size="m" />}
       onAdd={(tag) => save([...tags, tag])}
       onRemove={(tag) =>
         save(

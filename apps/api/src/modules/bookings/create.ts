@@ -37,6 +37,7 @@ import {
 } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { onlineRefusal } from '../clients/online'
+import { isTrustedUser } from '../clients/trusted'
 import { hasSignedInTeam } from '../team/members'
 import { addressSmsForNewBooking } from './address-sms'
 import { confirmBooking } from './confirm'
@@ -205,6 +206,17 @@ export async function assertOnlineBooking(db: Queryable, lb: LoadedBusiness, use
   if (refused) throw new ApiError(refused)
 }
 
+/**
+ * How an online request starts for this client: confirmed at once by an instant business, or by one that confirms by
+ * hand but "confirms trusted clients at once" when the account carries the mark (design v0.7 · D); pending otherwise.
+ * Every other rule (the hours, the slot, the limits) is checked the same whichever it is.
+ */
+export async function onlineStatus(db: Queryable, lb: LoadedBusiness, user: User, now: number): Promise<'pending' | 'confirmed'> {
+  const status = initialStatus('web', lb.rules.confirmMode)
+  if (status === 'pending' && lb.rules.confirmTrustedAtOnce && (await isTrustedUser(db, user.id, now))) return 'confirmed'
+  return status
+}
+
 export async function createBooking(deps: Deps, user: User, input: CreateBooking): Promise<BookingRow> {
   const { db } = deps
   const now = deps.now()
@@ -212,7 +224,7 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   const lb = await loadBusiness(db, b.id)
   await assertOnlineBooking(db, lb, user)
   if (!b.bookingTypes.includes(input.type)) throw new ApiError('not_bookable')
-  const status = initialStatus('web', lb.rules.confirmMode)
+  const status = await onlineStatus(db, lb, user, now)
   if (status === 'pending') await assertWaitingRoom(db, user.id, lb.business.id, now, { locked: false })
 
   if (input.type === 'appointment') {

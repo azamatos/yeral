@@ -110,7 +110,7 @@ const request = (code: string, name: string, patch: Partial<BookingRequest> = {}
   note: null,
   from: null,
   fits: null,
-  client: { id: null, name, phone: '+99365000000', visits: 2, noShows: 0, alerts: [] },
+  client: { id: null, name, phone: '+99365000000', visits: 2, noShows: 0, trusted: false, alerts: [] },
   canAnswer: true,
   answeredBy: 'desk',
   ...patch,

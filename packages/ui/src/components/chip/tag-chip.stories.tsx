@@ -1,9 +1,10 @@
 /**
  * TagChip — DS-Lists A8 `.tg` (v0.7): your own tags filled (28 in cards, 24 in tables), removable ones with a ×,
- * automatic tags outlined with an icon and never removable, Reported in the danger outline, the ring of a tag just added.
+ * automatic tags outlined with an icon and never removable, Reported in the danger outline, Trusted in the completed
+ * tones (v0.7 · D), the ring of a tag just added.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Clock, Flag, Repeat, Sparkles } from 'lucide-react'
+import { Clock, Flag, Repeat, ShieldCheck, Sparkles } from 'lucide-react'
 import { expect, fn, userEvent } from 'storybook/test'
 import { TagChip } from './tag-chip'
 
@@ -35,6 +36,14 @@ export const Kinds: Story = {
           </TagChip>
           <TagChip size={size} kind="reported" icon={<Flag aria-hidden />}>
             Reported
+          </TagChip>
+          <TagChip
+            size={size}
+            kind="trusted"
+            icon={<ShieldCheck aria-hidden />}
+            title="Trusted on Ýeral: 5 or more visits, no missed bookings"
+          >
+            Trusted
           </TagChip>
           <TagChip size={size}>VIP</TagChip>
           <TagChip size={size} highlight>
