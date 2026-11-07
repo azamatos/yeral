@@ -1,6 +1,6 @@
 /**
  * The business page (Venue, book C-06–C-11, C-15): the header and photos, the services with their chips and Select,
- * the booking card and its picked services, the phone bar; the section nav, specialists, reviews (a page at a time),
+ * the booking card and its picked services, the phone bar; the tabs as panels: specialists, reviews (a page at a time),
  * About (hours, map, rules) and the places nearby; an example business, the owner's preview, a paused page and a
  * client booked by phone only.
  */
@@ -88,7 +88,10 @@ export const MixedPrice: Story = {
 
 /** A first-launch sample (book Q-004): «Example» after the name and the line saying what it is. */
 export const Example: Story = {
-  args: { server: businessApi({ business: { ...GLOW, example: true, confirmMode: 'instant', typicalConfirmMinutes: null } }) },
+  args: {
+    path: '/en/b/glow-studio?tab=about',
+    server: businessApi({ business: { ...GLOW, example: true, confirmMode: 'instant', typicalConfirmMinutes: null } }),
+  },
   play: async ({ canvas }) => {
     // nothing marks it any more (owner's review, #40): no badge in the name, no notice
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
@@ -105,6 +108,7 @@ export const Example: Story = {
 /** The owner's own page in review (Venue `ownerPreview`, Q-153): the banner, nothing bookable. */
 export const OwnerPreview: Story = {
   args: {
+    path: '/en/b/glow-studio?tab=specialists',
     server: businessApi({ signedIn: AYJEMAL, business: { ...GLOW, preview: { status: 'pending', reason: null }, bookOnline: false } }),
   },
   play: async ({ canvas }) => {
@@ -120,7 +124,10 @@ export const OwnerPreview: Story = {
 
 /** Online booking paused (States 05, C-09): the services without Select, the card to call. */
 export const Paused: Story = {
-  args: { server: businessApi({ business: { ...GLOW, onlineEnabled: false, bookOnline: false } }) },
+  args: {
+    path: '/en/b/glow-studio?tab=specialists',
+    server: businessApi({ business: { ...GLOW, onlineEnabled: false, bookOnline: false } }),
+  },
   play: async ({ canvas }) => {
     const card = within(await canvas.findByRole('complementary', { name: 'Booking' }))
     await expect(card.getByRole('heading', { name: "This place isn't taking online bookings right now" })).toBeVisible()
@@ -147,6 +154,7 @@ export const PhoneOnly: Story = {
 /** Closed today for a special day (States 06): its name on the card, when it opens next in grey. */
 export const Closed: Story = {
   args: {
+    path: '/en/b/glow-studio?tab=about',
     server: businessApi({
       business: { ...GLOW, open: { open: false, inDays: 1, at: 540 }, specialDays: [{ date: today(), name: 'Holiday', hours: null }] },
     }),
@@ -215,28 +223,49 @@ export const Laptop: Story = {
   },
 }
 
-/** The section nav (Venue `.tabs`): a press scrolls to the part, moves the focus into it and underlines it. */
-export const SectionNav: Story = {
+/**
+ * The tabs as panels (Venue v0.7 · C2, the owner's #38): Services · Specialists · Reviews · About with their counts; a
+ * press opens that panel in place of the last (no scrolling to a section), ← → move along the bar and open the tab.
+ */
+export const Tabs: Story = {
   play: async ({ canvas }) => {
-    const nav = within(await canvas.findByRole('navigation', { name: 'Sections' }))
-    const links = nav.getAllByRole('link')
-    await expect(links.map((l) => l.textContent)).toEqual(['Services', 'Specialists', 'Reviews', 'About'])
-    await expect(nav.getByRole('link', { name: 'Services' })).toHaveAttribute('aria-current', 'true')
-    await expect(nav.getByRole('link', { name: 'Reviews' })).toHaveAttribute('href', '#reviews')
-    await userEvent.click(nav.getByRole('link', { name: 'Reviews' }))
-    await waitFor(() => expect(canvas.getByRole('region', { name: 'Reviews' })).toHaveFocus())
-    await waitFor(() => expect(nav.getByRole('link', { name: 'Reviews' })).toHaveAttribute('aria-current', 'true'))
-    // About, last and too short to reach the nav, is current once the page can't scroll further
-    await userEvent.click(nav.getByRole('link', { name: 'About' }))
-    await waitFor(() => expect(nav.getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'true'))
-    // the header's «96 reviews» leads there too
+    const bar = within(await canvas.findByRole('tablist', { name: 'Glow Studio' }))
+    await expect(bar.getAllByRole('tab').map((t) => t.textContent?.replace(/\s*\d+/g, ''))).toEqual([
+      'Services',
+      'Specialists',
+      'Reviews',
+      'About',
+    ])
+    await expect(bar.getByRole('tab', { name: /^Services \d+$/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(canvas.getByRole('tabpanel', { name: 'Services' })).toBeVisible()
+    await userEvent.click(bar.getByRole('tab', { name: 'Reviews 96' }))
+    await waitFor(() => expect(canvas.getByRole('tabpanel', { name: 'Reviews' })).toBeVisible())
+    await expect(canvas.queryByRole('tabpanel', { name: 'Services' })).toBeNull()
+    await expect(bar.getByRole('tab', { name: 'Reviews 96' })).toHaveAttribute('aria-selected', 'true')
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() => expect(bar.getByRole('tab', { name: 'About' })).toHaveAttribute('aria-selected', 'true'))
+    await expect(canvas.getByRole('tabpanel', { name: 'About' })).toBeVisible()
+    await userEvent.keyboard('{Home}')
+    await waitFor(() => expect(canvas.getByRole('tabpanel', { name: 'Services' })).toBeVisible())
+    // the cover's «96 reviews» opens the Reviews tab
     await userEvent.click(canvas.getByRole('link', { name: '96 reviews' }))
-    await waitFor(() => expect(canvas.getByRole('region', { name: 'Reviews' })).toHaveFocus())
+    await waitFor(() => expect(canvas.getByRole('tabpanel', { name: 'Reviews' })).toBeVisible())
+  },
+}
+
+/** A link to `?tab=reviews` opens the page on that panel, as the server renders it. */
+export const DeepLink: Story = {
+  args: { path: '/en/b/glow-studio?tab=reviews' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('tab', { name: 'Reviews 96' })).toHaveAttribute('aria-selected', 'true')
+    await expect(canvas.getByRole('tabpanel', { name: 'Reviews' })).toBeVisible()
+    await expect(canvas.queryByRole('tabpanel', { name: 'Services' })).toBeNull()
   },
 }
 
 /** Venue «Hünärmenler»: a card each with the next free time (none soon for one) and Book with them chosen. */
 export const Specialists: Story = {
+  args: { path: '/en/b/glow-studio?tab=specialists' },
   play: async ({ canvas }) => {
     const team = within(await canvas.findByRole('region', { name: 'Specialists' }))
     const cards = team.getAllByRole('listitem')
@@ -256,7 +285,7 @@ export const Specialists: Story = {
  * #39), one who doesn't opens the services, which say so.
  */
 export const SpecialistsPicked: Story = {
-  args: { path: '/en/b/glow-studio?services=s1' },
+  args: { path: '/en/b/glow-studio?services=s1&tab=specialists' },
   play: async ({ canvas }) => {
     const team = within(await canvas.findByRole('region', { name: 'Specialists' }))
     await expect(team.getByRole('link', { name: 'Book with Aýna' })).toHaveAttribute(
@@ -275,6 +304,7 @@ export const SpecialistsPicked: Story = {
  * (and in none of the numbers), the business's reply, who may rate. One page: no «All reviews».
  */
 export const Reviews: Story = {
+  args: { path: '/en/b/glow-studio?tab=reviews' },
   play: async ({ canvas }) => {
     const reviews = within(await canvas.findByRole('region', { name: 'Reviews' }))
     await expect(reviews.getByRole('img', { name: 'Average rating: 4.9 out of 5' })).toBeVisible()
@@ -299,7 +329,10 @@ const MANY = Array.from({ length: 14 }, (_, i) => ({ ...REVIEWS[i % REVIEWS.leng
 
 /** More than a page (12): «All reviews» brings the rest, then goes. */
 export const ReviewsPaging: Story = {
-  args: { server: businessApi({ reviews: MANY }) },
+  args: {
+    path: '/en/b/glow-studio?tab=reviews',
+    server: businessApi({ reviews: MANY }),
+  },
   play: async ({ canvas }) => {
     const reviews = within(await canvas.findByRole('region', { name: 'Reviews' }))
     await waitFor(() => expect(reviews.getAllByRole('article')).toHaveLength(12))
@@ -313,6 +346,7 @@ export const ReviewsPaging: Story = {
 /** No reviews yet (not drawn): the words alone, and who may rate. */
 export const NoReviews: Story = {
   args: {
+    path: '/en/b/glow-studio?tab=reviews',
     server: businessApi({
       business: { ...GLOW, rating: null, reviewsCount: 0, ratingBreakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } },
       reviews: [],
@@ -330,6 +364,7 @@ export const NoReviews: Story = {
  * amenities, the rules and how the business confirms.
  */
 export const About: Story = {
+  args: { path: '/en/b/glow-studio?tab=about' },
   play: async ({ canvas }) => {
     const about = within(await canvas.findByRole('region', { name: 'About' }))
     await expect(about.getByText(/Hair, nails and facial care in one place/)).toBeVisible()
@@ -358,6 +393,7 @@ export const About: Story = {
 /** A day to midnight (Venue `hoursCase=midnight`, E1): «09:00–24:00» and «Open now · until 24:00». */
 export const Midnight: Story = {
   args: {
+    path: '/en/b/glow-studio?tab=about',
     server: businessApi({
       business: { ...GLOW, hours: GLOW.hours.map(() => ({ open: 540, close: 1440, break: null })), open: { open: true, until: 1440 } },
     }),
@@ -374,6 +410,7 @@ export const Midnight: Story = {
 /** A home-based business: the approximate circle, no Directions, the address's note. */
 export const HomeBased: Story = {
   args: {
+    path: '/en/b/glow-studio?tab=about',
     server: businessApi({
       business: {
         ...GLOW,
@@ -446,12 +483,13 @@ export const Nearby: Story = {
   },
 }
 
-/** Phone (Mobile 4): the section nav sticks above the parts, 24 apart. */
-export const PhoneSections: Story = {
+/** Phone (Venue v0.7 · 390): the tab bar without counts; a press opens the panel. */
+export const PhoneTabs: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
-    const nav = await canvas.findByRole('navigation', { name: 'Sections' })
-    await expect(nav).toBeVisible()
-    await expect(within(canvas.getByRole('region', { name: 'Specialists' })).getAllByRole('listitem')).toHaveLength(4)
+    const tab = await canvas.findByRole('tab', { name: /^Specialists/ })
+    await expect(tab).toBeVisible()
+    await userEvent.click(tab)
+    await waitFor(() => expect(within(canvas.getByRole('region', { name: 'Specialists' })).getAllByRole('listitem')).toHaveLength(4))
   },
 }

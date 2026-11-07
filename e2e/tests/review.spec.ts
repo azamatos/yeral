@@ -32,6 +32,7 @@ test('a completed visit asks «How was it?», the review marks the row and shows
   await expect(row).toBeVisible()
   await expect(row.getByRole('img', { name: 'You rated it 5 out of 5' })).toBeVisible()
 
-  await client.goto(`${CLIENT_URL}/en/b/${SALON.slug}`)
-  await expect(client.getByRole('region', { name: 'Reviews' }).getByText(words)).toBeVisible()
+  // the reviews are a panel of their own (design v0.7 · C2): a link to it opens the page there
+  await client.goto(`${CLIENT_URL}/en/b/${SALON.slug}?tab=reviews`)
+  await expect(client.getByRole('tabpanel', { name: 'Reviews' }).getByText(words)).toBeVisible()
 })

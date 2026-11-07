@@ -26,7 +26,7 @@ import { BookingBar, BookingCard } from './booking-card'
 import { FavouriteButton } from './favourite'
 import { Nearby } from './nearby'
 import { Reviews } from './reviews'
-import { goTo, Section, SECTIONS, SectionNav } from './sections'
+import { pickTab, Section, SECTIONS, SectionTabs, tabSearch } from './sections'
 import { Specialists } from './specialists'
 
 /**
@@ -53,13 +53,14 @@ export function BusinessPage() {
   const lang = useLocale()
   const sdk = useSdk()
   const { data: detail } = useSuspenseQuery(sdk.catalog.business(slug, lang))
-  const search: { services?: string } = useSearch({ strict: false })
+  const search: { services?: string; tab?: string } = useSearch({ strict: false })
   const navigate = useNavigate()
   const t = useTranslations('business')
   const tb = useTranslations('booking')
   const state = bookingState(detail)
   // a page with nobody to pick (tables, classes) has no Specialists part
   const sections = SECTIONS.filter((s) => s !== 'specialists' || detail.specialists.length > 0)
+  const tab = pickTab(search.tab, sections)
   const ids = state === 'online' || state === 'preview' ? parseServiceIds(search.services) : []
   const picked = pickedServices(detail, ids)
   const pick = (next: string[]) =>
@@ -76,25 +77,39 @@ export function BusinessPage() {
         <Header detail={detail} />
         <div className="flex flex-wrap items-stretch gap-12 pt-10 max-sm:pt-6">
           <div className="min-w-0 flex-[999_1_540px]">
-            <SectionNav ids={sections} />
-            {/* Venue «Hyzmatlar» (`.sect.first`) */}
-            <Section id="services" title={t('services.title')} first>
-              <ServicePicker
-                groups={detail.serviceGroups}
-                picked={picked.map((s) => s.id)}
-                onToggle={(id) => {
-                  const next = toggleService(ids, id)
-                  // one booking takes up to 10 services (the api's limit)
-                  if (next.length > SERVICES_MAX) toast(tb('services.max', { max: SERVICES_MAX }))
-                  else pick(next)
-                }}
-                canPick={state === 'online' || state === 'preview'}
-                groupHeading="h3"
-              />
-            </Section>
-            {detail.specialists.length > 0 && <Specialists detail={detail} state={state} picked={picked.map((s) => s.id)} />}
-            <Reviews detail={detail} />
-            <About detail={detail} />
+            <SectionTabs
+              ids={sections}
+              current={tab}
+              label={detail.name}
+              belowBar={detail.photos.length > 0}
+              counts={{
+                services: detail.serviceGroups.reduce((n, g) => n + g.services.length, 0),
+                specialists: detail.specialists.length,
+                reviews: detail.reviewsCount,
+              }}
+            >
+              {{
+                services: (
+                  <Section id="services" title={t('services.title')}>
+                    <ServicePicker
+                      groups={detail.serviceGroups}
+                      picked={picked.map((s) => s.id)}
+                      onToggle={(id) => {
+                        const next = toggleService(ids, id)
+                        // one booking takes up to 10 services (the api's limit)
+                        if (next.length > SERVICES_MAX) toast(tb('services.max', { max: SERVICES_MAX }))
+                        else pick(next)
+                      }}
+                      canPick={state === 'online' || state === 'preview'}
+                      groupHeading="h3"
+                    />
+                  </Section>
+                ),
+                specialists: <Specialists detail={detail} state={state} picked={picked.map((s) => s.id)} />,
+                reviews: <Reviews detail={detail} />,
+                about: <About detail={detail} />,
+              }}
+            </SectionTabs>
           </div>
           <aside
             aria-label={t('card.label')}
@@ -174,9 +189,9 @@ function Header({ detail }: { detail: BusinessDetail }) {
                 <>
                   <Rating value={fmt.rating(detail.rating)} />
                   <span aria-hidden>·</span>
-                  <a href="#reviews" onClick={goTo('reviews')} className={cn(textLink, 'font-medium')}>
+                  <Link to="." search={tabSearch('reviews')} replace resetScroll={false} className={cn(textLink, 'font-medium')}>
                     {t('reviews', { count: detail.reviewsCount })}
-                  </a>
+                  </Link>
                 </>
               ) : (
                 <span>{t('noReviews')}</span>
