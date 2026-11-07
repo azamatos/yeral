@@ -8,6 +8,7 @@ import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
 import { CopyField } from '@yeral/ui/copy-field'
 import { InfoTip } from '@yeral/ui/info-tip'
+import { NoteRow } from '@yeral/ui/note-row'
 import { Pill } from '@yeral/ui/pill'
 import { Phone } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -113,14 +114,15 @@ export function ClientBlock({
           {card.stats.noShows > 0 && <Fact label={t('facts.noShows')} value={card.stats.noShows} danger />}
         </dl>
       )}
-      {alerts.map((note) => (
-        <div key={note.id} className="flex flex-col gap-0.5">
-          <span className="text-small text-n-900">{note.text}</span>
-          <span className="text-micro text-n-600">
-            {t('noteMeta', { by: note.by ?? t('unnamed'), date: fmt.shortDate(localOf(note.at).date) })}
-          </span>
+      {alerts.length > 0 && (
+        <div className="flex flex-col">
+          {alerts.map((note) => (
+            <NoteRow key={note.id} alert meta={t('noteMeta', { by: note.by ?? t('unnamed'), date: fmt.shortDate(localOf(note.at).date) })}>
+              {note.text}
+            </NoteRow>
+          ))}
         </div>
-      ))}
+      )}
       {(client.phone || onBookAgain) && (
         <div className="flex gap-2">
           {/* Call and Book again: two equal Secondary M (A4) */}

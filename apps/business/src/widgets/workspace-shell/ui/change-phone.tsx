@@ -87,9 +87,9 @@ function NewNumber({ current, onClose }: { current: string; onClose: () => void 
         setRefused('taken')
       } else if (isApiError(error, 'phone_change_unavailable')) {
         // the account can't change its number now (the code shows on the screen): its words, and the row closes
-        toast(errorText(error))
+        toast.error(errorText(error))
         onClose()
-      } else toast(errorText(error))
+      } else toast.error(errorText(error))
     },
   })
   const { state } = steps

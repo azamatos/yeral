@@ -255,7 +255,7 @@ function NewGroup({ slug, onDone }: { slug: string; onDone: () => void }) {
                   toast(t('groupAdded', { name }))
                   onDone()
                 },
-                onError: (error) => toast(errorText(error)),
+                onError: (error) => toast.error(errorText(error)),
               },
             )
           }
@@ -359,7 +359,7 @@ function Group({
                 { groupId, name: writtenIn(names, locale, next) },
                 {
                   onSuccess: () => toast(t('groupRenamed', { name: next })),
-                  onError: (error) => toast(errorText(error)),
+                  onError: (error) => toast.error(errorText(error)),
                 },
               )
             }
@@ -418,7 +418,7 @@ function Group({
                       onGroupDeleted()
                       toast(t('groupDeleted', { name }))
                     },
-                    (error: unknown) => toast(errorText(error)),
+                    (error: unknown) => toast.error(errorText(error)),
                   )
                 }
               >
@@ -504,7 +504,7 @@ function ServiceRow({
       { serviceId: service.id, online: on },
       {
         onSuccess: () => toast(on ? t('openedOnline', { name }) : t('closedOnline', { name })),
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
   }

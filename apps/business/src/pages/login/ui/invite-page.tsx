@@ -38,7 +38,7 @@ export function InvitePage({ token }: { token: string }) {
   const business = invite.data?.business.name
   usePageTitle(business ? t('invite.link.tabTitle', { business }) : t('invite.eyebrow'))
 
-  const failed = (error: unknown) => void toast(errorText(error))
+  const failed = (error: unknown) => void toast.error(errorText(error))
   const signIn = useSignIn({
     onVerified: (answer) => {
       if ('isThisYou' in answer) setIdentity(answer.isThisYou)

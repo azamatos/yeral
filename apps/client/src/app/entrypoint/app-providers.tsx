@@ -26,5 +26,5 @@ export function AppProviders({ sdk, locale, children }: { sdk: Sdk; locale: Loca
 
 function AppToaster() {
   const t = useTranslations('site')
-  return <Toaster label={t('notifications')} />
+  return <Toaster label={t('notifications')} closeLabel={t('closeNotification')} />
 }

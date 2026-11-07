@@ -144,7 +144,7 @@ function RemoveBody({
         const first = movable(listed.data) ? listed.data.bookings.flatMap((b) => b.colleagues ?? [])[0] : undefined
         setChoice(first ? 'move' : 'keep')
         setTo(first?.staffId ?? '')
-      } else toast(errorText(error))
+      } else toast.error(errorText(error))
     }
   }
 

@@ -62,7 +62,7 @@ export function useStatusToggles(slug: string): StatusToggles {
         }
         return true
       } catch (error) {
-        toast(errorText(error))
+        toast.error(errorText(error))
         return false
       }
     },

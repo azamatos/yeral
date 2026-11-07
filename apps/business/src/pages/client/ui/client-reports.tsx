@@ -105,7 +105,7 @@ function Row({
         const wasNoShow = r.type === 'noshow' && booking?.status === 'noshow'
         toast(wasNoShow ? drawer('removedNoShow', { status: statusWithoutNoShow(booking, now) }) : drawer('removed'))
       },
-      (error: unknown) => toast(errorText(error)),
+      (error: unknown) => toast.error(errorText(error)),
     )
 
   return (

@@ -77,7 +77,7 @@ export function useDoneStep(
       await finish.mutateAsync()
     } catch (error) {
       leaving.current = null
-      toast(errorText(error))
+      toast.error(errorText(error))
       const missing = isApiError(error, 'setup_incomplete') ? firstMissing((error.details as SetupIncompleteDetails).missing) : null
       if (missing) void navigate({ to: '/setup/$step', params: { step: missing } })
       // finished meanwhile (another tab) or gone: the draft is asked again, and the wizard follows what it finds

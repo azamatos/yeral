@@ -1,9 +1,9 @@
 /**
- * Callout — DS-Patterns → 02 Feedback → «Callout · tones, sizes, actions» (+ the owner-preview page banner and the
- * phone-only info card). Copy is the board's English samples; screens pass theirs through i18n.
+ * Callout — DS-Lists → 05 Callouts (A10) «Callouts take one tone, icon included» (+ the owner-preview page banner and
+ * the phone-only info card from DS-Patterns). Copy is the board's English samples; screens pass theirs through i18n.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Bell, CircleCheck, CircleX, Clock, Info, Lightbulb, Phone, RotateCw, Users, WifiOff } from 'lucide-react'
+import { Bell, CalendarOff, Clock, Link2, Phone, RotateCw, Users, WifiOff, Zap } from 'lucide-react'
 import { expect, fn, userEvent } from 'storybook/test'
 import { Button } from '../button'
 import { Callout } from './callout'
@@ -14,8 +14,8 @@ const meta = {
   args: {
     tone: 'neutral',
     size: 'm',
-    icon: <Info />,
-    children: 'Online booking is off. Your page stays open, but clients can only book by phone. Existing bookings don’t change.',
+    title: 'Only your team sees notes',
+    children: 'Clients never see notes, tags or reports.',
   },
   argTypes: { icon: { control: false }, actions: { control: false }, action: { control: false }, value: { control: false } },
 } satisfies Meta<typeof Callout>
@@ -31,66 +31,97 @@ const inReview = (
 
 export const Playground: Story = {}
 
-/** Six tones at M. Only danger speaks up by itself (`role="alert"`); the rest are static notes here. */
+/**
+ * Five tones at M: the line, the fill and the icon in one tone, the title ink, the body n-600. Each tone draws its own
+ * icon unless the screen names one («Bookings are confirmed at once» = Info + zap). Only danger speaks up by itself
+ * (`role="alert"`); the rest are static notes (`role="note"`).
+ */
 export const Tones: Story = {
   render: () => (
     <div className="grid max-w-180 gap-4">
-      <Callout tone="neutral" icon={<Info />}>
-        Online booking is off. Your page stays open, but clients can only book by phone. Existing bookings don’t change.
+      <Callout tone="accent" icon={<Zap />} title="Bookings are confirmed at once">
+        Your time is set as soon as you book. You’ll find it in My bookings.
       </Callout>
-      <Callout tone="accent" icon={<Lightbulb />}>
-        If only one specialist is away, add their time off in Team → staff member → Hours.
+      <Callout
+        tone="success"
+        title="Your page is live"
+        actions={
+          <Button size="s">
+            <Link2 />
+            Copy the link
+          </Button>
+        }
+      >
+        Clients can find Glow Studio in search and book at your link.
       </Callout>
-      <Callout tone="warning" icon={<Clock />}>
-        {inReview}
+      <Callout tone="warning" title="Your page is in review">
+        Only you and your team can see it. After the review it opens in search. You can use the calendar now.
       </Callout>
-      <Callout tone="danger" icon={<WifiOff />} title="Couldn’t load the list">
-        Check your internet connection.
+      <Callout tone="danger" title="Ýeral has hidden your page" actions={<Button size="s">Fix the address</Button>}>
+        Clients reported the wrong address. Fix it and send the page for review again.
       </Callout>
-      <Callout tone="success" icon={<CircleCheck />}>
-        Online booking is back. The no-show count starts again from zero.
-      </Callout>
-      <Callout tone="slate" icon={<CircleX />} title="Booking cancelled">
-        Reason: the specialist is ill. The client is notified.
+      <Callout tone="neutral" title="Only your team sees notes">
+        Clients never see notes, tags or reports.
       </Callout>
     </div>
   ),
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('alert')).toHaveTextContent('Couldn’t load the list')
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Ýeral has hidden your page')
+    await expect(canvas.getAllByRole('note')).toHaveLength(4)
     await expect(canvas.queryAllByRole('status')).toHaveLength(0)
+    // DS-Lists `.co`: pad 14 16, the icon 20 in the tone's ink on the title's first line
+    const live = canvas.getByText('Your page is live').closest('[role]') as HTMLElement
+    await expect(getComputedStyle(live).padding).toBe('14px 16px')
+    const icon = live.querySelector('[data-callout-icon] svg') as SVGElement
+    await expect(getComputedStyle(icon).color).toBe('rgb(6, 106, 65)')
+    await expect(icon.getBoundingClientRect().height).toBe(20)
+    // the 1 px line, then the 14 padding
+    await expect(Math.round(icon.getBoundingClientRect().top - live.getBoundingClientRect().top)).toBe(15)
   },
 }
 
-/** M (pad 14 16, icon 20) for pages and settings; S (pad 12 14, icon 18) for drawers, panels and inside forms. */
-export const Sizes: Story = {
+/** Compact: 40 high, icon 16, one line 13/18 500 ink that truncates rather than wraps — the booking summary, a drawer, a 390 step. */
+export const Compact: Story = {
   render: () => (
-    <div className="grid max-w-120 gap-4">
-      <Callout tone="warning" size="m" icon={<Clock />} title="18 min left to answer">
-        If no one answers, the request is cancelled and the client is offered 3 other times.
+    <div className="grid max-w-120 gap-2">
+      <Callout tone="accent" size="compact" icon={<Zap />}>
+        Bookings are confirmed at once.
       </Callout>
-      <Callout tone="warning" size="s" icon={<Clock />} title="18 min left to answer">
-        If no one answers, the request is cancelled and the client is offered 3 other times.
+      <Callout tone="warning" size="compact" icon={<CalendarOff />}>
+        Jeren is off on Friday 16 October.
       </Callout>
-      <Callout tone="neutral" size="s">
-        A quiet S note without an icon takes no space for one.
+      <Callout tone="neutral" size="compact">
+        Only your team sees this note.
+      </Callout>
+      <Callout tone="neutral" size="compact" className="max-w-60">
+        A note too long for a compact callout is cut with an ellipsis rather than wrapped.
       </Callout>
     </div>
   ),
+  play: async ({ canvas }) => {
+    const box = canvas.getByText('Bookings are confirmed at once.').closest('[role="note"]') as HTMLElement
+    await expect(box.getBoundingClientRect().height).toBe(40)
+    await expect(getComputedStyle(box).padding).toBe('0px 12px')
+    await expect(getComputedStyle(box).borderRadius).toBe('10px')
+    await expect((box.querySelector('[data-callout-icon] svg') as SVGElement).getBoundingClientRect().height).toBe(16)
+    const long = canvas.getByText(/too long for a compact/)
+    await expect(long.scrollWidth).toBeGreaterThan(long.clientWidth)
+    await expect(long.getBoundingClientRect().height).toBe(18)
+  },
 }
 
-/** A title line in 600 above the text; `live` callouts (a waiting request, a cancelled booking) are `role="status"`. */
+/** A title line in 600 ink above the body; `live` callouts (a waiting request, a saved switch) are `role="status"`. */
 export const WithTitle: Story = {
   render: () => (
     <div className="grid max-w-120 gap-4">
-      <Callout tone="warning" size="s" icon={<Clock />} title="18 min left to answer" live>
+      <Callout tone="warning" icon={<Clock />} title="18 min left to answer" live>
         If no one answers, the request is cancelled and the client is offered 3 other times.
       </Callout>
-      <Callout tone="slate" size="s" icon={<CircleX />} title="Booking cancelled" live>
-        Reason: the specialist is ill. The client is notified.
+      <Callout tone="success" title="Online booking is back" live>
+        The no-show count starts again from zero.
       </Callout>
       <Callout
         tone="accent"
-        icon={<Lightbulb />}
         title={<span className="text-label text-a-600 uppercase">Tip</span>}
         actions={
           <a href="#team" className="font-semibold text-a-600 no-underline hover:underline">
@@ -105,14 +136,18 @@ export const WithTitle: Story = {
   play: async ({ canvas }) => {
     const statuses = canvas.getAllByRole('status')
     await expect(statuses).toHaveLength(2)
-    await expect(statuses[1]).toHaveTextContent('Booking cancelled')
+    await expect(statuses[1]).toHaveTextContent('Online booking is back')
+    const title = canvas.getByText('18 min left to answer')
+    await expect(getComputedStyle(title).fontWeight).toBe('600')
+    await expect(getComputedStyle(title).color).toBe('rgb(16, 16, 20)')
+    await expect(getComputedStyle(title.nextElementSibling as HTMLElement).color).toBe('rgb(90, 90, 100)')
   },
 }
 
 const onReload = fn()
 const onAllow = fn()
 
-/** S buttons under the text, or one short action on the right of a one-line callout. */
+/** Secondary S buttons under the body, 8 apart and 8 below it, or one short action on the right of a one-line callout. */
 export const WithAction: Story = {
   render: () => (
     <div className="grid max-w-120 gap-4">
@@ -131,7 +166,6 @@ export const WithAction: Story = {
       </Callout>
       <Callout
         tone="accent"
-        size="s"
         icon={<Bell />}
         action={
           <Button size="s" onClick={onAllow}>
@@ -200,7 +234,7 @@ export const InfoCard: Story = {
   },
 }
 
-/** At 390: the text wraps beside the icon, actions wrap, the card takes the column. */
+/** At 390: the text wraps beside the icon, actions wrap, the compact line truncates, the card takes the column. */
 export const Phone390: Story = {
   name: 'On a phone (390)',
   globals: { viewport: { value: 'xs' } },
@@ -211,9 +245,11 @@ export const Phone390: Story = {
         {inReview}
       </Callout>
       <div className="grid gap-4 p-4">
+        <Callout tone="accent" size="compact" icon={<Zap />}>
+          Bookings are confirmed at once.
+        </Callout>
         <Callout
           tone="danger"
-          size="s"
           icon={<WifiOff />}
           title="Couldn’t load the list"
           actions={
@@ -225,7 +261,7 @@ export const Phone390: Story = {
         >
           Check your internet connection.
         </Callout>
-        <Callout tone="accent" size="s" icon={<Bell />} action={<Button size="s">Allow</Button>}>
+        <Callout tone="accent" icon={<Bell />} action={<Button size="s">Allow</Button>}>
           Turn on notifications to hear new requests.
         </Callout>
         <Callout
@@ -258,7 +294,6 @@ export const LongText: Story = {
       </Callout>
       <Callout
         tone="danger"
-        size="s"
         icon={<WifiOff />}
         title="Не удалось загрузить список записей"
         actions={
@@ -275,8 +310,11 @@ export const LongText: Story = {
       >
         Проверьте подключение к интернету и попробуйте ещё раз.
       </Callout>
-      <Callout tone="accent" size="s" icon={<Bell />} action={<Button size="s">Разрешить</Button>}>
+      <Callout tone="accent" icon={<Bell />} action={<Button size="s">Разрешить</Button>}>
         Включите уведомления, чтобы сразу узнавать о новых заявках.
+      </Callout>
+      <Callout tone="accent" size="compact" icon={<Zap />}>
+        Запись подтверждается сразу.
       </Callout>
       <Callout
         layout="card"

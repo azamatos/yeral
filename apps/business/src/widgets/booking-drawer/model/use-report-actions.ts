@@ -40,7 +40,7 @@ export function useReportActions(slug: string, now: number) {
           // the undo runs later: it takes the report back as the api holds it then
           toast(words, { action: { label: t('undo'), onClick: () => latest.current.remove(b, undefined, true) } })
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
   }
@@ -67,7 +67,7 @@ export function useReportActions(slug: string, now: number) {
             : {}),
         })
       },
-      onError: (error) => toast(errorText(error)),
+      onError: (error) => toast.error(errorText(error)),
     })
   }
 

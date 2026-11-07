@@ -125,7 +125,7 @@ export function RequestsTab({
   const confirmOne = (r: BookingRequest) =>
     confirm.mutate(r.code, {
       onSuccess: () => toast(t('confirmed')),
-      onError: (error) => toast(errorText(error)),
+      onError: (error) => toast.error(errorText(error)),
     })
   const confirmAll = async () => {
     const done = await settle(chosen, (code) => confirm.mutateAsync(code))

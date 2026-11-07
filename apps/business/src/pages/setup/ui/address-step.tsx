@@ -44,7 +44,7 @@ export function useAddressStep(slug: string, on: boolean): { body: ReactNode; ac
       await queryClient.invalidateQueries({ queryKey: sdk.setup.mine().queryKey })
       return true
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       return false
     }
   }

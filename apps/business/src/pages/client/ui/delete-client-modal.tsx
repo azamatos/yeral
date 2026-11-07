@@ -52,7 +52,7 @@ export function DeleteClientModal({
         toast(t('done'))
         onDeleted()
       },
-      (error: unknown) => toast(errorText(error)),
+      (error: unknown) => toast.error(errorText(error)),
     )
 
   const lead = !blocked

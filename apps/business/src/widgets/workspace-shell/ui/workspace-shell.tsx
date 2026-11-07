@@ -16,7 +16,7 @@ import { ShellTabBar } from './shell-tab-bar'
  * 24 beside the 72 rail (96), and on phones 12 from the sides and 12 above the tab bar.
  */
 // the breakpoints are the theme's `sm` and `md` (a media query can't read them)
-const TOASTS = `:root { --toast-left: 12px; --toast-bottom: calc(${TAB_BAR_HEIGHT} + 12px) }
+const TOASTS = `:root { --toast-left: 16px; --toast-bottom: calc(${TAB_BAR_HEIGHT} + 12px) }
 @media (min-width: 768px) { :root { --toast-left: 96px; --toast-bottom: 24px } }
 @media (min-width: 1024px) { :root { --toast-left: 272px } }`
 

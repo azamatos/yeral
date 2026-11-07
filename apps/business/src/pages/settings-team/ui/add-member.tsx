@@ -176,7 +176,7 @@ function AddMemberSteps({
       onDone()
     } catch (error) {
       onBusy(false)
-      toast(errorText(error))
+      toast.error(errorText(error))
     }
   }
 

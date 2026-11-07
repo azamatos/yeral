@@ -117,7 +117,7 @@ function ClientTagsInPlace({ slug, card, manage }: { slug: string; card: ClientC
         },
         onError: (error) => {
           setTags(card.tags)
-          toast(errorText(error))
+          toast.error(errorText(error))
         },
       },
     )

@@ -38,7 +38,9 @@ Package: `packages/ui` (theme `src/styles/theme.css` — every design token unde
 - Focus: `--focus-ring` on `:focus-visible` everywhere; inputs focus = border `a-500` + `--input-focus` halo; error = `#d9412f` + `--input-error`.
 - Flat: shadows only on raised layers (`--shadow-raised`: popover, drawer, modal, toast; `--shadow-sheet` on phones).
 - Overlays: modal 400 (login) / 480 / 560 (review) / 640 · right drawer 480 · popover 280–360 · all become bottom sheets under 768.
-  Toast: ink, bottom-left (bottom-centre on phones), 4–6 s, one at a time, one optional action ("Yzyna al" for undo).
+  Toast (v0.7 · A10): ink with a tinted icon, 5 s, one at a time, one text action (Undo, Try again), `toast()` = success,
+  `toast.info|warning|error`; an error with an action stays until closed; bottom-left of the content (bottom-centre on
+  phones). Callout: five tones with the icon in the tone's ink, M or compact. NoteRow for a client's notes, not a box.
 - Statuses: `st-pending|confirmed|completed|cancelled|noshow` with `-bg/-line/-ink/-dot`; one badge shape everywhere;
   phone booking = confirmed + phone icon; cancelled-by-client vs by-business = same colour, icon + label.
 - Type: Geist (v0.7, was Onest; self-hosted variable, `@fontsource-variable/geist`). Desktop scale display 64/68 · h1 44/48 ·

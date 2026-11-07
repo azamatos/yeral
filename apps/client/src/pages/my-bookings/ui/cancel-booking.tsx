@@ -69,7 +69,7 @@ export function CancelBooking({
         onError: (error) => {
           shut()
           void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(b.code, lang).queryKey })
-          toast(errorText(error))
+          toast.error(errorText(error))
         },
       },
     )

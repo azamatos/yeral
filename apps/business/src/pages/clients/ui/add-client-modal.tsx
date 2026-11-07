@@ -64,7 +64,7 @@ export function AddClientModal({
           toast(t('saved'))
           onSaved(id, book)
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
 

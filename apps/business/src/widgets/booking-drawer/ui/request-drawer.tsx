@@ -10,13 +10,14 @@ import { ChangeSummary } from '@yeral/ui/change-summary'
 import { cn } from '@yeral/ui/cn'
 import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@yeral/ui/drawer'
 import { KeyValueList } from '@yeral/ui/key-value'
+import { NoteRow } from '@yeral/ui/note-row'
 import { Pill } from '@yeral/ui/pill'
 import { Quote } from '@yeral/ui/quote'
 import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { ArrowLeftRight, Clock, Globe, TriangleAlert } from 'lucide-react'
+import { ArrowLeftRight, Clock, Globe } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
@@ -89,7 +90,7 @@ export function RequestDrawer({
         answered(r, r.kind === 'move' ? t('movedTo', { when }) : t('confirmed'))
       },
       onError: (error) => {
-        toast(errorText(error))
+        toast.error(errorText(error))
         void list.refetch()
       },
     })
@@ -318,17 +319,16 @@ function RequestBody({
           </span>
         </div>
       </div>
-      {r.client.alerts.map((alert, i) => (
-        <Callout
-          key={i}
-          tone="warning"
-          size="s"
-          icon={<TriangleAlert aria-hidden />}
-          title={<span className="text-label uppercase">{t('alert')}</span>}
-        >
-          {alert}
-        </Callout>
-      ))}
+      {r.client.alerts.length > 0 && (
+        // the client's notes «shown when booking» as note rows (A10), not the caps box
+        <div className="flex flex-col">
+          {r.client.alerts.map((alert, i) => (
+            <NoteRow key={i} alert>
+              {alert}
+            </NoteRow>
+          ))}
+        </div>
+      )}
       <KeyValueList
         items={[
           { key: t('service'), value: services },

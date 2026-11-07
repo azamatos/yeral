@@ -2,6 +2,7 @@
   "app": {
     "name": "{brand} Business",
     "notifications": "Notifications",
+    "closeNotification": "Close",
     "tag": "Business",
     "clientSite": "Book on {brand} as a client"
   },
@@ -1995,7 +1996,7 @@
       "added": "Note added",
       "none": "No notes yet. Only the team sees notes.",
       "meta": "{by} · {date}",
-      "shown": "Shown when booking"
+      "metaShown": "{meta} · Shown when booking"
     },
     "history": {
       "title": "History",
@@ -2151,8 +2152,7 @@
       "knownNumber": "This number is saved for {name}.",
       "chooseKnown": "Choose {name}",
       "change": "Change",
-      "phoneOnly": "Phone only",
-      "alert": "Note · the whole team sees it"
+      "phoneOnly": "Phone only"
     },
     "services": {
       "title": "Services",
@@ -2260,7 +2260,6 @@
       "newClient": "New client",
       "visits": "{n, plural, one {# visit} other {# visits}}",
       "noShows": "{n, plural, one {# no-show} other {# no-shows}}",
-      "alert": "Note · the whole team sees it",
       "service": "Service",
       "specialist": "Specialist",
       "dateTime": "Date and time",

@@ -24,5 +24,5 @@ export function AppProviders({ api, children }: { api: Api; children: ReactNode 
 
 function AppToaster() {
   const t = useTranslations('app')
-  return <Toaster label={t('notifications')} />
+  return <Toaster label={t('notifications')} closeLabel={t('closeNotification')} />
 }

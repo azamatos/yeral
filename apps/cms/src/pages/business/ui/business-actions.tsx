@@ -28,7 +28,7 @@ export function BusinessActions({ business }: { business: AdminBusiness }) {
   const state = businessState(business)
   const codeOnScreen = useQuery(sdk.auth.mode()).data?.codeOnScreen ?? false
 
-  const failed = { onError: (error: unknown) => void toast(errorText(error)) }
+  const failed = { onError: (error: unknown) => void toast.error(errorText(error)) }
   const done = (words: string) => ({
     ...failed,
     onSuccess: () => {

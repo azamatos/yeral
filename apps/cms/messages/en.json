@@ -2,6 +2,7 @@
   "app": {
     "name": "{brand} Admin",
     "notifications": "Notifications",
+    "closeNotification": "Close",
     "tag": "Admin",
     "clientSite": "Open {brand}"
   },

@@ -10,6 +10,7 @@ import { Callout } from '@yeral/ui/callout'
 import { Combobox, ComboboxInput, ComboboxList } from '@yeral/ui/combobox'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
+import { NoteRow } from '@yeral/ui/note-row'
 import { Pill } from '@yeral/ui/pill'
 import { PhoneInput } from '@yeral/ui/phone-input'
 import { Plus } from 'lucide-react'
@@ -138,11 +139,16 @@ export function ClientField({
             {t('change')}
           </Button>
         </div>
-        {alerts.map((alert) => (
-          <Callout key={alert} tone="warning" title={t('alert')}>
-            {alert}
-          </Callout>
-        ))}
+        {alerts.length > 0 && (
+          // their notes «shown when booking» as note rows (A10), not the caps box
+          <div className="flex flex-col">
+            {alerts.map((alert) => (
+              <NoteRow key={alert} alert>
+                {alert}
+              </NoteRow>
+            ))}
+          </div>
+        )}
       </section>
     )
   }

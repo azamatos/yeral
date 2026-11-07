@@ -45,7 +45,7 @@ export function LeaveConfirm({ workspace, onLeft, children }: { workspace: Works
                 // not on that team any more (removed meanwhile, or left on another device): done already (the sdk
                 // forgets it as for a leave)
                 if (isApiError(error, 'not_found')) left()
-                else toast(errorText(error))
+                else toast.error(errorText(error))
               })
             }
           >

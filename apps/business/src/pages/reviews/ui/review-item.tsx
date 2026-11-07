@@ -86,7 +86,7 @@ export function ReviewItem({
           setComposing(false)
           toast(editing ? t('toast.updated') : t('toast.posted'))
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
   }
@@ -99,11 +99,11 @@ export function ReviewItem({
         toast(t('toast.deleted'), {
           action: {
             label: t('toast.undo'),
-            onClick: () => reply.mutate({ id: r.id, text: old }, { onError: (error) => toast(errorText(error)) }),
+            onClick: () => reply.mutate({ id: r.id, text: old }, { onError: (error) => toast.error(errorText(error)) }),
           },
         })
       },
-      onError: (error) => toast(errorText(error)),
+      onError: (error) => toast.error(errorText(error)),
     })
   }
 

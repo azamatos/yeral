@@ -178,12 +178,12 @@ export function NewBookingDrawer({
               onClick: () =>
                 void undo.mutateAsync(code).then(
                   () => toast(t('undone')),
-                  (error: unknown) => toast(errorText(error)),
+                  (error: unknown) => toast.error(errorText(error)),
                 ),
             },
           })
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
   }

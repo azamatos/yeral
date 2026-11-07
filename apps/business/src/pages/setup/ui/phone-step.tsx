@@ -35,7 +35,7 @@ export function PhoneStep() {
   const [first, setFirst] = useState('')
   const [last, setLast] = useState('')
   const firstRef = useRef<HTMLInputElement>(null)
-  const failed = (error: unknown) => void toast(errorText(error))
+  const failed = (error: unknown) => void toast.error(errorText(error))
   const signIn = useSignIn({
     onVerified: (answer) => {
       if ('isThisYou' in answer) setIdentity(answer.isThisYou)

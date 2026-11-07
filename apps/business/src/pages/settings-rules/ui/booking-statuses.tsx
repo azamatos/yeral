@@ -185,7 +185,7 @@ function StatusRow({
                 toast(t('deleted', { name }))
                 onDeleted()
               },
-              (error: unknown) => toast(errorText(error)),
+              (error: unknown) => toast.error(errorText(error)),
             )
           }
         >

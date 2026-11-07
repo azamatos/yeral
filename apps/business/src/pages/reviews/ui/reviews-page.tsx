@@ -90,7 +90,7 @@ function Reviews({ workspace }: { workspace: Workspace }) {
 
   const more = () =>
     void list.fetchNextPage().then((r) => {
-      if (r.isError) toast(errorText(r.error))
+      if (r.isError) toast.error(errorText(r.error))
     })
 
   const chip = search.stars ? String(search.stars) : unanswered ? 'unanswered' : 'all'

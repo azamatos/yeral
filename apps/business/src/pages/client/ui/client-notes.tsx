@@ -7,9 +7,8 @@ import { Button } from '@yeral/ui/button'
 import { Checkbox } from '@yeral/ui/checkbox'
 import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
-import { Pill } from '@yeral/ui/pill'
+import { NoteRow } from '@yeral/ui/note-row'
 import { toast } from '@yeral/ui/toast'
-import { StickyNote, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
@@ -41,7 +40,7 @@ export function ClientNotes({ slug, card }: { slug: string; card: ClientCard }) 
           toast(t('added'))
           close()
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
 
@@ -106,29 +105,11 @@ function Note({ note }: { note: ClientNote }) {
   const t = useTranslations('clientCard.notes')
   const fmt = useFmt()
   const date = fmt.dayMonth(localOf(note.at).date)
-  const meta = <Caption>{note.by ? t('meta', { by: note.by, date }) : date}</Caption>
-  // an alert note is the same row (B-Client `.note`, COMPONENTS.md ClientNote): the warning icon and the pending-tone
-  // «Shown when booking» pill tell it apart; the amber box belongs to the booking drawer
+  const meta = note.by ? t('meta', { by: note.by, date }) : date
+  // an alert note is the same row with the warning icon (DS-Lists A10: a row, not a box); its meta says it's shown when booking
   return (
-    <div className="flex items-start gap-3 border-b border-n-200 py-3.5 text-small last:border-b-0">
-      {note.alert ? (
-        <TriangleAlert aria-hidden className="mt-px size-4.5 flex-none text-st-pending-dot" />
-      ) : (
-        <StickyNote aria-hidden className="mt-px size-4.5 flex-none text-n-500" />
-      )}
-      <span className="flex min-w-0 flex-col gap-1 [overflow-wrap:anywhere]">
-        <span>{note.text}</span>
-        {note.alert ? (
-          <span className="flex flex-wrap items-center gap-2">
-            {meta}
-            <Pill tone="warning" size="s">
-              {t('shown')}
-            </Pill>
-          </span>
-        ) : (
-          meta
-        )}
-      </span>
-    </div>
+    <NoteRow alert={note.alert} meta={note.alert ? t('metaShown', { meta }) : meta}>
+      {note.text}
+    </NoteRow>
   )
 }

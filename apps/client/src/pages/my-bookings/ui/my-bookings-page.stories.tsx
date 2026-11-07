@@ -185,7 +185,10 @@ export const UndoRefused: Story = {
   args: { path: '/en/account/bookings?tab=past', server: myBookingsApi({ refuse: 'slot_taken' }) },
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: /^Undo Glow Studio, / }))
-    await expect(await canvas.findByRole('alert')).toHaveTextContent("Couldn't undo — this time was already given to another client.")
+    // the row's line is the first alert; the error toast (A10: `role="alert"` too) comes after it in the page
+    await expect((await canvas.findAllByRole('alert'))[0]).toHaveTextContent(
+      "Couldn't undo — this time was already given to another client.",
+    )
     await expect(canvas.queryByRole('button', { name: /^Undo / })).toBeNull()
   },
 }

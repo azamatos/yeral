@@ -74,7 +74,7 @@ export function useHoursStep(slug: string, on: boolean, known: boolean): { body:
       await update.mutateAsync({ hours, specialDays: stored.specialDays })
       return true
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       return false
     }
   }

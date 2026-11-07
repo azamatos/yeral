@@ -77,7 +77,7 @@ export function HowWasItCard({
               aria-label={t('close')}
               disabled={close.isPending}
               className="-mt-1 -mr-2 flex-none rounded-ctl-m"
-              onClick={() => close.mutate(visit.code, { onError: (error) => toast(errorText(error)) })}
+              onClick={() => close.mutate(visit.code, { onError: (error) => toast.error(errorText(error)) })}
             >
               <X />
             </Button>

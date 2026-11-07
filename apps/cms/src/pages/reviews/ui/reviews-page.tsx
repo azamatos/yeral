@@ -92,7 +92,7 @@ function ReviewCard({ review }: { review: AdminReview }) {
         </div>
       )}
       {waiting && (
-        <Callout tone={report.counted ? 'warning' : 'neutral'} size="s">
+        <Callout tone={report.counted ? 'warning' : 'neutral'}>
           {report.counted ? t('countedAgain') : t('countsAgain', { when: format.dateTime(report.countsAgainAt, STAMP) })}
         </Callout>
       )}
@@ -114,7 +114,7 @@ function Decide({ id }: { id: string }) {
   const clear = useMutation(sdk.admin.clearReview())
   const remove = useMutation(sdk.admin.removeReview())
   const [removing, setRemoving] = useState(false)
-  const failed = (error: unknown) => void toast(errorText(error))
+  const failed = (error: unknown) => void toast.error(errorText(error))
   return (
     <div className="flex gap-2">
       <Button

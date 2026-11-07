@@ -71,7 +71,7 @@ function Switches({ slug, card }: { slug: string; card: ClientCard }) {
           done?.()
           toast(words)
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
   const flipPhone = (on: boolean) =>

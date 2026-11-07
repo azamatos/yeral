@@ -85,7 +85,7 @@ export function PhotosSection({ slug }: { slug: string }) {
         settle(id, null)
       } catch (error) {
         settle(id, null)
-        toast(errorText(error))
+        toast.error(errorText(error))
       }
     }
   }
@@ -110,9 +110,9 @@ export function PhotosSection({ slug }: { slug: string }) {
         busy={remove.isPending || order.isPending}
         locked={uploading > 0}
         onAdd={(files) => void addFiles(files)}
-        onRemove={(id) => remove.mutate(id, { onError: (error) => toast(errorText(error)) })}
+        onRemove={(id) => remove.mutate(id, { onError: (error) => toast.error(errorText(error)) })}
         // the gallery shows the new order (or one photo fewer) at once, and the old one again if the api refuses
-        onReorder={(ids) => order.mutate(ids, { onError: (error) => toast(errorText(error)) })}
+        onReorder={(ids) => order.mutate(ids, { onError: (error) => toast.error(errorText(error)) })}
         onDismiss={(id) => settle(id, null)}
         words={{
           cover: t('cover'),

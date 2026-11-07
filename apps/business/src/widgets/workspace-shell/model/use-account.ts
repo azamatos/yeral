@@ -34,7 +34,7 @@ export function useAccount() {
       !leaving &&
       logout.mutate(undefined, {
         onSuccess: () => void navigate({ to: '/login', replace: true }),
-        onError: (error) => void toast(errorText(error)),
+        onError: (error) => void toast.error(errorText(error)),
       }),
   }
 }

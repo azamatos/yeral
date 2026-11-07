@@ -291,7 +291,7 @@ function MemberEditor({
       onBusy(false)
       const issues = isApiError(error, 'validation_error') && Array.isArray(error.details.issues) ? error.details.issues : []
       if (issues.some((i: { path?: unknown[]; code?: string }) => i.path?.[0] === 'phone' && i.code === 'signs_in')) setPhoneLocked(true)
-      else toast(errorText(error))
+      else toast.error(errorText(error))
     } finally {
       setSaving(false)
     }
@@ -300,7 +300,7 @@ function MemberEditor({
     try {
       onLink(name, (await resend.mutateAsync(m.id)).link)
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
     }
   }
 

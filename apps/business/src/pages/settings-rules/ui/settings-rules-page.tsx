@@ -63,7 +63,7 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
   return (
     <SettingsPage section="rules" lead={lead} aside={<RulesPreview slug={slug} name={name} form={rules.form} paused={paused} />}>
       {paused && (
-        <Callout tone="neutral" size="s" icon={<Info aria-hidden />} live={false} className="mb-6">
+        <Callout tone="neutral" icon={<Info aria-hidden />} live={false} className="mb-6">
           {t.rich('rules.paused', {
             link: (words) => (
               <Link to="/w/$slug/settings/profile" params={{ slug }} className={textLink}>

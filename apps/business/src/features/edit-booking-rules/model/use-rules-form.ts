@@ -68,7 +68,7 @@ export function useRulesForm(slug: string, on: boolean): RulesFormState | null {
       setState((s) => s && { ...s, form: saved, stored: saved })
       return true
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       return false
     }
   }
