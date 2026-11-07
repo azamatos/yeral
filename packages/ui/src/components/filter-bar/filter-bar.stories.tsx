@@ -131,7 +131,7 @@ export const Rest: Story = {
   play: async ({ canvas }) => {
     const specialist = canvas.getByRole('combobox', { name: 'Specialist' })
     await expect(specialist.offsetHeight).toBe(40)
-    await expect(canvas.getByRole('searchbox', { name: 'Client, phone or booking code' }).offsetHeight).toBe(40)
+    await expect(canvas.getByRole('textbox', { name: 'Client, phone or booking code' }).offsetHeight).toBe(40)
     await expect(canvas.getByRole('button', { name: 'Sort: Time, soonest first' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Clear all' })).not.toBeInTheDocument()
     await expect(canvas.queryByText(/of 214 bookings/)).not.toBeInTheDocument()
@@ -141,7 +141,7 @@ export const Rest: Story = {
 /** Typing shows the second row with only the count; nothing to clear. */
 export const Searching: Story = {
   play: async ({ canvas }) => {
-    await userEvent.type(canvas.getByRole('searchbox'), 'jah')
+    await userEvent.type(canvas.getByRole('textbox'), 'jah')
     await expect(canvas.getByText('64 of 214 bookings')).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Clear all' })).not.toBeInTheDocument()
   },

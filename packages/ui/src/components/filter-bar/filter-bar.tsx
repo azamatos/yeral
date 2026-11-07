@@ -72,6 +72,8 @@ export type FilterBarProps = {
   /** «24 of 100 clients»: row 2 while something is filtered or searched, and beside Filters under 768. */
   count?: ReactNode
   labels: FilterBarLabels
+  /** Clear all in one go (one address change); without it each filter and the search clear one by one. */
+  onClearAll?: () => void
   className?: string
 }
 
@@ -252,15 +254,16 @@ function FiltersSheet({
   labels,
   open,
   onOpenChange,
+  clearAll,
 }: {
   filters: readonly FilterDef[]
   labels: FilterBarLabels
   open: boolean
   onOpenChange: (open: boolean) => void
+  clearAll: () => void
 }) {
   const [drill, setDrill] = useState<string | null>(null)
   const inner = filters.find((f) => f.id === drill)
-  const clearAll = () => filters.forEach((f) => (f.multiple ? f.onValueChange([]) : f.onValueChange(null)))
   const any = filters.some((f) => chosen(f) > 0)
   const summary = (f: FilterDef) => {
     const all = flatOptions(f.options)
@@ -370,21 +373,22 @@ function FiltersSheet({
  * count. Under 768: the search on its own row, then «Filters · N», the count and Sort as an icon button; the chips
  * under them; the Filters sheet holds the same menus. Fully controlled: the page keeps the values (its URL).
  */
-export function FilterBar({ search, filters, sort, action, count, labels, className }: FilterBarProps) {
+export function FilterBar({ search, filters, sort, action, count, labels, onClearAll, className }: FilterBarProps) {
   const phone = useSheet()
   const [sheetOpen, setSheetOpen] = useState(false)
   const chips = chipsOf(filters)
   const active = filters.reduce((n, f) => n + chosen(f), 0)
-  const clearAll = () => {
-    filters.forEach((f) => (f.multiple ? f.onValueChange([]) : f.onValueChange(null)))
-    search?.onChange('')
-  }
+  const clearAll =
+    onClearAll ??
+    (() => {
+      filters.forEach((f) => (f.multiple ? f.onValueChange([]) : f.onValueChange(null)))
+      search?.onChange('')
+    })
   const searched = !!search?.value.trim()
   const searchField = search && (
     <div className={cn('relative min-w-0', phone ? 'w-full' : 'w-72 flex-none')}>
       <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 text-n-500" strokeWidth={1.75} />
       <Input
-        type="search"
         size={phone ? 'l' : 'm'}
         aria-label={search.placeholder}
         placeholder={search.placeholder}
@@ -419,7 +423,7 @@ export function FilterBar({ search, filters, sort, action, count, labels, classN
           {action}
         </div>
         {chips.length > 0 && <div className="flex flex-wrap items-center gap-2">{chipRow}</div>}
-        <FiltersSheet filters={filters} labels={labels} open={sheetOpen} onOpenChange={setSheetOpen} />
+        <FiltersSheet filters={filters} labels={labels} open={sheetOpen} onOpenChange={setSheetOpen} clearAll={clearAll} />
       </div>
     )
 
