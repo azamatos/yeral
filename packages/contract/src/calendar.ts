@@ -16,6 +16,7 @@ import {
   bookingTypeSchema,
   epochSchema,
   idListQuery,
+  queryList,
   idSchema,
   langQuerySchema,
   listOf,
@@ -340,14 +341,27 @@ export const complaintInputSchema = z
  */
 export const BOOKING_TABS = ['today', 'upcoming', 'past', 'cancelled'] as const
 
-/** The filters: search (client, number or booking code), specialist, service, dates. */
+/**
+ * The list's orders (DS-Lists A5's SortMenu for B-Bookings): by time soonest or latest first, or the newest booked
+ * first. Without one, today's and those ahead run soonest first, the past and the cancelled latest first.
+ */
+export const BOOKING_SORTS = ['soonest', 'latest', 'booked'] as const
+export type BookingSort = (typeof BOOKING_SORTS)[number]
+
+/**
+ * The filters: search (client, number or booking code), specialists, services, statuses as people see them now,
+ * sources, dates, the order. A list matches any of its values (`staff=a,b`: with either); filters add up.
+ */
 export const bookingFiltersSchema = langQuerySchema.extend({
   tab: z.enum(BOOKING_TABS),
   q: z.string().trim().max(80).optional(),
-  staff: idSchema.optional(),
-  service: idSchema.optional(),
+  staff: queryList(idSchema).optional(),
+  service: queryList(idSchema, 200).optional(),
+  status: queryList(z.enum(BOOKING_STATUSES)).optional(),
+  source: queryList(z.enum(BOOKING_SOURCES)).optional(),
   from: ymdSchema.optional(),
   to: ymdSchema.optional(),
+  sort: z.enum(BOOKING_SORTS).optional(),
 })
 export const bookingListQuerySchema = bookingFiltersSchema.extend(cursorQuerySchema.shape)
 
@@ -391,5 +405,10 @@ export const bookingRowSchema = z
   .meta({ id: 'BookingRow' })
 export type BookingRow = z.infer<typeof bookingRowSchema>
 
-/** Today's and those ahead the soonest first; the past and the cancelled the newest first. */
-export const bookingListSchema = listOf(bookingRowSchema).meta({ id: 'BookingList' })
+/**
+ * In the asked order (by default today's and those ahead the soonest first, the past and the cancelled the newest
+ * first). `total` counts the rows the filters find, `tabTotal` the tab's rows the reader sees without them («24 of 214»).
+ */
+export const bookingListSchema = listOf(bookingRowSchema)
+  .extend({ total: z.number().int(), tabTotal: z.number().int() })
+  .meta({ id: 'BookingList' })

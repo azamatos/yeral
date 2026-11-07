@@ -92,8 +92,14 @@ import { audienceOf, inWorkspace, keys, type Audience, type BookingTab } from '.
  * pass numbers or flags as text cast with `as never` (the parameters themselves are typed from the contract).
  */
 type Query = Record<string, string | undefined>
-const clean = (q: Record<string, string | number | boolean | undefined | null>): Query =>
-  Object.fromEntries(Object.entries(q).flatMap(([k, v]) => (v === undefined || v === null || v === '' ? [] : [[k, String(v)]])))
+const clean = (q: Record<string, string | number | boolean | readonly string[] | undefined | null>): Query =>
+  Object.fromEntries(
+    Object.entries(q).flatMap(([k, v]) => {
+      // a list filter goes comma-separated (`staff=a,b`); an empty one is no filter
+      const value = Array.isArray(v) ? v.join(',') : v
+      return value === undefined || value === null || value === '' ? [] : [[k, String(value)]]
+    }),
+  )
 
 /** A query's parameters as its contract schema reads them: `K` must be given, the rest may be. */
 type Params<S extends z.ZodType, K extends keyof z.output<S>> = Pick<z.output<S>, K> & Partial<z.output<S>>

@@ -171,6 +171,14 @@ describe('the bookings list (book B-30, B-31)', () => {
       serviceId: manicure,
       start: 1450,
     })
+    // a confirmed visit that ended and nobody closed: completed, as people see it
+    codes.unclosed = await booking({
+      name: 'Zz List Unclosed',
+      date: addDays(TODAY, -1),
+      status: 'confirmed',
+      staffId: aynaId,
+      serviceId: haircut,
+    })
   })
   beforeEach(async () => {
     await db.delete(rateLimits)
@@ -182,14 +190,14 @@ describe('the bookings list (book B-30, B-31)', () => {
     return b
   }
   const list = async (b: ReturnType<typeof browser>, query: string) =>
-    (await b.req(`${W}/bookings?lang=en&${query}`)).json as { items: Row[]; total: number; cursor: string | null }
+    (await b.req(`${W}/bookings?lang=en&${query}`)).json as { items: Row[]; total: number; tabTotal: number; cursor: string | null }
 
   it('the tabs: today, ahead the soonest first, before the newest first, cancelled with who, a request run out', async () => {
     const maysa = await as(MAYSA)
     const codesOf = async (tab: string) => (await list(maysa, `tab=${tab}&q=Zz%20List`)).items.map((r) => r.code)
     expect(await codesOf('today')).toEqual([codes.today])
     expect(await codesOf('upcoming')).toEqual([codes.ahead2, codes.ahead1, codes.noHold, codes.late])
-    expect(await codesOf('past')).toEqual([codes.past, codes.firstVisit])
+    expect(await codesOf('past')).toEqual([codes.unclosed, codes.past, codes.firstVisit])
     const gone = (await list(maysa, 'tab=cancelled&q=Zz%20List')).items
     expect(gone.map((r) => [r.code, r.status, r.cancelledBy])).toEqual([
       [codes.ranOut, 'cancelled', 'system'],
@@ -217,10 +225,72 @@ describe('the bookings list (book B-30, B-31)', () => {
     expect((await list(maysa, `tab=upcoming&q=Zz%20List&limit=1&cursor=${first.cursor}`)).items.map((r) => r.code)).toEqual([codes.ahead1])
   })
 
+  it('several specialists and services, repeated or comma-separated; filters add up', async () => {
+    const maysa = await as(MAYSA)
+    const found = async (query: string) => (await list(maysa, `tab=upcoming&q=Zz%20List&${query}`)).items.map((r) => r.code)
+    const everyone = [codes.ahead2, codes.ahead1, codes.noHold, codes.late]
+    expect(await found(`staff=${aynaId},${maralId}`)).toEqual(everyone)
+    expect(await found(`staff=${aynaId}&staff=${maralId}`)).toEqual(everyone)
+    expect(await found(`staff=${aynaId},${aynaId}`)).toEqual([codes.ahead1, codes.noHold])
+    expect(await found(`service=${manicure}&service=${haircut}`)).toEqual(everyone)
+    expect(await found(`service=${haircut},${manicure}&staff=${maralId}`)).toEqual([codes.ahead2, codes.late])
+    // none of Aýna's is a manicure
+    expect(await found(`staff=${aynaId}&service=${manicure}`)).toEqual([])
+    expect(await found(`staff=${maralId}&status=pending&from=${addDays(TODAY, 1)}&to=${addDays(TODAY, 1)}`)).toEqual([codes.ahead2])
+  })
+
+  it('statuses as people see them now, sources, the order', async () => {
+    const maysa = await as(MAYSA)
+    const found = async (query: string) => (await list(maysa, `q=Zz%20List&${query}`)).items.map((r) => r.code)
+    expect(await found('tab=upcoming&status=pending')).toEqual([codes.ahead2, codes.noHold])
+    expect(await found('tab=upcoming&status=confirmed&status=pending')).toEqual([codes.ahead2, codes.ahead1, codes.noHold, codes.late])
+    // an ended confirmed visit reads as completed; a request run out as cancelled
+    expect(await found('tab=past&status=completed')).toEqual([codes.unclosed, codes.past, codes.firstVisit])
+    expect(await found('tab=past&status=confirmed')).toEqual([])
+    expect(await found('tab=cancelled&status=cancelled')).toEqual([codes.ranOut, codes.cancelled])
+    expect(await found('tab=cancelled&status=pending')).toEqual([])
+    expect(await found('tab=upcoming&source=phone,walkin&status=confirmed')).toEqual([codes.ahead1, codes.late])
+    expect(await found('tab=upcoming&source=web&source=app')).toEqual([])
+    expect(await found('tab=upcoming&sort=latest')).toEqual([codes.late, codes.noHold, codes.ahead1, codes.ahead2])
+    expect(await found('tab=upcoming&sort=booked')).toEqual([codes.late, codes.noHold, codes.ahead2, codes.ahead1])
+    expect(await found('tab=past&sort=soonest')).toEqual([codes.firstVisit, codes.past, codes.unclosed])
+  })
+
+  it('the total for the filters and the tab’s without them («24 of 214»)', async () => {
+    const maysa = await as(MAYSA)
+    const whole = await list(maysa, 'tab=upcoming')
+    expect(whole.tabTotal).toBe(whole.total)
+    const some = await list(maysa, `tab=upcoming&q=Zz%20List&status=pending&limit=1`)
+    expect([some.items.length, some.total, some.tabTotal]).toEqual([1, 2, whole.total])
+    expect(whole.total).toBeGreaterThan(2)
+    const none = await list(maysa, `tab=upcoming&staff=${aynaId}&service=${manicure}&q=Zz%20List`)
+    expect([none.items, none.total, none.tabTotal]).toEqual([[], 0, whole.total])
+  })
+
+  it('bad filters are refused', async () => {
+    const maysa = await as(MAYSA)
+    const status = async (query: string) => (await maysa.req(`${W}/bookings?lang=en&tab=upcoming&${query}`)).status
+    expect(await status('staff=nope')).toBe(400)
+    expect(await status(`staff=${aynaId},nope`)).toBe(400)
+    expect(await status('staff=')).toBe(400)
+    expect(await status('service=,')).toBe(400)
+    expect(await status('status=lost')).toBe(400)
+    expect(await status('status=pending,lost')).toBe(400)
+    expect(await status('source=fax')).toBe(400)
+    expect(await status('sort=random')).toBe(400)
+    expect(await status(`staff=${aynaId}&sort=booked&status=noshow`)).toBe(200)
+  })
+
   it('a specialist sees her own rows; another’s column is refused; no export for her', async () => {
     const maral = await as(MARAL)
     expect((await list(maral, 'tab=upcoming&q=Zz%20List')).items.map((r) => r.code)).toEqual([codes.ahead2, codes.late])
+    expect((await list(maral, `tab=upcoming&q=Zz%20List&staff=${maralId}`)).items.map((r) => r.code)).toEqual([codes.ahead2, codes.late])
+    // her tab's count is of her own rows too
+    const mine = await list(maral, 'tab=upcoming')
+    expect((await list(maral, `tab=upcoming&q=Zz%20List`)).tabTotal).toBe(mine.total)
     expect((await maral.req(`${W}/bookings?lang=en&tab=upcoming&staff=${aynaId}`)).status).toBe(403)
+    expect((await maral.req(`${W}/bookings?lang=en&tab=upcoming&staff=${maralId},${aynaId}`)).status).toBe(403)
+    expect((await maral.req(`${W}/bookings?lang=en&tab=upcoming&staff=${maralId}&staff=${aynaId}`)).status).toBe(403)
     expect((await maral.req(`${W}/bookings/export?lang=en&tab=upcoming`)).status).toBe(403)
   })
 
@@ -250,5 +320,10 @@ describe('the bookings list (book B-30, B-31)', () => {
     const rows = (await ticked.text()).trim().split('\r\n').slice(1)
     expect(rows.map((r) => r.split(',')[0])).toEqual([codes.ahead1, codes.late])
     expect(rows[1]).toContain(',00:10–00:25,')
+    // several specialists and a status, as the list filters them
+    const both = await t.app.request(`${W}/bookings/export?lang=en&tab=upcoming&q=Zz%20List&staff=${aynaId},${maralId}&status=pending`, {
+      headers: { cookie: selbi.cookie },
+    })
+    expect(both.headers.get('x-total-count')).toBe('2')
   })
 })
