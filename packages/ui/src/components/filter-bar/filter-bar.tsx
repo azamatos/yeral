@@ -47,6 +47,8 @@ type FilterCommon = {
   disabled?: boolean
   /** A chip's words for a chosen option; «Specialist: Jeren» without it. */
   chip?: (option: SelectOption) => string
+  /** A single filter's trigger words for the chosen option («Upcoming booking · Yes»); its label without it. */
+  short?: (option: SelectOption) => string
 }
 
 export type FilterDef = FilterCommon &
@@ -108,6 +110,7 @@ function SingleFilter({ filter, labels }: { filter: Extract<FilterDef, { multipl
   const [open, setOpen] = useState(false)
   const sheet = useSheet()
   const current = filter.value ? flatOptions(filter.options).find((o) => o.value === filter.value) : undefined
+  const currentLabel = current && (filter.short?.(current) ?? current.label)
   const options = optionsOf(filter)
   const trigger = (
     <button
@@ -115,7 +118,7 @@ function SingleFilter({ filter, labels }: { filter: Extract<FilterDef, { multipl
       role="combobox"
       aria-haspopup="listbox"
       aria-expanded={open}
-      aria-label={current ? `${filter.label} · ${current.label}` : filter.label}
+      aria-label={current ? `${filter.label} · ${currentLabel}` : filter.label}
       disabled={filter.disabled}
       data-state={open ? 'open' : 'closed'}
       className={cn(buttonClass, current && activeClass)}
@@ -125,7 +128,7 @@ function SingleFilter({ filter, labels }: { filter: Extract<FilterDef, { multipl
         {current && (
           <>
             {' · '}
-            <span className="font-semibold">{current.label}</span>
+            <span className="font-semibold">{currentLabel}</span>
           </>
         )}
       </span>

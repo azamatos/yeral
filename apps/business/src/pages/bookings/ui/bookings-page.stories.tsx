@@ -162,7 +162,8 @@ const answer = (request: Request, level: Workspace['level'], more: boolean, none
     const tab = url.searchParams.get('tab') as keyof typeof rows
     const q = url.searchParams.get('q')?.toLowerCase()
     // several specialists, services and statuses come comma-separated; a list matches any of its values
-    const listed = (key: string) => url.searchParams.get(key)?.split(',') ?? []
+    // as the api's `queryList` reads it: the key repeated (what the sdk sends) or comma-separated
+    const listed = (key: string) => url.searchParams.getAll(key).flatMap((v) => v.split(','))
     const [staff, service, status] = [listed('staff'), listed('service'), listed('status')]
     const found = rows[tab].filter(
       (r) =>
@@ -306,7 +307,8 @@ export const SeveralFilters: Story = {
     await expect(names.map((b) => b.textContent).filter(Boolean)).toEqual(['Leýli G.', 'Gözel A.'])
     await expect(canvas.getByRole('link', { name: 'Export CSV' })).toHaveAttribute(
       'href',
-      expect.stringMatching(/status=(pending|confirmed)(%2C|,)/),
+      // both statuses, the key repeated as the sdk sends a list
+      expect.stringMatching(/status=(pending|confirmed)&(.*&)?status=(pending|confirmed)/),
     )
   },
 }

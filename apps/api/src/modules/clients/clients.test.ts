@@ -151,6 +151,9 @@ describe('clients (book B-32, B-34)', () => {
       total: number
       cursor: string | null
       counts: Record<'all' | 'regular' | 'new' | 'lapsed' | 'flagged', number>
+      upcoming: { yes: number; no: number }
+      tags: { name: string; count: number }[]
+      everyone: number
     }
 
   it('the most recently seen first, by number or name, with the chips; the owner sees totals, an administrator doesn’t', async () => {
@@ -408,6 +411,95 @@ describe('clients (book B-32, B-34)', () => {
       // the direction goes with the sort: not the oldest first, which would be `recent` ascending
       expect(ids(await list(selbi, 'q=659100&sort=total&dir=asc'))).toEqual([e, a, d, b, c])
       expect(ids(await list(selbi, 'q=659100&sort=name&dir=desc'))).toEqual([a, ...byId(c, e), d, b])
+    })
+
+    describe('by tag and Upcoming booking (design v0.7 B5, the owner’s #31)', () => {
+      const VIP = encodeURIComponent('Fltr VIP')
+      const BRIDE = encodeURIComponent('Fltr Bride')
+      const KID = encodeURIComponent('Fltr Kid')
+      /** Only this block's tags, whatever the demo clients carry. */
+      const ours = (page: { tags: { name: string; count: number }[] }) => page.tags.filter((x) => x.name.toLowerCase().startsWith('fltr '))
+
+      beforeAll(async () => {
+        const tags: [string, string[]][] = [
+          [a, ['Fltr VIP', 'Fltr Bride']],
+          [b, ['fltr vip']],
+          [c, ['Fltr Bride']],
+          [d, ['Fltr VIP']],
+          [e, ['Fltr Kid']],
+        ]
+        for (const [id, list] of tags) await db.update(clients).set({ tags: list }).where(eq(clients.id, id))
+      })
+
+      it('a tag keeps the clients with it whatever its case, several any of them; each menu counts under the other filters', async () => {
+        const maysa = await as(MAYSA)
+        const vip = await list(maysa, `q=659100&tag=${VIP}`)
+        expect(ids(vip)).toEqual([a, d, b])
+        expect(vip.total).toBe(3)
+        expect(vip.counts).toEqual({ all: 3, regular: 1, new: 1, lapsed: 0, flagged: 0 })
+        expect(vip.upcoming).toEqual({ yes: 1, no: 2 })
+        // the Tag menu counts without the tags chosen: the most held first, under the most used spelling
+        expect(ours(vip)).toEqual([
+          { name: 'Fltr VIP', count: 3 },
+          { name: 'Fltr Bride', count: 2 },
+          { name: 'Fltr Kid', count: 1 },
+        ])
+        expect(ids(await list(maysa, `q=659100&tag=${VIP}&tag=${KID}`))).toEqual([e, a, d, b])
+        expect(ids(await list(maysa, `q=659100&tag=fltr%20kid`))).toEqual([e])
+        // «24 of 100 clients»: every client the reader sees, whatever the filters
+        expect(vip.everyone).toBe((await list(maysa, '')).total)
+      })
+
+      it('Upcoming booking: a visit or a request ahead, or none; with a chip, the tags, the search and a sort', async () => {
+        const maysa = await as(MAYSA)
+        const ahead = await list(maysa, 'q=659100&upcoming=yes')
+        expect(ids(ahead)).toEqual([e, a])
+        expect(ahead.counts).toEqual({ all: 2, regular: 1, new: 0, lapsed: 1, flagged: 0 })
+        expect(ahead.upcoming).toEqual({ yes: 2, no: 3 })
+        expect(ours(ahead)).toEqual([
+          { name: 'Fltr Bride', count: 1 },
+          { name: 'Fltr Kid', count: 1 },
+          { name: 'Fltr VIP', count: 1 },
+        ])
+        expect(ids(await list(maysa, 'q=659100&upcoming=no'))).toEqual([d, b, c])
+        const all = await list(maysa, `q=659100&tag=${BRIDE}&upcoming=no&segment=lapsed&sort=name`)
+        expect(ids(all)).toEqual([c])
+        expect(all.counts).toEqual({ all: 1, regular: 0, new: 0, lapsed: 1, flagged: 1 })
+        expect(all.upcoming).toEqual({ yes: 0, no: 1 })
+        // a tag nobody holds under the other filters stays in the menu with 0
+        expect(ours(all)).toEqual([
+          { name: 'Fltr Bride', count: 1 },
+          { name: 'Fltr Kid', count: 0 },
+          { name: 'Fltr VIP', count: 0 },
+        ])
+        expect(ids(await list(maysa, `q=659100&tag=${VIP}&upcoming=yes&sort=visits&dir=asc`))).toEqual([a])
+      })
+
+      it('a specialist filters and counts her own clients and their tags only', async () => {
+        const maral = await as(MARAL)
+        const mine = await list(maral, `q=659100&tag=${BRIDE}`)
+        expect(ids(mine)).toEqual([a])
+        expect(mine.counts).toMatchObject({ all: 1, regular: 1 })
+        expect(mine.upcoming).toEqual({ yes: 1, no: 0 })
+        expect(ours(mine)).toEqual([
+          { name: 'Fltr Bride', count: 1 },
+          { name: 'Fltr VIP', count: 1 },
+        ])
+        expect(ids(await list(maral, 'q=659100&upcoming=no'))).toEqual([])
+        expect(ids(await list(maral, `q=659100&tag=${KID}`))).toEqual([])
+      })
+
+      it('a bad tag or Upcoming booking is a 400', async () => {
+        const maysa = await as(MAYSA)
+        for (const query of [
+          'upcoming=maybe',
+          'upcoming=',
+          'tag=',
+          `tag=${'x'.repeat(21)}`,
+          Array.from({ length: 21 }, (_, i) => `tag=t${i}`).join('&'),
+        ])
+          expect((await maysa.req(`${W}/clients?${query}`)).status, query).toBe(400)
+      })
     })
 
     it('the card: what the completed visits cost, and how many bookings the history holds', async () => {

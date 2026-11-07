@@ -16,4 +16,13 @@ describe('the clients list’s address', () => {
     expect(clientsSearch({ q: '', segment: 'vip', sort: 'phone', dir: 'desc', modal: 'edit' })).toEqual({})
     expect(clientsSearch({ sort: 'name', dir: 'down' })).toEqual({ sort: 'name' })
   })
+
+  it('keeps the tags as a list, each once, and Upcoming booking yes or no', () => {
+    expect(clientsSearch({ tag: 'VIP', upcoming: 'yes' })).toEqual({ tag: ['VIP'], upcoming: 'yes' })
+    expect(clientsSearch({ tag: [' VIP ', 'Bride', 'VIP', '', 3, 'x'.repeat(21)], upcoming: 'no' })).toEqual({
+      tag: ['VIP', 'Bride'],
+      upcoming: 'no',
+    })
+    expect(clientsSearch({ tag: [], upcoming: 'maybe' })).toEqual({})
+  })
 })

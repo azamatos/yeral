@@ -1,7 +1,8 @@
 /**
  * Clients — B7-Clients B5 (design v0.7, DS-Lists A6), in the app's shell over a `fetch` that answers like the api: one
- * line per client with the tags and «+N», the chips with their counts, the sortable headers, the row as the link to the
- * card, the copy icon and the one «New booking» icon, the search, no results, no clients yet, adding a client (a number
+ * line per client with the tags and «+N», the segments with their counts, the FilterBar (Tag and Upcoming booking with
+ * counts, the active chips, Clear all, «N of M clients», the Sort menu, the 390 Filters sheet), the sortable headers,
+ * the row as the link to the card, the copy icon and the one «New booking» icon, the search, no results, no clients yet, adding a client (a number
  * already saved, Save and book), the phone's list items, a reader who doesn't see revenue.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
@@ -106,15 +107,21 @@ const answer = async (request: Request, level: Workspace['level'], none: boolean
     return json({ items: digits && rows[0]!.phone?.endsWith(digits) ? [{ ...rows[0], alerts: [], usualServices: [] }] : [] })
   }
   if (route === 'GET /w/glow-studio/clients') {
+    // the api's filters, each menu counted under the others
     const q = url.searchParams.get('q')?.toLowerCase()
     const segment = url.searchParams.get('segment')
-    const items = none
-      ? []
-      : sorted(rows, url)
-          .filter((r) => !q || r.name?.toLowerCase().includes(q))
-          .filter((r) => !segment || r.segments.includes(segment as never))
-          .map((r) => (level === 'specialist' ? { ...r, total: null, avgCheck: null } : r))
-    const shown = none ? [] : rows.filter((r) => !q || r.name?.toLowerCase().includes(q))
+    const tags = url.searchParams.getAll('tag').map((x) => x.toLowerCase())
+    const upcoming = url.searchParams.get('upcoming')
+    const byQ = (r: ClientRow) => !q || !!r.name?.toLowerCase().includes(q)
+    const bySegment = (r: ClientRow) => !segment || r.segments.includes(segment as never)
+    const byTag = (r: ClientRow) => !tags.length || r.tags.some((x) => tags.includes(x.toLowerCase()))
+    const byUpcoming = (r: ClientRow) => !upcoming || (upcoming === 'yes') === !!r.next
+    const all = none ? [] : rows
+    const under = (...keep: ((r: ClientRow) => boolean)[]) => all.filter((r) => keep.every((k) => k(r)))
+    const items = sorted(under(byQ, bySegment, byTag, byUpcoming), url).map((r) =>
+      level === 'specialist' ? { ...r, total: null, avgCheck: null } : r,
+    )
+    const shown = under(byQ, byTag, byUpcoming)
     const counts = {
       all: shown.length,
       regular: shown.filter((r) => r.segments.includes('regular')).length,
@@ -122,7 +129,20 @@ const answer = async (request: Request, level: Workspace['level'], none: boolean
       lapsed: shown.filter((r) => r.segments.includes('lapsed')).length,
       flagged: shown.filter((r) => r.segments.includes('flagged')).length,
     }
-    return json({ items, total: items.length, cursor: null, counts })
+    const ahead = under(byQ, bySegment, byTag)
+    const tagged = under(byQ, bySegment, byUpcoming)
+    const tagCounts = [...new Set(all.flatMap((r) => r.tags))]
+      .map((name) => ({ name, count: tagged.filter((r) => r.tags.includes(name)).length }))
+      .sort((x, y) => y.count - x.count || x.name.localeCompare(y.name))
+    return json({
+      items,
+      total: items.length,
+      cursor: null,
+      counts,
+      upcoming: { yes: ahead.filter((r) => r.next).length, no: ahead.filter((r) => !r.next).length },
+      tags: tagCounts,
+      everyone: all.length,
+    })
   }
   if (route === 'POST /w/glow-studio/clients') {
     await request.json()
@@ -211,7 +231,7 @@ export const RowActions: Story = {
   },
 }
 
-/** A chip, the search, no results and back. */
+/** A segment, the search, no results and back. */
 export const Filters: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('table', { name: 'Clients' })
@@ -221,6 +241,54 @@ export const Filters: Story = {
     await expect(await canvas.findByText('No clients match “zzz”')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }))
     await expect(await canvas.findByText('Gözel Annaýewa')).toBeVisible()
+  },
+}
+
+/** The Tag menu with each tag's count: a choice applies at once, as a chip with «N of M clients»; Clear all. */
+export const TagFilter: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('table', { name: 'Clients' })
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Tag' }))
+    const menu = within(await page.findByRole('listbox', { name: 'Tag' }))
+    await expect(menu.getByRole('option', { name: /VIP/ })).toHaveTextContent('2')
+    await userEvent.click(menu.getByRole('option', { name: /VIP/ }))
+    await userEvent.keyboard('{Escape}')
+    await expect(await canvas.findByText('Tag: VIP')).toBeVisible()
+    await expect(await canvas.findByText('2 of 4 clients')).toBeVisible()
+    await waitFor(() => expect(canvas.queryByText('Ogulnabat Ç.')).toBeNull())
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }))
+    await waitFor(() => expect(canvas.queryByText('Tag: VIP')).toBeNull())
+    await expect(await canvas.findByText('Ogulnabat Ç.')).toBeVisible()
+  },
+}
+
+/** Straight from the address (`?tag=VIP&upcoming=yes`): the chips, «Upcoming booking · Yes», the count; a chip's × removes it. */
+export const FiltersFromAddress: Story = {
+  args: { path: '/w/glow-studio/clients?tag=VIP&upcoming=yes' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('1 of 4 clients')).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Upcoming booking · Yes' })).toBeVisible()
+    await expect(canvas.getByText('Has an upcoming booking')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove Has an upcoming booking' }))
+    await expect(await canvas.findByText('2 of 4 clients')).toBeVisible()
+  },
+}
+
+/** The Upcoming booking menu counts the clients with and without one; the Sort menu holds the api's sorts. */
+export const UpcomingAndSort: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('table', { name: 'Clients' })
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Upcoming booking' }))
+    const menu = within(await page.findByRole('listbox', { name: 'Upcoming booking' }))
+    await expect(menu.getByRole('option', { name: /No upcoming booking/ })).toHaveTextContent('3')
+    await userEvent.click(menu.getByRole('option', { name: /No upcoming booking/ }))
+    await waitFor(() => expect(canvas.queryByText('Gözel Annaýewa')).toBeNull())
+    await userEvent.click(canvas.getByRole('button', { name: 'Sort: Recently seen' }))
+    const sorts = within(await page.findByRole('listbox', { name: 'Sort' }))
+    await expect(sorts.getByRole('option', { name: 'Total · highest first' })).toBeInTheDocument()
+    await userEvent.click(sorts.getByRole('option', { name: 'Visits · most first' }))
+    const table = within(canvas.getByRole('table', { name: 'Clients' }))
+    await waitFor(() => expect(table.getByRole('columnheader', { name: 'Visits' })).toHaveAttribute('aria-sort', 'descending'))
   },
 }
 
@@ -265,12 +333,15 @@ export const SaveAndBook: Story = {
   },
 }
 
-/** A reader who doesn't see revenue has no Total. */
+/** A reader who doesn't see revenue has no Total, nor sorts by it. */
 export const NoRevenue: Story = {
   args: { server: fakeApi('specialist') },
   play: async ({ canvas }) => {
     const table = within(await canvas.findByRole('table', { name: 'Clients' }))
     await expect(table.queryByRole('columnheader', { name: 'Total' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Sort: Recently seen' }))
+    const sorts = within(await page.findByRole('listbox', { name: 'Sort' }))
+    await expect(sorts.queryByRole('option', { name: /Total/ })).toBeNull()
   },
 }
 
@@ -282,6 +353,21 @@ export const Phone: Story = {
     await expect(list.getByRole('link', { name: /Gözel Annaýewa/ })).toHaveAttribute('href', `/w/glow-studio/clients/${id(1)}`)
     await expect(list.getAllByText(/11 visits/)[0]).toBeVisible()
     await expect(canvas.queryByRole('button', { name: /New booking for/ })).toBeNull()
+  },
+}
+
+/** 390: the Filters sheet holds Tag and Upcoming booking; «Show N results» closes it. */
+export const PhoneFilters: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('list', { name: 'Clients' })
+    await expect(canvas.getByText('4 clients')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Filters' }))
+    const sheet = within(await page.findByRole('dialog', { name: 'Filters' }))
+    await userEvent.click(sheet.getByRole('option', { name: /Has an upcoming booking/ }))
+    await userEvent.click(await sheet.findByRole('button', { name: 'Show 1 result' }))
+    await expect(await canvas.findByText('Has an upcoming booking')).toBeVisible()
+    await expect(canvas.getByText('1 of 4 clients')).toBeVisible()
   },
 }
 

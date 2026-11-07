@@ -83,19 +83,34 @@ export const CLIENT_SORT_DIR: Record<ClientSort, SortDir> = {
   nextBooking: 'asc',
 }
 
+/** The Tag filter takes up to this many of the team's tags at once. */
+export const CLIENT_TAG_FILTER_MAX = 20
+/** "Upcoming booking": `yes`, a waiting request or a visit ahead; `no`, neither. */
+export const CLIENT_UPCOMING = ['yes', 'no'] as const
+export type ClientUpcoming = (typeof CLIENT_UPCOMING)[number]
+
+const tagFilterSchema = z.string().trim().min(1).max(CLIENT_TAG_MAX)
+
 /**
  * "Müşderiler": the most recently seen first unless `sort` says otherwise. `q` finds a name, or digits anywhere in the
- * number. `total` sorts as `recent` for a reader without "See revenue" (they get no totals).
+ * number; `tag` (repeated for several) keeps the clients with any of these tags, whatever their case; `upcoming` those
+ * with or without a booking ahead. The filters combine. `total` sorts as `recent` for a reader without "See revenue"
+ * (they get no totals).
  */
 export const clientListQuerySchema = cursorQuerySchema.extend({
   q: z.string().trim().max(80).optional(),
   /** A chip; "Ählisi" (all) without one. */
   segment: z.enum(CLIENT_SEGMENTS).optional(),
+  tag: z
+    .union([tagFilterSchema, z.array(tagFilterSchema).max(CLIENT_TAG_FILTER_MAX)])
+    .transform((v) => (Array.isArray(v) ? v : [v]))
+    .optional(),
+  upcoming: z.enum(CLIENT_UPCOMING).optional(),
   sort: z.enum(CLIENT_SORTS).optional(),
   /** The sort's own direction without it (`CLIENT_SORT_DIR`). */
   dir: z.enum(SORT_DIRS).optional(),
 })
-/** How many clients each chip would show for the same `q`: "Ählisi" and the four segments. */
+/** How many clients each chip would show under the other filters (`q`, `tag`, `upcoming`): "Ählisi" and the four segments. */
 export const clientSegmentCountsSchema = z
   .object({
     all: z.number().int(),
@@ -106,7 +121,21 @@ export const clientSegmentCountsSchema = z
   })
   .meta({ id: 'ClientSegmentCounts' })
 export type ClientSegmentCounts = z.infer<typeof clientSegmentCountsSchema>
-export const clientListSchema = listOf(clientRowSchema).extend({ counts: clientSegmentCountsSchema }).meta({ id: 'ClientList' })
+/** The Upcoming booking menu: how many of the clients the other filters (`q`, `segment`, `tag`) leave have one, and don't. */
+export const clientUpcomingCountsSchema = z.object({ yes: z.number().int(), no: z.number().int() }).meta({ id: 'ClientUpcomingCounts' })
+/** One of the team's tags in the Tag menu: its most used spelling and how many clients hold it under the other filters. */
+export const clientTagCountSchema = z.object({ name: z.string(), count: z.number().int() }).meta({ id: 'ClientTagCount' })
+export type ClientTagCount = z.infer<typeof clientTagCountSchema>
+export const clientListSchema = listOf(clientRowSchema)
+  .extend({
+    counts: clientSegmentCountsSchema,
+    upcoming: clientUpcomingCountsSchema,
+    /** Every tag on the clients the reader sees, the most held first; a count can be 0 under the other filters. */
+    tags: z.array(clientTagCountSchema),
+    /** The clients the reader sees with no filter at all: "24 of 100 clients". */
+    everyone: z.number().int(),
+  })
+  .meta({ id: 'ClientList' })
 
 /** The new-booking drawer looks a number up from this many of its digits, a name from this many letters. */
 export const LOOKUP_MIN_DIGITS = 3
