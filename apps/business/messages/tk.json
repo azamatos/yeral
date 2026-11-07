@@ -57,6 +57,8 @@
       "triggerOf": "Hasap menýusy: {name}",
       "openAsClient": "Müşderi hökmünde aç",
       "logout": "Çykmak",
+      "logoutTitle": "Bu enjamda {brand} hasabyndan çykmalymy?",
+      "logoutCancel": "Ýatyr",
       "profile": "Profilim",
       "logIn": "Giriş"
     },

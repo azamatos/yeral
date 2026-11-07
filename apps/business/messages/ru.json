@@ -57,6 +57,8 @@
       "triggerOf": "Меню аккаунта: {name}",
       "openAsClient": "Открыть как клиент",
       "logout": "Выйти",
+      "logoutTitle": "Выйти из {brand} на этом устройстве?",
+      "logoutCancel": "Отмена",
       "profile": "Мой профиль",
       "logIn": "Войти"
     },
