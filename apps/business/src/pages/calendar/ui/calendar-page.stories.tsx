@@ -132,6 +132,18 @@ const busyDay = [
   booking(1, DAY, 960, 1020, 'confirmed', 'Aýlar Hommadowa', 'Peeling'),
   booking(1, DAY, 990, 1050, 'completed', 'Sona Pirmuhammedowa', 'Lash lift', { source: 'phone' }),
 ]
+/**
+ * Aýna's narrow day (B7-Calendar · B3, the lead's 1440 check): a two-hour request whose time left can't sit beside its
+ * range, three bookings at one time, a 15- and a 30-minute one side by side.
+ */
+const narrowDay = [
+  booking(1, DAY, 780, 900, 'pending', 'Arzygül Hojaýewa', 'Facial cleansing'),
+  booking(1, DAY, 960, 1020, 'confirmed', 'Aýjemal Gurbanowa', 'Lash lift'),
+  booking(1, DAY, 975, 1035, 'confirmed', 'Gyzlargül Saparowa', 'Hydrating facial', { source: 'phone' }),
+  booking(1, DAY, 990, 1050, 'completed', 'Merjen Gurbanowa', 'Lash extensions'),
+  booking(1, DAY, 1080, 1095, 'confirmed', 'Ogulbibi Ataýewa', 'Lash tint'),
+  booking(1, DAY, 1080, 1110, 'confirmed', 'Jahan Annaýewa', 'Brow tint'),
+]
 const moved = dayBookings[3]!
 const move: CalendarView['moves'][number] = {
   ...asked,
@@ -301,6 +313,7 @@ const fakeApi =
       moveFits = true,
       internal = false,
       busy = false,
+      narrow = false,
       refuseMove,
     }: {
       /** false: the business is closed every day (a late request). */
@@ -315,6 +328,8 @@ const fakeApi =
       refuseMove?: { problem: string; staffId: string; busy?: { start: number; end: number } }
       /** Aýna's busy day too (`busyDay`): the week's short and overlapping blocks. */
       busy?: boolean
+      /** Aýna's narrow day too (`narrowDay`): blocks too narrow for all their words. */
+      narrow?: boolean
     } = {},
   ): (() => typeof fetch) =>
   () => {
@@ -361,7 +376,12 @@ const fakeApi =
         )
         return json({
           ...view,
-          bookings: [...view.bookings.map(marked), ...(busy ? busyDay : []), ...saved.filter((b) => b.date === view.from)],
+          bookings: [
+            ...view.bookings.map(marked),
+            ...(busy ? busyDay : []),
+            ...(narrow ? narrowDay : []),
+            ...saved.filter((b) => b.date === view.from),
+          ],
           blocks: [...view.blocks, ...blocked.filter((k) => k.date === view.from)],
           internalStatuses: internal ? [arrived] : [],
         })
@@ -444,7 +464,7 @@ const fakeApi =
       // one booking on its own (the booking drawer), the team's note and marker on it
       const one = /^(GET|PUT) \/w\/glow-studio\/bookings\/([^/]+)(\/note|\/internal-status)?$/.exec(route)
       if (one) {
-        const found = [...dayBookings, ...tomorrowBookings, cancelledOne, ...busyDay].find((b) => b.code === one[2])
+        const found = [...dayBookings, ...tomorrowBookings, cancelledOne, ...busyDay, ...narrowDay].find((b) => b.code === one[2])
         if (!found) return json({ error: { code: 'not_found' } }, 404)
         return one[1] === 'GET' ? json(marked(found)) : new Response(null, { status: 204 })
       }
@@ -669,14 +689,15 @@ export const ClosedNow: Story = {
 /** A tablet: the columns scroll sideways under the names and beside the hours. */
 export const Tablet: Story = { globals: { viewport: { value: 'sm' } } }
 
-/** The phone: one person's day at a time, a chip each. */
+/** The phone: one person's day at a time, picked in the «Whose calendar» sheet from her avatar (B7-Calendar · B2, 390). */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
     await expect(grid.getByRole('group', { name: 'Aýna' })).toBeVisible()
     await expect(grid.queryByRole('group', { name: 'Maral' })).toBeNull()
-    await userEvent.click(within(canvas.getByRole('radiogroup', { name: 'Specialist' })).getByRole('radio', { name: 'Maral' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Whose calendar: Aýna' }))
+    await userEvent.click(await page.findByRole('option', { name: /^Maral/ }))
     await waitFor(() => expect(grid.getByRole('group', { name: 'Maral' })).toBeVisible())
     await expect(grid.queryByRole('group', { name: 'Aýna' })).toBeNull()
     // a request opened from her column keeps her day on screen
@@ -1124,13 +1145,14 @@ export const MoveLeftForABooking: Story = {
   },
 }
 
-/** On a phone the confirm is a sheet, and the chips change the person. */
+/** On a phone the confirm is a sheet, and the «Whose calendar» sheet changes the person. */
 export const MoveSheet: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(canvas.getByRole('button', { name: 'Next day' }))
-    await userEvent.click(within(canvas.getByRole('radiogroup', { name: 'Specialist' })).getByRole('radio', { name: 'Maral' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Whose calendar: Aýna' }))
+    await userEvent.click(await page.findByRole('option', { name: /^Maral/ }))
     await userEvent.click(await canvas.findByRole('button', { name: /^10:00 Jemal B\./ }))
     await userEvent.click(
       await within(await page.findByRole('dialog', { name: 'Booking' })).findByRole('button', { name: 'Move to another time' }),
@@ -1150,7 +1172,8 @@ export const MoveRussianLength: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(canvas.getByRole('button', { name: /^Next day/ }))
-    await userEvent.click(within(canvas.getByRole('radiogroup', { name: /^Specialist/ })).getByRole('radio', { name: /Maral/ }))
+    await userEvent.click(canvas.getByRole('button', { name: /Whose calendar/ }))
+    await userEvent.click(await page.findByRole('option', { name: /Maral/ }))
     await userEvent.click(await canvas.findByRole('button', { name: /Jemal B\./ }))
     await userEvent.click(await within(await page.findByRole('dialog')).findByRole('button', { name: /Move to another time/ }))
     const bar = await canvas.findByRole('status')
@@ -1411,7 +1434,8 @@ export const WeekOfOne: Story = {
 export const WeekBusy: Story = {
   args: { server: fakeApi('owner', { busy: true }), path: `/w/glow-studio/calendar?view=weekOne&staff=${id(1)}` },
   play: async ({ canvas }) => {
-    const short = await canvas.findByRole('button', { name: /^15:00 Jahan B\..*15:00–15:15, Brow shaping, Confirmed$/ })
+    const short = await canvas.findByRole('button', { name: /^15:00–15:15 Jahan Berdiýewa Brow shaping, Confirmed$/ })
+    await expect(within(short).getByText('Jahan B.')).toBeVisible()
     await expect(short).toBeVisible()
     const left = canvas.getByRole('button', { name: /^16:00–17:00 Aýlar Hommadowa Peeling/ })
     const right = canvas.getByRole('button', { name: /^16:30–17:30 Sona Pirmuhammedowa Lash lift.*Completed, by phone$/ })
@@ -1475,5 +1499,125 @@ export const LegendFromFilters: Story = {
     await expect(d.getByText('Phone — booked during a call')).toBeVisible()
     await userEvent.click(d.getByRole('button', { name: 'Got it' }))
     await waitFor(() => expect(page.queryByRole('dialog', { name: 'Colours and symbols' })).toBeNull())
+  },
+}
+
+/** Every week block's time is whole or not there: no «11:00–13:0», whatever width the block has. */
+const noTimeCut = async (blocks: HTMLElement[]) => {
+  for (const b of blocks) {
+    const box = b.getBoundingClientRect()
+    for (const time of b.querySelectorAll('.tabular-nums')) await expect(time.getBoundingClientRect().right).toBeLessThanOrEqual(box.right)
+  }
+}
+
+/**
+ * Narrow blocks (B7-Calendar · B3): the request's time left goes to its own line under the service, three bookings at
+ * one time show the start or the name only, 15 and 30 minutes side by side the start only; the card and the name keep
+ * everything.
+ */
+export const WeekNarrow: Story = {
+  args: { server: fakeApi('owner', { narrow: true }), path: `/w/glow-studio/calendar?view=weekOne&staff=${id(1)}` },
+  play: async ({ canvas }) => {
+    const request = await canvas.findByRole('button', {
+      name: /^13:00–15:00 Arzygül Hojaýewa Facial cleansing, Pending, .*left to answer$/,
+    })
+    await expect(within(request).getByText('13:00–15:00')).toBeVisible()
+    await expect(within(request).getByText(/^\d+ min$|^by /)).toBeVisible()
+    const middle = canvas.getByRole('button', { name: /^16:15–17:15 Gyzlargül Saparowa Hydrating facial, Confirmed, by phone$/ })
+    await expect(within(middle).queryByText('16:15–17:15')).toBeNull()
+    const short = canvas.getByRole('button', { name: /^18:00–18:15 Ogulbibi Ataýewa Lash tint, Confirmed$/ })
+    await expect(within(short).getByText('18:00')).toBeVisible()
+    await noTimeCut(canvas.getAllByTestId('week-block'))
+    await userEvent.hover(middle)
+    const card = within(await page.findByRole('dialog', { name: 'Gyzlargül Saparowa · 16:15–17:15' }))
+    await waitFor(() => expect(card.getByText('Hydrating facial')).toBeVisible())
+  },
+}
+
+/** The same at 1024: narrower columns, still no time cut. */
+export const WeekNarrowLaptop: Story = {
+  args: { server: fakeApi('owner', { narrow: true, busy: true }), path: `/w/glow-studio/calendar?view=weekOne&staff=${id(1)}` },
+  globals: { viewport: { value: 'md' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: /^13:00–15:00 Arzygül Hojaýewa/ })
+    await noTimeCut(canvas.getAllByTestId('week-block'))
+  },
+}
+
+/** Filters' statuses (B7-Calendar · B2): today's counts, Pending ticked shows only the requests, «1 on · Clear» brings all back. */
+export const FilterStatuses: Story = {
+  play: async ({ canvas }) => {
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Filters' }))
+    const menu = within(await page.findByRole('dialog', { name: 'Filters' }))
+    const status = within(menu.getByRole('group', { name: 'Status' }))
+    await expect(status.getByRole('checkbox', { name: /^Pending/ })).not.toBeChecked()
+    await expect(status.getByText('Confirmed').closest('label')).toHaveTextContent(/Confirmed\d+$/)
+    await userEvent.click(status.getByRole('checkbox', { name: /^Pending/ }))
+    await waitFor(() => expect(grid.queryByRole('button', { name: /Gözel A\./ })).toBeNull())
+    await expect(grid.getByRole('button', { name: /Mähri G\. Hair colouring/ })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Filters · 1' })).toBeVisible()
+    await expect(menu.getByText('1 on')).toBeVisible()
+    await userEvent.click(menu.getByRole('button', { name: 'Clear' }))
+    await waitFor(() => expect(grid.getByRole('button', { name: /Gözel A\./ })).toBeVisible())
+    await expect(menu.queryByText('1 on')).toBeNull()
+  },
+}
+
+/** The statuses from the address: `?status=confirmed` shows the confirmed only, Filters reads «Filters · 1». */
+export const FilterStatusesAddress: Story = {
+  args: { path: '/w/glow-studio/calendar?status=confirmed' },
+  play: async ({ canvas }) => {
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    await expect(await grid.findByRole('button', { name: /Gözel A\./ })).toBeVisible()
+    await expect(grid.queryByRole('button', { name: /Mähri G\. Hair colouring/ })).toBeNull()
+    await expect(canvas.getByRole('button', { name: 'Filters · 1' })).toBeVisible()
+  },
+}
+
+/** The phone's «Whose calendar» sheet (B7-Calendar · B2, 390): her avatar opens it; search, a row each with today's count, one pick. */
+export const PhoneSheet: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Whose calendar: Aýna' }))
+    const sheet = within(await page.findByRole('dialog', { name: 'Whose calendar' }))
+    await expect(sheet.getByRole('option', { name: /^Aýna/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(sheet.queryByRole('option', { name: /^Everyone/ })).toBeNull()
+    await userEvent.type(sheet.getByPlaceholderText('Search people'), 'jer')
+    await waitFor(() => expect(sheet.queryByRole('option', { name: /^Maral/ })).toBeNull())
+    await expect(sheet.getByRole('option', { name: /^Jeren/ })).toBeVisible()
+  },
+}
+
+/** The phone's week (B7-Calendar · B3, 390): a list of days, each head sticky with its count, the bookings in time order; a card opens the booking. */
+export const PhoneWeek: Story = {
+  args: { server: fakeApi('owner', { busy: true }), path: `/w/glow-studio/calendar?view=weekOne&staff=${id(1)}` },
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const head = await canvas.findByRole('heading', { name: /Today/ })
+    await expect(head).toHaveTextContent(/bookings?/)
+    await expect(canvas.queryAllByTestId('week-block')).toHaveLength(0)
+    const card = canvas.getByRole('button', { name: /^15:00–15:15 Jahan Berdiýewa Brow shaping · 15 min, Confirmed$/ })
+    await expect(card).toBeVisible()
+    await expect(canvas.getAllByText(/^Busy elsewhere/)[0]).toBeVisible()
+    await userEvent.click(card)
+    await expect(await page.findByRole('dialog', { name: 'Booking' })).toBeVisible()
+  },
+}
+
+/** DateNav's keys (B7-Calendar · B2): → the next day, ← back, T today, told in the arrows' and Today's tooltips. */
+export const DateKeys: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.hover(canvas.getByRole('button', { name: 'Next day' }))
+    await waitFor(() => expect(page.getByRole('tooltip')).toHaveTextContent('Next day · →'))
+    await userEvent.unhover(canvas.getByRole('button', { name: 'Next day' }))
+    await userEvent.keyboard('{ArrowRight}')
+    await expect(await canvas.findByRole('button', { name: /Jemal B\..*Confirmed$/ })).toBeVisible()
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Today' })).not.toHaveAttribute('aria-disabled'))
+    await userEvent.keyboard('t')
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Today' })).toHaveAttribute('aria-disabled', 'true'))
+    await expect(await canvas.findByRole('button', { name: /Gözel A\./ })).toBeVisible()
   },
 }

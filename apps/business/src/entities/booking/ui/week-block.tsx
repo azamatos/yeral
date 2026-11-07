@@ -6,8 +6,9 @@ import { Pill } from '@yeral/ui/pill'
 import { Popover, PopoverAnchor, PopoverContent } from '@yeral/ui/popover'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { Phone, TriangleAlert, User } from 'lucide-react'
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
+import { blockFit, TIMER_ROOM } from '../model/block-fit'
 import { useJoin } from './affected-bookings-list'
 import { BLOCK_LOOK, type CalendarBooking } from './booking-block'
 import { BOOKING_STATUS_ICON } from './status-icons'
@@ -156,10 +157,12 @@ export function BookingHoverCard({
 }
 
 /**
- * WeekBlock (B7-Calendar `.bk.w`): a booking in one person's week, three sizes by its length, not its pixels — 45 min
- * and longer: the time range, the client, the service; 30 min: the start and the client on one line; 15 min: a status
- * dot, the start and «Jahan B.». Every line truncates, the time never shrinks. Hover or focus opens `card`; click opens
- * the booking (`onOpen`) and rings it (`selected`). Its name is what it shows, then the status and the markers.
+ * WeekBlock (B7-Calendar `.bk.w`): a booking in one person's week, three sizes by its length — 45 min and longer: the
+ * time range, the client, the service; 30 min: the start and the client on one line; 15 min: a status dot, the start
+ * and «Jahan B.». Then its width and height trim it (`blockFit`): the time left moves to its own line or drops, the
+ * markers drop, the range becomes the start, and the narrowest show the name only, so no time is cut mid-way. Hover or
+ * focus opens `card`; click opens the booking (`onOpen`) and rings it (`selected`). Its name is always the whole
+ * booking: the time range, client, service, status and markers.
  */
 export function WeekBlock({
   status,
@@ -200,21 +203,50 @@ export function WeekBlock({
   const minutes = end - start
   const size = minutes >= 45 ? 'long' : minutes >= 30 ? 'medium' : 'short'
   const Icon = BOOKING_STATUS_ICON[status]
-  const more = join(
-    [
-      size === 'long' ? '' : fmt.timeRange(start, end),
-      size === 'long' ? '' : service,
-      s(status),
-      phone ? t('byPhone') : '',
-      walkIn ? t('walkIn') : '',
-      alert ? t('alert') : '',
-      timerText ?? '',
-    ],
-    'list',
+  const box = useRef<HTMLButtonElement>(null)
+  const [room, setRoom] = useState<{ width: number; height: number } | null>(null)
+  // what fits is read from the block's own box, before it paints and again whenever it resizes
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el) return
+    const read = () =>
+      setRoom((was) =>
+        was?.width === el.offsetWidth && was.height === el.offsetHeight ? was : { width: el.offsetWidth, height: el.offsetHeight },
+      )
+    read()
+    const watch = new ResizeObserver(read)
+    watch.observe(el)
+    return () => watch.disconnect()
+  }, [])
+  const count = (phone || walkIn ? 1 : 0) + (alert ? 1 : 0)
+  const fit = blockFit({ width: room?.width ?? 999, height: room?.height ?? 999, size, markers: count, timer: !!timer })
+  // its name is always the whole booking, whatever the block has room to show
+  const label = t('label', {
+    time: fmt.timeRange(start, end),
+    name,
+    service,
+    more: t('more', {
+      more: join([s(status), phone ? t('byPhone') : '', walkIn ? t('walkIn') : '', alert ? t('alert') : '', timerText ?? ''], 'list'),
+    }),
+  })
+  const struck = status === 'cancelled' && 'line-through'
+  const markers = fit.markers && count > 0 && (
+    <>
+      {phone && <Phone strokeWidth={1.75} />}
+      {walkIn && <User strokeWidth={1.75} />}
+      {alert && <TriangleAlert strokeWidth={1.75} className="text-danger-ink" />}
+    </>
   )
-  const markers = (phone || walkIn ? 1 : 0) + (alert ? 1 : 0)
+  const top = (markers || fit.timer === 'top') && (
+    <span aria-hidden className="absolute top-0.5 right-1 flex items-center gap-1 text-n-900 [&_svg]:size-3">
+      {markers}
+      {fit.timer === 'top' && timer}
+    </span>
+  )
+  const reserve = (fit.markers ? count * 16 : 0) + (fit.timer === 'top' ? TIMER_ROOM : 0)
   const button = (
     <button
+      ref={box}
       type="button"
       data-testid="week-block"
       aria-pressed={selected || undefined}
@@ -229,46 +261,49 @@ export function WeekBlock({
         selected && 'z-5 shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-n-900)]',
       )}
     >
+      <span className="sr-only">{label}</span>
       {size === 'short' ? (
-        <>
-          <span aria-hidden className={cn('size-1.5 flex-none rounded-pill', DOT[status])} />
-          <span className="flex-none text-[12px] leading-[13px] font-semibold tabular-nums">{fmt.time(start)}</span>
-          <span className={cn('min-w-0 truncate text-[12px] leading-[13px] font-semibold', status === 'cancelled' && 'line-through')}>
-            {shortName(name)}
-          </span>
-        </>
+        <span aria-hidden className="flex min-w-0 items-center gap-1" style={{ paddingRight: reserve }}>
+          {fit.time !== 'none' && (
+            <>
+              <span className={cn('size-1.5 flex-none rounded-pill', DOT[status])} />
+              <span className="flex-none text-[12px] leading-[13px] font-semibold tabular-nums">{fmt.time(start)}</span>
+            </>
+          )}
+          {fit.name && <span className={cn('min-w-0 truncate text-[12px] leading-[13px] font-semibold', struck)}>{shortName(name)}</span>}
+        </span>
       ) : (
-        <>
-          <span className="flex min-w-0 items-center gap-1 whitespace-nowrap" style={{ paddingRight: markers * 16 + (timer ? 56 : 0) }}>
-            <Icon aria-hidden strokeWidth={2} className={cn('size-3 flex-none', ICON_INK[status])} />
-            <span className="flex-none text-[12px] leading-[14px] font-semibold tabular-nums">
-              {size === 'long' ? fmt.timeRange(start, end) : fmt.time(start)}
+        <span aria-hidden className="contents">
+          {(fit.time !== 'none' || size === 'medium') && (
+            <span className="flex min-w-0 items-center gap-1 whitespace-nowrap" style={{ paddingRight: reserve }}>
+              {fit.time !== 'none' && (
+                <>
+                  <Icon strokeWidth={2} className={cn('size-3 flex-none', ICON_INK[status])} />
+                  <span className="flex-none text-[12px] leading-[14px] font-semibold tabular-nums">
+                    {fit.time === 'range' ? fmt.timeRange(start, end) : fmt.time(start)}
+                  </span>
+                </>
+              )}
+              {size === 'medium' && fit.name && (
+                <span className={cn('min-w-0 truncate text-[13px] leading-[14px] font-semibold', struck)}>{name}</span>
+              )}
             </span>
-            {size === 'medium' && (
-              <span className={cn('min-w-0 truncate text-[13px] leading-[14px] font-semibold', status === 'cancelled' && 'line-through')}>
-                {name}
-              </span>
-            )}
-          </span>
+          )}
           {size === 'long' && (
             <>
-              <span className={cn('truncate text-[13px] leading-[15px] font-semibold', status === 'cancelled' && 'line-through')}>
+              <span
+                className={cn('truncate text-[13px] leading-[15px] font-semibold', struck)}
+                style={fit.time === 'none' ? { paddingRight: reserve } : undefined}
+              >
                 {name}
               </span>
               <span className="truncate text-[12px] leading-[14px] text-n-600">{service}</span>
             </>
           )}
-        </>
-      )}
-      {(markers > 0 || timer) && (
-        <span aria-hidden className="absolute top-0.5 right-1 flex items-center gap-1 text-n-900 [&_svg]:size-3">
-          {phone && <Phone strokeWidth={1.75} />}
-          {walkIn && <User strokeWidth={1.75} />}
-          {alert && <TriangleAlert strokeWidth={1.75} className="text-danger-ink" />}
-          {timer}
+          {fit.timer === 'line' && <span className="flex">{timer}</span>}
         </span>
       )}
-      <span className="sr-only">{t('more', { more })}</span>
+      {top}
     </button>
   )
   return card ? (

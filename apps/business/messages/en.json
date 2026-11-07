@@ -1465,6 +1465,7 @@
       "alert": "alert note about the client",
       "timeLength": "{time} · {length}",
       "more": ", {more}",
+      "label": "{time} {name} {service}{more}",
       "when": "{date} · {time}",
       "moveTo": "→ {when}?",
       "moveAsked": "time change request: {when}",
@@ -1513,7 +1514,8 @@
       "dayCard": "{name} · {date}",
       "count": "{bookings}{requests, plural, =0 {} other { · {requests, plural, one {# request} other {# requests}}}}",
       "timeOff": "{from} – {to}",
-      "bar": "{bookings}, {time}"
+      "bar": "{bookings}, {time}",
+      "serviceLength": "{service} · {length}"
     },
     "legend": {
       "title": "Colours and symbols",
@@ -1569,12 +1571,22 @@
       "title": "Whose calendar",
       "clear": "Clear",
       "done": "Done",
-      "close": "Close"
+      "close": "Close",
+      "whose": "Whose calendar: {name}",
+      "takesBookings": "Takes bookings"
+    },
+    "keys": {
+      "prev": "{what} · ←",
+      "next": "{what} · →",
+      "today": "Today · T"
     },
     "filters": {
       "label": "Filters",
       "active": "Filters · {n}",
-      "colours": "What the colours mean"
+      "colours": "What the colours mean",
+      "status": "Status",
+      "on": "{n} on",
+      "clear": "Clear"
     },
     "summary": "{bookings}{revenue, select, none {} other { · {revenue}}}",
     "hoverCard": {
