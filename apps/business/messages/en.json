@@ -1786,7 +1786,42 @@
     "bookFor": "New booking for {name}",
     "moreTags": "{count, plural, one {# more tag} other {# more tags}}",
     "visitsCount": "{count, plural, one {# visit} other {# visits}}",
-    "autoTag": "Set automatically from visits"
+    "autoTag": "Set automatically from visits",
+    "filters": {
+      "filters": "Filters",
+      "clearAll": "Clear all",
+      "clear": "Clear",
+      "close": "Close",
+      "back": "Back",
+      "showResults": "{n, plural, one {Show # result} other {Show # results}}",
+      "searchIn": "Search",
+      "remove": "Remove {chip}",
+      "nothingMatches": "Nothing matches “{q}”",
+      "tag": "Tag",
+      "upcoming": "Upcoming booking",
+      "any": "Any",
+      "upcomingYes": "Has an upcoming booking",
+      "upcomingNo": "No upcoming booking",
+      "yes": "Yes",
+      "no": "No",
+      "count": "{n, plural, one {# client} other {# clients}}",
+      "of": "{n} of {m, plural, one {# client} other {# clients}}",
+      "sort": "Sort",
+      "sorts": {
+        "recent": "Recently seen",
+        "recentAsc": "Seen longest ago",
+        "lastVisit": "Last visit · newest first",
+        "lastVisitAsc": "Last visit · oldest first",
+        "visits": "Visits · most first",
+        "visitsAsc": "Visits · fewest first",
+        "total": "Total · highest first",
+        "totalAsc": "Total · lowest first",
+        "name": "Name · A–Z",
+        "nameDesc": "Name · Z–A",
+        "nextBooking": "Next booking · soonest first",
+        "nextBookingDesc": "Next booking · latest first"
+      }
+    }
   },
   "reviews": {
     "summary": {
