@@ -6,11 +6,13 @@
  */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { adminInviteSchema, adminSetupLinkSchema } from '@yeral/contract/admin'
+import { DAY_MINUTES, withinHours, type BusinessHours } from '@yeral/domain/hours'
+import { NOSHOW_MARK_HOURS } from '@yeral/domain/lifecycle'
 import { BOOKING_STATUSES } from '@yeral/domain/model'
-import { addDays, today } from '@yeral/domain/time'
-import { eq } from 'drizzle-orm'
+import { addDays, epochOf, localOf, QUARTER_HOUR } from '@yeral/domain/time'
+import { eq, sql } from 'drizzle-orm'
 import type { Db } from '../../db/client'
-import { bookingItems, bookings } from '../../db/schema'
+import { bookingItems, bookings, businesses } from '../../db/schema'
 import type { Deps } from '../../deps'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
@@ -26,20 +28,39 @@ const elapseRoute = createRoute({
   hide: true,
   tags: ['e2e'],
   summary:
-    'Test hook (`E2E_HOOKS`): time passes for one booking — a waiting request’s hold ends now and the expiry job runs; a confirmed visit moves to the latest day it has ended by now and the completion job runs',
+    'Test hook (`E2E_HOOKS`): time passes for one booking — a waiting request’s hold ends now and the expiry job runs; a confirmed visit moves to a time that has just ended (inside the no-show window) and the completion job runs',
   request: { params: z.object({ code: z.string() }) },
   responses: { 200: json(z.object({ status: z.enum(BOOKING_STATUSES) })), 404: errors[404], 409: errors[409] },
 })
 
-/** How many days back a visit may go to find its specialist free: the seed's days are never full that long. */
-const DAYS_BACK = 7
+/**
+ * How long before now the hook's visit may have ended: a no-show is taken until 24 hours after the end (book B-28), and
+ * the flow keeps an hour of it to open the drawer and report.
+ */
+const ENDED_WITHIN_MIN = NOSHOW_MARK_HOURS * 60 - 60
 
-/** The visit on another day, the same time (the items' `span` follows `date`); false when its specialist is busy then. */
-async function moveTo(db: Db, id: string, date: string): Promise<boolean> {
+/** A visit's place in time: its business day and the minute it starts at. */
+interface Slot {
+  date: string
+  start: number
+}
+
+/**
+ * The visit moved to another day and start, its length kept: its items move by as much (their `span` follows), so
+ * every specialist on it stays where the visit is; false when one of them is busy then.
+ */
+async function moveTo(db: Db, id: string, from: Slot, to: Slot): Promise<boolean> {
+  const shift = to.start - from.start
   try {
     await db.transaction(async (tx) => {
-      await tx.update(bookings).set({ date }).where(eq(bookings.id, id))
-      await tx.update(bookingItems).set({ date }).where(eq(bookingItems.bookingId, id))
+      await tx
+        .update(bookings)
+        .set({ date: to.date, start: sql`${bookings.start} + ${shift}`, end: sql`${bookings.end} + ${shift}` })
+        .where(eq(bookings.id, id))
+      await tx
+        .update(bookingItems)
+        .set({ date: to.date, start: sql`${bookingItems.start} + ${shift}`, end: sql`${bookingItems.end} + ${shift}` })
+        .where(eq(bookingItems.bookingId, id))
     })
     return true
   } catch (e) {
@@ -52,26 +73,48 @@ const statusOf = async (db: Db, id: string) =>
   (await db.select({ status: bookings.status }).from(bookings).where(eq(bookings.id, id)))[0]!.status
 
 /**
- * A visit that has ended: the same time on the latest day that makes it so, where its specialist's day has room and
- * the completion job then takes it. Counted back from today or the visit's own day, whichever is earlier: a visit
- * booked days ahead stepped back from its own day would still be ahead. Today comes first: a visit whose time of day
- * has passed ended just now, and one a day back could be past the 24 hours a no-show may be reported in (book B-28).
- * One day back isn't always enough (a visit past midnight, book Q-105, ends into the next day), so the job runs after
- * each step until it did.
+ * Where a visit can have just ended: by now, and no earlier than `ENDED_WITHIN_MIN` ago, so a no-show can still be
+ * reported, whatever the hour and whatever else its specialist has. Its own time of day first, today or a day or two
+ * back (a visit past midnight, book Q-105, ends into the next day); then, should those be busy or too long ago (once
+ * the end's time of day has passed, yesterday's is more than a day back), every quarter hour back from now. Inside the
+ * business's hours before outside them: the hook mustn't fail on a closed day, but a visit at night reads oddly.
  */
-async function endVisit(deps: Deps, b: { id: string; date: string }): Promise<void> {
-  const todayDate = today(deps.now())
-  const from = b.date < todayDate ? b.date : todayDate
-  for (let back = 0; back <= DAYS_BACK; back++) {
-    if (!(await moveTo(deps.db, b.id, addDays(from, -back)))) continue
+function endedSlots(visit: { start: number; end: number }, hours: BusinessHours, now: number): Slot[] {
+  const { date: todayDate, min } = localOf(now)
+  const length = visit.end - visit.start
+  const endsJustNow = (s: Slot) => {
+    const end = epochOf(s.date, s.start + length)
+    return end <= now && end >= now - ENDED_WITHIN_MIN * 60_000
+  }
+  const sameTime = [0, 1, 2].map((back) => ({ date: addDays(todayDate, -back), start: visit.start }))
+  const quarters: Slot[] = []
+  for (let end = min - (min % QUARTER_HOUR); end >= min - ENDED_WITHIN_MIN; end -= QUARTER_HOUR) {
+    // minutes counted from today's start: a negative start is the day before
+    const back = Math.ceil(Math.max(0, -(end - length)) / DAY_MINUTES)
+    quarters.push({ date: addDays(todayDate, -back), start: end - length + back * DAY_MINUTES })
+  }
+  const slots = [...sameTime, ...quarters].filter(endsJustNow)
+  const inHours = (s: Slot) => withinHours(hours, s.date, { start: s.start, end: s.start + length })
+  return [...slots.filter(inHours), ...slots.filter((s) => !inHours(s))]
+}
+
+/**
+ * A visit that has just ended (`endedSlots`): moved to the first such time its specialists have free, then the
+ * completion job takes it.
+ */
+async function endVisit(deps: Deps, b: { id: string; businessId: string; date: string; start: number; end: number }): Promise<void> {
+  const [hours] = await deps.db
+    .select({ hours: businesses.hours, exceptions: businesses.exceptions })
+    .from(businesses)
+    .where(eq(businesses.id, b.businessId))
+  let at: Slot = { date: b.date, start: b.start }
+  for (const slot of endedSlots(b, hours!, deps.now())) {
+    if (!(await moveTo(deps.db, b.id, at, slot))) continue
+    at = slot
     await completeVisits(deps)
     if ((await statusOf(deps.db, b.id)) !== 'confirmed') return
   }
-  throw new ApiError(
-    'invalid_status',
-    { daysTried: DAYS_BACK },
-    'no earlier day ended the visit: its specialist is busy at that time, or its end is still ahead',
-  )
+  throw new ApiError('invalid_status', { hoursTried: ENDED_WITHIN_MIN / 60 }, 'no time that has just ended had the visit’s specialist free')
 }
 
 const adminInviteRoute = createRoute({
