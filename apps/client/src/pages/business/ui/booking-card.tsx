@@ -4,27 +4,18 @@ import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
+import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
-import { CalendarX2, CircleCheck, Phone, Wallet, X } from 'lucide-react'
+import { CalendarX2, Clock, Phone, Wallet, X, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { selectionTotal } from '@/features/pick-services'
-import { confirmLine, nextFreeText } from '../model/when'
+import { nextFreeText } from '../model/when'
 import type { BookingState } from './business-page'
 import { FavouriteButton } from './favourite'
 
 type Detail = BusinessDetail
 type Service = Detail['serviceGroups'][number]['services'][number]
-
-/** An icon row of the card and the About part (`.ir`): 20 icon, 15/22 text, 12 apart. */
-function InfoRow({ icon, children, className }: { icon: ReactNode; children: ReactNode; className?: string }) {
-  return (
-    <div className={cn('flex items-start gap-3 text-body [&>svg]:mt-px [&>svg]:size-5 [&>svg]:flex-none', className)}>
-      {icon}
-      {children}
-    </div>
-  )
-}
 
 function CallLink({
   phone,
@@ -57,11 +48,31 @@ function useNextFree(next: Detail['nextFree']): string | null {
   return next && nextFreeText(next, today(now), fmt, (values) => t('at', values))
 }
 
-/** How the business answers (`confirmLine`). */
-function ConfirmLine({ detail }: { detail: Detail }) {
-  const t = useTranslations('business.card')
+/**
+ * How this business confirms (Venue v0.7 · C2 BookingCard): one Info callout, a clock for by hand (with the usual wait
+ * when the business has one), a zap for at once. `compact` is the phone's one line at the top of the Services panel.
+ */
+export function ConfirmCallout({ detail, compact = false, className }: { detail: Detail; compact?: boolean; className?: string }) {
+  const t = useTranslations('business.card.confirm')
   const fmt = useFmt()
-  return confirmLine(detail, fmt, t)
+  const instant = detail.confirmMode === 'instant'
+  const icon = instant ? <Zap aria-hidden /> : <Clock aria-hidden />
+  if (compact)
+    return (
+      <Callout tone="accent" size="s" icon={icon} className={cn('font-medium', className)}>
+        {instant ? t('instantShort') : t('byHandShort', { name: detail.name })}
+      </Callout>
+    )
+  const lead = instant
+    ? t('instantLead')
+    : detail.typicalConfirmMinutes
+      ? t('byHandWithin', { time: fmt.duration(detail.typicalConfirmMinutes) })
+      : t('byHandLead')
+  return (
+    <Callout tone="accent" icon={icon} title={instant ? t('instant') : t('byHand', { name: detail.name })} className={className}>
+      <span className="text-n-600">{lead}</span>
+    </Callout>
+  )
 }
 
 /** The booking flow's address with what's picked: the services step with nothing, the specialist step with some. */
@@ -159,29 +170,18 @@ export function BookingCard({
   if (picked.length === 0) {
     return (
       <div className={card}>
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
+        {/* Venue v0.7 · C2 `.bkc`: the same in every state, Next free time, Book and how the business confirms */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
             <span className="text-label text-n-500 uppercase">{t('card.nextFree')}</span>
-            <span className={cn(next ? 'text-[28px] leading-[34px] font-bold tracking-[-0.02em]' : 'text-body-l font-semibold text-n-600')}>
+            <span className={cn(next ? 'text-[22px] leading-7 font-semibold tracking-[-0.01em]' : 'text-body-l font-semibold text-n-600')}>
               {next ?? t('card.noFree')}
             </span>
           </div>
           <BookLink slug={detail.slug} picked={picked} disabled={disabled}>
             {t('card.book')}
           </BookLink>
-          <div className="h-px bg-n-200" />
-          <div className="flex flex-col gap-4">
-            <InfoRow icon={<Phone aria-hidden />} className="items-center [&>svg]:mt-0">
-              <a href={`tel:${detail.phone}`} className="flex-1 text-n-900 hover:text-a-600">
-                {fmt.phone(detail.phone)}
-              </a>
-            </InfoRow>
-          </div>
-          <div className="h-px bg-n-200" />
-          <span className="flex items-center gap-2 text-dense text-n-600">
-            <CircleCheck aria-hidden className="size-4 flex-none" strokeWidth={1.75} />
-            <ConfirmLine detail={detail} />
-          </span>
+          <ConfirmCallout detail={detail} />
         </div>
       </div>
     )

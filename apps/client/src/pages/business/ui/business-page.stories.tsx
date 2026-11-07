@@ -5,7 +5,7 @@
  * client booked by phone only.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { today } from '@yeral/domain/time'
+import { hm, nowMin, today } from '@yeral/domain/time'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { AYJEMAL, businessApi, GLOW, PageStory, REVIEWS } from '@/shared/storybook'
 import { BusinessPage } from './business-page'
@@ -15,6 +15,9 @@ const routes = {
   '/$lang/b/$slug': BusinessPage,
   '/$lang/b/$slug/book': () => <p>Booking</p>,
 }
+
+// GLOW closes at 20:00: «Open until 20:00», or the amber «Closes at 20:00» when the stories run in its last hour
+const OPEN_UNTIL_20 = /^(Open until|Closes at) 20:00$/
 
 const meta = {
   title: 'Client/Pages/Business',
@@ -35,8 +38,8 @@ export const Default: Story = {
     const crumbs = within(canvas.getByRole('navigation', { name: 'You are here' }))
     await expect(crumbs.getByRole('link', { name: 'Beauty salon' })).toHaveAttribute('href', '/en/c/beauty')
     await expect(canvas.getAllByRole('link', { name: 'Beauty salon' })).toHaveLength(1)
-    // the state as the cover's StatusPill; the hours live once, in About (A7, #19): the card only books
-    await expect(canvas.getAllByText('Open until 20:00')[0]).toBeVisible()
+    // the state as the cover's StatusPill (amber in the last hour); the hours live once, in About (A7, #19)
+    await expect(canvas.getAllByText(OPEN_UNTIL_20)[0]).toBeVisible()
     const card = within(canvas.getByRole('complementary', { name: 'Booking' }))
     await expect(card.queryByText(/09:00–20:00/)).toBeNull()
     await expect(card.getByText(/^Today 15:30$/)).toBeVisible()
@@ -62,7 +65,7 @@ export const Default: Story = {
 export const Cover: Story = {
   play: async ({ canvas, canvasElement }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
-    await expect(canvas.getAllByText('Open until 20:00')[0]).toBeVisible()
+    await expect(canvas.getAllByText(OPEN_UNTIL_20)[0]).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Share' })).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Photo 2 of 5' })).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'All photos · 5' }))
@@ -465,9 +468,21 @@ export const Midnight: Story = {
   },
   play: async ({ canvas }) => {
     // the StatusPill on the cover and beside About's hours
-    await expect(await canvas.findAllByText('Open until 24:00')).toHaveLength(2)
+    await expect(await canvas.findAllByText(/^(Open until|Closes at) 24:00$/)).toHaveLength(2)
     const about = within(canvas.getByRole('region', { name: 'About' }))
     await expect(about.getAllByText('09:00–24:00')).toHaveLength(7)
+  },
+}
+
+/** The last hour before closing (DS · Lists A7 `ClosesSoon`): the amber «Closes at …» on the cover and in About. */
+const SOON = nowMin() + 30
+export const ClosesSoon: Story = {
+  args: {
+    path: '/en/b/glow-studio?tab=about',
+    server: businessApi({ business: { ...GLOW, open: { open: true, until: SOON } } }),
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findAllByText(`Closes at ${hm(SOON % 1440)}`)).toHaveLength(2)
   },
 }
 

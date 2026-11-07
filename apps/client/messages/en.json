@@ -292,6 +292,7 @@
     "opensOn": "Closed · opens {day} at {time}",
     "closed": "Closed",
     "statusOpen": "Open until {time}",
+    "statusClosesSoon": "Closes at {time}",
     "away": "{distance} from you",
     "newAddress": "New address",
     "approximate": "Approximate area: the exact address comes with a confirmed booking.",
@@ -392,6 +393,15 @@
       "confirmsWithin": "Usually confirms within {time}",
       "confirmsByHand": "The business confirms each booking",
       "confirmsAtOnce": "Bookings are confirmed at once",
+      "confirm": {
+        "byHand": "{name} confirms bookings by hand",
+        "byHandWithin": "Usually within {time}. You’ll get a message when it’s confirmed.",
+        "byHandLead": "You’ll get a message when it’s confirmed.",
+        "byHandShort": "{name} confirms bookings by hand.",
+        "instant": "Bookings are confirmed at once",
+        "instantLead": "Your time is set as soon as you book. You’ll find it in My bookings.",
+        "instantShort": "Bookings are confirmed at once."
+      },
       "chosen": "Selected services",
       "count": "{count, plural, one {# service} other {# services}}",
       "remove": "Remove: {name}",

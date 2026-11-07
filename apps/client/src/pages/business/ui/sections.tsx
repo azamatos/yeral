@@ -65,7 +65,7 @@ export function SectionTabs({
             <TabsTrigger key={id} value={id} className="flex-none">
               <span id={`tab-${id}-label`}>{t(id)}</span>
               {/* «Services 100» is the tab's name too; phones show no counts */}
-              {counts[id] ? <span className="font-medium text-n-500 max-sm:hidden"> {counts[id]}</span> : null}
+              {counts[id] ? <span className="ml-1.5 font-medium text-n-500 max-sm:hidden"> {counts[id]}</span> : null}
             </TabsTrigger>
           ))}
         </TabsList>

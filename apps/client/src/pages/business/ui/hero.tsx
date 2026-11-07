@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { today } from '@yeral/domain/time'
+import { nowMin, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
@@ -106,19 +106,36 @@ function useCoverFold(coverRef: RefObject<HTMLDivElement | null>, on: boolean) {
   }, [coverRef, on])
 }
 
+/** The last hour before closing turns the pill amber (DS · Lists A7 `ClosesSoon`). */
+const CLOSES_SOON_MIN = 60
+
 /**
- * Whether it's open now (A7 `StatusPill`): green «Open until 20:00», grey «Closed · opens tomorrow at 10:00»; it never
- * wraps. The hours themselves are in About only (the owner's #19).
+ * Whether it's open now (A7 `StatusPill`): green «Open until 20:00», amber «Closes at 20:00» in the last hour, grey
+ * «Closed · opens tomorrow at 10:00»; it never wraps. The hours themselves are in About only (the owner's #19).
  */
 export function StatusPill({ open, className }: { open: Detail['open']; className?: string }) {
   const t = useTranslations('business')
   const fmt = useFmt()
   const now = useClock()
-  const line = open.open ? { text: t('statusOpen', { time: fmt.time(open.until) }), isOpen: true } : openLine(open, today(now), fmt, t)
+  if (open.open) {
+    // `until` is a minute of the business day, past 1440 when it runs past midnight
+    const left = (((open.until - nowMin(now)) % 1440) + 1440) % 1440
+    const soon = left <= CLOSES_SOON_MIN
+    return (
+      <Pill
+        tone={soon ? 'warning' : 'success'}
+        icon={<i aria-hidden className={cn('size-1.5 rounded-pill', soon ? 'bg-st-pending-dot' : 'bg-st-completed-dot')} />}
+        className={cn('gap-1.5 pr-2.5', className)}
+      >
+        {t(soon ? 'statusClosesSoon' : 'statusOpen', { time: fmt.time(open.until) })}
+      </Pill>
+    )
+  }
+  const line = openLine(open, today(now), fmt, t)
   return (
     <Pill
-      tone={line.isOpen ? 'success' : 'slate'}
-      icon={<i aria-hidden className="size-1.5 rounded-pill bg-current" />}
+      tone="slate"
+      icon={<i aria-hidden className="size-1.5 rounded-pill bg-st-cancelled-dot" />}
       className={cn('gap-1.5 pr-2.5', className)}
     >
       {line.text}

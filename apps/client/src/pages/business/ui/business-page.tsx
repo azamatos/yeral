@@ -12,7 +12,7 @@ import { useLocale, useTranslations } from 'use-intl'
 import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { wrap } from '@/shared/ui'
 import { About } from './about'
-import { BookingBar, BookingCard } from './booking-card'
+import { BookingBar, BookingCard, ConfirmCallout } from './booking-card'
 import { Hero } from './hero'
 import { Nearby } from './nearby'
 import { Reviews } from './reviews'
@@ -96,6 +96,8 @@ export function BusinessPage() {
               {{
                 services: (
                   <Section id="services" title={t('services.title')}>
+                    {/* the phone has no card: how the business confirms opens the panel in one line (C2) */}
+                    {(state === 'online' || state === 'preview') && <ConfirmCallout detail={detail} compact className="md:hidden" />}
                     <ServicePicker
                       groups={detail.serviceGroups}
                       picked={picked.map((s) => s.id)}
@@ -118,7 +120,10 @@ export function BusinessPage() {
           </div>
           <aside
             aria-label={t('card.label')}
-            className={cn('min-w-0 flex-[1_1_340px]', state === 'phone-only' ? 'max-md:order-first max-md:basis-full' : 'max-md:hidden')}
+            className={cn(
+              'min-w-0 flex-[1_1_340px] pt-4',
+              state === 'phone-only' ? 'max-md:order-first max-md:basis-full max-md:pt-0' : 'max-md:hidden',
+            )}
           >
             <BookingCard
               detail={detail}
