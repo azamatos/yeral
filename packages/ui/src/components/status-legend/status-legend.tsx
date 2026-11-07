@@ -42,6 +42,8 @@ export type StatusLegendProps = {
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /** In place of the ? button: a menu's row («What the colours mean»), which the popover or sheet hangs from. */
+  trigger?: ReactNode
   /** «Got it» was pressed (the legend is closed). */
   onConfirm?: () => void
   /** Where the popover hangs from the trigger (the toolbar's end: `end`). */
@@ -101,6 +103,7 @@ export function StatusLegend({
   defaultOpen,
   open: openProp,
   onOpenChange,
+  trigger: triggerProp,
   onConfirm,
   align = 'end',
   className,
@@ -118,7 +121,7 @@ export function StatusLegend({
   }
   const titleId = useId()
   const titleRef = useRef<HTMLHeadingElement>(null)
-  const trigger = (
+  const trigger = triggerProp ?? (
     <Button
       variant="plain"
       size="s"

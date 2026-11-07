@@ -4,36 +4,19 @@ import { Pill } from '@yeral/ui/pill'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { LegendTile, StatusLegend, type StatusLegendSection } from '@yeral/ui/status-legend'
 import { Clock, Globe, Lock, Phone, TriangleAlert, User, Coffee } from 'lucide-react'
-import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { InternalStatusChip, useInternalStatusName } from '@/entities/booking'
 
-/** Remembered in the browser (decision 2): no account preference exists, and a per-browser convenience is enough. */
-const SEEN = 'yeral.calendar.legend-seen'
-const seen = () => {
-  try {
-    return window.localStorage.getItem(SEEN) === '1'
-  } catch {
-    return true
-  }
-}
-const remember = () => {
-  try {
-    window.localStorage.setItem(SEEN, '1')
-  } catch {
-    // storage refused (a private window): it opens again next visit
-  }
-}
-
 /**
  * «Colours and symbols» (B-Calendar `legend`, book F-134): statuses, sources, what the grid's layers mean, the timers,
- * the internal statuses switched on. It opens by itself on a person's first visit; «Got it» remembers that.
+ * the internal statuses switched on. Since v0.7 (B7-Calendar · B2) it opens from the Filters menu's «What the colours
+ * mean» row (`trigger`), no longer by itself on a first visit.
  */
-export function CalendarLegend({ statuses }: { statuses: CalendarView['internalStatuses'] }) {
+export function CalendarLegend({ statuses, trigger }: { statuses: CalendarView['internalStatuses']; trigger?: ReactNode }) {
   const t = useTranslations('calendar.legend')
   const s = useTranslations('status')
   const statusName = useInternalStatusName()
-  const [first] = useState(() => !seen())
   const icon = { 'aria-hidden': true, strokeWidth: 1.75, className: 'size-4' } as const
   const sections: StatusLegendSection[] = [
     {
@@ -112,14 +95,5 @@ export function CalendarLegend({ statuses }: { statuses: CalendarView['internalS
         ]
       : []),
   ]
-  return (
-    <StatusLegend
-      title={t('title')}
-      closeLabel={t('close')}
-      confirmLabel={t('confirm')}
-      sections={sections}
-      defaultOpen={first}
-      onConfirm={remember}
-    />
-  )
+  return <StatusLegend title={t('title')} closeLabel={t('close')} confirmLabel={t('confirm')} sections={sections} trigger={trigger} />
 }

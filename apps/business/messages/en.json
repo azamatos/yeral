@@ -1483,7 +1483,15 @@
       "percent": "{percent}%",
       "cell": "{name}, {date}:",
       "open": " — open the day",
-      "note": "The bar shows how much of the working time is booked. Click a cell to open that day’s calendar."
+      "note": "The bar shows how much of the working time is booked. Click a cell to open that day’s calendar.",
+      "people": "{n, plural, one {# person} other {# people}}",
+      "noBookings": "No bookings",
+      "works": "Works {time}",
+      "openDay": "Open {name}’s day",
+      "dayCard": "{name} · {date}",
+      "count": "{bookings}{requests, plural, =0 {} other { · {requests, plural, one {# request} other {# requests}}}}",
+      "timeOff": "{from} – {to}",
+      "bar": "{bookings}, {time}"
     },
     "legend": {
       "title": "Colours and symbols",
@@ -1525,7 +1533,35 @@
       "close": "Close"
     },
     "elsewhereRefused": "{name} is busy elsewhere {time}. Pick another time.",
-    "elsewhereSelf": "You’re busy elsewhere {time}. Pick another time."
+    "elsewhereSelf": "You’re busy elsewhere {time}. Pick another time.",
+    "youreOnToday": "You’re on today",
+    "requestsButton": "Requests",
+    "people": {
+      "label": "People",
+      "everyone": "Everyone",
+      "several": "{n, plural, one {# person} other {# people}}",
+      "search": "Search people",
+      "nothing": "Nothing matches “{q}”",
+      "offToday": "Off today",
+      "offThisWeek": "Off this week",
+      "title": "Whose calendar",
+      "clear": "Clear",
+      "done": "Done",
+      "close": "Close"
+    },
+    "filters": {
+      "label": "Filters",
+      "active": "Filters · {n}",
+      "colours": "What the colours mean"
+    },
+    "summary": "{bookings}{revenue, select, none {} other { · {revenue}}}",
+    "hoverCard": {
+      "open": "Open",
+      "online": "Online",
+      "phone": "By phone",
+      "walkIn": "Walk-in",
+      "length": "{length} · {price}"
+    }
   },
   "bookings": {
     "tabsLabel": "Which bookings",

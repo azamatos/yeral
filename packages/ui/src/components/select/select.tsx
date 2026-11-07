@@ -173,6 +173,10 @@ export type MultiSelectProps = Shared &
     /** The footer's Clear (shown with a choice) and the sheet's Done («Show 24 results»). */
     clearLabel: string
     doneLabel: ReactNode
+    /** What the trigger shows in place of «Label · n»: a people picker's «Everyone · 19», «Jeren», «3 people». */
+    summary?: ReactNode
+    /** The active tint and Clear, when the count doesn't say it (a row that means «everything» is always ticked). */
+    active?: boolean
   }
 
 /**
@@ -197,6 +201,8 @@ export function MultiSelect({
   empty,
   title,
   closeLabel,
+  summary,
+  active,
   onOpenChange,
   className,
   onKeyDown,
@@ -212,6 +218,7 @@ export function MultiSelect({
   const all = flatOptions(options)
   const picked = new Set(value.filter((v) => all.some((o) => o.value === v)))
   const count = picked.size
+  const on = active ?? count > 0
   const search = searchable ?? all.length >= SEARCH_FROM
   const name = count ? `${label} · ${count}` : label
   const trigger = (
@@ -232,17 +239,21 @@ export function MultiSelect({
         selectTriggerClass,
         selectTriggerSize[size],
         'w-auto',
-        count > 0 && 'border-a-line bg-a-50 text-a-600 hover:border-a-200 [&>svg]:text-a-600',
+        on && 'border-a-line bg-a-50 text-a-600 hover:border-a-200 [&>svg]:text-a-600',
         className,
       )}
     >
       {icon}
-      <span className="min-w-0 truncate">
-        {label}
-        {count > 0 && (
+      <span className="flex min-w-0 items-center gap-2 truncate">
+        {summary ?? (
           <>
-            {' · '}
-            <span className="font-semibold">{count}</span>
+            {label}
+            {count > 0 && (
+              <>
+                {' · '}
+                <span className="font-semibold">{count}</span>
+              </>
+            )}
           </>
         )}
       </span>
@@ -253,7 +264,7 @@ export function MultiSelect({
       )}
     </button>
   )
-  const clear = count > 0 && (
+  const clear = on && (
     <Button variant="tertiary" size={sheet ? 'l' : 's'} onClick={() => onValueChange([])} className={cn(sheet && 'flex-1')}>
       {clearLabel}
     </Button>

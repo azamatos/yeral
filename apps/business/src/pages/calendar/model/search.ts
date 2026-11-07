@@ -11,9 +11,10 @@ export type CalendarSearch = {
   cancelled?: true
   booking?: string
   request?: string
+  /** The people picked, comma-separated (B7-Calendar's PeoplePicker); with no `view`, the person a phone shows. */
   staff?: string
   move?: string
-  /** All staff's day without it. */
+  /** Everyone's day without it; `dayOne` the day of the people in `staff`, `weekOne` one person's week, `weekAll` the team's. */
   view?: 'dayOne' | 'weekAll' | 'weekOne'
   panel?: 'new'
   start?: number
@@ -47,3 +48,10 @@ export function calendarSearch(search: Record<string, unknown>): CalendarSearch 
     ...(services ? { services } : {}),
   }
 }
+
+/** The people in `?staff=`: ids comma-separated, none for everyone. */
+export const peopleOf = (staff: string | undefined): string[] => (staff ?? '').split(',').filter(Boolean)
+
+/** The `view` for a range and the people picked: everyone's day has none; one person's week is `weekOne`. */
+export const viewFor = (week: boolean, people: readonly string[]): CalendarSearch['view'] =>
+  week ? (people.length === 1 ? 'weekOne' : 'weekAll') : people.length ? 'dayOne' : undefined

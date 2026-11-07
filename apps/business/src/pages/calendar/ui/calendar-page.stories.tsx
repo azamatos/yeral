@@ -13,6 +13,7 @@ import { addDays, localOf, today } from '@yeral/domain/time'
 import { expect, screen, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
+import { mondayOf } from '../model/grid'
 import { CalendarPage } from './calendar-page'
 
 /** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
@@ -125,6 +126,12 @@ const dayBookings = [
 ]
 const cancelledOne = booking(1, DAY, 615, 660, 'cancelled', 'Şemşat K.', 'Hair styling')
 const tomorrowBookings = [booking(2, TOMORROW, 600, 660, 'confirmed', 'Jemal B.', 'Pedicure')]
+/** A busy day for the week (B7-Calendar · B3): Aýna's 15-minute brow shaping, and two bookings at one time, one by phone. */
+const busyDay = [
+  booking(1, DAY, 900, 915, 'confirmed', 'Jahan Berdiýewa', 'Brow shaping'),
+  booking(1, DAY, 960, 1020, 'confirmed', 'Aýlar Hommadowa', 'Peeling'),
+  booking(1, DAY, 990, 1050, 'completed', 'Sona Pirmuhammedowa', 'Lash lift', { source: 'phone' }),
+]
 const moved = dayBookings[3]!
 const move: CalendarView['moves'][number] = {
   ...asked,
@@ -276,6 +283,7 @@ const fakeApi =
       arrives = false,
       moveFits = true,
       internal = false,
+      busy = false,
       refuseMove,
     }: {
       /** false: the business is closed every day (a late request). */
@@ -288,6 +296,8 @@ const fakeApi =
       internal?: boolean
       /** The team's move is refused with this `cannot_move` (book B-26). */
       refuseMove?: { problem: string; staffId: string; busy?: { start: number; end: number } }
+      /** Aýna's busy day too (`busyDay`): the week's short and overlapping blocks. */
+      busy?: boolean
     } = {},
   ): (() => typeof fetch) =>
   () => {
@@ -334,7 +344,7 @@ const fakeApi =
         )
         return json({
           ...view,
-          bookings: [...view.bookings.map(marked), ...saved.filter((b) => b.date === view.from)],
+          bookings: [...view.bookings.map(marked), ...(busy ? busyDay : []), ...saved.filter((b) => b.date === view.from)],
           blocks: [...view.blocks, ...blocked.filter((k) => k.date === view.from)],
           internalStatuses: internal ? [arrived] : [],
         })
@@ -408,7 +418,7 @@ const fakeApi =
       // one booking on its own (the booking drawer), the team's note and marker on it
       const one = /^(GET|PUT) \/w\/glow-studio\/bookings\/([^/]+)(\/note|\/internal-status)?$/.exec(route)
       if (one) {
-        const found = [...dayBookings, ...tomorrowBookings, cancelledOne].find((b) => b.code === one[2])
+        const found = [...dayBookings, ...tomorrowBookings, cancelledOne, ...busyDay].find((b) => b.code === one[2])
         if (!found) return json({ error: { code: 'not_found' } }, 404)
         return one[1] === 'GET' ? json(marked(found)) : new Response(null, { status: 204 })
       }
@@ -475,10 +485,6 @@ const meta = {
     path: '/w/glow-studio/calendar',
     server: fakeApi('owner'),
   },
-  // the legend opens by itself on a first visit: every story but its own has been here before
-  beforeEach: () => {
-    localStorage.setItem('yeral.calendar.legend-seen', '1')
-  },
 } satisfies Meta<typeof PageStory>
 export default meta
 type Story = StoryObj<typeof meta>
@@ -500,9 +506,12 @@ export const Day: Story = {
     await expect(maral.getByRole('button', { name: /Ogulgerek M\..*by phone, alert note about the client/ })).toBeVisible()
     await expect(grid.getByText('Doesn’t use the app')).toBeVisible()
     await expect(canvas.getByText(/^Revenue \(planned\)/)).toBeVisible()
-    // Aýna's request and Maral's client asking to move: in their columns and the toolbar
+    // Aýna's request and Maral's client asking to move: in their columns and the toolbar's Requests (the summary line
+    // no longer repeats them, B7-Calendar · B2); Today greyed out with «You're on today»
     await expect(canvas.getAllByText('1 request', { selector: 'span:not(.sr-only)' })).toHaveLength(2)
-    await expect(canvas.getByRole('button', { name: '2 requests — open the most urgent' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Requests 2 — open the most urgent' })).toBeVisible()
+    await expect(canvas.getByText(/^Revenue \(planned\)/).closest('p')).not.toHaveTextContent('request')
+    await expect(canvas.getByRole('button', { name: 'Today' })).toHaveAttribute('aria-disabled', 'true')
     await waitFor(() => expect(document.title).toBe('Calendar · Glow Studio · Ýeral Business'))
   },
 }
@@ -543,13 +552,40 @@ export const Closed: Story = {
   },
 }
 
-/** Show cancelled: the cancelled booking struck through, beside the live one at its time. */
+/** Show cancelled, a switch inside Filters (B7-Calendar · B2): the cancelled booking struck through, beside the live one at its time; «Filters · 1». */
 export const ShowCancelled: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
-    await userEvent.click(canvas.getByRole('checkbox', { name: 'Show cancelled' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Filters' }))
+    await userEvent.click(await page.findByRole('switch', { name: 'Show cancelled' }))
     const block = await canvas.findByRole('button', { name: /Şemşat K\..*Cancelled$/ })
     await expect(block).toHaveClass('left-[52%]')
+    await userEvent.keyboard('{Escape}')
+    await expect(await canvas.findByRole('button', { name: 'Filters · 1' })).toBeVisible()
+  },
+}
+
+/** Another day: Today is a live Tertiary S inside the DateNav box and brings today back; ‹ › move by a day. */
+export const AnotherDay: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Previous day' }))
+    const todayButton = await canvas.findByRole('button', { name: 'Today' })
+    await waitFor(() => expect(todayButton).not.toHaveAttribute('aria-disabled'))
+    await userEvent.click(todayButton)
+    await expect(await canvas.findByRole('button', { name: /Gözel A\./ })).toBeVisible()
+  },
+}
+
+/** 1024 (B7-Calendar · B2): nothing wraps — Filters and Requests are icons with a count badge. */
+export const Laptop: Story = {
+  globals: { viewport: { value: 'md' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    const requests = canvas.getByRole('button', { name: '2 — open the most urgent' })
+    await expect(requests).toBeVisible()
+    await expect(within(requests).getByText('2')).toBeVisible()
+    await expect(within(requests).queryByText('Requests')).not.toBeVisible()
   },
 }
 
@@ -628,7 +664,7 @@ export const Phone: Story = {
 export const ConfirmRequest: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
-    await userEvent.click(await canvas.findByRole('button', { name: '2 requests — open the most urgent' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Requests 2 — open the most urgent' }))
     const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
     await expect(drawer.getByText('1 / 2')).toBeVisible()
     await expect(await drawer.findByText(/^\d+ min left to answer$/)).toBeVisible()
@@ -662,7 +698,7 @@ export const RequestArrives: Story = {
   args: { server: fakeApi('owner', { arrives: true }) },
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
-    await userEvent.click(await canvas.findByRole('button', { name: '2 requests — open the most urgent' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Requests 2 — open the most urgent' }))
     const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
     await userEvent.click(await drawer.findByRole('button', { name: 'Confirm' }))
     // the list read again after the answer brings the new one; the answer's own toast stacks on it
@@ -709,7 +745,7 @@ export const RequestGone: Story = {
 /** Decline with a reason and two other times the client can take in one tap. */
 export const DeclineWithTimes: Story = {
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: '2 requests — open the most urgent' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Requests 2 — open the most urgent' }))
     const drawer = within(await page.findByRole('dialog', { name: 'Request' }))
     await userEvent.click(await drawer.findByRole('button', { name: 'Decline' }))
     const modal = within(await page.findByRole('dialog', { name: 'Decline the request' }))
@@ -1088,7 +1124,7 @@ export const MoveRussianLength: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(canvas.getByRole('button', { name: /^Next day/ }))
-    await userEvent.click(within(canvas.getByRole('radiogroup')).getByRole('radio', { name: /Maral/ }))
+    await userEvent.click(within(canvas.getByRole('radiogroup', { name: /^Specialist/ })).getByRole('radio', { name: /Maral/ }))
     await userEvent.click(await canvas.findByRole('button', { name: /Jemal B\./ }))
     await userEvent.click(await within(await page.findByRole('dialog')).findByRole('button', { name: /Move to another time/ }))
     const bar = await canvas.findByRole('status')
@@ -1272,52 +1308,100 @@ export const QuickBookingMore: Story = {
 export const OneSpecialist: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
-    await userEvent.click(canvas.getByRole('radio', { name: 'One specialist' }))
+    const picker = canvas.getByRole('combobox', { name: 'Whose calendar' })
+    await expect(picker).toHaveTextContent('Everyone4')
+    await userEvent.click(picker)
+    const list = await screen.findByRole('listbox')
+    await expect(within(list).getByRole('option', { name: /^Everyone/ })).toHaveAttribute('aria-selected', 'true')
+    await userEvent.click(within(list).getByRole('option', { name: /^Aýna/ }))
     const grid = within(canvas.getByRole('region', { name: /^Calendar, / }))
     await expect(await grid.findByRole('group', { name: 'Aýna' })).toBeVisible()
     await expect(grid.queryByRole('group', { name: 'Maral' })).toBeNull()
     await expect(grid.getByRole('button', { name: /Gözel A\. · \+99365000000/ })).toBeVisible()
-    await pick(canvas.getByRole('combobox', { name: 'Specialist' }), 'Maral')
+    await userEvent.click(within(list).getByRole('option', { name: /^Maral/ }))
     await expect(await grid.findByRole('group', { name: 'Maral' })).toBeVisible()
+    await waitFor(() => expect(picker).toHaveTextContent('2 people'))
+    // Everyone brings the whole team back
+    await userEvent.click(within(list).getByRole('option', { name: /^Everyone/ }))
+    await expect(await grid.findByRole('group', { name: 'Jeren' })).toBeVisible()
+    await waitFor(() => expect(picker).toHaveTextContent('Everyone4'))
   },
 }
 
-/** The week's load (book B-17 step 3): a row per person, a bar and a count a day; a cell opens that day for everyone. */
+/** The team's week (B7-Calendar · B3): a row per person, a timeline bar, the count and the first–last time a day; hover shows the day, a click opens it. */
 export const WeekLoad: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(canvas.getByRole('radio', { name: 'Week' }))
     const table = await canvas.findByRole('table', { name: 'The week’s load' })
     await expect(canvas.getByRole('button', { name: 'Previous week' })).toBeVisible()
-    const cell = within(table).getByRole('button', { name: /^Aýna, .*: 2 bookings\s*27%\s*1 request/ })
+    await expect(within(table).getByText('4 people')).toBeVisible()
+    const cell = within(table).getByRole('button', { name: /^Aýna, .*2 bookings.*1 request 10:00–13:00/ })
+    await userEvent.hover(cell)
+    const card = within(await page.findByRole('dialog', { name: /^Aýna · / }))
+    await waitFor(() => expect(card.getByText('Gözel A.')).toBeVisible())
+    await expect(card.getByText('10:00–10:45')).toBeVisible()
     await userEvent.click(cell)
     const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
-    await expect(grid.getByRole('group', { name: 'Maral' })).toBeVisible()
+    await expect(await grid.findByRole('group', { name: 'Aýna' })).toBeVisible()
+    await expect(grid.queryByRole('group', { name: 'Maral' })).toBeNull()
     await expect(canvas.getByRole('radio', { name: 'Day' })).toHaveAttribute('aria-checked', 'true')
   },
 }
 
-/** One person's week (book B-17 step 4): textless blocks; a day's head opens that day, one person's. */
+/** One person's week (B7-Calendar · B3): picked in the toolbar, every block says when, who and what; a day's head opens that day. */
 export const WeekOfOne: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(canvas.getByRole('radio', { name: 'Week' }))
     await canvas.findByRole('table', { name: 'The week’s load' })
-    await userEvent.click(canvas.getByRole('radio', { name: 'One specialist' }))
-    const head = await canvas.findByRole('button', { name: /2 bookings.*Aýna, / })
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Whose calendar' }))
+    await userEvent.click(await screen.findByRole('option', { name: /^Aýna/ }))
+    const head = await canvas.findByRole('button', { name: /2 bookings.*1 request.*Aýna, / })
     await expect((await canvas.findAllByTestId('week-block')).length).toBe(2)
+    await expect(canvas.getByRole('button', { name: /^10:00–10:45 Gözel A\. Women’s haircut.*Confirmed$/ })).toBeVisible()
     await userEvent.click(head)
     await expect(await canvas.findByRole('group', { name: 'Aýna' })).toBeVisible()
     await expect(canvas.queryByRole('group', { name: 'Maral' })).toBeNull()
   },
 }
 
-/** A specialist has their own week, and no «All staff». */
+/** A busy week: a 15-minute block («15:00 Jahan B.»), two bookings at one time side by side, the holiday's column; hover shows the card, a click opens the drawer. */
+export const WeekBusy: Story = {
+  args: { server: fakeApi('owner', { busy: true }), path: `/w/glow-studio/calendar?view=weekOne&staff=${id(1)}` },
+  play: async ({ canvas }) => {
+    const short = await canvas.findByRole('button', { name: /^15:00 Jahan B\..*15:00–15:15, Brow shaping, Confirmed$/ })
+    await expect(short).toBeVisible()
+    const left = canvas.getByRole('button', { name: /^16:00–17:00 Aýlar Hommadowa Peeling/ })
+    const right = canvas.getByRole('button', { name: /^16:30–17:30 Sona Pirmuhammedowa Lash lift.*Completed, by phone$/ })
+    await expect(left.getBoundingClientRect().right).toBeLessThanOrEqual(right.getBoundingClientRect().left + 1)
+    // the holiday's column, when it falls in this week
+    if (mondayOf(HOLIDAY) === mondayOf(DAY)) await expect(canvas.getByText('Closed · Independence Day')).toBeVisible()
+    await userEvent.hover(short)
+    const card = within(await page.findByRole('dialog', { name: 'Jahan Berdiýewa · 15:00–15:15' }))
+    await waitFor(() => expect(card.getByText('Brow shaping')).toBeVisible())
+    await expect(card.getByText('Jahan Berdiýewa')).toBeVisible()
+    await userEvent.click(short)
+    await expect(await page.findByRole('dialog', { name: 'Booking' })).toBeVisible()
+    await waitFor(() => expect(short).toHaveAttribute('aria-pressed', 'true'))
+  },
+}
+
+/** One person's week at 1024: 68 px an hour, the blocks keep their three lines. */
+export const WeekLaptop: Story = {
+  args: { server: fakeApi('owner', { busy: true }), path: `/w/glow-studio/calendar?view=weekOne&staff=${id(1)}` },
+  globals: { viewport: { value: 'md' } },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('button', { name: /^16:00–17:00 Aýlar Hommadowa Peeling/ })).toBeVisible()
+  },
+}
+
+/** A specialist has their own week, and no people picker. */
 export const SpecialistWeek: Story = {
   args: { server: fakeApi('specialist') },
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
-    await expect(canvas.queryByRole('radio', { name: 'All staff' })).toBeNull()
+    await expect(canvas.queryByRole('combobox', { name: 'Whose calendar' })).toBeNull()
     await userEvent.click(canvas.getByRole('radio', { name: 'Week' }))
     await expect(await canvas.findAllByRole('button', { name: /Maral, .*open the day$/ })).toHaveLength(7)
   },
@@ -1339,17 +1423,16 @@ export const WeekOfOneAddress: Story = {
   },
 }
 
-/** The legend (F-134): by itself on a first visit, «Got it» remembers it; the ? opens it any time. */
-export const LegendFirstVisit: Story = {
-  beforeEach: () => {
-    localStorage.removeItem('yeral.calendar.legend-seen')
-  },
-  play: async () => {
+/** The legend (F-134) opens from the Filters menu's «What the colours mean» (B7-Calendar · B2). */
+export const LegendFromFilters: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Filters' }))
+    await userEvent.click(await page.findByRole('button', { name: 'What the colours mean' }))
     const d = within(await page.findByRole('dialog', { name: 'Colours and symbols' }))
     await waitFor(() => expect(d.getByText('New request — waiting for an answer')).toBeVisible())
     await expect(d.getByText('Phone — booked during a call')).toBeVisible()
     await userEvent.click(d.getByRole('button', { name: 'Got it' }))
-    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
-    await expect(localStorage.getItem('yeral.calendar.legend-seen')).toBe('1')
+    await waitFor(() => expect(page.queryByRole('dialog', { name: 'Colours and symbols' })).toBeNull())
   },
 }
