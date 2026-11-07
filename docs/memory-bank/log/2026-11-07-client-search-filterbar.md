@@ -19,7 +19,13 @@ DS-Lists A5). The category pages share the page, so they got it too.
   `e2e/tests/discovery.spec.ts` reads it unchanged). A calendar day from Home's When (`date`) now reads "free time on
   Thu, 12 Nov" (`dayOf`), shows no day of the toggle, and Today / Tomorrow / This week clear it (the home-search gap).
 - **Removed:** the Filters drawer (price fields, Open now, Women only), the «Filters · N» and «Rating 4.5+» chips, the
-  How-far and sort selects; the address keys `open` and `women` (an older link with them searches without them).
+  How-far and sort selects.
+- **Open now and Women only kept: book C-03 wins on behaviour** (AGENTS.md; the C7 board doesn't draw them). Two more
+  single FilterButtons after Price, on the clients list's «Upcoming booking · Yes» pattern: an «any» row («Open or
+  closed», «Everyone») and one option, «Open now · Yes» while on, a plain chip («Open now»), two radio rows each in the
+  phone sheet; the address keys `open` and `women` as before, so older links keep working (`openNow`, `womenOnly` to
+  the api); Clear all and «Clear filters» reset them with the rest. Row 1 now wraps inside the list column (Sort drops
+  to a second line under ~800 px of column), as FilterBar wraps; no new layout.
 - **`@yeral/ui` FilterBar** (generic, stories `DisabledHint`, `PlainDefault`, `SearchedElsewhere`): `disabledHint` (a
   single filter off with a reason: the button stays focusable with a tooltip, `aria-disabled`; the sheet shows the line
   instead of the options), `plain` on a single filter (the option that means nothing is filtered: checked by default,
@@ -31,8 +37,8 @@ DS-Lists A5). The category pages share the page, so they got it too.
 ## Decisions
 
 - **Drawn ∩ api:** Distance, Rating, Price and Sort are drawn and in `searchQuerySchema`. Open now and Women only are in
-  the api and were in the old drawer but aren't on the C7 board, so they're out (nothing undrawn); the owner can have them
-  back as two more FilterButtons (the api takes `openNow`, `womenOnly`), at the cost of row 1 wrapping at 760.
+  the api and the book (C-03) but not on the C7 board: first left out as undrawn, then kept (the book wins on behaviour,
+  the screen on visuals), on the nearest drawn pattern, at the cost of row 1 wrapping.
 - **Recommended** = the api's own order (nearest with a position, rating × reviews without). The board's "free times on
   the chosen day first" isn't an api order. **Earliest time** isn't in the api either, so it isn't offered. A `sort=rating`
   link keeps working (the option appears while it's the value).

@@ -52,6 +52,9 @@ export const searchAddress = z.object({
   rating: z.coerce.number().min(0).max(5).optional().catch(undefined),
   from: whole.optional().catch(undefined),
   to: whole.optional().catch(undefined),
+  /** Open now and Women only (book C-03): on or absent, as the api takes them. */
+  open: z.literal(true).optional().catch(undefined),
+  women: z.literal(true).optional().catch(undefined),
   /** Around a position (near me, a typed place): `lat,lng`. */
   near: z.string().max(40).optional().catch(undefined),
   /** The radius around it, km. */
@@ -108,6 +111,8 @@ export function apiSearch(a: SearchAddress, lang: Locale, todayDate: string): Se
     minRating: a.rating,
     minPrice,
     maxPrice,
+    openNow: a.open,
+    womenOnly: a.women,
     bbox: areaOf(a.area),
     ...nearOf(a.near),
     ...(nearOf(a.near) && a.r ? { r: a.r } : {}),
@@ -116,13 +121,21 @@ export function apiSearch(a: SearchAddress, lang: Locale, todayDate: string): Se
 
 /** Any filter on (the toolbar's chips and the map area, not the day or the sort): the empty state offers to clear them. */
 export const filtered = (a: SearchAddress) =>
-  a.rating !== undefined || a.from !== undefined || a.to !== undefined || (a.r !== undefined && a.r !== DEFAULT_RADIUS_KM) || !!a.area
+  a.rating !== undefined ||
+  a.from !== undefined ||
+  a.to !== undefined ||
+  !!a.open ||
+  !!a.women ||
+  (a.r !== undefined && a.r !== DEFAULT_RADIUS_KM) ||
+  !!a.area
 
 /** What Clear all and «Clear filters» reset, in one navigation. */
-export const CLEARED: Pick<SearchAddress, 'rating' | 'from' | 'to' | 'r' | 'area'> = {
+export const CLEARED: Pick<SearchAddress, 'rating' | 'from' | 'to' | 'open' | 'women' | 'r' | 'area'> = {
   rating: undefined,
   from: undefined,
   to: undefined,
+  open: undefined,
+  women: undefined,
   r: undefined,
   area: undefined,
 }

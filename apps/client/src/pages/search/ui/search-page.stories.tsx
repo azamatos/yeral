@@ -122,6 +122,8 @@ export const Results: Story = {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Popular places' })).toBeVisible()
     await expect(await canvas.findByText('2 places · free time today')).toBeVisible()
     await expect(canvas.getByRole('combobox', { name: 'Rating' })).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Open now' })).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Women only' })).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Sort: Recommended' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Clear all' })).toBeNull()
     await expect(canvas.getByRole('link', { name: 'Barber Loft' })).toHaveAttribute('href', '/en/b/barber-loft')
@@ -173,7 +175,10 @@ export const CalendarDay: Story = {
   },
 }
 
-/** A price band applies at once: the trigger tints, a chip appears with Clear all; the chip's × and Clear all take it off. */
+/**
+ * A price band applies at once: the trigger tints, a chip appears with Clear all. Open now and Women only (book C-03) are
+ * toggles: «Open now · Yes» and a plain chip while on. Clear all takes everything off in one go.
+ */
 export const Filters: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('link', { name: 'Barber Loft' })
@@ -184,10 +189,33 @@ export const Filters: Story = {
     await expect(last.has('minPrice')).toBe(false)
     await pick(canvas.getByRole('combobox', { name: 'Price · Up to 100 TMT' }), '100–200 TMT')
     await waitFor(() => expect(last.get('minPrice')).toBe('100'))
+    await pick(canvas.getByRole('combobox', { name: 'Open now' }), 'Open now')
+    await expect(await canvas.findByRole('combobox', { name: 'Open now · Yes' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Remove Open now' })).toBeVisible()
+    await waitFor(() => expect(last.get('openNow')).toBe('1'))
+    await pick(canvas.getByRole('combobox', { name: 'Women only' }), 'Women only')
+    await expect(await canvas.findByRole('combobox', { name: 'Women only · Yes' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Remove Women only' })).toBeVisible()
+    await waitFor(() => expect(last.get('womenOnly')).toBe('1'))
     await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }))
     await waitFor(() => expect(last.has('maxPrice')).toBe(false))
+    await expect(last.has('openNow')).toBe(false)
+    await expect(last.has('womenOnly')).toBe(false)
     await expect(canvas.queryByText(/^Price: /)).toBeNull()
+    await expect(canvas.getByRole('combobox', { name: 'Open now' })).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Women only' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Clear all' })).toBeNull()
+  },
+}
+
+/** An older link with the toggles on (the keys from before the toolbar) still reads them. */
+export const OlderToggles: Story = {
+  args: { path: '/en/search?open=true&women=true' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('combobox', { name: 'Open now · Yes' })).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Women only · Yes' })).toBeVisible()
+    await waitFor(() => expect(last.get('openNow')).toBe('1'))
+    await expect(last.get('womenOnly')).toBe('1')
   },
 }
 
@@ -351,7 +379,10 @@ export const Phone: Story = {
   },
 }
 
-/** The phone's Filters sheet: a section per filter with radio rows, Distance's reason while location is off, Show N places closes. */
+/**
+ * The phone's Filters sheet: a section per filter with radio rows, Distance's reason while location is off, Open now and
+ * Women only as two rows each («Open or closed» / «Open now»), Show N places closes.
+ */
 export const PhoneFilters: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
@@ -360,11 +391,17 @@ export const PhoneFilters: Story = {
     const sheet = within(await page.findByRole('dialog', { name: 'Filters' }))
     await expect(sheet.getByText('Turn on location to filter by distance')).toBeVisible()
     await expect(sheet.getByRole('option', { name: /Any rating/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(sheet.getByRole('option', { name: 'Open or closed' })).toHaveAttribute('aria-selected', 'true')
+    await expect(sheet.getByRole('option', { name: 'Everyone' })).toHaveAttribute('aria-selected', 'true')
     await userEvent.click(sheet.getByRole('option', { name: /Up to 100 TMT/ }))
     await waitFor(() => expect(last.get('maxPrice')).toBe('100'))
+    await userEvent.click(sheet.getByRole('option', { name: 'Open now' }))
+    await waitFor(() => expect(last.get('openNow')).toBe('1'))
+    await expect(sheet.getByRole('option', { name: 'Open now' })).toHaveAttribute('aria-selected', 'true')
     await userEvent.click(sheet.getByRole('button', { name: 'Show 2 places' }))
     await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
-    await expect(canvas.getByRole('button', { name: 'Filters 1' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Filters 2' })).toBeVisible()
     await expect(canvas.getByText('Price: Up to 100 TMT')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Remove Open now' })).toBeVisible()
   },
 }

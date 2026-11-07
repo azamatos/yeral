@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { apiSearch, areaOf, dayOf, filtered, nearOf, priceBandAddress, priceBandOf, searchAddress, widerRadius } from './search'
+import { apiSearch, areaOf, CLEARED, dayOf, filtered, nearOf, priceBandAddress, priceBandOf, searchAddress, widerRadius } from './search'
 
 describe('searchAddress', () => {
   it('reads what it knows and leaves the rest out', () => {
-    expect(searchAddress.parse({ what: ' cut ', day: 'tomorrow', sort: 'nearby', from: '50', open: true, rating: 'high' })).toEqual({
+    expect(
+      searchAddress.parse({ what: ' cut ', day: 'tomorrow', sort: 'nearby', from: '50', open: true, women: 'yes', rating: 'high' }),
+    ).toEqual({
       what: 'cut',
       day: 'tomorrow',
       from: 50,
+      open: true,
     })
   })
 
@@ -37,6 +40,11 @@ describe('apiSearch', () => {
 
   it('leaves an empty «what» out', () => {
     expect(apiSearch({ what: '' }, 'en', day).q).toBeUndefined()
+  })
+
+  it('asks for open now and women only', () => {
+    expect(apiSearch({ open: true, women: true }, 'en', day)).toMatchObject({ openNow: true, womenOnly: true })
+    expect(apiSearch({}, 'en', day)).toMatchObject({ openNow: undefined, womenOnly: undefined })
   })
 })
 
@@ -112,5 +120,11 @@ describe('filters', () => {
     expect(filtered({ r: 5 })).toBe(false)
     expect(filtered({ rating: 4.5 })).toBe(true)
     expect(filtered({ r: 10 })).toBe(true)
+    expect(filtered({ open: true })).toBe(true)
+    expect(filtered({ women: true })).toBe(true)
+  })
+
+  it('clears every one of them at once', () => {
+    expect(filtered({ rating: 4.5, from: 100, open: true, women: true, r: 10, area: '37.9,58.3,38,58.5', ...CLEARED })).toBe(false)
   })
 })

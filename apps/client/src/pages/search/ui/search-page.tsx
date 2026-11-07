@@ -28,7 +28,7 @@ import { ResultsToolbar } from './results-toolbar'
 /**
  * Search (book C-03, board Search; the toolbar from C7-Home C4) and a category's page (C-05: the same page with its
  * category, its heading and its intro): the box, the category chips, the day, then the heading and the results toolbar
- * (Distance · Rating · Price · Sort, the active chips, the count), the rows and Show more. Only places with a free time
+ * (Distance · Rating · Price · Open now · Women only · Sort, the active chips, the count), the rows and Show more. Only places with a free time
  * on the day are listed (Q-150). From 1024 the map sits beside the list (C-04), a row and its pin lighting each other;
  * under it a floating Map opens it over the page, with the places as cards under it.
  */

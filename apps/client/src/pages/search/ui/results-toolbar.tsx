@@ -7,12 +7,16 @@ import { CLEARED, PRICE_BANDS, priceBandAddress, priceBandOf, RATINGS, type Sear
 
 /** The Sort menu's value for the api's own order (nearest with a position, rating × reviews without), no `sort` param. */
 const RECOMMENDED = 'recommended'
+/** A toggle filter's one option (Open now, Women only): on, or the «any» row; the api takes only on. */
+const ON = 'yes'
 
 /**
- * The results toolbar (C7-Home C4, on the DS-Lists A5 FilterBar): row 1 Distance · Rating · Price · Sort, all M 40;
- * row 2 the active chips, Clear all and the count, always shown (the query lives in the search fields above). Under
- * 768 «Filters · N», the count and Sort as an icon, with the Filters sheet. Distance is off without a position. Every
- * value lives in the address (ADR 0011); a choice applies at once. The menus carry no counts: the api gives none.
+ * The results toolbar (C7-Home C4, on the DS-Lists A5 FilterBar): row 1 Distance · Rating · Price · Open now · Women
+ * only · Sort, all M 40 (the two toggles are book C-03's, not drawn: a single menu with its «any» row, «Open now · Yes»
+ * while on, as the clients list's Upcoming booking); row 2 the active chips, Clear all and the count, always shown (the
+ * query lives in the search fields above). Under 768 «Filters · N», the count and Sort as an icon, with the Filters
+ * sheet. Distance is off without a position. Every value lives in the address (ADR 0011); a choice applies at once.
+ * The menus carry no counts: the api gives none.
  */
 export function ResultsToolbar({
   address,
@@ -92,6 +96,26 @@ export function ResultsToolbar({
       value: band ?? null,
       onValueChange: (v) => v !== 'custom' && onChange(priceBandAddress(v)),
       chip: (o) => t('filters.chip', { filter: t('filters.price'), value: o.label }),
+    },
+    {
+      id: 'open',
+      label: t('filters.openNow'),
+      anyLabel: t('filters.anyOpen'),
+      options: [{ value: ON, label: t('filters.openNow') }],
+      value: address.open ? ON : null,
+      onValueChange: (v) => onChange({ open: v ? true : undefined }),
+      chip: (o) => o.label,
+      short: () => t('filters.yes'),
+    },
+    {
+      id: 'women',
+      label: t('filters.women'),
+      anyLabel: t('filters.everyone'),
+      options: [{ value: ON, label: t('filters.women') }],
+      value: address.women ? ON : null,
+      onValueChange: (v) => onChange({ women: v ? true : undefined }),
+      chip: (o) => o.label,
+      short: () => t('filters.yes'),
     },
   ]
 

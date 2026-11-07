@@ -277,7 +277,12 @@
       "anyPrice": "Any price",
       "upTo": "Up to {price}",
       "between": "{from}–{to}",
-      "andUp": "{price} and up"
+      "andUp": "{price} and up",
+      "openNow": "Open now",
+      "anyOpen": "Open or closed",
+      "women": "Women only",
+      "everyone": "Everyone",
+      "yes": "Yes"
     }
   },
   "notFound": {
