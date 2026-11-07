@@ -1,25 +1,18 @@
 /**
- * The fixed permissions as Team → Permissions reads them (design §28.1 «Fixed permissions», B-Team `tab=permissions`,
- * DS-Business): 13 rows × Owner · Admin · Specialist, each cell yes, no or a short text («Own», «View only»). Read-only:
- * editing permissions is Later (F-089). Where a row is one of `@yeral/domain/permissions`' rows, it says which, and a
- * test keeps the two in step.
+ * The fixed permissions as Settings → Permissions reads them (design v0.7 · B7-Team B9 «Permissions matrix», book
+ * chapter 3): 13 rows × Owner · Admin · Specialist, each cell a symbol — yes, no, Own (only their own column, bookings,
+ * clients, earnings) or View (can see, can't change) — with a footnote number where a nuance needs words, and an ⓘ on
+ * the row where the action covers more than its name says. Read-only: editing permissions is Later (F-089). Where a
+ * row is one of `@yeral/domain/permissions`' rows, it says which, and a test keeps the two in step.
  */
-import type { Permission } from '@yeral/domain/permissions'
+import type { Level, Permission } from '@yeral/domain/permissions'
 
-/** Yes, no, or the words of a narrower reach (`settings.permissions.cells.*`). */
-export type PermissionCell =
-  | 'yes'
-  | 'no'
-  | 'own'
-  | 'ownColumn'
-  | 'perAnswers'
-  | 'ownAnswers'
-  | 'ownBookings'
-  | 'ownClients'
-  | 'ownEarnings'
-  | 'aboutThem'
-  | 'viewOnly'
-  | 'seeOwn'
+/** A symbol cell (`settings.permissions.cells.*` for the two chips). */
+export type PermissionCell = 'yes' | 'no' | 'own' | 'view'
+
+/** The numbered notes under the matrix (`settings.permissions.notes.n*`). */
+export type Footnote = 1 | 2 | 3 | 4
+export const FOOTNOTES: readonly Footnote[] = [1, 2, 3, 4]
 
 export type PermissionRowId =
   | 'calendar'
@@ -37,29 +30,36 @@ export type PermissionRowId =
   | 'team'
 
 export interface PermissionRow {
-  /** The row's words: `settings.permissions.rows.*`. */
+  /** The row's words: `settings.permissions.rows.*`; with `about`, `settings.permissions.about.*` behind its ⓘ. */
   id: PermissionRowId
   /** The domain's row it shows, if it is one. */
   permission?: Permission
   owner: PermissionCell
   admin: PermissionCell
   specialist: PermissionCell
+  /** A footnote number beside a level's symbol. */
+  notes?: Partial<Record<Level, Footnote>>
+  /** The row has an ⓘ saying what the action covers (`settings.permissions.about.*`, keyed like the row). */
+  about?: AboutRowId
 }
 
+/** The rows whose name doesn't say everything the action covers. */
+export type AboutRowId = Extract<PermissionRowId, 'bookings' | 'report' | 'clientsManage' | 'revenue' | 'settings' | 'team'>
+
 export const PERMISSION_ROWS: readonly PermissionRow[] = [
-  { id: 'calendar', permission: 'calendar', owner: 'yes', admin: 'yes', specialist: 'ownColumn' },
-  // who answers isn't the table's `answerRequests` alone: «Who answers requests?» decides (`canAnswerRequest`); the
-  // board draws the admin's check, the book says the setting narrows it too, so the admin's cell says so
-  { id: 'answer', owner: 'yes', admin: 'perAnswers', specialist: 'ownAnswers' },
-  { id: 'bookings', permission: 'bookings', owner: 'yes', admin: 'yes', specialist: 'own' },
-  { id: 'report', permission: 'noshow', owner: 'yes', admin: 'yes', specialist: 'ownBookings' },
-  { id: 'clients', permission: 'clients', owner: 'yes', admin: 'yes', specialist: 'ownClients' },
-  { id: 'clientsManage', owner: 'yes', admin: 'yes', specialist: 'no' },
-  { id: 'revenue', permission: 'revenue', owner: 'yes', admin: 'no', specialist: 'ownEarnings' },
-  { id: 'reviews', owner: 'yes', admin: 'yes', specialist: 'aboutThem' },
+  { id: 'calendar', permission: 'calendar', owner: 'yes', admin: 'yes', specialist: 'own', notes: { specialist: 2 } },
+  // who answers isn't the table's `answerRequests` alone: «Who answers requests?» decides (`canAnswerRequest`), so every
+  // level's symbol carries note 1
+  { id: 'answer', owner: 'yes', admin: 'yes', specialist: 'own', notes: { owner: 1, admin: 1, specialist: 1 } },
+  { id: 'bookings', permission: 'bookings', owner: 'yes', admin: 'yes', specialist: 'own', about: 'bookings' },
+  { id: 'report', permission: 'noshow', owner: 'yes', admin: 'yes', specialist: 'own', about: 'report' },
+  { id: 'clients', permission: 'clients', owner: 'yes', admin: 'yes', specialist: 'own' },
+  { id: 'clientsManage', owner: 'yes', admin: 'yes', specialist: 'no', about: 'clientsManage' },
+  { id: 'revenue', permission: 'revenue', owner: 'yes', admin: 'no', specialist: 'own', about: 'revenue' },
+  { id: 'reviews', owner: 'yes', admin: 'yes', specialist: 'own' },
   { id: 'reviewsReply', permission: 'reviewsReply', owner: 'yes', admin: 'yes', specialist: 'no' },
   { id: 'services', permission: 'services', owner: 'yes', admin: 'yes', specialist: 'no' },
-  { id: 'settings', permission: 'settings', owner: 'yes', admin: 'yes', specialist: 'no' },
-  { id: 'shifts', owner: 'yes', admin: 'viewOnly', specialist: 'seeOwn' },
-  { id: 'team', permission: 'team', owner: 'yes', admin: 'viewOnly', specialist: 'no' },
+  { id: 'settings', permission: 'settings', owner: 'yes', admin: 'yes', specialist: 'no', about: 'settings' },
+  { id: 'shifts', owner: 'yes', admin: 'view', specialist: 'own', notes: { specialist: 3 } },
+  { id: 'team', permission: 'team', owner: 'yes', admin: 'view', specialist: 'no', notes: { admin: 4 }, about: 'team' },
 ]

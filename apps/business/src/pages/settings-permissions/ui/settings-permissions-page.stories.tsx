@@ -6,7 +6,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { Workspace } from '@yeral/contract/team'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
@@ -84,7 +84,9 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The owner: the table read-only, a check, a dash or the narrower reach in each cell; Team gives the levels. */
+const body = within(document.body)
+
+/** The owner: a matrix of symbols — ✓, —, Own, View — with the key above, footnote numbers and the notes under it. */
 export const Owner: Story = {
   play: async ({ canvas }) => {
     const table = await canvas.findByRole('table', { name: 'Permissions by access level' })
@@ -94,7 +96,17 @@ export const Owner: Story = {
     const [owner, admin, specialist] = within(within(table).getByRole('row', { name: /See revenue/ })).getAllByRole('cell')
     await expect(owner).toHaveTextContent('Yes')
     await expect(admin).toHaveTextContent('No')
-    await expect(specialist).toHaveTextContent('Own earnings only')
+    await expect(specialist).toHaveTextContent('Own')
+    // a footnote number beside the symbol, and the note under the table
+    const calendar = within(within(table).getByRole('row', { name: /See everyone’s calendar/ })).getAllByRole('cell')[2]!
+    await expect(within(calendar).getByLabelText('note 2')).toHaveTextContent('2')
+    await expect(canvas.getByText('Other people’s time shows as “Busy”.')).toBeVisible()
+    await expect(canvas.getByText('Only their own — column, bookings, clients, earnings')).toBeVisible()
+    // ⓘ says what the action covers
+    await userEvent.click(within(table).getByRole('button', { name: 'About: See revenue' }))
+    await expect(await body.findByRole('dialog')).toHaveTextContent('Visit totals and the average check.')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument())
     await expect(canvas.getByRole('link', { name: 'Permissions' })).toHaveAttribute('aria-current', 'page')
     // the lead's «Team» (the menu has one too)
     const header = canvas.getByRole('heading', { level: 2, name: 'Permissions' }).parentElement!
@@ -103,28 +115,33 @@ export const Owner: Story = {
   },
 }
 
-/** An admin sees the same table: managing the team and shifts are «View only» for them. */
+/** An admin sees the same matrix: «View» on managing the team (note 4) and on shifts; who answers carries note 1. */
 export const Admin: Story = {
   args: { server: fakeApi(glow('admin')) },
   play: async ({ canvas }) => {
     const table = await canvas.findByRole('table', { name: 'Permissions by access level' })
     const [, admin, specialist] = within(within(table).getByRole('row', { name: /Manage the team/ })).getAllByRole('cell')
-    await expect(admin).toHaveTextContent('View only')
+    await expect(admin).toHaveTextContent('View4')
     await expect(specialist).toHaveTextContent('No')
+    const [, shifts] = within(within(table).getByRole('row', { name: /Shifts and time off/ })).getAllByRole('cell')
+    await expect(shifts).toHaveTextContent('View')
     // who answers depends on «Who answers requests?», for an admin too (book chapter 3)
-    const [, answers] = within(within(table).getByRole('row', { name: /Answer requests/ })).getAllByRole('cell')
-    await expect(answers).toHaveTextContent('Per “Who answers requests?”')
+    const [owner, answers] = within(within(table).getByRole('row', { name: /Answer requests/ })).getAllByRole('cell')
+    await expect(owner).toHaveTextContent('Yes1')
+    await expect(answers).toHaveTextContent('Yes1')
+    await expect(canvas.getByText(/^Follows “Who answers requests\?” in Booking rules/)).toBeVisible()
   },
 }
 
-/** The phone: no header; each row stacks, the name on top and every cell with its level's name, read too. */
+/** The phone: one card per action with the three levels as rows and the card's own note. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
-    const table = await canvas.findByRole('table', { name: 'Permissions by access level' })
-    await expect(within(table).queryByRole('columnheader', { name: 'Owner' })).toBeNull()
-    const [owner, , specialist] = within(within(table).getByRole('row', { name: /See revenue/ })).getAllByRole('cell')
-    await expect(owner).toHaveTextContent('OwnerYes')
-    await expect(specialist).toHaveTextContent('SpecialistOwn earnings only')
+    const revenue = await canvas.findByRole('region', { name: 'See revenue' })
+    await expect(canvas.queryByRole('table')).toBeNull()
+    await expect(revenue).toHaveTextContent('See revenueOwnerYesAdmin—NoSpecialistOwn')
+    const calendar = canvas.getByRole('region', { name: 'See everyone’s calendar' })
+    await expect(within(calendar).getByText('Other people’s time shows as “Busy”.')).toBeVisible()
+    await expect(canvas.getByRole('region', { name: 'Manage the team' })).toHaveTextContent('OwnerYesAdminView4Specialist—No')
   },
 }

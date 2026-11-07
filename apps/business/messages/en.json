@@ -753,40 +753,55 @@
       "changed": "Your page’s link is now {url}"
     },
     "permissions": {
-      "lead": "Permissions work by access level — give each person a level in <team>Team</team>.",
+      "lead": "Access levels are fixed. Each person gets one level on the member page in <team>Team</team>.",
       "table": "Permissions by access level",
-      "what": "What",
+      "what": "What they can do",
       "yes": "Yes",
       "no": "No",
       "noMark": "—",
-      "rows": {
-        "calendar": "See everyone’s calendar",
-        "answer": "Answer requests",
-        "bookings": "Add, move and cancel bookings; block time",
-        "report": "Report clients (no-show, late, rude)",
-        "clients": "See clients and their phone numbers",
-        "clientsManage": "Add and delete clients, “Phone only” switch",
-        "revenue": "See revenue (visit totals, average check)",
-        "reviews": "Read reviews",
-        "reviewsReply": "Reply to and report reviews",
-        "services": "Change services and prices",
-        "settings": "Change business settings (profile, rules, hours, link and QR)",
-        "shifts": "Shifts and time off",
-        "team": "Manage the team (invite, remove, access level, “Uses the app”)"
+      "key": {
+        "label": "Key",
+        "yes": "Yes",
+        "own": "Only their own — column, bookings, clients, earnings",
+        "view": "Can see, can’t change",
+        "no": "No"
       },
       "cells": {
         "own": "Own",
-        "ownColumn": "Own column (others’ time shows as “Busy”)",
-        "perAnswers": "Per “Who answers requests?”",
-        "ownAnswers": "Own — per “Who answers requests?”",
-        "ownBookings": "Own bookings",
-        "ownClients": "Own clients (with a booking with them)",
-        "ownEarnings": "Own earnings only",
-        "aboutThem": "About them",
-        "viewOnly": "View only",
-        "seeOwn": "See own"
+        "view": "View"
       },
-      "noApp": "Specialists who don’t use the app never sign in, so the table doesn’t apply to them."
+      "rows": {
+        "calendar": "See everyone’s calendar",
+        "answer": "Answer requests",
+        "bookings": "Add, move and cancel bookings",
+        "report": "Report clients",
+        "clients": "See clients and phone numbers",
+        "clientsManage": "Add and delete clients",
+        "revenue": "See revenue",
+        "reviews": "Read reviews",
+        "reviewsReply": "Reply to and report reviews",
+        "services": "Change services and prices",
+        "settings": "Change business settings",
+        "shifts": "Shifts and time off",
+        "team": "Manage the team"
+      },
+      "aboutLabel": "About: {row}",
+      "about": {
+        "bookings": "Also blocking time in the calendar.",
+        "report": "No-show, late, rude.",
+        "clientsManage": "Also the “Phone only” switch.",
+        "revenue": "Visit totals and the average check.",
+        "settings": "Business profile, booking rules, hours, link and QR.",
+        "team": "Invite, remove, access level, “Uses the app”."
+      },
+      "note": "note {n}",
+      "notes": {
+        "n1": "Follows “Who answers requests?” in Booking rules. Requests for people who don’t use the app go to the owner and admins.",
+        "n2": "Other people’s time shows as “Busy”.",
+        "n3": "They see their own shift and time off; only the owner changes them.",
+        "n4": "Admins can change which services each person does."
+      },
+      "noApp": "People who don’t use the app never sign in, so none of this applies to them."
     },
     "save": {
       "question": "Save your changes?",
@@ -1104,32 +1119,15 @@
       }
     },
     "team": {
-      "lead": "Clients see specialists in this order.",
+      "lead": "Clients see the people who take bookings in this order.",
       "adminNote": "You can view the team and change which services each person does. Only the owner adds and removes people and changes access levels, shifts and time off.",
       "columns": {
         "name": "Name",
         "level": "Access level",
+        "takesBookings": "Takes bookings",
         "services": "Services",
         "hours": "Hours",
         "status": "Status"
-      },
-      "sections": {
-        "specialists": {
-          "title": "Specialists",
-          "sub": "Clients see and pick"
-        },
-        "management": {
-          "title": "Management",
-          "sub": "They don’t take bookings — clients don’t see them"
-        },
-        "invites": {
-          "title": "Invites",
-          "sub": "Each invite works for {days, plural, one {# day} other {# days}}. They join when they accept it."
-        },
-        "former": {
-          "title": "No longer on the team",
-          "sub": "Their past bookings and reviews stay"
-        }
       },
       "hours": {
         "business": "Business hours",
@@ -1195,9 +1193,8 @@
         "expired": "Expired",
         "declined": "Declined",
         "cancelled": "Cancelled",
-        "daysLeft": "{n, plural, one {# day left} other {# days left}}",
-        "endedOn": "ended on {date}",
-        "untilAccept": "works without the app until they accept"
+        "invitedUntil": "Invited · until {date}",
+        "withDate": "{label} · {date}"
       },
       "services": "{n, plural, one {# service} other {# services}}",
       "you": "You",
@@ -1217,8 +1214,6 @@
       "leftChoose": "Choose",
       "reactivateAria": "Reactivate: {name}",
       "reactivated": "{name} is back on the team",
-      "reactivateCaption": "Reactivate restores {name}’s access and makes {name} bookable again.",
-      "signInWith": "They’ll see the invite when they sign in with {phone}",
       "actions": "{name}: actions",
       "reactivatedInvite": "{name} is back as invited — send a new invite so they can join",
       "linkTitle": "Invite link for {name}",
@@ -1360,6 +1355,7 @@
           "desk": "“Owner and admins” — specialists don’t answer"
         },
         "adminCap": "Admins always use the app.",
+        "cancel": "Cancel",
         "save": "Save",
         "saving": "Saving…",
         "saved": "{name}: changes saved",
@@ -1408,7 +1404,33 @@
         "saving": "Saving",
         "settledWith": "{name}’s bookings are settled · {sum}",
         "settled": "{name}’s bookings are settled"
-      }
+      },
+      "table": "Team",
+      "aboutTakesBookings": "About takes bookings",
+      "takesBookingsAbout": "Anyone with at least one service takes bookings — the owner and admins too. Clients see and book only these people. Add services on the member page.",
+      "takes": {
+        "yes": "Yes",
+        "no": "Doesn’t take bookings"
+      },
+      "filters": {
+        "search": "Name or phone number",
+        "level": "Access level",
+        "levels": {
+          "all": "Any access level",
+          "owner": "Owner",
+          "admin": "Admin",
+          "specialist": "Specialist"
+        },
+        "takes": "Takes bookings",
+        "takesOptions": {
+          "all": "Everyone",
+          "yes": "Takes bookings",
+          "no": "Doesn’t take bookings"
+        },
+        "clear": "Clear"
+      },
+      "count": "{n, plural, one {# person} other {# people}}",
+      "empty": "No one matches."
     }
   },
   "calendar": {

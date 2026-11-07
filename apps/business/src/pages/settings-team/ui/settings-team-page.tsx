@@ -1,20 +1,26 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { TeamMember } from '@yeral/contract/team'
-import { maskPhone } from '@yeral/domain/phone'
 import { INVITE_DAYS } from '@yeral/domain/team'
 import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
-import { Button } from '@yeral/ui/button'
+import { Button, IconButton } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
+import { cn } from '@yeral/ui/cn'
 import { CopyField } from '@yeral/ui/copy-field'
+import { InfoTip } from '@yeral/ui/info-tip'
+import { Input } from '@yeral/ui/input'
+import { useMediaQuery } from '@yeral/ui/media-query'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@yeral/ui/menu'
 import { Modal, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/modal'
+import { Pill } from '@yeral/ui/pill'
+import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
-import { textLink } from '@yeral/ui/text-link'
+import { Table, TableCell, TableColumnHeader, TableHeader, TableRow } from '@yeral/ui/table'
 import { toast } from '@yeral/ui/toast'
-import { Ellipsis, Info, UserMinus, UserPlus } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { Tooltip } from '@yeral/ui/tooltip'
+import { Check, Ellipsis, Info, RotateCcw, Send, UserMinus, UserPlus } from 'lucide-react'
+import { useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useAffectedCount } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
@@ -22,18 +28,18 @@ import { useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 import { inviteAgainForm, inviteNow } from '../model/invite'
-import { inviteDaysLeft, invitePending, leftAhead } from '../model/member'
+import { invitePending, leftAhead } from '../model/member'
 import { AddMember } from './add-member'
 import { MemberDrawer } from './member-drawer'
 import { RemoveMember } from './remove-member'
 
 /**
- * Settings → Team (B-Team `tab=team`, design §8 «Topar», §28.4 Team, book B-43–B-50): everyone in groups,
- * Specialists (clients see and pick them), Management (they take no bookings), the open and past Invites, and those no
- * longer on the team. A row says the person's access level, how many services they do, their hours (the business's,
- * or their own shift) and where they stand: Active, Invited (working without the app until they accept), Removed;
- * «Doesn't use the app». The owner adds someone («Add a team member»), gets an invite's link, resends or cancels it,
- * and reactivates someone removed; an administrator sees the team and can't change it here.
+ * Settings → Team (design v0.7 · B7-Team B9, book B-43–B-50): one table of everyone — the owner, admins and specialists,
+ * the open and past invites, and those no longer on the team — Name · Access level · Takes bookings · Services · Hours
+ * · Status. No «Management» group: whoever has a service takes bookings, the owner and admins too. A row opens the
+ * member page; a removed row has Reactivate; an open invite has its link, resend and cancel. Search and two filters
+ * narrow the table. The owner adds someone («Add a team member»); an administrator sees the team and can't change it
+ * here. Under 768 the people are list items.
  */
 export function SettingsTeamPage() {
   const { workspace, me } = useWorkspace()
@@ -49,17 +55,26 @@ export function SettingsTeamPage() {
   )
 }
 
-/** Clients pick from specialists and anyone doing a service; the rest manage (B-Team `kindOf`). */
-const takesBookings = (m: TeamMember, services: number) => m.level === 'specialist' || services > 0
+/** Clients see and book anyone with at least one service (B7-Team «Takes bookings» ⓘ). */
+const takesBookings = (services: number) => services > 0
 
-/** The six columns from 1280, where the pane is wide enough for them (B-Team `.tr`); under it each row stacks. */
-const COLUMNS = 'xl:grid-cols-[minmax(0,1.5fr)_104px_88px_minmax(0,1fr)_minmax(0,1.2fr)_40px]'
+const ALL = 'all'
+const LEVEL_FILTERS = ['all', 'owner', 'admin', 'specialist'] as const
+const TAKES_FILTERS = ['all', 'yes', 'no'] as const
+type Filters = { q: string; level: (typeof LEVEL_FILTERS)[number]; takes: (typeof TAKES_FILTERS)[number] }
+
+/** Name · Access level · Takes bookings · Services · Hours · Status (B7-Team `.tr.tm`). */
+const COLUMNS = 'minmax(0,1fr) 92px 128px 72px 112px 208px'
+
+/** The rows in the order the owner reads them: the people, then the invites, then those no longer on the team. */
+const ORDER: Record<TeamMember['status'], number> = { active: 0, invited: 1, removed: 2 }
 
 function TeamSettings({ slug, business, owner, myPhone }: { slug: string; business: string; owner: boolean; myPhone: string | null }) {
   const t = useTranslations('settings.team')
   const sdk = useSdk()
   const team = useQuery(sdk.team.list(slug))
   const menu = useQuery(sdk.settings.menu(slug))
+  const wide = useMediaQuery('(min-width: 768px)')
   // the invite link a send just returned, to copy (the api keeps only its hash, so it can't be read back later)
   const [link, setLink] = useState<{ name: string; url: string } | null>(null)
   const count = useAffectedCount()
@@ -73,13 +88,14 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
   const [openId, setOpenId] = useState<string | null>(null)
   const opener = useRef<HTMLElement | null>(null)
   const addButton = useRef<HTMLButtonElement>(null)
+  const [filters, setFilters] = useState<Filters>({ q: '', level: ALL, takes: ALL })
 
-  // the groups and counts come from the menu too: both, or the page waits
+  // the services per person come from the menu too: both, or the page waits
   if (!team.data && team.isError) throw team.error
   if (!menu.data && menu.isError) throw menu.error
   if (!team.data || !menu.data)
     return (
-      <SettingsPage section="team" lead={t('lead')}>
+      <SettingsPage section="team" wide lead={t('lead')}>
         <div className="flex justify-center py-16">
           <Spinner />
         </div>
@@ -90,17 +106,45 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
   for (const s of menu.data.groups.flatMap((g) => g.services)) for (const id of s.staffIds) counts.set(id, (counts.get(id) ?? 0) + 1)
   const servicesOf = (id: string) => counts.get(id) ?? 0
   const people = team.data.items
-  const live = people.filter((m) => m.status === 'active')
-  const sections = [
-    { id: 'specialists', rows: live.filter((m) => takesBookings(m, servicesOf(m.id))) },
-    { id: 'management', rows: live.filter((m) => !takesBookings(m, servicesOf(m.id))) },
-    { id: 'invites', rows: people.filter((m) => m.status === 'invited') },
-    { id: 'former', rows: people.filter((m) => m.status === 'removed') },
-  ] as const
+  const q = filters.q.trim().toLowerCase()
+  const digits = q.replace(/\D/g, '')
+  const rows = people
+    .filter((m) => {
+      if (filters.level !== ALL && m.level !== filters.level) return false
+      if (filters.takes !== ALL && takesBookings(servicesOf(m.id)) !== (filters.takes === 'yes')) return false
+      if (!q) return true
+      const names = [m.name, m.fullName ?? ''].join(' ').toLowerCase()
+      return names.includes(q) || (digits.length >= 2 && !!m.phone && m.phone.replace(/\D/g, '').includes(digits))
+    })
+    .sort((a, b) => ORDER[a.status] - ORDER[b.status])
+  const filtered = !!q || filters.level !== ALL || filters.takes !== ALL
+
+  const rowProps = (m: TeamMember) => ({
+    slug,
+    member: m,
+    owner,
+    me: !!myPhone && m.phone === myPhone,
+    services: servicesOf(m.id),
+    onLink: (url: string) => setLink({ name: m.fullName ?? m.name, url }),
+    onInviteAgain: (el: HTMLButtonElement) => {
+      // the focus comes back to the row's button when the window closes
+      againOpener.current = el
+      setAgain(m)
+      setAdding(true)
+    },
+    onOpen:
+      m.status === 'removed'
+        ? undefined
+        : (el: HTMLElement) => {
+            opener.current = el
+            setOpenId(m.id)
+          },
+  })
 
   return (
     <SettingsPage
       section="team"
+      wide
       lead={t('lead')}
       action={
         owner && (
@@ -144,52 +188,67 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
               {t('leftBanner', { name: m.name, what: count(leftAhead(m), 'and'), n: leftAhead(m).total })}
             </Callout>
           ))}
-      <div className="flex flex-col">
-        <div aria-hidden className={`hidden min-h-10 items-center gap-x-3 border-y border-n-200 px-2 xl:grid ${COLUMNS}`}>
-          {(['name', 'level', 'services', 'hours', 'status'] as const).map((k) => (
-            <span key={k} className="text-label text-n-500 uppercase">
-              {t(`columns.${k}`)}
-            </span>
-          ))}
-        </div>
-        {sections.map(
-          (s) =>
-            s.rows.length > 0 && (
-              <div key={s.id} role="group" aria-label={t(`sections.${s.id}.title`)}>
-                <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 border-b border-n-200 px-2 pt-5 pb-2">
-                  <span className="text-label text-n-500 uppercase">{t(`sections.${s.id}.title`)}</span>
-                  <span className="text-dense text-n-600">{t(`sections.${s.id}.sub`, { days: INVITE_DAYS })}</span>
-                </div>
-                {s.rows.map((m) => (
-                  <MemberRow
-                    key={m.id}
-                    slug={slug}
-                    member={m}
-                    owner={owner}
-                    me={!!myPhone && m.phone === myPhone}
-                    services={servicesOf(m.id)}
-                    pro={s.id === 'specialists' || (s.id === 'invites' && m.level === 'specialist')}
-                    onLink={(url) => setLink({ name: m.fullName ?? m.name, url })}
-                    onInviteAgain={(el) => {
-                      // the focus comes back to the row's link when the window closes
-                      againOpener.current = el
-                      setAgain(m)
-                      setAdding(true)
-                    }}
-                    onOpen={
-                      s.id === 'former'
-                        ? undefined
-                        : (el) => {
-                            opener.current = el
-                            setOpenId(m.id)
-                          }
-                    }
-                  />
-                ))}
-              </div>
-            ),
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          size="m"
+          aria-label={t('filters.search')}
+          placeholder={t('filters.search')}
+          className="w-full sm:w-80"
+          value={filters.q}
+          onChange={(e) => setFilters({ ...filters, q: e.target.value })}
+        />
+        <Select
+          size="m"
+          aria-label={t('filters.level')}
+          className="w-auto max-sm:hidden"
+          listWidth="content"
+          value={filters.level}
+          onValueChange={(v) => setFilters({ ...filters, level: v as Filters['level'] })}
+          options={LEVEL_FILTERS.map((value) => ({ value, label: t(`filters.levels.${value}`) }))}
+        />
+        <Select
+          size="m"
+          aria-label={t('filters.takes')}
+          className="w-auto max-sm:hidden"
+          listWidth="content"
+          value={filters.takes}
+          onValueChange={(v) => setFilters({ ...filters, takes: v as Filters['takes'] })}
+          options={TAKES_FILTERS.map((value) => ({ value, label: t(`filters.takesOptions.${value}`) }))}
+        />
+        {filtered && (
+          <Button variant="tertiary" size="s" onClick={() => setFilters({ q: '', level: ALL, takes: ALL })}>
+            {t('filters.clear')}
+          </Button>
         )}
+        <span className="flex-1" />
+        <span className="text-dense whitespace-nowrap text-n-500">{t('count', { n: rows.length })}</span>
       </div>
+      {rows.length === 0 ? (
+        <p className="m-0 py-8 text-center text-small text-n-600">{t('empty')}</p>
+      ) : wide ? (
+        <Table aria-label={t('table')} columns={COLUMNS} className="rounded-m border border-n-200 bg-n-0">
+          <TableHeader className="px-2">
+            <TableColumnHeader>{t('columns.name')}</TableColumnHeader>
+            <TableColumnHeader>{t('columns.level')}</TableColumnHeader>
+            <TableColumnHeader className="justify-center gap-1.5">
+              {t('columns.takesBookings')}
+              <InfoTip label={t('aboutTakesBookings')}>{t('takesBookingsAbout')}</InfoTip>
+            </TableColumnHeader>
+            <TableColumnHeader numeric>{t('columns.services')}</TableColumnHeader>
+            <TableColumnHeader>{t('columns.hours')}</TableColumnHeader>
+            <TableColumnHeader>{t('columns.status')}</TableColumnHeader>
+          </TableHeader>
+          {rows.map((m) => (
+            <MemberRow key={m.id} {...rowProps(m)} />
+          ))}
+        </Table>
+      ) : (
+        <ul aria-label={t('table')} className="m-0 flex list-none flex-col border-t border-n-200 p-0">
+          {rows.map((m) => (
+            <MemberItem key={m.id} {...rowProps(m)} />
+          ))}
+        </ul>
+      )}
       {owner && settling && (
         <RemoveMember
           slug={slug}
@@ -228,7 +287,7 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
         returnFocus={opener}
         onClose={() => setOpenId(null)}
         onRemoved={() => {
-          // their row moves to «No longer on the team» without the button that opened the drawer
+          // their row stays, dimmed, without the button that opened the drawer
           opener.current = addButton.current
           setOpenId(null)
         }}
@@ -248,53 +307,43 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
   )
 }
 
-/** «Business hours», or «Own shift» with «12:00–19:00», «varies by day» or «no working days». */
-function useHours(slug: string, member: TeamMember, pro: boolean) {
+/** «Business hours», the own shift's one time range («12:00–19:00»), or «Own shift» when it varies by day. */
+function useHours(slug: string, member: TeamMember, shown: boolean) {
   const t = useTranslations('settings.team.hours')
   const fmt = useFmt()
   const sdk = useSdk()
-  const schedule = useQuery({ ...sdk.team.schedule(slug, member.id), enabled: pro && member.status === 'active' })
-  if (!pro) return { hours: '—', sub: '' }
-  if (member.status === 'invited') return { hours: t('business'), sub: '' }
-  if (!schedule.data) return { hours: '', sub: '' }
+  const schedule = useQuery({ ...sdk.team.schedule(slug, member.id), enabled: shown && member.status === 'active' })
+  if (!shown) return '—'
+  if (member.status === 'invited') return t('business')
+  if (!schedule.data) return ''
   const shift = schedule.data.shift
-  if (!shift) return { hours: t('business'), sub: '' }
+  if (!shift) return t('business')
   const ranges = [...new Set(shift.flatMap((d) => (d ? [fmt.timeRange(d.open, d.close)] : [])))]
-  return { hours: t('own'), sub: ranges.length === 0 ? t('noDays') : ranges.length === 1 ? ranges[0]! : t('varies') }
+  return ranges.length === 1 ? ranges[0]! : t('own')
 }
 
-function MemberRow({
-  slug,
-  member: m,
-  owner,
-  me,
-  services,
-  pro,
-  onLink,
-  onOpen,
-  onInviteAgain,
-}: {
+interface RowProps {
   slug: string
   member: TeamMember
   owner: boolean
   me: boolean
   services: number
-  pro: boolean
   onLink: (url: string) => void
-  /** Opens their staff drawer (not for someone no longer on the team). */
+  /** Opens their member page (not for someone no longer on the team). */
   onOpen?: (from: HTMLElement) => void
-  /** Someone who left: «Invite again» opens Add a team member with them filled in (the link gets the focus back). */
+  /** Someone who left: «Invite again» opens Add a team member with them filled in (the button gets the focus back). */
   onInviteAgain: (from: HTMLButtonElement) => void
-}) {
+}
+
+/** What a row says and does, for the table and the phone's list alike. */
+function useMemberRow({ slug, member: m, owner, services, onLink, onInviteAgain }: RowProps) {
   const t = useTranslations('settings.team')
-  const levels = useTranslations('levels')
   const fmt = useFmt()
   const sdk = useSdk()
   const errorText = useErrorText()
   const resend = useMutation(sdk.team.resendInvite(slug))
   const cancel = useMutation(sdk.team.cancelInvite(slug))
   const reactivate = useMutation(sdk.team.reactivate(slug))
-  const { hours, sub: hoursSub } = useHours(slug, m, pro)
   const busy = resend.isPending || cancel.isPending || reactivate.isPending
 
   const name = m.fullName ?? m.name
@@ -307,24 +356,25 @@ function MemberRow({
   const pending = invitePending(m, now)
   // a specialist without the app who was sent an invite works as before until they accept
   const waiting = m.status === 'active' && pending && !m.joined
-  const daysLeft = m.invite ? inviteDaysLeft(m.invite, now) : 0
+  const shift = m.level === 'specialist' || takesBookings(services)
+  const hours = useHours(slug, m, shift && !former)
 
-  let status: { tone: 'on' | 'invited' | 'off'; label: string; sub?: string }
-  if (former)
-    status = {
-      tone: 'off',
-      label: left ? t('status.left') : t('status.removed'),
-      sub: m.ended ? (today(m.ended.at) === today(now) ? t('status.today') : fmt.dayMonth(today(m.ended.at))) : undefined,
-    }
-  else if (inviteRow)
+  // one StatusPill per row (B7-Team StaffStatus): Active · Doesn't use the app · Invited · until 21 Oct · Removed; an
+  // invite that ended and someone who left use the same slate pill
+  const endedOn = (at: number) => (today(at) === today(now) ? t('status.today') : fmt.shortDate(today(at)))
+  let status: { tone: 'success' | 'neutral' | 'warning' | 'slate'; label: string }
+  if (former) {
+    const label = left ? t('status.left') : t('status.removed')
+    status = { tone: 'slate', label: m.ended ? t('status.withDate', { label, date: endedOn(m.ended.at) }) : label }
+  } else if (inviteRow)
     status =
       state === 'expired'
-        ? { tone: 'off', label: t('status.expired'), sub: t('status.endedOn', { date: fmt.dayMonth(today(m.invite!.expiresAt)) }) }
+        ? { tone: 'slate', label: t('status.withDate', { label: t('status.expired'), date: fmt.shortDate(today(m.invite!.expiresAt)) }) }
         : state === 'declined' || state === 'cancelled'
-          ? { tone: 'off', label: t(`status.${state}`) }
-          : { tone: 'invited', label: t('status.invited'), sub: pending ? t('status.daysLeft', { n: daysLeft }) : undefined }
-  else if (waiting) status = { tone: 'invited', label: t('status.invited'), sub: t('status.untilAccept') }
-  else status = { tone: 'on', label: t('status.active') }
+          ? { tone: 'slate', label: t(`status.${state}`) }
+          : { tone: 'warning', label: t('status.invitedUntil', { date: fmt.shortDate(today(m.invite!.expiresAt)) }) }
+  else if (!m.hasApp) status = { tone: 'neutral', label: t('noApp') }
+  else status = { tone: 'success', label: t('status.active') }
 
   const act = (action: () => Promise<void>) => async () => {
     if (busy) return
@@ -351,123 +401,158 @@ function MemberRow({
     toast(back.status === 'active' ? t('reactivated', { name: m.name }) : t('reactivatedInvite', { name: m.name }))
   })
 
-  const link = !owner
-    ? null
-    : left
-      ? // not while their bookings wait for a choice: invited, they'd leave «Someone left» with the bookings unsettled
-        leftAhead(m).total > 0
-        ? null
-        : {
-            text: t('inviteAgain'),
-            aria: t('inviteAgainAria', { name }),
-            go: (el: HTMLButtonElement) => Promise.resolve(onInviteAgain(el)),
-          }
-      : former
-        ? { text: t('reactivate'), aria: t('reactivateAria', { name }), go: reactivateIt }
-        : inviteRow || waiting
-          ? pending
-            ? { text: t('copyLink'), aria: t('copyLinkAria', { name }), go: copyLink }
-            : { text: t('resend'), aria: t('resendAria', { name }), go: resendIt }
-          : null
-  const caption =
-    owner && former && !left
-      ? t('reactivateCaption', { name: m.name })
-      : inviteRow && pending && m.phone
-        ? t('signInWith', { phone: maskPhone(m.phone) })
-        : null
-  const servicesText = pro && !former ? t('services', { n: services }) : '—'
-  // an open invite names no phone (its caption does, masked); a past one shows it masked
-  const sub = me
-    ? t('you')
-    : inviteRow
-      ? [m.specialization, !pending && m.phone ? maskPhone(m.phone) : ''].filter(Boolean).join(' · ')
-      : (m.specialization ?? (m.phone ? fmt.phone(m.phone) : ''))
-  const meta = [
-    levels(m.level),
-    pro && !former ? servicesText : '',
-    pro && !former && hours ? [hours, hoursSub].filter(Boolean).join(' ') : '',
-  ]
-    .filter(Boolean)
-    .join(' · ')
-  const tone = { on: 'text-st-completed-ink', invited: 'text-st-pending-ink', off: 'text-st-cancelled-ink' }[status.tone]
-  const dot = { on: 'bg-st-completed-dot', invited: 'bg-st-pending-dot', off: 'bg-st-cancelled-dot' }[status.tone]
+  // the owner's action in the row: one icon button, or the «…» menu of an open invite (B8: «…» only with 2+ actions)
+  let action: ReactNode = null
+  if (owner) {
+    const icon = (label: string, go: (el: HTMLButtonElement) => unknown, child: ReactNode) => (
+      <IconButton variant="plain" size="s" label={label} aria-busy={busy || undefined} onClick={(e) => void go(e.currentTarget)}>
+        {child}
+      </IconButton>
+    )
+    if (left) {
+      // not while their bookings wait for a choice: invited, they'd leave «Someone left» with the bookings unsettled
+      if (leftAhead(m).total === 0) action = icon(t('inviteAgainAria', { name }), onInviteAgain, <UserPlus />)
+    } else if (former) action = icon(t('reactivateAria', { name }), reactivateIt, <RotateCcw />)
+    else if (inviteRow || waiting)
+      action = pending ? (
+        <Menu>
+          <MenuTrigger asChild>
+            <IconButton variant="plain" size="s" label={t('actions', { name })}>
+              <Ellipsis />
+            </IconButton>
+          </MenuTrigger>
+          <MenuContent>
+            <MenuItem onSelect={() => void copyLink()}>{t('copyLink')}</MenuItem>
+            <MenuItem onSelect={() => void resendIt()}>{t('resend')}</MenuItem>
+            <MenuItem onSelect={() => void cancelIt()} className="text-danger-ink">
+              {t('cancelInvite')}
+            </MenuItem>
+          </MenuContent>
+        </Menu>
+      ) : (
+        icon(t('resendAria', { name }), resendIt, <Send />)
+      )
+  }
 
+  return { name, former, inviteRow, takes: takesBookings(services) && !former, hours, status, action }
+}
+
+/** The status as one pill with a 6 px dot (B7-Team `.pill`). */
+function StatusPill({ tone, label }: { tone: 'success' | 'neutral' | 'warning' | 'slate'; label: string }) {
+  const dot = { success: 'bg-st-completed-dot', neutral: 'bg-n-500', warning: 'bg-st-pending-dot', slate: 'bg-st-cancelled-dot' }[tone]
   return (
-    <div
-      className={`relative grid min-h-16 grid-cols-[minmax(0,1fr)_40px] items-center gap-x-3 gap-y-1 border-b border-n-200 px-1 py-2.5 text-small xl:px-2 xl:py-2 ${COLUMNS} ${former ? 'text-n-600' : ''} ${onOpen ? 'hover:bg-n-50' : ''}`}
+    <Pill tone={tone} size="m" className="gap-1.5 pr-2.5 pl-2" icon={<span aria-hidden className={`size-1.5 rounded-pill ${dot}`} />}>
+      {label}
+    </Pill>
+  )
+}
+
+/** The name as the row's button: one line, truncating, with the job title in a tooltip; the whole row opens the member. */
+function NameButton({
+  name,
+  title,
+  onOpen,
+  className,
+}: {
+  name: string
+  title: string | null
+  onOpen?: (from: HTMLElement) => void
+  className?: string
+}) {
+  const text = onOpen ? (
+    <button
+      type="button"
+      aria-haspopup="dialog"
+      onClick={(e) => onOpen(e.currentTarget)}
+      className={cn(
+        'block min-w-0 cursor-pointer truncate border-0 bg-transparent p-0 text-left after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:shadow-focus-inset',
+        className,
+      )}
     >
-      <div className="flex min-w-0 items-center gap-3">
-        <Avatar name={m.name} src={m.photo?.url} size={32} letters={1} tone={former || inviteRow ? 'neutral' : 'tint'} decorative />
-        <span className="flex min-w-0 flex-col gap-0.5">
-          {onOpen ? (
-            // the whole row opens the drawer (B-Team `.tr`); its link and menu sit above
-            <button
-              type="button"
-              aria-haspopup="dialog"
-              onClick={(e) => onOpen(e.currentTarget)}
-              className="cursor-pointer self-start border-0 bg-transparent p-0 text-left text-body leading-5 font-semibold text-n-900 after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:shadow-[inset_0_0_0_2px_var(--color-a-400)]"
-            >
-              {name}
-            </button>
-          ) : (
-            <span className="text-body leading-5 font-semibold">{name}</span>
+      {name}
+    </button>
+  ) : (
+    <span className={cn('block min-w-0 truncate', className)}>{name}</span>
+  )
+  return title ? <Tooltip content={title}>{text}</Tooltip> : text
+}
+
+function MemberRow(props: RowProps) {
+  const { member: m, owner, me, services, onOpen } = props
+  const t = useTranslations('settings.team')
+  const levels = useTranslations('levels')
+  const { name, former, inviteRow, takes, hours, status, action } = useMemberRow(props)
+  return (
+    <TableRow className={cn('px-2', former && 'text-n-600 hover:bg-transparent')}>
+      <TableCell className="relative flex-row items-center gap-2.5">
+        <Avatar name={m.name} src={m.photo?.url} size={28} letters={1} tone={former || inviteRow ? 'neutral' : 'tint'} decorative />
+        <NameButton
+          name={name}
+          title={m.specialization}
+          onOpen={onOpen}
+          className={cn('font-medium', former ? 'text-n-600' : 'text-n-900')}
+        />
+        {me && <span className="flex-none text-dense text-n-500">{t('you')}</span>}
+      </TableCell>
+      <TableCell>{levels(m.level)}</TableCell>
+      <TableCell className="items-center justify-center">
+        {takes ? (
+          <>
+            <Check aria-hidden strokeWidth={2} className="size-4.5 text-n-900" />
+            <span className="sr-only">{t('takes.yes')}</span>
+          </>
+        ) : (
+          <>
+            <span aria-hidden className="text-[16px]/5 text-n-500">
+              —
+            </span>
+            <span className="sr-only">{t('takes.no')}</span>
+          </>
+        )}
+      </TableCell>
+      <TableCell numeric className={cn('pr-6.5', !takes && 'text-n-500')}>
+        {takes ? services : '—'}
+      </TableCell>
+      <TableCell className={cn('truncate', hours === '—' && 'text-n-500')}>{hours}</TableCell>
+      <TableCell className="relative z-1 flex-row items-center gap-1">
+        <StatusPill {...status} />
+        {owner && action}
+      </TableCell>
+    </TableRow>
+  )
+}
+
+/** Under 768 (B7-Team 390 `.li2`): avatar 36, the name with the level on the right, the job and services under it. */
+function MemberItem(props: RowProps) {
+  const { member: m, me, services, onOpen } = props
+  const t = useTranslations('settings.team')
+  const levels = useTranslations('levels')
+  const { name, former, inviteRow, takes, status, action } = useMemberRow(props)
+  const line = takes ? [m.specialization, t('services', { n: services })].filter(Boolean).join(' · ') : t('takes.no')
+  return (
+    <li className={cn('relative flex h-17 items-center gap-3 border-b border-n-200 px-4', former && 'text-n-600')}>
+      <Avatar name={m.name} src={m.photo?.url} size={36} letters={1} tone={former || inviteRow ? 'neutral' : 'tint'} decorative />
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="flex items-center gap-3">
+          <NameButton
+            name={name}
+            title={null}
+            onOpen={onOpen}
+            className={cn('flex-1 text-[15px]/5 font-medium', former ? 'text-n-600' : 'text-n-900')}
+          />
+          {me && <span className="-ml-2 flex-none text-dense text-n-500">{t('you')}</span>}
+          <span className="flex-none text-small font-medium text-n-900">{levels(m.level)}</span>
+        </span>
+        <span className="flex items-center gap-3">
+          <span className="min-w-0 flex-1 truncate text-dense text-n-500">{line}</span>
+          {(status.tone !== 'success' || action) && (
+            <span className="relative z-1 flex flex-none items-center gap-1">
+              {status.tone !== 'success' && <StatusPill {...status} />}
+              {action}
+            </span>
           )}
-          {sub && <span className="text-dense text-n-600">{sub}</span>}
-          <span className="text-dense text-n-600 xl:hidden">{meta}</span>
         </span>
-      </div>
-      <div className="hidden xl:block">
-        <span className="inline-flex min-h-6.5 items-center rounded-pill border border-n-200 bg-group px-2.5 text-dense font-semibold text-n-900">
-          {levels(m.level)}
-        </span>
-      </div>
-      <span className="hidden xl:block">{servicesText}</span>
-      <span className="hidden flex-col xl:flex">
-        <span>{pro && !former ? hours || '…' : '—'}</span>
-        {pro && !former && hoursSub && <span className="text-dense text-n-600">{hoursSub}</span>}
       </span>
-      <div className="col-start-1 row-start-2 flex min-w-0 flex-row flex-wrap items-center gap-x-2.5 gap-y-0.5 pl-11 xl:col-start-auto xl:row-start-auto xl:flex-col xl:items-start xl:pl-0">
-        <span className={`inline-flex items-center gap-2 text-small font-semibold ${tone}`}>
-          <span aria-hidden className={`size-1.5 rounded-pill ${dot}`} />
-          {status.label}
-        </span>
-        {status.sub && <span className="text-dense text-n-600">{status.sub}</span>}
-        {m.level === 'specialist' && !m.hasApp && !former && !inviteRow && (
-          <span className="inline-flex items-center rounded-pill bg-n-100 px-1.75 text-[11px] leading-4 font-semibold whitespace-nowrap text-n-600">
-            {t('noApp')}
-          </span>
-        )}
-        {link && (
-          <button
-            type="button"
-            aria-label={link.aria}
-            aria-busy={busy || undefined}
-            onClick={(e) => void link.go(e.currentTarget)}
-            className={`${textLink} relative z-1 -ml-2 min-h-8 px-2 py-1 text-left text-dense`}
-          >
-            {link.text}
-          </button>
-        )}
-      </div>
-      <div className="relative z-1 col-start-2 row-start-1 flex justify-end xl:col-start-auto xl:row-start-auto">
-        {owner && inviteRow && pending && (
-          <Menu>
-            <MenuTrigger asChild>
-              <Button variant="plain" size="s" iconOnly aria-label={t('actions', { name })}>
-                <Ellipsis />
-              </Button>
-            </MenuTrigger>
-            <MenuContent>
-              <MenuItem onSelect={() => void copyLink()}>{t('copyLink')}</MenuItem>
-              <MenuItem onSelect={() => void resendIt()}>{t('resend')}</MenuItem>
-              <MenuItem onSelect={() => void cancelIt()} className="text-danger-ink">
-                {t('cancelInvite')}
-              </MenuItem>
-            </MenuContent>
-          </Menu>
-        )}
-      </div>
-      {caption && <span className="col-span-full pl-11 text-dense text-n-600">{caption}</span>}
-    </div>
+    </li>
   )
 }
