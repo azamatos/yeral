@@ -31,7 +31,7 @@ test('a search lists places with free times, and a time opens the booking at tha
 
 test('a search for words no place has says so', async ({ page }) => {
   await page.goto(`${CLIENT_URL}/en/search?what=zzzzzz`)
-  await expect(page.getByText('No free time here')).toBeVisible()
+  await expect(page.getByText('No places for “zzzzzz”')).toBeVisible()
 })
 
 test('search engines get a sitemap, robots and a business’s structured data', async ({ page, request }) => {

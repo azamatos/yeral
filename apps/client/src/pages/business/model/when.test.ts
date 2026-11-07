@@ -1,23 +1,12 @@
 import { epochOf } from '@yeral/domain/time'
 import { createFmt } from '@yeral/i18n'
 import { describe, expect, it } from 'vitest'
-import { openLine, weekRows } from './when'
+import { weekRows } from './when'
 
 const fmt = createFmt('en')
 const week = (open: number, close: number) => Array.from({ length: 7 }, () => ({ open, close, break: null }))
-const words = (key: string, values?: Record<string, string>) => `${key}${values ? ` ${Object.values(values).join(' ')}` : ''}`
 
 // 2026-10-23 is a Friday, 2026-10-24 a Saturday
-describe('the open line', () => {
-  it('says until when it is open, or when it opens', () => {
-    expect(openLine({ open: true, until: 1200 }, '2026-10-23', fmt, words)).toEqual({ text: 'openUntil 20:00', isOpen: true })
-    expect(openLine({ open: false, inDays: 0, at: 540 }, '2026-10-23', fmt, words).text).toBe('opensToday 09:00')
-    expect(openLine({ open: false, inDays: 1, at: 540 }, '2026-10-23', fmt, words).text).toBe('opensTomorrow 09:00')
-    expect(openLine({ open: false, inDays: 3, at: 540 }, '2026-10-23', fmt, words).text).toBe('opensOn Monday 09:00')
-    expect(openLine({ open: false, inDays: null, at: null }, '2026-10-23', fmt, words).text).toBe('closed')
-  })
-})
-
 describe('the hours table', () => {
   const at = epochOf('2026-10-23', 600) // a Friday
 

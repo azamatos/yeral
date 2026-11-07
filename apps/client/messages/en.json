@@ -209,11 +209,12 @@
     "nothing": "No place found"
   },
   "businessCard": {
-    "line": "{category} · {street}",
-    "lineFar": "{line} · {distance}",
+    "line": "{category} · {distance}",
     "from": "from {price}",
     "bookAt": "Book {name} at {time}",
-    "more": "+{n}"
+    "bookOn": "Book {name}, {day} {time}",
+    "more": "+{n}",
+    "moreTimes": "{n, plural, one {# more time} other {# more times}}"
   },
   "search": {
     "title": "Search",
@@ -244,8 +245,12 @@
     },
     "nothing": "No free time here",
     "nothingHint": "Widen the area, pick another day or clear the filters.",
+    "noPlacesFor": "No places for “{what}”",
+    "noPlacesForNear": "No places for “{what}” near you",
+    "checkSpelling": "Check the spelling, or try one of these.",
     "tryTomorrow": "Try tomorrow",
-    "widen": "Make it {km} km",
+    "furtherAway": "Search further away",
+    "clearSearch": "Clear search",
     "clearFilters": "Clear filters",
     "showMore": "Show more",
     "map": {

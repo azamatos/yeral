@@ -2,7 +2,7 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import type { Category } from '@yeral/contract/catalog'
 import { DEFAULT_RADIUS_KM } from '@yeral/domain/geo'
-import { today } from '@yeral/domain/time'
+import { addDays, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { ChipRadioGroup } from '@yeral/ui/chip'
@@ -14,14 +14,14 @@ import type { MapArea } from '@yeral/ui/map-frame'
 import { useMediaQuery } from '@yeral/ui/media-query'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
 import { Skeleton } from '@yeral/ui/skeleton'
-import { List, Map as MapIcon, SearchX } from 'lucide-react'
+import { List, Map as MapIcon, MapPin, SearchX } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BusinessRow } from '@/entities/business'
 import { LocationBanner, placeAddress, usePlace, WhereField, type Place } from '@/features/pick-place'
 import { useSdk } from '@yeral/sdk/react'
 import { wrap } from '@/shared/ui'
-import { apiSearch, CLEARED, dayOf, DAYS, filtered, widerRadius, type Day, type SearchAddress } from '../model/search'
+import { apiSearch, canWiden, CLEARED, dayOf, DAYS, filtered, WIDEST_RADIUS_KM, type Day, type SearchAddress } from '../model/search'
 import { ResultsMap } from './results-map'
 import { ResultsToolbar } from './results-toolbar'
 
@@ -75,7 +75,13 @@ export function SearchPage({ category }: { category?: Category }) {
   const name = category?.name
   const title = nearby ? (name ? t('nearName', { name }) : t('near')) : (name ?? t('popular'))
   const radius = address.r ?? DEFAULT_RADIUS_KM
-  const wider = nearby ? widerRadius(radius) : undefined
+  // «Search further away» (C7-Home nothing found): around a position, straight to the widest radius
+  const further = nearby && canWiden(radius)
+  // the day the rows show times for; over a week a row's later day is named on its first time
+  const from = day === 'tomorrow' ? addDays(today(now), 1) : day === 'date' ? (address.date ?? today(now)) : today(now)
+  const empty = !list.isPending && rows.length === 0
+  // the words found nothing (C7-Home `SearchNoResults`): the toolbar goes, the spelling and a wider search are offered
+  const noMatch = empty && !!address.what
   const place = (next: Place) => {
     located.pick(next)
     go({ near: undefined, city: undefined, area: undefined, r: undefined, ...placeAddress(next) })
@@ -151,13 +157,15 @@ export function SearchPage({ category }: { category?: Category }) {
         </div>
 
         <h1 className="m-0 text-[28px] leading-[34px] font-bold tracking-[-0.02em] text-n-900">{title}</h1>
-        <ResultsToolbar
-          address={address}
-          located={nearby}
-          total={total}
-          count={first && t(`count.${day}`, { n: total, date: address.date ? fmt.shortWeekdayDate(address.date) : '' })}
-          onChange={go}
-        />
+        {!noMatch && (
+          <ResultsToolbar
+            address={address}
+            located={nearby}
+            total={total}
+            count={first && t(`count.${day}`, { n: total, date: address.date ? fmt.shortWeekdayDate(address.date) : '' })}
+            onChange={go}
+          />
+        )}
 
         <LocationBanner
           unknown={located.unknown && !addressed}
@@ -182,25 +190,38 @@ export function SearchPage({ category }: { category?: Category }) {
               </div>
             ))}
           </div>
-        ) : rows.length === 0 ? (
+        ) : empty ? (
           <EmptyState
+            bordered={false}
             icon={<SearchX aria-hidden />}
-            title={t('nothing')}
-            description={t('nothingHint')}
+            title={noMatch ? t(nearby ? 'noPlacesForNear' : 'noPlacesFor', { what: address.what ?? '' }) : t('nothing')}
+            description={noMatch ? t('checkSpelling') : t('nothingHint')}
             action={
-              <span className="flex flex-wrap justify-center gap-2">
-                {wider && (
-                  <Button variant="secondary" size="s" onClick={() => go({ r: wider })}>
-                    {t('widen', { km: wider })}
+              <span className="flex flex-wrap justify-center gap-3">
+                {further && (
+                  <Button variant="secondary" onClick={() => go({ r: WIDEST_RADIUS_KM })}>
+                    <MapPin aria-hidden />
+                    {t('furtherAway')}
                   </Button>
                 )}
-                {day !== 'tomorrow' && (
-                  <Button variant="secondary" size="s" onClick={() => go({ day: 'tomorrow' })}>
+                {!noMatch && day !== 'tomorrow' && (
+                  <Button variant="secondary" onClick={() => go({ day: 'tomorrow' })}>
                     {t('tryTomorrow')}
                   </Button>
                 )}
+                {noMatch && (
+                  <Button
+                    variant="tertiary"
+                    onClick={() => {
+                      setTyped('')
+                      go({ what: undefined })
+                    }}
+                  >
+                    {t('clearSearch')}
+                  </Button>
+                )}
                 {filtered(address) && (
-                  <Button variant="tertiary" size="s" onClick={() => go(CLEARED)}>
+                  <Button variant="tertiary" onClick={() => go(CLEARED)}>
                     {t('clearFilters')}
                   </Button>
                 )}
@@ -209,16 +230,17 @@ export function SearchPage({ category }: { category?: Category }) {
           />
         ) : (
           <>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col">
               {rows.map((card) => (
                 <div
                   key={card.slug}
                   id={`row-${card.slug}`}
                   onMouseEnter={() => setHot(card.slug)}
                   onMouseLeave={() => setHot(null)}
-                  className={cn('-mx-3 rounded-card px-3', hot === card.slug && 'bg-a-50')}
+                  // the row and its pin light each other (C7-Home: hover n-50, the pin ink)
+                  className={cn('-mx-3 rounded-card px-3', hot === card.slug && 'bg-n-50')}
                 >
-                  <BusinessRow card={card} />
+                  <BusinessRow card={card} from={from} className="border-t border-n-200" />
                 </div>
               ))}
             </div>
@@ -255,7 +277,7 @@ export function SearchPage({ category }: { category?: Category }) {
           <div className="flex flex-none snap-x gap-3 overflow-x-auto border-t border-n-200 bg-n-0 px-4 py-3">
             {rows.map((card) => (
               <div key={card.slug} id={`card-${card.slug}`} className="w-[88%] flex-none snap-center">
-                <BusinessRow card={card} />
+                <BusinessRow card={card} from={from} />
               </div>
             ))}
           </div>

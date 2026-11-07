@@ -84,8 +84,11 @@ export function nearOf(near: string | undefined): { lat: number; lng: number } |
   return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : undefined
 }
 
-/** The next wider radius, for the empty state; none past the last. */
-export const widerRadius = (r: number = DEFAULT_RADIUS_KM) => RADIUS_OPTIONS_KM.find((km) => km > r)
+/** The widest radius the api takes: «Search further away» (C7-Home nothing found) goes straight to it. */
+export const WIDEST_RADIUS_KM = Math.max(...RADIUS_OPTIONS_KM)
+
+/** Whether a search around a position can go further: short of the widest radius. */
+export const canWiden = (r: number = DEFAULT_RADIUS_KM) => r < WIDEST_RADIUS_KM
 
 /**
  * The day the page shows: the toggle's day, else a calendar day from Home's When — today or tomorrow by their names,

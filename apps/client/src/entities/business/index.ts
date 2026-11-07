@@ -1,6 +1,8 @@
+export { openLine, type OpenState } from './model/open-line'
 export { useCardLine } from './ui/business-meta'
 export { BusinessRow } from './ui/business-row'
 export { BusinessTile } from './ui/business-tile'
 export { ChangedNotice, type ChangedSinceLastVisit } from './ui/changed-notice'
 export { matchIn, searchServices, type GroupResult, type Match, type SearchResult, type ServiceMatch } from './model/search-services'
+export { StatusPill } from './ui/status-pill'
 export { TimeChips } from './ui/time-chips'
