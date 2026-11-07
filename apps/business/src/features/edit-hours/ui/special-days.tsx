@@ -14,13 +14,14 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@yeral/ui/menu'
 import { Modal, ModalActions, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
 import { SettingsSection, SettingsSectionTitle } from '@yeral/ui/settings-layout'
-import { TimeRangeField } from '@yeral/ui/time-range'
+import { Switch } from '@yeral/ui/switch'
 import { toast } from '@yeral/ui/toast'
 import { Calendar, CircleAlert, Ellipsis, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useDatePickerWords, useDateSpan, useDayName, useErrorText } from '@/shared/i18n'
+import { HoursRow } from './hours-row'
 import {
   dateProblem,
   dayOf,
@@ -347,36 +348,30 @@ function SpecialDayModal({
         onChange={(e) => set({ yearly: e.target.checked })}
         className="min-h-11 self-start"
       />
-      <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
-        <legend className="mb-1.5 p-0 text-dense font-semibold text-n-900">{draft.multi ? t('onThoseDays') : t('thatDay')}</legend>
-        <div className="flex flex-wrap gap-x-6">
-          <Radio
-            name={`${ids}-kind`}
-            label={t('closed')}
-            checked={draft.closed}
-            onChange={() => set({ closed: true })}
-            className="min-h-11"
-          />
-          <Radio
-            name={`${ids}-kind`}
-            label={t('otherHours')}
-            checked={!draft.closed}
-            onChange={() => set({ closed: false })}
-            className="min-h-11"
-          />
+      {/* «Closed all day» on by default (most special days are closures); off shows that day's times as a day row (B7-Hours) */}
+      <div className="flex flex-col gap-2">
+        <div className="flex min-h-10 items-center justify-between gap-4">
+          <span id={`${ids}-closed`} className="text-dense font-semibold text-n-900">
+            {t('closedAllDay')}
+          </span>
+          <Switch checked={draft.closed} onCheckedChange={(closed) => set({ closed })} aria-labelledby={`${ids}-closed`} />
         </div>
         {!draft.closed && (
-          <TimeRangeField
-            value={draft.hours}
-            onChange={(hours) => set({ hours })}
-            fromLabel={t('opens')}
-            toLabel={t('closes')}
-            nextDay={(time) => h('nextDay', { time })}
-            step={HOURS_STEP}
+          <HoursRow
+            name={t('hours')}
+            hours={draft.hours}
+            break={null}
+            breaks={false}
+            onChange={({ hours }) => set({ hours })}
+            closedText={t('closed')}
             error={nightText || undefined}
+            step={HOURS_STEP}
+            labels={{ opens: t('opens'), closes: t('closes') }}
+            nextDay={(time) => h('nextDay', { time })}
+            className="py-0"
           />
         )}
-      </fieldset>
+      </div>
       {overlap && (
         <Callout tone="warning" icon={<CircleAlert />} title={t('overlap', { name: overlap.name, winner: overlap.winner })} role="status">
           {t('overlapRule')}

@@ -350,7 +350,7 @@ export const SpecialDayProblems: Story = {
     else await expect(body.getByRole('button', { name: 'Previous month' })).toBeDisabled()
     await userEvent.keyboard('{Escape}')
     await pickDate(modal, 'Date', weekdayAhead(12))
-    await userEvent.click(modal.getByRole('radio', { name: 'Different hours' }))
+    await userEvent.click(modal.getByRole('switch', { name: 'Closed all day' }))
     await typeTime(modal.getByRole('combobox', { name: 'Opens' }), '20:00')
     await typeTime(modal.getByRole('combobox', { name: 'Closes' }), '10:00')
     await expect(await modal.findByText(/opens\. Pick an earlier time\.$/)).toBeVisible()
@@ -417,3 +417,31 @@ export const DeleteOverBookings: Story = {
     await waitFor(() => expect(canvas.queryByText('Stocktake')).toBeNull())
   },
 }
+
+/** A break is the gap between two times: Add break splits Monday at 13:00–14:00, × joins the two again (B7-Hours). */
+export const AddBreak: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Monday: add break' }))
+    await expect(canvas.getByRole('combobox', { name: 'Monday: closes' })).toHaveDisplayValue('13:00')
+    await expect(canvas.getByRole('combobox', { name: 'Monday, 2nd time opens' })).toHaveDisplayValue('14:00')
+    await expect(canvas.getByRole('combobox', { name: 'Monday, 2nd time closes' })).toHaveDisplayValue('20:00')
+    await expect(canvas.queryByRole('button', { name: 'Monday: add break' })).not.toBeInTheDocument()
+    await userEvent.click(canvas.getByRole('button', { name: /^Monday: remove the break/ }))
+    await waitFor(() => expect(canvas.getByRole('combobox', { name: 'Monday: closes' })).toHaveDisplayValue('20:00'))
+    await expect(canvas.queryByRole('combobox', { name: 'Monday, 2nd time opens' })).not.toBeInTheDocument()
+  },
+}
+
+/** The first time ends after the second starts: the row says so and Save waits. */
+export const InvalidBreak: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Monday: add break' }))
+    await typeTime(canvas.getByRole('combobox', { name: 'Monday: closes' }), '15:00')
+    await expect(await canvas.findByRole('alert')).toHaveTextContent('The break must end after it starts.')
+    await expect(canvas.getByRole('combobox', { name: 'Monday, 2nd time opens' })).toHaveAttribute('aria-invalid', 'true')
+    await expect(within(canvas.getByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' })).toBeDisabled()
+  },
+}
+
+/** Under 1280 the row is narrow: the times under the day's name, one per line, Add break at the end of its line. */
+export const Tablet: Story = { globals: { viewport: { value: 'sm' } } }

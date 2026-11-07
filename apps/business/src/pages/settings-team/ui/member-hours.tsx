@@ -11,15 +11,12 @@ import { Checkbox } from '@yeral/ui/checkbox'
 import { DatePicker } from '@yeral/ui/date-picker'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
-import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
-import { Switch } from '@yeral/ui/switch'
-import { textLink } from '@yeral/ui/text-link'
-import { TimeRangeField } from '@yeral/ui/time-range'
+import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
 import { toast } from '@yeral/ui/toast'
-import { CalendarOff, Plus, Trash2 } from 'lucide-react'
+import { CalendarOff, Trash2 } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { HoursAffectedBookings, type AffectedChoice } from '@/features/edit-hours'
+import { HoursAffectedBookings, HoursRow, type AffectedChoice } from '@/features/edit-hours'
 import { useSdk } from '@/shared/api'
 import { DAY_OFF_NOTE_MAX } from '@/shared/config'
 import { useDatePickerWords, useDateSpan, useDayName, useErrorText } from '@/shared/i18n'
@@ -27,22 +24,18 @@ import { dayHours, dayProblem, switchShift, works, type ShiftForm } from '../mod
 
 type Business = readonly (WeekdayHours | null)[]
 
-/** A break's place: 13:00–13:40 when it fits with time on both sides (B-Team `addBreak`), else 40 minutes mid-shift. */
-function newBreak({ open, close }: { open: number; close: number }) {
-  if (open < 780 && close > 820) return { start: 780, end: 820 }
-  const start = open + Math.max(0, Math.floor((close - open - 40) / 20) * 10)
-  return { start, end: Math.min(start + 40, close) }
-}
-
 /**
- * The staff drawer's working hours (B-Team `tabHours`, design §28.4 «Staff drawer · Hours», book B-47): «Business
- * hours» (follows them) or «Own shift» (own hours per day; within the business hours, when the business is closed a
- * shift doesn't open bookings), a break per day either way. Saved with the drawer's Save. The administrator reads it.
+ * The staff drawer's working hours (B7-Hours · B1.2, book B-47): Segmented «Business hours · Own shift». Business
+ * hours has nothing to set: the days read as text. Own shift starts from a copy of the business hours, a row per day
+ * (`HoursRow`, the drawer's narrow layout) with the business window as a faint line under it — within the business
+ * hours: when the business is closed, a shift doesn't open bookings — and a break as the gap between two times.
+ * Saved with the drawer's Save. The administrator reads it.
  */
 export function ShiftEditor({
   form,
   saved,
   business,
+  businessName,
   owner,
   name,
   onChange,
@@ -51,6 +44,7 @@ export function ShiftEditor({
   /** The week as saved: back on «Own shift», a saved own shift comes back as it was. */
   saved: ShiftForm
   business: Business
+  businessName: string
   owner: boolean
   name: string
   onChange: (form: ShiftForm) => void
@@ -62,39 +56,16 @@ export function ShiftEditor({
   const id = useId()
   const setDay = (i: number, patch: Partial<ShiftForm['days'][number]>) =>
     onChange({ ...form, days: form.days.map((d, j) => (j === i ? { ...d, ...patch } : d)) })
-
-  if (!owner)
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-dense font-semibold text-n-900">{t('working')}</span>
-          <span className="text-body font-semibold text-n-900">{form.own ? t('own') : t('business')}</span>
-        </div>
-        <div className="flex flex-col border-t border-n-200">
-          {form.days.map((d, i) => {
-            const hours = dayHours(form, i, business)
-            return (
-              <div key={i} className="flex justify-between gap-3 border-b border-n-200 py-2.5 text-small">
-                <span>{dayName(i)}</span>
-                <span className="text-right">
-                  {hours
-                    ? [
-                        fmt.timeRange(hours.open, hours.close),
-                        d.break ? t('breakRo', { time: fmt.timeRange(d.break.start, d.break.end) }) : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')
-                    : business[i]
-                      ? t('dayOff')
-                      : h('closed')}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-        <p className="m-0 text-dense text-n-600">{form.own ? t('ownCaption') : t('businessCaption', { name })}</p>
-      </div>
-    )
+  const editing = owner && form.own
+  // a day as text («09:00–20:00 · break 13:00–13:40», «Day off», «Closed»): business hours, and the administrator's view
+  const text = (i: number) => {
+    const hours = dayHours(form, i, business)
+    const d = form.days[i]!
+    if (!hours) return business[i] ? t('dayOff') : h('closed')
+    return [fmt.timeRange(hours.open, hours.close), d.break ? t('breakRo', { time: fmt.timeRange(d.break.start, d.break.end) }) : '']
+      .filter(Boolean)
+      .join(' · ')
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -102,80 +73,75 @@ export function ShiftEditor({
         <span id={`${id}-mode`} className="text-dense font-semibold text-n-900">
           {t('working')}
         </span>
-        <OptionCardGroup
-          value={form.own ? 'own' : 'business'}
-          onValueChange={(v) => onChange(v === 'own' && saved.own ? saved : switchShift(form, v === 'own', business))}
-          aria-labelledby={`${id}-mode`}
-          className="grid grid-cols-2 gap-2 max-sm:grid-cols-1"
-        >
-          <OptionCard value="business" indicator="start" title={t('business')} caption={t('businessHint')} />
-          <OptionCard value="own" indicator="start" title={t('own')} caption={t('ownHint')} />
-        </OptionCardGroup>
+        {owner ? (
+          <Segmented
+            value={form.own ? 'own' : 'business'}
+            onValueChange={(v) => v && onChange(v === 'own' && saved.own ? saved : switchShift(form, v === 'own', business))}
+            aria-labelledby={`${id}-mode`}
+          >
+            <SegmentedItem value="business">{t('business')}</SegmentedItem>
+            <SegmentedItem value="own">{t('own')}</SegmentedItem>
+          </Segmented>
+        ) : (
+          <span className="text-body font-semibold text-n-900">{form.own ? t('own') : t('business')}</span>
+        )}
       </div>
-      <div className="flex flex-col">
-        {form.days.map((d, i) => {
-          const day = dayName(i)
-          const on = works(form, i, business)
-          const hours = dayHours(form, i, business)
-          const problem = dayProblem(form, i, business)
-          return (
-            <div key={i} role="group" aria-label={day} className="flex flex-col gap-2 border-t border-n-200 py-2.5">
-              <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2">
-                {form.own && (
-                  <Switch
-                    checked={d.works}
-                    aria-label={t('worksLabel', { day })}
-                    // a weekday the business is closed opens no bookings: it can be turned off, not on
-                    disabled={!business[i] && !d.works}
-                    onCheckedChange={(works) => setDay(i, { works })}
-                    className="-ml-1.5"
-                  />
-                )}
-                <span className="w-24 flex-none text-body font-medium text-n-900">{day}</span>
-                {form.own && on ? (
-                  <TimeRangeField
-                    value={d.hours}
-                    onChange={(hours) => setDay(i, { hours })}
-                    fromLabel={t('starts', { day })}
-                    toLabel={t('ends', { day })}
-                    nextDay={(time) => h('nextDay', { time })}
-                    step={HOURS_STEP}
-                  />
-                ) : hours ? (
-                  <span className="text-body text-n-900">{fmt.timeRange(hours.open, hours.close)}</span>
-                ) : (
-                  <span className="text-body text-n-500">{business[i] ? t('dayOff') : h('closed')}</span>
-                )}
-                {on && hours && !d.break && (
-                  <button
-                    type="button"
-                    aria-label={h('addBreak', { day })}
-                    onClick={() => setDay(i, { break: newBreak(hours) })}
-                    className={`${textLink} inline-flex min-h-8 items-center gap-1.5 text-small`}
-                  >
-                    <Plus aria-hidden strokeWidth={2} className="size-4" />
-                    {h('break')}
-                  </button>
-                )}
-              </div>
-              {on && hours && d.break && (
-                <TimeRangeField
-                  value={{ open: d.break.start, close: d.break.end }}
-                  onChange={({ open, close }) => setDay(i, { break: { start: open, end: close } })}
-                  dayStart={hours.open}
-                  label={h('break')}
-                  fromLabel={h('breakStarts', { day })}
-                  toLabel={h('breakEnds', { day })}
-                  step={10}
+      {editing ? (
+        <div className="flex flex-col divide-y divide-n-100 border-t border-n-200">
+          {form.days.map((d, i) => {
+            const day = dayName(i)
+            const b = business[i]
+            const problem = dayProblem(form, i, business)
+            return (
+              <div key={i} role="group" aria-label={day}>
+                <HoursRow
+                  narrow
+                  name={day}
+                  // a weekday the business is closed opens no bookings: it can be turned off, not on
+                  switch={{
+                    checked: d.works,
+                    label: t('worksLabel', { day }),
+                    disabled: !b && !d.works,
+                    onChange: (works) => setDay(i, { works }),
+                  }}
+                  hours={d.works ? d.hours : null}
+                  break={d.break}
+                  onChange={(next) => setDay(i, { hours: next.hours, break: next.break })}
+                  closedText={b ? t('dayOff') : h('closed')}
+                  note={b ? t('window', { business: businessName, hours: fmt.timeRange(b.open, b.close) }) : undefined}
                   error={problem && t(`problems.${problem}`)}
-                  remove={{ label: h('removeBreak', { day }), onClick: () => setDay(i, { break: null }) }}
+                  step={HOURS_STEP}
+                  labels={{
+                    opens: t('starts', { day }),
+                    closes: t('ends', { day }),
+                    secondOpens: t('secondStarts', { day }),
+                    secondCloses: t('secondEnds', { day }),
+                    addBreak: h('addBreak', { day }),
+                    removeBreak: (range) => h('removeBreakRange', { day, range }),
+                  }}
+                  nextDay={(time) => h('nextDay', { time })}
                 />
-              )}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="flex flex-col border-t border-n-200">
+          {form.days.map((_, i) => (
+            <div key={i} className="flex justify-between gap-3 border-b border-n-200 py-2.5 text-small">
+              <span>{dayName(i)}</span>
+              <span className="text-right">{text(i)}</span>
             </div>
-          )
-        })}
-      </div>
-      <p className="m-0 -mt-2 text-dense text-n-600">{form.own ? t('ownCaption') : t('businessCaption', { name })}</p>
+          ))}
+        </div>
+      )}
+      <p className="m-0 -mt-2 text-dense text-n-600">
+        {owner && !form.own
+          ? t('businessText', { name, business: businessName })
+          : form.own
+            ? t('ownCaption')
+            : t('businessCaption', { name })}
+      </p>
     </div>
   )
 }
