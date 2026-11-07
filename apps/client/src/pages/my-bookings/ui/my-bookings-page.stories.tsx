@@ -104,7 +104,7 @@ const card = async (canvas: Canvas) => within(await canvas.findByRole('region', 
 
 /**
  * The «How was it?» card asks about the latest completed visit without a review: a star pressed opens the form with it
- * picked; sent, the card goes and the visit's row says «★ 5 · You rated» with «Edit the review».
+ * picked; sent, the card goes and the visit's row says «You rated ★ 5» with «Edit the review».
  */
 export const HowWasIt: Story = {
   args: { path: '/en/account/bookings?tab=past' },
@@ -141,11 +141,11 @@ export const HowWasItClosed: Story = {
   },
 }
 
-/** A reviewed visit: «★ 5 · You rated» in the row; «Edit the review» changes it while it may (C-35, 7 days). */
+/** A reviewed visit: «You rated ★ 5» in the row's footer; «Edit the review» changes it while it may (C-35, 7 days). */
 export const Reviewed: Story = {
   args: { path: '/en/account/bookings?tab=past' },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('img', { name: 'You rated it 5 out of 5' })).toHaveTextContent('5 · You rated')
+    await expect(await canvas.findByRole('img', { name: 'You rated it 5 out of 5' })).toHaveTextContent('You rated 5')
     await userEvent.click(canvas.getByRole('button', { name: /^Edit the review Barber Loft, / }))
     const form = within(await within(document.body).findByRole('dialog', { name: 'How was it?' }))
     await waitFor(() => expect(form.getByRole('radio', { name: '5 stars' })).toBeChecked())
@@ -156,7 +156,7 @@ export const Reviewed: Story = {
     await userEvent.click(save)
     const changed = await within(document.body).findByText('Your review is changed.')
     await waitFor(() => expect(changed).toBeVisible())
-    await expect(await canvas.findByRole('img', { name: 'You rated it 4 out of 5' })).toHaveTextContent('4 · You rated')
+    await expect(await canvas.findByRole('img', { name: 'You rated it 4 out of 5' })).toHaveTextContent('You rated 4')
   },
 }
 
@@ -233,11 +233,32 @@ export const LongWordsPast: Story = {
   },
 }
 
-/** Phone: the card's stars and word wrap within 390; the rows stack their price and actions under the text. */
+/**
+ * Phone, Upcoming: the card's stars and word wrap within 390; each booking's card keeps its name with the status beside
+ * it and stacks its footer, the actions across the width.
+ */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('The business declined')).toBeVisible()
     await expect((await card(canvas)).getByRole('radio', { name: '5 stars' })).toBeVisible()
+    await expect(canvas.getAllByRole('link', { name: 'Call Glow Studio' })[0]).toBeVisible()
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
+  },
+}
+
+/** Phone, Past: a completed visit rated («You rated ★ 5» over Edit the review and Book again), one not yet rated, a cancelled one with Undo. */
+export const PastPhone: Story = {
+  name: 'Phone, past',
+  args: { path: '/en/account/bookings?tab=past' },
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('img', { name: 'You rated it 5 out of 5' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: /^Edit the review Barber Loft, / })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: /^Write a review Glow Studio, / })).toBeVisible()
+    await expect(canvas.getByText('You cancelled')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: /^Undo Glow Studio, / })).toBeVisible()
+    await expect(canvas.getAllByRole('link', { name: 'Book again' })[0]).toBeVisible()
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth)
   },
 }

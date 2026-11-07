@@ -299,7 +299,8 @@ function Identity({ detail, onPhoto, nameInBar = false }: { detail: Detail; onPh
           {detail.rating !== null && detail.reviewsCount > 0 ? (
             <>
               <span className={cn('inline-flex items-center gap-1.5 font-semibold', !onPhoto && 'text-n-900')}>
-                <Star aria-hidden className="size-4 fill-current" strokeWidth={1.75} />
+                {/* the star a-500 on white (owner, 07.11); white with the rest on the photo */}
+                <Star aria-hidden className={cn('size-4 fill-current', !onPhoto && 'text-a-500')} strokeWidth={1.75} />
                 {fmt.rating(detail.rating)}
               </span>
               <span aria-hidden className="-ml-2">

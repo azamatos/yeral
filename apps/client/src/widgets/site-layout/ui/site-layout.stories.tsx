@@ -51,8 +51,18 @@ export const SignedIn: Story = {
     await waitFor(() => expect(within(menu).getByText('Aýjemal Gurbanowa')).toBeVisible())
     await expect(within(menu).getByText('+993 65 90 11 22')).toBeVisible()
     await userEvent.click(within(menu).getByRole('menuitem', { name: 'Log out' }))
-    await expect(await canvas.findByRole('link', { name: 'Log in' })).toBeVisible()
+    // «Log out» asks first; the menu is gone, Cancel gives the avatar the focus back
+    const ask = await body.findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
     await waitFor(() => expect(body.queryByRole('menu')).toBeNull())
+    await userEvent.click(within(ask).getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(avatar).toHaveFocus())
+    await userEvent.click(avatar)
+    await userEvent.click(await body.findByRole('menuitem', { name: 'Log out' }))
+    const again = await body.findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await userEvent.click(within(again).getByRole('button', { name: 'Log out' }))
+    await expect(await canvas.findByRole('link', { name: 'Log in' })).toBeVisible()
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
   },
 }
 
@@ -69,16 +79,20 @@ export const MenuKeyboard: Story = {
   },
 }
 
-/** Logging out failed (no connection): the menu stays, a toast says why. */
+/** Logging out failed (no connection): the question stays for another try, a toast says why. */
 export const LogOutFails: Story = {
   args: { server: authApi({ signedIn: AYJEMAL, logoutFails: true }) },
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: /Account menu/ }))
     await userEvent.click(await body.findByRole('menuitem', { name: 'Log out' }))
+    const ask = await body.findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await userEvent.click(within(ask).getByRole('button', { name: 'Log out' }))
     const toast = await body.findByText('No connection. Please try again.')
     await waitFor(() => expect(toast).toBeVisible())
-    await expect(body.getByRole('menu')).toBeVisible()
+    await expect(ask).toBeVisible()
+    await expect(within(ask).getByRole('button', { name: 'Log out' })).toBeEnabled()
     await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
   },
 }
 
@@ -113,6 +127,10 @@ export const Phone: Story = {
     await userEvent.click(await canvas.findByRole('button', { name: /Account menu/ }))
     const sheet = await body.findByRole('dialog', { name: 'Aýjemal Gurbanowa' })
     await userEvent.click(within(sheet).getByRole('button', { name: 'Log out' }))
+    // the sheet gives way to the question (a bottom sheet too at this width)
+    const ask = await body.findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await waitFor(() => expect(body.queryByRole('dialog', { name: 'Aýjemal Gurbanowa' })).toBeNull())
+    await userEvent.click(within(ask).getByRole('button', { name: 'Log out' }))
     await expect(await canvas.findByRole('link', { name: 'Log in' })).toBeVisible()
   },
 }

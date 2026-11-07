@@ -161,7 +161,7 @@ export function useDoneStep(
               <span className="text-dense text-n-600">{t('cardMeta', { category: draft.category, where })}</span>
             </div>
             <span className="inline-flex shrink-0 items-center gap-1 text-small font-semibold text-n-900">
-              <Star aria-hidden className="size-3.5 fill-n-900 stroke-none" />
+              <Star aria-hidden className="size-3.5 fill-a-500 stroke-none" />
               {t('new')}
             </span>
           </div>

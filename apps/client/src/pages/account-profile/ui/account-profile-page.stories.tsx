@@ -239,22 +239,37 @@ export const DeleteOwner: Story = {
   },
 }
 
-/** Log out from the account goes Home (not to the login the account would ask for). */
+/**
+ * The Account section's two even rows, each asking first: «Log out» opens «Log out of Ýeral on this device?», Cancel
+ * keeps the session and gives the button the focus back; Log out goes Home (not to the login the account would ask for).
+ */
 export const LogOut: Story = {
   name: 'Log out',
   play: async ({ canvas }) => {
     const section = await canvas.findByRole('region', { name: 'Account' })
-    await userEvent.click(within(section).getByRole('button', { name: 'Log out' }))
+    const logOut = within(section).getByRole('button', { name: 'Log out' })
+    await expect(within(section).getByRole('button', { name: 'Delete account' })).toBeVisible()
+    await userEvent.click(logOut)
+    const ask = await body.findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await userEvent.click(within(ask).getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(logOut).toHaveFocus())
+    await userEvent.click(logOut)
+    const again = await body.findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await userEvent.click(within(again).getByRole('button', { name: 'Log out' }))
     await expect(await canvas.findByText('Landed on /en')).toBeVisible()
   },
 }
 
-/** Log out from the header's menu while in the account: the account area sends the visitor Home. */
+/** Log out from the header's menu while in the account: the same question, then the account area sends the visitor Home. */
 export const LogOutFromHeader: Story = {
   name: 'Log out from the header',
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: /Account menu/ }))
     await userEvent.click(await body.findByRole('menuitem', { name: 'Log out' }))
+    const ask = await body.findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await waitFor(() => expect(body.queryByRole('menu')).toBeNull())
+    await userEvent.click(within(ask).getByRole('button', { name: 'Log out' }))
     await expect(await canvas.findByText('Landed on /en')).toBeVisible()
   },
 }

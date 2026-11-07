@@ -110,7 +110,7 @@ export const Reviewed: Story = {
   },
   play: async () => {
     const d = await drawer()
-    await expect(await d.findByRole('img', { name: 'You rated it 5 out of 5' })).toHaveTextContent('5 · You rated')
+    await expect(await d.findByRole('img', { name: 'You rated it 5 out of 5' })).toHaveTextContent('You rated 5')
     await expect(d.getByRole('button', { name: 'Edit the review' })).toBeVisible()
   },
 }

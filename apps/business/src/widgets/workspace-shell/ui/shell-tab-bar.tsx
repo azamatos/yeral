@@ -20,7 +20,14 @@ const TABS: readonly Section[] = ['calendar', 'bookings', 'clients']
  * More opens the sheet above the bar: the workspace (its switcher), Reviews and Settings where the level has them, the
  * person, the client site, Contact Ýeral (its small sheet over More: the ways that are set; none, no row) and Log out.
  */
-export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | null) => void }) {
+export function ShellTabBar({
+  onProfile,
+  onLogOut,
+}: {
+  onProfile: (opener: HTMLElement | null) => void
+  /** The log-out question; it closes back to More, as My profile does. */
+  onLogOut: (opener: HTMLElement | null) => void
+}) {
   const t = useTranslations('shell')
   const words = useTranslations()
   const contact = useContactYeral()
@@ -118,7 +125,7 @@ export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | n
           label={t('account.logout')}
           onClick={() => {
             setMore(false)
-            account.logout()
+            onLogOut(moreButton.current)
           }}
         />
       </MoreSheet>

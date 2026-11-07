@@ -5,27 +5,40 @@ import { cn } from '@yeral/ui/cn'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from '@yeral/ui/drawer'
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '@yeral/ui/menu'
 import { CalendarDays, ChevronDown, ChevronUp, LogOut, User } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { useLogOut } from '@/features/log-out'
+import { LogOutConfirm } from '@/features/log-out'
 import { PersonMark } from '@/shared/ui'
 
 /**
  * The signed-in header's avatar and its menu (Auth «Logged-in header»): the person's name and phone, My bookings,
- * Profile, then «Log out». A popover 260 wide under the avatar; a bottom sheet under 768 (the caption). Both are
- * rendered and CSS shows the one for the screen, so the server's page and the browser's agree. Favourites join with
- * their page (P4 slice 5), the language row with a market's second language.
+ * Profile, then «Log out», which asks first (the one {@link LogOutConfirm}; the menu or sheet closes as the question
+ * opens, and Cancel brings the focus back to the avatar). A popover 260 wide under the avatar; a bottom sheet under
+ * 768 (the caption). Both are rendered and CSS shows the one for the screen, so the server's page and the browser's
+ * agree. Favourites join with their page (P4 slice 5), the language row with a market's second language.
  */
 export function AccountMenu({ me }: { me: Me }) {
   const t = useTranslations('account')
   const lang = useLocale()
   const [menuOpen, setMenuOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [confirm, setConfirm] = useState(false)
+  const root = useRef<HTMLSpanElement>(null)
   const close = () => {
     setMenuOpen(false)
     setSheetOpen(false)
   }
-  const { logOut, loggingOut } = useLogOut({ onDone: close })
+  // the row chosen opens the question: the focus goes to it, not back to the avatar, when the menu or sheet closes
+  const handOver = useRef(false)
+  const keepFocus = (e: Event) => {
+    if (handOver.current) e.preventDefault()
+    handOver.current = false
+  }
+  const ask = () => {
+    handOver.current = true
+    close()
+    setConfirm(true)
+  }
   const name = me.name ?? me.firstName
   const phone = formatPhone(me.phone)
 
@@ -57,11 +70,11 @@ export function AccountMenu({ me }: { me: Me }) {
   )
 
   return (
-    <>
+    <span ref={root} className="contents">
       <span className="contents max-sm:hidden">
         <Menu open={menuOpen} onOpenChange={setMenuOpen}>
           <MenuTrigger asChild>{trigger(menuOpen)}</MenuTrigger>
-          <MenuContent className="w-[260px] [&_[role=menuitem]_svg]:size-5!">
+          <MenuContent className="w-[260px] [&_[role=menuitem]_svg]:size-5!" onCloseAutoFocus={keepFocus}>
             <MenuLabel className="flex-row items-center gap-3 px-2.5 pt-2.5 pb-2">
               <PersonMark firstName={me.firstName} size={40} />
               <span className="flex min-w-0 flex-col gap-0.5">
@@ -73,14 +86,7 @@ export function AccountMenu({ me }: { me: Me }) {
             <MenuItem asChild>{bookings}</MenuItem>
             <MenuItem asChild>{profile}</MenuItem>
             <MenuSeparator />
-            <MenuItem
-              disabled={loggingOut}
-              onSelect={(e) => {
-                // the menu stays until the session is over, so a failure can be tried again
-                e.preventDefault()
-                logOut()
-              }}
-            >
+            <MenuItem onSelect={ask}>
               <LogOut aria-hidden />
               {t('logOut')}
             </MenuItem>
@@ -90,7 +96,7 @@ export function AccountMenu({ me }: { me: Me }) {
       <span className="contents sm:hidden">
         <Drawer open={sheetOpen} onOpenChange={setSheetOpen}>
           <DrawerTrigger asChild>{trigger(sheetOpen)}</DrawerTrigger>
-          <DrawerContent {...(name ? {} : { 'aria-describedby': undefined })}>
+          <DrawerContent {...(name ? {} : { 'aria-describedby': undefined })} onCloseAutoFocus={keepFocus}>
             <DrawerHeader
               leading={<PersonMark firstName={me.firstName} size={40} />}
               title={name ?? phone}
@@ -107,7 +113,7 @@ export function AccountMenu({ me }: { me: Me }) {
                 {t('profile')}
               </Link>
               <span aria-hidden className="mx-3 my-1.5 h-px bg-n-200" />
-              <button type="button" onClick={logOut} disabled={loggingOut} aria-busy={loggingOut || undefined} className={sheetRow}>
+              <button type="button" onClick={ask} className={sheetRow}>
                 <LogOut aria-hidden />
                 {t('logOut')}
               </button>
@@ -115,7 +121,16 @@ export function AccountMenu({ me }: { me: Me }) {
           </DrawerContent>
         </Drawer>
       </span>
-    </>
+      <LogOutConfirm
+        open={confirm}
+        onOpenChange={setConfirm}
+        onCloseAutoFocus={(e) => {
+          // the row that opened it is gone with its menu: the avatar takes the focus
+          e.preventDefault()
+          visibleAccountTrigger(root.current)?.focus()
+        }}
+      />
+    </span>
   )
 }
 

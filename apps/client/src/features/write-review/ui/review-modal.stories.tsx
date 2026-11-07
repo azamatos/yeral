@@ -90,7 +90,7 @@ function opener(props: { review?: WrittenReview; rating?: number }) {
         <Button variant="secondary" size="s" onClick={() => setOpen(true)}>
           {props.review ? 'Edit review' : 'Write a review'}
         </Button>
-        {done?.review && <span>{`${done.review.rating} · You rated`}</span>}
+        {done?.review && <span>{`You rated ${done.review.rating}`}</span>}
         <ReviewModal booking={VISIT} {...props} open={open} onOpenChange={setOpen} onDone={setDone} />
       </div>
     )
@@ -142,7 +142,7 @@ export const New: Story = {
     await waitFor(() => expect(thanks).toBeVisible())
     await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
     await expect(sent).toEqual([{ method: 'POST', body: { rating: 5, tags: ['on_time', 'skilled'], text: 'Very gentle and quick.' } }])
-    await expect(await canvas.findByText('5 · You rated')).toBeVisible()
+    await expect(await canvas.findByText('You rated 5')).toBeVisible()
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Write a review' })).toHaveFocus())
   },
 }

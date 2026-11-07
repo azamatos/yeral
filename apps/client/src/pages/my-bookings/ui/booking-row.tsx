@@ -31,16 +31,17 @@ export function ByLine({ icon, children }: { icon?: ReactNode; children: ReactNo
   )
 }
 
-/** The drawer's `.rated` (Account-Bookings): the star and «5 · You rated», heard as «You rated it 5 out of 5». */
+/** «You rated ★ 5» in the row's footer and the drawer (Account-Bookings `.rated`; the star a-500), heard as «You rated it 5 out of 5». */
 export function YouRated({ rating }: { rating: number }) {
   const t = useTranslations('myBookings')
   return (
-    <Rating
+    <span
       role="img"
       aria-label={t('ratedLabel', { rating })}
-      value={t('rated', { rating })}
-      className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
-    />
+      className="inline-flex items-center gap-1.5 self-start text-small leading-[18px] font-semibold text-n-900"
+    >
+      {t('rated')} <Rating value={rating} className="gap-1 [&_svg]:size-4" />
+    </span>
   )
 }
 
@@ -61,15 +62,17 @@ export function useCancelledBy() {
 }
 
 /**
- * A row of My bookings (Account-Bookings `.brow`, book C-23–C-31, C-40): the business's photo, its name (opening the
- * booking in the drawer: the whole row answers to it), what and when (a phone icon for a booking the business made by
- * phone; the time struck through while offered times stand in for it), the status with what it means now (waiting
- * for the business, who cancelled, a no-show, a waiting move), the reason of a decline or the business's cancel, the
- * price, and what can be done now: Call while it's ahead (and for a client booked by phone only), Undo after the
- * client's own cancel (its failure said in the row), Write a review after a visit (`features/write-review`), «★ 5 · You
- * rated» once reviewed with Edit the review while it may change (7 days, as the drawer), Book again. Times offered
+ * A row of My bookings (book C-23–C-31, C-40), a bordered card since 07.11 (the owner found Account-Bookings' `.brow`
+ * scattered): the business's photo 64 (the Mobile board's) beside its name with the status on the right (opening the
+ * booking in the drawer: the whole card answers to it), then «what · who · price», then when (a phone icon for a
+ * booking the business made by phone; the time struck through while offered times stand in for it), what the status
+ * means now (waiting for the business, who cancelled, a no-show, a waiting move) and the reason of a decline or the
+ * business's cancel. A footer under a line carries «You rated ★ 5» once reviewed on the left and what can be done now
+ * on the right: Call while it's ahead (and for a client booked by phone only), Undo after the client's own cancel (its
+ * failure said in the card), Write a review after a visit (`features/write-review`), Edit the review while it may
+ * change (7 days, as the drawer), Book again; on phones the footer stacks and the actions take the width. Times offered
  * after a decline, an expiry or the business's cancel show as chips ({@link OfferTimes}); once they've all passed, the
- * row says so with the way to the business's page.
+ * card says so with the way to the business's page.
  */
 export function BookingRow({
   booking: b,
@@ -122,37 +125,87 @@ export function BookingRow({
       },
     )
 
+  const waiting = b.status === 'pending' && !b.reschedule
+  const means = waiting || b.status === 'noshow' || !!by || !!b.reschedule
+  const actions = [
+    (ahead || !b.bookOnline || b.actions.callOnly) && (
+      // named from what it shows, the business read but not seen: «Call» stays in the name whatever the language
+      // or the words' length (axe: label-content-name-mismatch)
+      <Button key="call" asChild size="s" variant="tertiary">
+        <a href={telHref(b.business.phone)}>
+          <Phone aria-hidden />
+          {t.rich('callLabel', { business: b.business.name, hidden })}
+        </a>
+      </Button>
+    ),
+    b.actions.restore && !undoFailed && (
+      // the card's actions name their booking the same way: the word seen, the booking read
+      <Button key="undo" size="s" variant="tertiary" loading={restore.isPending} onClick={() => !restore.isPending && undo()}>
+        {t.rich('undoLabel', { business: b.business.name, when, hidden })}
+      </Button>
+    ),
+    b.actions.review && onReview && (
+      <Button key="review" size="s" variant="secondary" onClick={() => onReview(b)}>
+        {t.rich('writeReviewLabel', { business: b.business.name, when, hidden })}
+      </Button>
+    ),
+    b.actions.editReview && b.review && onReview && (
+      // the review to change while it may be (book C-35, 7 days), as the drawer offers it
+      <Button key="edit" size="s" variant="tertiary" onClick={() => onReview(b)}>
+        {t.rich('editReviewLabel', { business: b.business.name, when, hidden })}
+      </Button>
+    ),
+    b.actions.bookAgain && (
+      <Button key="again" asChild size="s" variant="secondary">
+        <Link to="/$lang/b/$slug" params={{ lang, slug: b.business.slug }}>
+          {t('bookAgain')}
+        </Link>
+      </Button>
+    ),
+  ].filter(Boolean)
+
   return (
-    <div className="relative grid grid-cols-[96px_minmax(0,1fr)_auto] gap-5 rounded-card px-4 py-5 hover:bg-n-50 max-sm:grid-cols-[64px_minmax(0,1fr)] max-sm:gap-x-3.5 max-sm:gap-y-3 max-sm:px-0 max-sm:hover:bg-transparent">
+    <div className="relative grid grid-cols-[64px_minmax(0,1fr)] gap-x-4 gap-y-3 rounded-card border border-n-200 p-4 hover:bg-n-50">
       {b.business.photo ? (
         <img
           src={b.business.photo.url}
           alt=""
-          className={cn('block size-24 rounded-ctl-l object-cover max-sm:size-16', b.cancelledBy === 'client' && 'opacity-50')}
+          className={cn('block size-16 rounded-ctl-l object-cover', b.cancelledBy === 'client' && 'opacity-50')}
         />
       ) : (
-        <span aria-hidden className="flex size-24 items-center justify-center rounded-ctl-l bg-n-100 text-n-500 max-sm:size-16">
-          <Building2 className="size-7" strokeWidth={1.75} />
+        <span aria-hidden className="flex size-16 items-center justify-center rounded-ctl-l bg-n-100 text-n-500">
+          <Building2 className="size-6" strokeWidth={1.75} />
         </span>
       )}
       <div className="flex min-w-0 flex-col gap-1">
-        {/* the whole row opens the booking; what's pressable in it sits above the link (`relative`) */}
-        <Link
-          id={rowLinkId(b.code)}
-          to="/$lang/account/bookings/$code"
-          params={{ lang, code: b.code }}
-          search={{ tab: tab === 'past' ? 'past' : undefined }}
-          resetScroll={false}
-          // which booking it opens, with the name seen first (axe: label-content-name-mismatch)
-          aria-label={t('openLabel', { business: b.business.name, when })}
-          className={cn(
-            'text-[16px] leading-[22px] font-semibold text-n-900 outline-none after:absolute after:inset-0 after:rounded-card focus-visible:after:shadow-focus',
-            b.cancelledBy === 'client' && 'text-n-600',
-          )}
-        >
-          {b.business.name}
-        </Link>
-        {services && <span className="text-small text-n-600">{visit(b.what)}</span>}
+        <div className="flex items-start justify-between gap-3">
+          {/* the whole card opens the booking; what's pressable in it sits above the link (`relative`) */}
+          <Link
+            id={rowLinkId(b.code)}
+            to="/$lang/account/bookings/$code"
+            params={{ lang, code: b.code }}
+            search={{ tab: tab === 'past' ? 'past' : undefined }}
+            resetScroll={false}
+            // which booking it opens, with the name seen first (axe: label-content-name-mismatch)
+            aria-label={t('openLabel', { business: b.business.name, when })}
+            className={cn(
+              'min-w-0 text-[16px] leading-[22px] font-semibold text-n-900 outline-none after:absolute after:inset-0 after:rounded-card focus-visible:after:shadow-focus',
+              b.cancelledBy === 'client' && 'text-n-600',
+            )}
+          >
+            {b.business.name}
+          </Link>
+          <span className="flex flex-none">
+            <BookingStatusBadge status={b.status} />
+          </span>
+        </div>
+        {(services || b.price) && (
+          <span className="text-small text-n-600">
+            {services && visit(b.what)}
+            {services && b.price && ' · '}
+            {b.price && <Price hidden={b.price.type === 'hidden'}>{fmt.price(b.price)}</Price>}
+          </span>
+        )}
         <span className={cn('inline-flex items-center gap-1.5 text-small', live ? 'text-n-500 line-through' : 'text-n-900')}>
           <CalendarDays aria-hidden className="size-4 flex-none text-n-600" strokeWidth={1.75} />
           {when}
@@ -160,23 +213,23 @@ export function BookingRow({
             <Phone role="img" aria-label={t('byPhone')} className="size-3.5 flex-none text-n-600" strokeWidth={1.75} />
           )}
         </span>
-        <div className="flex flex-wrap items-center gap-2.5 pt-1.5">
-          <BookingStatusBadge status={b.status} />
-          {b.status === 'pending' && !b.reschedule && <ByLine>{t('waiting')}</ByLine>}
-          {b.status === 'noshow' && <ByLine>{t('noshow')}</ByLine>}
-          {by && <ByLine icon={by.icon}>{by.text}</ByLine>}
-          {b.reschedule && (
-            <ByLine icon={<Clock aria-hidden className="text-st-pending-ink" />}>
-              {t('moveWaiting', { when: at(b.reschedule.date, b.reschedule.start, b.reschedule.end) })}
-            </ByLine>
-          )}
-        </div>
+        {means && (
+          <div className="flex flex-wrap items-center gap-2.5">
+            {waiting && <ByLine>{t('waiting')}</ByLine>}
+            {b.status === 'noshow' && <ByLine>{t('noshow')}</ByLine>}
+            {by && <ByLine icon={by.icon}>{by.text}</ByLine>}
+            {b.reschedule && (
+              <ByLine icon={<Clock aria-hidden className="text-st-pending-ink" />}>
+                {t('moveWaiting', { when: at(b.reschedule.date, b.reschedule.start, b.reschedule.end) })}
+              </ByLine>
+            )}
+          </div>
+        )}
         {reason && (
           <span className="text-dense text-n-600">
             {reason.text ? t('reasonWith', { reason: reason.reason, text: reason.text }) : t('reason', { reason: reason.reason })}
           </span>
         )}
-        {b.review && <YouRated rating={b.review.rating} />}
         {took && b.offerTakenBy && (
           // the booking the offered time became, on Upcoming (Account-Bookings `openNew`)
           <Link
@@ -208,48 +261,15 @@ export function BookingRow({
           </span>
         )}
       </div>
-      <div className="flex flex-col items-end justify-between gap-3 max-sm:col-span-2 max-sm:flex-row max-sm:items-center">
-        {b.price ? <Price hidden={b.price.type === 'hidden'}>{fmt.price(b.price)}</Price> : <span />}
-        <div className="relative flex flex-wrap items-center justify-end gap-1">
-          {(ahead || !b.bookOnline || b.actions.callOnly) && (
-            // named from what it shows, the business read but not seen: «Call» stays in the name whatever the language
-            // or the words' length (axe: label-content-name-mismatch)
-            <Button asChild size="s" variant="tertiary">
-              <a href={telHref(b.business.phone)}>
-                <Phone aria-hidden />
-                {t.rich('callLabel', { business: b.business.name, hidden })}
-              </a>
-            </Button>
-          )}
-          {b.actions.restore && !undoFailed && (
-            // the row's actions name their booking the same way: the word seen, the booking read
-            <Button size="s" variant="tertiary" loading={restore.isPending} onClick={() => !restore.isPending && undo()}>
-              {t.rich('undoLabel', { business: b.business.name, when, hidden })}
-            </Button>
-          )}
-          {b.actions.review && onReview && (
-            <Button size="s" variant="secondary" onClick={() => onReview(b)}>
-              {t.rich('writeReviewLabel', { business: b.business.name, when, hidden })}
-            </Button>
-          )}
-          {b.actions.editReview && b.review && onReview && (
-            // the review to change while it may be (book C-35, 7 days), as the drawer offers it
-            <Button size="s" variant="tertiary" onClick={() => onReview(b)}>
-              {t.rich('editReviewLabel', { business: b.business.name, when, hidden })}
-            </Button>
-          )}
-          {b.actions.bookAgain && (
-            <Button asChild size="s" variant="secondary">
-              <Link to="/$lang/b/$slug" params={{ lang, slug: b.business.slug }}>
-                {t('bookAgain')}
-              </Link>
-            </Button>
-          )}
-        </div>
-      </div>
       {live && (
-        <div className="relative col-start-2 col-end-[-1] max-sm:col-start-1">
+        <div className="relative col-span-2">
           <OfferTimes code={b.code} business={b.business.name} services={services} offers={live} />
+        </div>
+      )}
+      {(b.review || actions.length > 0) && (
+        <div className="relative col-span-2 flex items-center justify-between gap-3 border-t border-n-200 pt-3 max-sm:flex-col max-sm:items-stretch">
+          {b.review ? <YouRated rating={b.review.rating} /> : <span />}
+          {actions.length > 0 && <div className="flex flex-wrap justify-end gap-2 max-sm:[&>*]:flex-auto">{actions}</div>}
         </div>
       )}
     </div>

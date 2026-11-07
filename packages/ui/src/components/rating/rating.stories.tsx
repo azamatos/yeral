@@ -1,6 +1,7 @@
 /**
  * Display/Rating — «★ 4,9 (212)» on cards and headers; five stars in the reviews summary (12 / 14 / 16); the star input
- * of the review modal (five 48 targets, a word).
+ * of the review modal (five 48 targets, a word). Stars are the accent a-500 (owner, 07.11; the boards drew them ink),
+ * the empty ones n-300; the input's unpicked outlines n-500, the one under the pointer and the pick on the a-50 tint.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'

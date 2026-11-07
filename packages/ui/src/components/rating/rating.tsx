@@ -5,10 +5,14 @@ import { cn } from '../../lib/cn'
 /** The board's sharp star: one shape for the stars shown and the stars picked. */
 const STAR_POINTS = '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'
 
+/**
+ * A star shown, filled in the accent a-500 (owner, 07.11: the primary colour instead of the boards' ink; 6.2:1 on
+ * white) up to `fill`, n-300 past it. The number beside it stays ink.
+ */
 function Star({ fill = 1, className }: { fill?: number; className?: string }) {
   const id = `star-${Math.round(fill * 100)}`
   return (
-    <svg viewBox="0 0 24 24" aria-hidden className={cn('size-4 flex-none', className)}>
+    <svg viewBox="0 0 24 24" aria-hidden className={cn('size-4 flex-none text-a-500', className)}>
       <defs>
         <linearGradient id={id}>
           <stop offset={fill} stopColor="currentColor" />
@@ -20,7 +24,7 @@ function Star({ fill = 1, className }: { fill?: number; className?: string }) {
   )
 }
 
-/** «★ 4,9» in ink (Venue header, cards). `value` is already formatted for the locale (decimal comma). */
+/** «★ 4,9» — the star a-500, the number ink (Venue header, cards). `value` is already formatted for the locale (decimal comma). */
 export function Rating({ value, count, className, ...props }: ComponentProps<'span'> & { value: ReactNode; count?: ReactNode }) {
   return (
     <span {...props} className={cn('inline-flex items-center gap-1 font-semibold text-n-900', className)}>
@@ -34,7 +38,7 @@ export function Rating({ value, count, className, ...props }: ComponentProps<'sp
 const STAR_SIZE = { 12: 'size-3', 14: 'size-3.5', 16: 'size-4' } as const
 
 /**
- * Five stars, partly filled (a reviews summary, a review), 12 / 14 / 16 (16 by default): filled ink, empty n-300; the
+ * Five stars, partly filled (a reviews summary, a review), 12 / 14 / 16 (16 by default): filled a-500, empty n-300; the
  * number is always written beside them too. Give it an accessible `label` such as «Average rating: 4.9 out of 5».
  */
 export function Stars({
@@ -49,7 +53,7 @@ export function Stars({
   className?: string
 }) {
   return (
-    <span role="img" aria-label={label} className={cn('inline-flex gap-0.5 text-n-900', className)}>
+    <span role="img" aria-label={label} className={cn('inline-flex gap-0.5', className)}>
       {[0, 1, 2, 3, 4].map((i) => (
         <Star key={i} fill={Math.max(0, Math.min(1, rating - i))} className={STAR_SIZE[size]} />
       ))}
@@ -59,11 +63,12 @@ export function Stars({
 
 /**
  * RatingInput (DS-Patterns → «Rating input · 48 targets + word»; the review modal): five 48 star buttons as a radio
- * group (arrow keys move and pick), 32 stars, n-500 outlines until picked, ink filled up to the pick (or up to the one
- * under the pointer, as a preview), and the pick's word beside them («Poor … Excellent», 15/22 600 n-600, said as it
- * changes). The words come from the caller: `label` names the group, `starLabel(n)` each star («4 stars»), `words`
- * the five words, `placeholder` the word before any is picked («Pick the stars», the review modal). The word under the
- * pointer is only seen; the picked one is said.
+ * group (arrow keys move and pick), 32 stars, n-500 outlines until picked (a control's line needs 3:1; n-300 wouldn't),
+ * a-500 filled up to the pick (or up to the one under the pointer, as a preview; owner, 07.11: the primary colour, not
+ * ink), the star under the pointer and the picked one on the a-50 tint, and the pick's word beside them («Poor …
+ * Excellent», 15/22 600 n-600, said as it changes). The words come from the caller: `label` names the group,
+ * `starLabel(n)` each star («4 stars»), `words` the five words, `placeholder` the word before any is picked («Pick the
+ * stars», the review modal). The word under the pointer is only seen; the picked one is said.
  */
 export function RatingInput({
   value,
@@ -115,8 +120,8 @@ export function RatingInput({
             onPointerEnter={() => setHover(n)}
             className={cn(
               'inline-flex size-12 cursor-pointer items-center justify-center rounded-ctl-l border-0 bg-transparent p-0 text-n-500',
-              'hover:bg-group focus-visible:shadow-focus focus-visible:outline-none',
-              n <= shown && 'text-n-900',
+              'hover:bg-a-50 focus-visible:shadow-focus focus-visible:outline-none data-[state=checked]:bg-a-50',
+              n <= shown && 'text-a-500',
             )}
           >
             <svg viewBox="0 0 24 24" aria-hidden className="size-8">
