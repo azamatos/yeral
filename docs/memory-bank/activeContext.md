@@ -16,11 +16,14 @@ from the summary (the time kept while it fits), rows, the confirm card, the phon
 codes (`FIXED_SIGN_IN_CODES` in the server's `.env` only: the owner's number, whose Telegram is Russian) · #337 the
 reviews page's «Ýeral removed a review you reported» notice + migration 0051 dropping `users.demo`/`businesses.sandbox`
 · #338 the client search on the FilterBar (Open now and Women only kept: book C-03 wins on behaviour) · #339 A10
-callouts, toasts (`toast.error` = an alert) and NoteRow. **Left from round 7:** C1's compact header SearchBar on
-Search and the business page (then the on-page What/Where fields and the day control go); the result cards'
-StatusPill / service line / time slots (C4 VenueResultRow); idea 3 (follow, plan only); tk/ru strings (with #332's two
-SMS for the owner to check). Each piece's log note (`log/2026-11-07-*.md`) lists what it left. CI's e2e now streams
-its output and stops before the job's limit (`globalTimeout`).
+callouts, toasts (`toast.error` = an alert) and NoteRow. **Then live at c9ba95e (07.11):** #340 search result rows
+(StatusPill, free-time chips with «+N», «No places for …» with Search further away / Clear search) · #341 C1's compact
+search bar in the header of Search and the business page (the phone's summary field opens the SearchSheet; the search
+page's own What/Where fields and day control are gone). **Stopped for the day at 07.11 (≈17 % of the week).**
+**Left from round 7:** tk/ru strings (with #332's two SMS for the owner to check); idea 3 (follow, plan only); the
+result row's service line and «Did you mean» wait for api fields; the phone sheet's live count ignores the page's
+filters. Each piece's log note (`log/2026-11-07-*.md`) lists what it left. CI's e2e streams its output and stops
+before the job's limit (`globalTimeout`).
 **Agents:** allowed for this run (owner 06.11): two at a time (two on battery for 07.11), Fable 5.1 at xhigh (free; owner
 07.11), Opus 5.5 as the fallback; budget 30 % of the week that began 07.11. Docs-only changes go straight to `main`.
 

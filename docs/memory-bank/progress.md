@@ -544,6 +544,8 @@
   Lessons: a PR title over 100 characters fails CI (count it in the brief); Playwright's `{ pressed: false }` matches
   every button without `aria-pressed` (scope rows to their container); turbo's grouped logs hid a hung e2e until the job
   was cancelled (now `--log-order=stream` and `globalTimeout`); toasts outlive a story (dismiss them in `beforeEach`).
+  Last of the day: #340 search result rows, #341 the compact header search bar (C1); deployed c9ba95e. ≈17 % of the
+  week at the stop (cap 30 %).
   Lessons: agents overran the 130k stop in their briefs (stop them by message); a PR that changes a contract or a flow must
   run the story files and e2e helpers that use it; a test hook that moves time must stay inside the rule's window; a
   background merge script outlives its session (check `ps` for one at a session's start); the stories' fake apis must read
