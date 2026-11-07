@@ -7,9 +7,8 @@ import { useFmt } from '@yeral/i18n'
 import { localOf } from '@yeral/domain/time'
 import { openMinutesBetween } from '@yeral/domain/hours'
 import { Button } from '@yeral/ui/button'
-import { Avatar } from '@yeral/ui/avatar'
-import { ChipRadioGroup } from '@yeral/ui/chip'
 import { useClock } from '@yeral/ui/clock'
+import { useMediaQuery } from '@yeral/ui/media-query'
 import { Spinner } from '@yeral/ui/spinner'
 import { TimerPill } from '@yeral/ui/timer-pill'
 import { Plus } from 'lucide-react'
@@ -23,10 +22,11 @@ import { useSdk } from '@/shared/api'
 import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import { gridHours, mondayOf } from '../model/grid'
-import { peopleOf, viewFor, type CalendarSearch } from '../model/search'
+import { peopleOf, statusesOf, viewFor, type CalendarSearch } from '../model/search'
 import { CalendarToolbar } from './calendar-toolbar'
 import { DayGrid } from './day-grid'
 import { WeekAll } from './week-all'
+import { WeekList } from './week-list'
 import { WeekOne } from './week-one'
 
 /**
@@ -56,6 +56,8 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
   const todayDate = today(now)
   const date = search.date ?? todayDate
   const cancelled = !!search.cancelled
+  const statuses = statusesOf(search.status)
+  const phone = useMediaQuery('(max-width: 639px)')
   const week = search.view === 'weekOne' || search.view === 'weekAll'
   // the people picked in the toolbar (`?staff=` with a `?view=`); `?staff=` alone is the phone's person
   const people = search.view ? peopleOf(search.staff) : []
@@ -111,6 +113,11 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
   const requests = (summary?.requests ?? 0) + moves
   const first = queue[0]
   const columns = view.data?.columns ?? []
+  // the grids show the statuses ticked in Filters (none = all; cancelled ones go by Show cancelled)
+  const data =
+    view.data && statuses.length
+      ? { ...view.data, bookings: view.data.bookings.filter((b) => b.status === 'cancelled' || statuses.some((x) => x === b.status)) }
+      : view.data
   const leaveMove = () => go({ move: undefined }, true)
   const moving = useMoveBooking({ slug, code: search.move, date: shown, now, people: columns, onLeave: leaveMove })
   // the people picked who are on the grid (a specialist has only themself)
@@ -176,6 +183,12 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           view={view.data}
           cancelled={cancelled}
           onCancelled={(on) => go({ cancelled: on ? true : undefined })}
+          statuses={statuses}
+          onStatuses={(next) => go({ status: next.join(',') || undefined }, true)}
+          onClearFilters={() => go({ status: undefined, cancelled: undefined }, true)}
+          phoneStaff={phoneStaff}
+          // the person stays in the address as picked, across days; the booking picked in another column goes
+          onPhoneStaff={(staff) => go({ staff, booking: undefined }, true)}
           requests={first ? queue.length : requests}
           onRequests={first ? () => openRequest(first) : undefined}
           onNew={() => go({ panel: 'new', booking: undefined, move: undefined }, true)}
@@ -198,25 +211,6 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
             )}
           </p>
         )}
-        {/* on a phone: one person's day at a time, a chip each (B-Calendar `.stchips`; a specialist has only theirs) */}
-        {columns.length > 1 && phoneStaff && (
-          <ChipRadioGroup
-            aria-label={t('specialist')}
-            className="-mx-4 flex-nowrap overflow-x-auto px-4 py-0.5 sm:hidden [&>*]:h-11 [&>*]:flex-none [&>*]:gap-2 [&>*]:pl-2"
-            value={phoneStaff}
-            // the person stays in the address as picked, across days; the booking picked in another column goes
-            onValueChange={(staff) => go({ staff, booking: undefined }, true)}
-            options={columns.map((c) => ({
-              value: c.staffId,
-              label: (
-                <>
-                  <Avatar name={c.name} src={c.photo?.url} size={24} letters={1} tone="tint" decorative />
-                  {c.name}
-                </>
-              ),
-            }))}
-          />
-        )}
       </div>
       {moving.booking && <MoveBar booking={moving.booking} onBack={leaveMove} />}
       {/* the phone's way in (B-Mobile 2, 5c): over the tab bar, the toast taking its place while it shows */}
@@ -230,20 +224,36 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           <Plus aria-hidden />
         </Button>
       )}
-      {view.data && shape === 'weekAll' && (
+      {data && week && phone && columns.find((c) => c.staffId === phoneStaff) && (
+        // a phone shows one person at a time: her week as a list of days
+        <WeekList
+          view={data}
+          column={columns.find((c) => c.staffId === phoneStaff)!}
+          from={data.from}
+          now={now}
+          picked={search.booking}
+          timer={timer}
+          onOpen={(pick) =>
+            'request' in pick
+              ? openRequest({ code: pick.request })
+              : go({ booking: search.booking === pick.booking ? undefined : pick.booking, request: undefined, move: undefined }, true)
+          }
+        />
+      )}
+      {data && !phone && shape === 'weekAll' && (
         <WeekAll
-          view={{ ...view.data, columns: weekColumns }}
-          from={view.data.from}
+          view={{ ...data, columns: weekColumns }}
+          from={data.from}
           today={todayDate}
           // the person's day, one column; the head's, as many people as the week showed
           onDay={(day, staffId) => go({ date: day === todayDate ? undefined : day, view: 'dayOne', staff: staffId }, false)}
         />
       )}
-      {view.data && shape === 'weekOne' && columns.find((c) => c.staffId === phoneStaff) && (
+      {data && !phone && shape === 'weekOne' && columns.find((c) => c.staffId === phoneStaff) && (
         <WeekOne
-          view={view.data}
+          view={data}
           column={columns.find((c) => c.staffId === phoneStaff)!}
-          from={view.data.from}
+          from={data.from}
           now={now}
           picked={search.booking}
           timer={timer}
@@ -255,9 +265,9 @@ function Calendar({ slug, level }: { slug: string; level: Level }) {
           }
         />
       )}
-      {view.data && !week ? (
+      {data && !week ? (
         <DayGrid
-          view={view.data}
+          view={data}
           date={shown}
           now={now}
           business={business}
