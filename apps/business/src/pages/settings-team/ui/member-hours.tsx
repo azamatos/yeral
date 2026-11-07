@@ -20,7 +20,7 @@ import { HoursAffectedBookings, HoursRow, type AffectedChoice } from '@/features
 import { useSdk } from '@/shared/api'
 import { DAY_OFF_NOTE_MAX } from '@/shared/config'
 import { useDatePickerWords, useDateSpan, useDayName, useErrorText } from '@/shared/i18n'
-import { dayHours, dayProblem, switchShift, works, type ShiftForm } from '../model/shift'
+import { dayHours, dayProblem, switchShift, type ShiftForm } from '../model/shift'
 
 type Business = readonly (WeekdayHours | null)[]
 
