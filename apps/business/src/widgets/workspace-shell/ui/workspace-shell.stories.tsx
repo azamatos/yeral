@@ -259,6 +259,15 @@ export const AccountMenu: Story = {
     )
     await userEvent.keyboard('{ArrowLeft}')
     await userEvent.click(within(menu).getByRole('menuitem', { name: 'Log out' }))
+    // «Log out» asks first (owner, 07.11): Cancel keeps the session and gives the menu's button the focus back
+    const ask = await within(document.body).findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await userEvent.click(within(ask).getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(within(document.body).queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(button).toHaveFocus())
+    await userEvent.click(button!)
+    await userEvent.click(await within(document.body).findByRole('menuitem', { name: 'Log out' }))
+    const again = await within(document.body).findByRole('dialog', { name: 'Log out of Ýeral on this device?' })
+    await userEvent.click(within(again).getByRole('button', { name: 'Log out' }))
     await expect(await canvas.findByText('Log in')).toBeVisible()
   },
 }

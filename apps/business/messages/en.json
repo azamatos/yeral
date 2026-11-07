@@ -57,6 +57,8 @@
       "triggerOf": "Account menu: {name}",
       "openAsClient": "Open as a client",
       "logout": "Log out",
+      "logoutTitle": "Log out of {brand} on this device?",
+      "logoutCancel": "Cancel",
       "profile": "My profile",
       "logIn": "Log in"
     },

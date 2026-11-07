@@ -43,6 +43,9 @@ Package: `packages/ui` (theme `src/styles/theme.css` — every design token unde
   phones). Callout: five tones with the icon in the tone's ink, M or compact. NoteRow for a client's notes, not a box.
 - Statuses: `st-pending|confirmed|completed|cancelled|noshow` with `-bg/-line/-ink/-dot`; one badge shape everywhere;
   phone booking = confirmed + phone icon; cancelled-by-client vs by-business = same colour, icon + label.
+- Rating stars are `a-500` everywhere (owner, 2026-11-07; `COMPONENTS.md` still says ink), empty stars `n-300`, the
+  number beside them ink; the star input's unpicked outlines stay `n-500` (a control's line needs 3:1), its hover and
+  pick sit on the `a-50` tint. White stars only on a photo (the business hero).
 - Type: Geist (v0.7, was Onest; self-hosted variable, `@fontsource-variable/geist`). Desktop scale display 64/68 · h1 44/48 ·
   h2 32/38 · h3 22/28 · body-l 17/26 · body 15/22 · dense 13/18 · button 15/20 · label 11/14 caps +0.07em; heading tracking
   −0.03 / −0.025 / −0.02 / −0.01 em; phones scale down below 768 (see `tokens.css`). Figures proportional; `tabular-nums` only

@@ -19,10 +19,13 @@ import { ShellSwitcher } from './shell-switcher'
 export function ShellSidebar({
   collapsed = false,
   onProfile,
+  onLogOut,
 }: {
   collapsed?: boolean
   /** My profile, opened from the account menu (its button gets the focus back). */
   onProfile: (opener: HTMLElement | null) => void
+  /** The log-out question, the same way. */
+  onLogOut: (opener: HTMLElement | null) => void
 }) {
   const t = useTranslations('shell')
   const contact = useContactYeral()
@@ -79,7 +82,7 @@ export function ShellSidebar({
           },
           // no way to reach Ýeral set: no row (a submenu with no links would open empty)
           ...(contact.links.length ? [{ id: 'contact', label: contact.title, icon: <Headset />, links: contact.links }] : []),
-          { id: 'logout', label: t('account.logout'), icon: <LogOut />, danger: true, onSelect: account.logout },
+          { id: 'logout', label: t('account.logout'), icon: <LogOut />, danger: true, onSelect: onLogOut, opensDialog: true },
         ]}
         className={collapsed ? undefined : 'self-stretch'}
       />

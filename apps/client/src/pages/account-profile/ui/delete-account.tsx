@@ -11,8 +11,8 @@ import { useLocale, useTranslations } from 'use-intl'
 import { useErrorText } from '@/shared/i18n'
 
 /**
- * Deleting the account (book C-47, Q-172; Account-Profile «Hasaby öçür» and its modal): the danger S button, then a 480
- * modal that says what goes (upcoming bookings cancelled and the businesses told; the account, favourites and reviews
+ * Deleting the account (book C-47, Q-172; Account-Profile «Hasaby öçür» and its modal): the danger button (M, even with
+ * «Log out» beside it — owner, 07.11), then a 480 modal that says what goes (upcoming bookings cancelled and the businesses told; the account, favourites and reviews
  * deleted; the businesses keep their own visit records) with Back and the solid danger «Delete account»
  * (`DELETE /v1/me`). Done, the person is signed out and lands on Home with a toast. An owner of a business can't
  * (`owns_workspace`): the modal says why.
@@ -49,9 +49,7 @@ export function DeleteAccount() {
       }}
     >
       <ModalTrigger asChild>
-        <Button variant="danger-quiet" size="s">
-          {t('profile.delete')}
-        </Button>
+        <Button variant="danger-quiet">{t('profile.delete')}</Button>
       </ModalTrigger>
       <ModalContent size={480}>
         <ModalHeader title={t('profile.deleteTitle')} closeLabel={t('account.close')}>

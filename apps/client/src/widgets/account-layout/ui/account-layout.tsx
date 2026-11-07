@@ -7,7 +7,7 @@ import { CalendarDays, LogOut, UserRound } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { TrustedBadge } from '@/entities/client'
-import { useLogOut } from '@/features/log-out'
+import { LogOutConfirm } from '@/features/log-out'
 import { PersonMark, wrap } from '@/shared/ui'
 
 /** A place in the account aside (`.sn`): 40 high, 14/500, r10; the current one on tint; pills under 1024. */
@@ -33,7 +33,6 @@ export function AccountLayout({ children }: { children: ReactNode }) {
   // the Trusted badge under the name (C7-Booking D2): only once someone is signed in
   const trusted = useQuery({ ...sdk.me.trusted(), enabled: !!me.data })
   const navigate = useNavigate()
-  const { logOut, loggingOut } = useLogOut()
   const signedOut = me.data === null
   useEffect(() => {
     if (signedOut) void navigate({ to: '/$lang', params: { lang }, replace: true })
@@ -67,16 +66,12 @@ export function AccountLayout({ children }: { children: ReactNode }) {
               {t('profileAndSettings')}
             </Link>
             <span aria-hidden className="my-2 h-px bg-n-200 max-md:hidden" />
-            <button
-              type="button"
-              onClick={logOut}
-              disabled={loggingOut}
-              aria-busy={loggingOut || undefined}
-              className={cn(navItem, 'max-md:hidden')}
-            >
-              <LogOut aria-hidden />
-              {t('logOut')}
-            </button>
+            <LogOutConfirm>
+              <button type="button" className={cn(navItem, 'max-md:hidden')}>
+                <LogOut aria-hidden />
+                {t('logOut')}
+              </button>
+            </LogOutConfirm>
           </nav>
         </aside>
         <div className="flex min-w-0 flex-[999_1_640px] flex-col">{children}</div>

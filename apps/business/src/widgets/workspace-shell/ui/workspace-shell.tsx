@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSdk } from '@/shared/api'
 import { placeFor, targetRoute } from '../model/sections'
 import { useWorkspace } from '../model/use-workspace'
+import { LogOutConfirm } from './log-out-confirm'
 import { OfflineBanner } from './offline-banner'
 import { ProfileDrawer } from './profile-drawer'
 import { RequestArrivals } from './request-arrivals'
@@ -35,11 +36,16 @@ export function WorkspaceShell() {
   const member = !!workspace
   const pathname = useLocation({ select: (l) => l.pathname })
   const [profile, setProfile] = useState(false)
-  // what opened My profile gets the focus back when it closes (the account menu's button, More)
+  const [logOut, setLogOut] = useState(false)
+  // what opened My profile or the log-out question gets the focus back when it closes (the account menu's button, More)
   const opener = useRef<HTMLElement | null>(null)
   const openProfile = (from: HTMLElement | null) => {
     opener.current = from
     setProfile(true)
+  }
+  const openLogOut = (from: HTMLElement | null) => {
+    opener.current = from
+    setLogOut(true)
   }
 
   useEffect(() => {
@@ -59,8 +65,8 @@ export function WorkspaceShell() {
   return (
     <div className="flex min-h-dvh bg-n-0">
       <style>{TOASTS}</style>
-      <ShellSidebar onProfile={openProfile} />
-      <ShellSidebar collapsed onProfile={openProfile} />
+      <ShellSidebar onProfile={openProfile} onLogOut={openLogOut} />
+      <ShellSidebar collapsed onProfile={openProfile} onLogOut={openLogOut} />
       {/* under 768 the tab bar is fixed at the bottom: the page keeps clear of it; a page as tall as the screen (the
           calendar's, `flush`) gets exactly its height */}
       <div
@@ -70,9 +76,10 @@ export function WorkspaceShell() {
         <OfflineBanner />
         <Outlet />
       </div>
-      <ShellTabBar onProfile={openProfile} />
+      <ShellTabBar onProfile={openProfile} onLogOut={openLogOut} />
       {member && <RequestArrivals key={slug} slug={slug} />}
       <ProfileDrawer open={profile} onOpenChange={setProfile} opener={opener} />
+      <LogOutConfirm open={logOut} onOpenChange={setLogOut} opener={opener} />
     </div>
   )
 }

@@ -112,9 +112,10 @@ export function MyBookingsPage() {
         />
       ) : (
         <>
-          <ul className="m-0 -mx-4 flex list-none flex-col p-0 max-sm:mx-0">
+          {/* bordered cards 12 apart (owner, 07.11), each a listitem the flows find by its link */}
+          <ul className="m-0 flex list-none flex-col gap-3 p-0">
             {rows.map((b) => (
-              <li key={b.code} className="border-b border-n-200 last:border-b-0 max-sm:border-b">
+              <li key={b.code}>
                 <BookingRow booking={b} tab={tab} onReview={review} />
               </li>
             ))}

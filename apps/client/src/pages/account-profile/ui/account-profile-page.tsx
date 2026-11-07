@@ -8,11 +8,10 @@ import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { SaveBar } from '@yeral/ui/save-bar'
 import { toast } from '@yeral/ui/toast'
-import { LogOut } from 'lucide-react'
 import { useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { TrustedCard } from '@/entities/client'
-import { useLogOut } from '@/features/log-out'
+import { LogOutConfirm } from '@/features/log-out'
 import { useErrorText } from '@/shared/i18n'
 import { ChangePhoneBox } from './change-phone-box'
 import { DeleteAccount } from './delete-account'
@@ -175,23 +174,40 @@ function Profile({ me }: { me: Me }) {
   )
 }
 
-/** Log out (C-46) and delete the account (C-47). */
+/**
+ * Log out (C-46) and delete the account (C-47): two even rows (owner, 07.11), each asking before it acts — «Log out»
+ * the Secondary M, «Delete account» the danger M, both through their 480 confirm.
+ */
 function AccountSection() {
   const t = useTranslations()
-  const { logOut, loggingOut } = useLogOut()
   return (
     <Section title={t('profile.account')} lead={t('profile.accountLead')}>
-      <div>
-        <Button variant="secondary" loading={loggingOut} onClick={logOut}>
-          <LogOut aria-hidden />
-          {t('account.logOut')}
-        </Button>
-      </div>
-      <div className="h-px bg-n-200" />
-      <div className="flex flex-col items-start gap-2">
-        <DeleteAccount />
-        <span className="text-dense text-n-600">{t('profile.deleteLead')}</span>
+      <div className="flex flex-col divide-y divide-n-200">
+        <ActionRow title={t('account.logOut')} lead={t('profile.logOutLead')}>
+          <LogOutConfirm>
+            <Button variant="secondary">{t('account.logOut')}</Button>
+          </LogOutConfirm>
+        </ActionRow>
+        <ActionRow title={t('profile.delete')} lead={t('profile.deleteLead')}>
+          <DeleteAccount />
+        </ActionRow>
       </div>
     </Section>
+  )
+}
+
+/**
+ * A row of the Account section on the SettingsRow's values (DS-Patterns `.y-sr`): the title 15/22 500 with its line
+ * 13/18 on the left, its button on the right; on phones the button goes under the words at full width.
+ */
+function ActionRow({ title, lead, children }: { title: string; lead: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-6 py-4 first:pt-0 last:pb-0 max-sm:flex-col max-sm:items-stretch max-sm:gap-3">
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-body font-medium text-n-900">{title}</span>
+        <span className="text-dense text-n-600">{lead}</span>
+      </div>
+      <div className="flex flex-none max-sm:[&>*]:flex-auto">{children}</div>
+    </div>
   )
 }
