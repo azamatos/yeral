@@ -92,14 +92,16 @@ import { audienceOf, inWorkspace, keys, type Audience, type BookingTab } from '.
  * pass numbers or flags as text cast with `as never` (the parameters themselves are typed from the contract).
  */
 type Query = Record<string, string | string[] | undefined>
+type QueryValue = string | number | boolean | readonly string[] | undefined | null
+const isList = (v: QueryValue): v is readonly string[] => Array.isArray(v)
 /**
  * What a query sends: blanks and empty lists dropped, a list as the key repeated (`tag=VIP&tag=Bride`, so a comma inside
  * a tag stays; the bookings filters' `queryList` reads repeated keys too). Ids for `idListQuery` arrive joined already.
  */
-const clean = (q: Record<string, string | number | boolean | readonly string[] | undefined | null>): Query =>
+const clean = (q: Record<string, QueryValue>): Query =>
   Object.fromEntries(
     Object.entries(q).flatMap(([k, v]) =>
-      v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length) ? [] : [[k, Array.isArray(v) ? [...v] : String(v)]],
+      v === undefined || v === null || v === '' || (isList(v) && !v.length) ? [] : [[k, isList(v) ? [...v] : String(v)]],
     ),
   )
 
