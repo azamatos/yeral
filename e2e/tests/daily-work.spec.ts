@@ -66,8 +66,11 @@ test('the owner books a client by phone from the calendar and the client’s My 
   const owner = await openOwnerCalendar(browser)
   await owner.getByRole('button', { name: 'New booking', exact: true }).click()
   const drawer = owner.getByRole('dialog', { name: 'New booking' })
-  await drawer.getByRole('textbox', { name: 'Phone number' }).fill(phone)
-  await expect(drawer.getByText(/^This number isn’t saved yet/)).toBeVisible()
+  // the one Client field (B7): digits nobody has → «+ New client» takes them into the inline form
+  await drawer.getByRole('combobox', { name: 'Client' }).fill(phone)
+  await expect(drawer.getByText(`No client “${phone}”`)).toBeVisible()
+  await drawer.getByRole('option', { name: `New client “${phone}”` }).click()
+  await expect(drawer.getByRole('textbox', { name: 'Phone number' })).not.toHaveValue('')
   await drawer.getByRole('checkbox').first().check()
   await drawer
     .getByRole('button', { name: /\d{1,2}:\d{2}/ })
