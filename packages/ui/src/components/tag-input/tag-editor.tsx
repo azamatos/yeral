@@ -176,7 +176,7 @@ export function TagEditor({
   }
 
   const onBlur = (e: FocusEvent<HTMLSpanElement>) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false)
+    if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false)
   }
 
   return (
