@@ -286,12 +286,12 @@
     "description": "{name} · {category}",
     "reviews": "{count, plural, one {# review} other {# reviews}}",
     "noReviews": "No reviews yet",
-    "openNow": "Open now",
     "openUntil": "Open now · until {time}",
     "opensToday": "Closed · opens at {time}",
     "opensTomorrow": "Closed · opens tomorrow at {time}",
     "opensOn": "Closed · opens {day} at {time}",
     "closed": "Closed",
+    "statusOpen": "Open until {time}",
     "away": "{distance} from you",
     "newAddress": "New address",
     "approximate": "Approximate area: the exact address comes with a confirmed booking.",
@@ -313,12 +313,16 @@
       "failed": "Couldn't share the link. Copy it from the address bar."
     },
     "photoCount": "Photo {n} of {total}",
-    "photoOf": "{n} / {total}",
+    "photos": {
+      "all": "All photos",
+      "open": "All photos · {count}",
+      "title": "Photos of {name}",
+      "close": "Close"
+    },
     "services": {
       "title": "Services"
     },
     "sections": {
-      "label": "Sections",
       "services": "Services",
       "specialists": "Specialists",
       "reviews": "Reviews",

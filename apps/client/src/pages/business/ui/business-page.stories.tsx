@@ -34,9 +34,9 @@ export const Default: Story = {
     // the category crumb and the meta line's category open the category page (#18)
     const crumbs = within(canvas.getByRole('navigation', { name: 'You are here' }))
     await expect(crumbs.getByRole('link', { name: 'Beauty salon' })).toHaveAttribute('href', '/en/c/beauty')
-    await expect(canvas.getAllByRole('link', { name: 'Beauty salon' })).toHaveLength(2)
+    await expect(canvas.getAllByRole('link', { name: 'Beauty salon' })).toHaveLength(1)
     // the open line once, in the card, on its own line under today's hours; the header says only the state (#19)
-    await expect(canvas.getByText('Open now')).toBeVisible()
+    await expect(canvas.getByText('Open until 20:00')).toBeVisible()
     const card = within(canvas.getByRole('complementary', { name: 'Booking' }))
     await expect(card.getByText('Today 09:00–20:00')).toBeVisible()
     await expect(canvas.getAllByText('Open now · until 20:00')).toHaveLength(1)
@@ -53,6 +53,74 @@ export const Default: Story = {
     await expect(card.getByText('1 service')).toBeVisible()
     await userEvent.click(card.getByRole('button', { name: 'Clear' }))
     await expect(await card.findByText('Next free time')).toBeVisible()
+  },
+}
+
+/**
+ * The cover (Venue v0.7 · C2, option B): the name, rating, StatusPill and address on the photo, Favourite and Share on
+ * it, photos 2–5 as thumbnails; the last opens all the photos.
+ */
+export const Cover: Story = {
+  play: async ({ canvas, canvasElement }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
+    await expect(canvas.getByText('Open until 20:00')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Share' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Photo 2 of 5' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'All photos · 5' }))
+    const photos = within(await within(canvasElement.ownerDocument.body).findByRole('dialog', { name: 'Photos of Glow Studio' }))
+    await waitFor(() => expect(photos.getAllByRole('img')).toHaveLength(5))
+    await userEvent.click(photos.getByRole('button', { name: 'Close' }))
+    await waitFor(() => expect(within(canvasElement.ownerDocument.body).queryByRole('dialog')).toBeNull())
+  },
+}
+
+/** No photos yet: no cover, the initial tile and the name on white, Favourite and Share as outline buttons. */
+export const NoPhotos: Story = {
+  args: { server: businessApi({ business: { ...GLOW, photos: [] } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: /^All photos/ })).toBeNull()
+    await expect(canvas.getByRole('button', { name: 'Share' })).toBeVisible()
+  },
+}
+
+/** One photo: the cover alone, no thumbnails. */
+export const OnePhoto: Story = {
+  args: { server: businessApi({ business: { ...GLOW, photos: GLOW.photos.slice(0, 1) } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: /^Photo \d of/ })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: /^All photos/ })).toBeNull()
+  },
+}
+
+/** Three photos: two thumbnails, each opening the photos; no «All photos» veil under five. */
+export const FewPhotos: Story = {
+  args: { server: businessApi({ business: { ...GLOW, photos: GLOW.photos.slice(0, 3) } }) },
+  play: async ({ canvas, canvasElement }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Photo 3 of 3' }))
+    const photos = within(await within(canvasElement.ownerDocument.body).findByRole('dialog', { name: 'Photos of Glow Studio' }))
+    await waitFor(() => expect(photos.getAllByRole('img')).toHaveLength(3))
+  },
+}
+
+/**
+ * Phone (Venue v0.7 · 390 «Cover collapse»): the cover with the identity on it; scrolled 244 px down it has folded into
+ * the white 56 px bar with the round photo and the name, the tab bar stuck under it.
+ */
+export const PhoneCover: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas, canvasElement }) => {
+    const title = await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })
+    await expect(canvas.getByRole('link', { name: 'Beauty salon' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'All photos · 5' })).toBeVisible()
+    const fill = canvasElement.ownerDocument.querySelector<HTMLElement>('[data-part="fill"]')
+    await waitFor(() => expect(fill?.style.opacity).toBe('0'))
+    canvasElement.ownerDocument.defaultView?.scrollTo({ top: 400, behavior: 'instant' })
+    await waitFor(() => expect(fill?.style.opacity).toBe('1'))
+    // the name on the cover hands over to the one in the bar
+    await expect(title.style.opacity).toBe('0')
+    await expect(canvas.getByRole('tab', { name: /^Services/ }).getBoundingClientRect().top).toBeGreaterThanOrEqual(56)
   },
 }
 
@@ -163,9 +231,8 @@ export const Closed: Story = {
     const card = within(await canvas.findByRole('complementary', { name: 'Booking' }))
     await expect(card.getByText(/Closed today · Holiday/)).toBeVisible()
     await expect(card.getByText('Closed · opens tomorrow at 09:00')).toBeVisible()
-    // once on the page: the header says only «Closed» (#19)
-    await expect(canvas.getAllByText('Closed · opens tomorrow at 09:00')).toHaveLength(1)
-    await expect(canvas.getByText('Closed')).toBeVisible()
+    // the cover's StatusPill says it too
+    await expect(canvas.getAllByText('Closed · opens tomorrow at 09:00')).toHaveLength(2)
     // the hours table's today says so too
     const hours = within(canvas.getByRole('region', { name: 'About' }))
     await expect(hours.getByText('Today').closest('div')).toHaveTextContent(/Today\s*Closed · Holiday$/)
@@ -188,7 +255,7 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Booking' }))
     await expect(bar.getByRole('link', { name: 'Book' })).toBeVisible()
-    await expect(canvas.getByText('Photo 1 of 5')).toBeInTheDocument()
+    await expect(canvas.getByRole('button', { name: 'All photos · 5' })).toBeVisible()
   },
 }
 
@@ -401,7 +468,7 @@ export const Midnight: Story = {
   play: async ({ canvas }) => {
     // the card's line only; the header says just «Open now» (#19)
     await expect(await canvas.findAllByText('Open now · until 24:00')).toHaveLength(1)
-    await expect(canvas.getByText('Open now')).toBeVisible()
+    await expect(canvas.getByText('Open until 24:00')).toBeVisible()
     const about = within(canvas.getByRole('region', { name: 'About' }))
     await expect(about.getAllByText('09:00–24:00')).toHaveLength(7)
   },

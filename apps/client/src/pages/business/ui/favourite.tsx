@@ -14,7 +14,7 @@ const LoginModal = lazy(() => import('@/features/log-in').then((m) => ({ default
  * the login first and saves the place once the person is in (States 10). `wide` is the paused card's full-width
  * ghost «Add to favourites» (States 05); otherwise a 44 square with the words for screen readers.
  */
-export function FavouriteButton({ slug, wide = false }: { slug: string; wide?: boolean }) {
+export function FavouriteButton({ slug, wide = false, className }: { slug: string; wide?: boolean; className?: string }) {
   const t = useTranslations('business.favourite')
   const lang = useLocale()
   const sdk = useSdk()
@@ -32,7 +32,7 @@ export function FavouriteButton({ slug, wide = false }: { slug: string; wide?: b
         iconOnly={!wide}
         aria-pressed={on}
         aria-label={wide ? undefined : label}
-        className={wide ? '-mt-1 w-full' : undefined}
+        className={wide ? '-mt-1 w-full' : className}
         // a press while one saves waits for it (never disabled under the person's focus)
         onClick={() => !save.isPending && press()}
       >

@@ -1,32 +1,22 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { today } from '@yeral/domain/time'
-import { useFmt } from '@yeral/i18n'
 import { useSdk } from '@yeral/sdk/react'
 import { Breadcrumbs, Crumb } from '@yeral/ui/breadcrumbs'
-import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
-import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
-import { Pill } from '@yeral/ui/pill'
-import { Rating } from '@yeral/ui/rating'
-import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { Clock, MapPin, Share2 } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
-import { site } from '@/shared/config'
-import { addressLine } from '@/shared/lib'
 import { wrap } from '@/shared/ui'
-import { openLine } from '../model/when'
 import { About } from './about'
 import { BookingBar, BookingCard } from './booking-card'
-import { FavouriteButton } from './favourite'
+import { Hero } from './hero'
 import { Nearby } from './nearby'
 import { Reviews } from './reviews'
-import { pickTab, Section, SECTIONS, SectionTabs, tabSearch } from './sections'
+import { pickTab, Section, SECTIONS, SectionTabs } from './sections'
 import { Specialists } from './specialists'
 
 /**
@@ -43,9 +33,10 @@ export function bookingState(detail: Pick<BusinessDetail, 'preview' | 'onlineEna
 }
 
 /**
- * `/{lang}/b/{slug}` — the business page (Venue, book C-06–C-11, C-15): the header with the photos; under the section
- * nav the services to pick from (kept in `?services=`), the specialists, the reviews and About, with the booking card
- * beside them (a bar under 1024); the places nearby across the foot. The route's loader has the page (and the first
+ * `/{lang}/b/{slug}` — the business page (Venue v0.7 · C2, book C-06–C-11, C-15): the breadcrumbs, the cover hero with
+ * the identity on the photo; under it the tabs as panels (`?tab=`): the services to pick from (kept in `?services=`),
+ * the specialists, the reviews and About, with the booking card beside them (a bar under 1024); the places nearby
+ * across the foot. The route's loader has the page (and the first
  * reviews) in the cache, or has already turned an unknown, hidden or not yet open business into the 404 page (C-10).
  */
 export function BusinessPage() {
@@ -57,6 +48,7 @@ export function BusinessPage() {
   const navigate = useNavigate()
   const t = useTranslations('business')
   const tb = useTranslations('booking')
+  const home = useTranslations('notFound')('home')
   const state = bookingState(detail)
   // a page with nobody to pick (tables, classes) has no Specialists part
   const sections = SECTIONS.filter((s) => s !== 'specialists' || detail.specialists.length > 0)
@@ -74,8 +66,21 @@ export function BusinessPage() {
     <>
       {detail.preview && <PreviewBanner preview={detail.preview} />}
       <div className={wrap}>
-        <Header detail={detail} />
-        <div className="flex flex-wrap items-stretch gap-12 pt-10 max-sm:pt-6">
+        <Breadcrumbs label={t('crumbs')} className="pt-6 max-md:hidden">
+          <Crumb asChild>
+            <Link to="/$lang" params={{ lang }}>
+              {home}
+            </Link>
+          </Crumb>
+          <Crumb asChild>
+            <Link to="/$lang/c/$category" params={{ lang, category: detail.category.id }}>
+              {detail.category.name}
+            </Link>
+          </Crumb>
+          <Crumb current>{detail.name}</Crumb>
+        </Breadcrumbs>
+        <Hero detail={detail} />
+        <div className="flex flex-wrap items-stretch gap-12 pt-4 max-md:pt-0">
           <div className="min-w-0 flex-[999_1_540px]">
             <SectionTabs
               ids={sections}
@@ -150,146 +155,5 @@ function PreviewBanner({ preview }: { preview: NonNullable<BusinessDetail['previ
     <Callout layout="banner" tone={preview.status === 'pending' ? 'warning' : 'danger'} icon={<Clock />}>
       {text}
     </Callout>
-  )
-}
-
-/**
- * The header (Venue `.hero`): the path (its category a link to the category page, book C-05), the name, the rating,
- * reviews, the category and whether it's open now (the full open line is the booking card's: owner's review, #19), the
- * address, the heart and Share; then the photos (one large and four small; one at a time on phones, first on the page,
- * with its count). Nothing marks a sample business any more (owner's review, #40).
- */
-function Header({ detail }: { detail: BusinessDetail }) {
-  const t = useTranslations('business')
-  const home = useTranslations('notFound')('home')
-  const fmt = useFmt()
-  const lang = useLocale()
-  const now = useClock()
-  const open = openLine(detail.open, today(now), fmt, t)
-  const categoryLink = { to: '/$lang/c/$category' as const, params: { lang, category: detail.category.id } }
-  return (
-    <div className="flex flex-col gap-5 pt-6 max-sm:gap-4 max-sm:pt-0">
-      <Breadcrumbs label={t('crumbs')} className="max-sm:hidden">
-        <Crumb asChild>
-          <Link to="/$lang" params={{ lang }}>
-            {home}
-          </Link>
-        </Crumb>
-        <Crumb asChild>
-          <Link {...categoryLink}>{detail.category.name}</Link>
-        </Crumb>
-        <Crumb current>{detail.name}</Crumb>
-      </Breadcrumbs>
-      <div className="flex items-end justify-between gap-x-6 gap-y-4 max-sm:flex-col max-sm:items-start">
-        <div className="flex min-w-0 flex-col gap-2">
-          <h1 className="m-0 text-[40px] leading-11 font-bold tracking-[-0.03em] max-sm:text-[30px] max-sm:leading-9">{detail.name}</h1>
-          <div className="flex flex-col gap-1 text-body text-n-600">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              {detail.rating !== null && detail.reviewsCount > 0 ? (
-                <>
-                  <Rating value={fmt.rating(detail.rating)} />
-                  <span aria-hidden>·</span>
-                  <Link to="." search={tabSearch('reviews')} replace resetScroll={false} className={cn(textLink, 'font-medium')}>
-                    {t('reviews', { count: detail.reviewsCount })}
-                  </Link>
-                </>
-              ) : (
-                <span>{t('noReviews')}</span>
-              )}
-              <span aria-hidden>·</span>
-              <Link {...categoryLink} className={cn(textLink, 'font-medium')}>
-                {detail.category.name}
-              </Link>
-              <span aria-hidden>·</span>
-              <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>
-                {open.isOpen ? t('openNow') : t('closed')}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-              <MapPin aria-hidden className="size-4 flex-none" strokeWidth={1.75} />
-              <span>
-                {addressLine(detail, fmt)}
-                {detail.distanceM !== null && ` · ${t('away', { distance: fmt.distance(detail.distanceM) })}`}
-              </span>
-              {/* the api sends when it moved only for the 30 days the page says so (book Q-215) */}
-              {detail.movedAt !== null && <Pill tone="accent">{t('newAddress')}</Pill>}
-            </div>
-            {detail.hideExactAddress && <span className="text-dense">{t('approximate')}</span>}
-          </div>
-        </div>
-        <div className="flex flex-none gap-2">
-          {/* the owner's page in review isn't public: nothing to keep among favourites */}
-          {!detail.preview && <FavouriteButton slug={detail.slug} />}
-          <ShareButton name={detail.name} slug={detail.slug} />
-        </div>
-      </div>
-      <Gallery photos={detail.photos} />
-    </div>
-  )
-}
-
-/**
- * Share (Venue): the phone's share sheet where there is one, else the link copied, with a toast; a sheet closed by the
- * person is no error, and anything that fails says so.
- */
-function ShareButton({ name, slug }: { name: string; slug: string }) {
-  const t = useTranslations('business.share')
-  const lang = useLocale()
-  const share = async () => {
-    const url = `${site.urls.client}/${lang}/b/${slug}`
-    try {
-      if (typeof navigator.share === 'function') {
-        await navigator.share({ title: name, url })
-        return
-      }
-      await navigator.clipboard.writeText(url)
-      toast(t('copied'))
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) toast(t('failed'))
-    }
-  }
-  return (
-    <Button variant="secondary" iconOnly aria-label={t('label')} onClick={() => void share()}>
-      <Share2 aria-hidden />
-    </Button>
-  )
-}
-
-/**
- * The photos (Venue `.gal`): one large and up to four beside it, 440 high, r16; under 768 the first alone, full width
- * and square-cornered, with «1 / 5». Fewer photos keep the large one and stack the rest; none, no gallery.
- */
-function Gallery({ photos }: { photos: BusinessDetail['photos'] }) {
-  const t = useTranslations('business')
-  const [first, ...rest] = photos
-  if (!first) return null
-  const small = rest.slice(0, 4)
-  return (
-    <div className="relative max-sm:order-first max-sm:-mx-4">
-      <div
-        className={cn(
-          'grid h-110 gap-2 overflow-hidden rounded-card max-sm:h-70 max-sm:grid-cols-1 max-sm:rounded-none',
-          small.length === 0 ? 'grid-cols-1' : small.length < 4 ? 'grid-cols-[2fr_1fr]' : 'grid-cols-[2fr_1fr_1fr] grid-rows-2',
-        )}
-        // fewer than four small photos stack beside the large one, one row each
-        style={small.length > 0 && small.length < 4 ? { gridTemplateRows: `repeat(${small.length}, minmax(0, 1fr))` } : undefined}
-      >
-        <img
-          src={first.url}
-          alt={first.alt}
-          className="size-full object-cover"
-          style={small.length > 0 ? { gridRow: `span ${small.length < 4 ? small.length : 2}` } : undefined}
-        />
-        {small.map((p) => (
-          <img key={p.url} src={p.url} alt={p.alt} loading="lazy" className="size-full object-cover max-sm:hidden" />
-        ))}
-      </div>
-      {photos.length > 1 && (
-        <span className="absolute right-4 bottom-4 hidden h-7 items-center rounded-pill bg-n-0 px-2.5 text-dense font-semibold text-n-900 max-sm:inline-flex">
-          <span aria-hidden>{t('photoOf', { n: 1, total: photos.length })}</span>
-          <span className="sr-only">{t('photoCount', { n: 1, total: photos.length })}</span>
-        </span>
-      )}
-    </div>
   )
 }
