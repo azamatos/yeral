@@ -1,6 +1,6 @@
 /**
- * Search — book C-03, C-05, board Search, over a `fetch` that answers like the api: the rows with their time chips, a
- * category's page, the day, the filters, nothing found, Show more, a phone.
+ * Search — book C-03, C-05, board Search and the C7-Home results toolbar, over a `fetch` that answers like the api: the
+ * rows with their time chips, a category's page, the day, the toolbar's filters and sort, nothing found, Show more, a phone.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BusinessCard, Category } from '@yeral/contract/catalog'
@@ -116,11 +116,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The rows: name, rating, the line, from, Example, four times and how many more; only categories that take appointments. */
+/** The rows: name, rating, the line, from, four times and how many more; only categories that take appointments; the toolbar at rest. */
 export const Results: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Popular places' })).toBeVisible()
     await expect(await canvas.findByText('2 places · free time today')).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Rating' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Sort: Recommended' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Clear all' })).toBeNull()
     await expect(canvas.getByRole('link', { name: 'Barber Loft' })).toHaveAttribute('href', '/en/b/barber-loft')
     await expect(canvas.getAllByText('Barbershop · Magtymguly şaýoly 12')).toHaveLength(2)
     // an example business is no longer marked (owner's review, #40)
@@ -157,19 +160,69 @@ export const Tomorrow: Story = {
   },
 }
 
-/** The drawer changes nothing until Show results; its chip then counts what's on. */
+/** A calendar day from Home's When: the count names it, no day of the toggle is on, and Today clears it. */
+export const CalendarDay: Story = {
+  args: { path: `/en/search?date=${addDays(DAY, 5)}` },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText(/^2 places · free time on \w+, \d+ \w+$/)).toBeVisible()
+    await expect(last.get('date')).toBe(addDays(DAY, 5))
+    await expect(canvas.getByRole('radio', { name: 'Today' })).not.toBeChecked()
+    await userEvent.click(canvas.getByRole('radio', { name: 'Today' }))
+    await expect(await canvas.findByText('2 places · free time today')).toBeVisible()
+    await waitFor(() => expect(last.has('date')).toBe(false))
+  },
+}
+
+/** A price band applies at once: the trigger tints, a chip appears with Clear all; the chip's × and Clear all take it off. */
 export const Filters: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('link', { name: 'Barber Loft' })
-    await userEvent.click(canvas.getByRole('button', { name: 'Filters' }))
-    const d = within(await page.findByRole('dialog', { name: 'Filters' }))
-    await userEvent.type(d.getByRole('textbox', { name: 'Price from' }), '50')
-    await userEvent.click(d.getByRole('switch', { name: 'Open now' }))
-    await expect(last.has('openNow')).toBe(false)
-    await userEvent.click(d.getByRole('button', { name: 'Show results' }))
-    await expect(await canvas.findByRole('button', { name: 'Filters: 2' })).toBeVisible()
-    await waitFor(() => expect(last.get('minPrice')).toBe('50'))
-    await expect(last.get('openNow')).toBe('1')
+    await pick(canvas.getByRole('combobox', { name: 'Price' }), 'Up to 100 TMT')
+    await expect(await canvas.findByRole('combobox', { name: 'Price · Up to 100 TMT' })).toBeVisible()
+    await expect(canvas.getByText('Price: Up to 100 TMT')).toBeVisible()
+    await waitFor(() => expect(last.get('maxPrice')).toBe('100'))
+    await expect(last.has('minPrice')).toBe(false)
+    await pick(canvas.getByRole('combobox', { name: 'Price · Up to 100 TMT' }), '100–200 TMT')
+    await waitFor(() => expect(last.get('minPrice')).toBe('100'))
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }))
+    await waitFor(() => expect(last.has('maxPrice')).toBe(false))
+    await expect(canvas.queryByText(/^Price: /)).toBeNull()
+    await expect(canvas.queryByRole('button', { name: 'Clear all' })).toBeNull()
+  },
+}
+
+/** A range from an older link that the menu doesn't offer stays, read as it is. */
+export const OlderRange: Story = {
+  args: { path: '/en/search?from=50' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('combobox', { name: 'Price · 50 TMT and up' })).toBeVisible()
+    await expect(canvas.getByText('Price: 50 TMT and up')).toBeVisible()
+  },
+}
+
+/** Sort says what it does; without a position Nearest isn't offered. */
+export const Sort: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('link', { name: 'Barber Loft' })
+    await userEvent.click(canvas.getByRole('button', { name: 'Sort: Recommended' }))
+    const list = await screen.findByRole('listbox')
+    await expect(within(list).queryByRole('option', { name: 'Nearest' })).toBeNull()
+    await userEvent.click(within(list).getByRole('option', { name: 'Price, lowest first' }))
+    await expect(await canvas.findByRole('button', { name: 'Sort: Price, lowest first' })).toBeVisible()
+    await waitFor(() => expect(last.get('sort')).toBe('price'))
+  },
+}
+
+/** Location off: Distance is off with a reason, and opens nothing. */
+export const LocationOff: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('link', { name: 'Barber Loft' })
+    const distance = canvas.getByRole('combobox', { name: 'Distance' })
+    await expect(distance).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.hover(distance)
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent('Turn on location to filter by distance')
+    await userEvent.click(distance)
+    await expect(screen.queryByRole('listbox')).toBeNull()
   },
 }
 
@@ -177,7 +230,7 @@ export const Filters: Story = {
 export const NothingFound: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('link', { name: 'Barber Loft' })
-    await userEvent.click(canvas.getByRole('button', { name: 'Rating 4.5+' }))
+    await pick(canvas.getByRole('combobox', { name: 'Rating' }), '4.5+')
     await expect(await canvas.findByText('No free time here')).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Try tomorrow' })).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Clear filters' }))
@@ -204,15 +257,20 @@ export const ShowMore: Story = {
   },
 }
 
-/** Around a position: near you, how far, and no offer to share a location already given. */
+/** Around a position: near you, Distance (5 km plain, another radius tints and chips), Nearest in Sort, no offer to share a location. */
 export const NearAPosition: Story = {
   args: { path: '/en/search?near=37.95,58.39' },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Places near you' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull()
-    await pick(canvas.getByRole('combobox', { name: 'How far' }), '10 km')
+    await expect(canvas.queryByText(/^Distance: /)).toBeNull()
+    await pick(await canvas.findByRole('combobox', { name: 'Distance' }), 'Within 10 km')
     await waitFor(() => expect(last.get('r')).toBe('10'))
     await expect(last.get('lat')).toBe('37.95')
+    await expect(canvas.getByRole('combobox', { name: 'Distance · 10 km' })).toBeVisible()
+    await expect(canvas.getByText('Distance: 10 km')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Sort: Recommended' }))
+    await expect(within(await screen.findByRole('listbox')).getByRole('option', { name: 'Nearest' })).toBeInTheDocument()
   },
 }
 
@@ -281,11 +339,32 @@ export const PhoneMap: Story = {
   },
 }
 
-/** A phone (Mobile 2): the rows narrow, nothing runs off sideways. */
+/** A phone (Mobile 2): the rows narrow, nothing runs off sideways; the toolbar is Filters · the count · Sort as an icon. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     await canvas.findByRole('link', { name: 'Barber Loft' })
+    await expect(canvas.getByRole('button', { name: 'Filters' })).toBeVisible()
+    await expect(canvas.getByText('2 places · free time today')).toBeVisible()
+    await expect(canvas.queryByRole('combobox', { name: /Rating/ })).toBeNull()
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+  },
+}
+
+/** The phone's Filters sheet: a section per filter with radio rows, Distance's reason while location is off, Show N places closes. */
+export const PhoneFilters: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('link', { name: 'Barber Loft' })
+    await userEvent.click(canvas.getByRole('button', { name: 'Filters' }))
+    const sheet = within(await page.findByRole('dialog', { name: 'Filters' }))
+    await expect(sheet.getByText('Turn on location to filter by distance')).toBeVisible()
+    await expect(sheet.getByRole('option', { name: /Any rating/ })).toHaveAttribute('aria-selected', 'true')
+    await userEvent.click(sheet.getByRole('option', { name: /Up to 100 TMT/ }))
+    await waitFor(() => expect(last.get('maxPrice')).toBe('100'))
+    await userEvent.click(sheet.getByRole('button', { name: 'Show 2 places' }))
+    await waitFor(() => expect(page.queryByRole('dialog')).toBeNull())
+    await expect(canvas.getByRole('button', { name: 'Filters 1' })).toBeVisible()
+    await expect(canvas.getByText('Price: Up to 100 TMT')).toBeVisible()
   },
 }

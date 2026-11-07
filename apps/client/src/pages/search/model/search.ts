@@ -10,8 +10,28 @@ export type Day = (typeof DAYS)[number]
 export const SORTS = ['distance', 'rating', 'price'] as const
 export type Sort = (typeof SORTS)[number]
 
-/** «Rating 4.5+» (Search). */
-export const TOP_RATING = 4.5
+/** The Rating menu (C7-Home results toolbar): 4.5+ · 4.0+. */
+export const RATINGS = [4.5, 4] as const
+
+export type PriceBand = 'to100' | '100to200' | 'from200'
+/** The Price menu (C7-Home results toolbar): up to 100 · 100–200 · 200 and up, in the market's currency. */
+export const PRICE_BANDS: readonly { id: PriceBand; from?: number; to?: number }[] = [
+  { id: 'to100', to: 100 },
+  { id: '100to200', from: 100, to: 200 },
+  { id: 'from200', from: 200 },
+]
+
+/** Which band the address's range is; `custom` for a range the menu doesn't offer (an older link), shown as it is. */
+export function priceBandOf(a: Pick<SearchAddress, 'from' | 'to'>): PriceBand | 'custom' | undefined {
+  if (a.from === undefined && a.to === undefined) return undefined
+  return PRICE_BANDS.find((b) => b.from === a.from && b.to === a.to)?.id ?? 'custom'
+}
+
+/** The address of a band; none clears the range. */
+export function priceBandAddress(id: string | null): Pick<SearchAddress, 'from' | 'to'> {
+  const band = PRICE_BANDS.find((b) => b.id === id)
+  return { from: band?.from, to: band?.to }
+}
 
 const whole = z.coerce.number().int().min(0).max(1_000_000)
 
@@ -32,8 +52,6 @@ export const searchAddress = z.object({
   rating: z.coerce.number().min(0).max(5).optional().catch(undefined),
   from: whole.optional().catch(undefined),
   to: whole.optional().catch(undefined),
-  open: z.literal(true).optional().catch(undefined),
-  women: z.literal(true).optional().catch(undefined),
   /** Around a position (near me, a typed place): `lat,lng`. */
   near: z.string().max(40).optional().catch(undefined),
   /** The radius around it, km. */
@@ -66,6 +84,16 @@ export function nearOf(near: string | undefined): { lat: number; lng: number } |
 /** The next wider radius, for the empty state; none past the last. */
 export const widerRadius = (r: number = DEFAULT_RADIUS_KM) => RADIUS_OPTIONS_KM.find((km) => km > r)
 
+/**
+ * The day the page shows: the toggle's day, else a calendar day from Home's When — today or tomorrow by their names,
+ * any other as `date` (the count copy names it).
+ */
+export function dayOf(a: Pick<SearchAddress, 'day' | 'date'>, todayDate: string): Day | 'date' {
+  if (a.day) return a.day
+  if (!a.date || a.date === todayDate) return 'today'
+  return a.date === addDays(todayDate, 1) ? 'tomorrow' : 'date'
+}
+
 /** What the api is asked. A range the wrong way round is read the right way, as the api refuses one. */
 export function apiSearch(a: SearchAddress, lang: Locale, todayDate: string): SearchParams {
   const [minPrice, maxPrice] = a.from !== undefined && a.to !== undefined && a.from > a.to ? [a.to, a.from] : [a.from, a.to]
@@ -80,17 +108,21 @@ export function apiSearch(a: SearchAddress, lang: Locale, todayDate: string): Se
     minRating: a.rating,
     minPrice,
     maxPrice,
-    openNow: a.open,
-    womenOnly: a.women,
     bbox: areaOf(a.area),
     ...nearOf(a.near),
     ...(nearOf(a.near) && a.r ? { r: a.r } : {}),
   }
 }
 
-/** Any filter on (the drawer's and the chips', not the day or the sort): the empty state offers to clear them. */
+/** Any filter on (the toolbar's chips and the map area, not the day or the sort): the empty state offers to clear them. */
 export const filtered = (a: SearchAddress) =>
-  a.rating !== undefined || a.from !== undefined || a.to !== undefined || !!a.open || !!a.women || !!a.area
+  a.rating !== undefined || a.from !== undefined || a.to !== undefined || (a.r !== undefined && a.r !== DEFAULT_RADIUS_KM) || !!a.area
 
-/** How many of the drawer's filters are on, for its chip. */
-export const filterCount = (a: SearchAddress) => [a.from !== undefined || a.to !== undefined, !!a.open, !!a.women].filter(Boolean).length
+/** What Clear all and «Clear filters» reset, in one navigation. */
+export const CLEARED: Pick<SearchAddress, 'rating' | 'from' | 'to' | 'r' | 'area'> = {
+  rating: undefined,
+  from: undefined,
+  to: undefined,
+  r: undefined,
+  area: undefined,
+}

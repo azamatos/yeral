@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apiSearch, areaOf, filterCount, filtered, nearOf, searchAddress, widerRadius } from './search'
+import { apiSearch, areaOf, dayOf, filtered, nearOf, priceBandAddress, priceBandOf, searchAddress, widerRadius } from './search'
 
 describe('searchAddress', () => {
   it('reads what it knows and leaves the rest out', () => {
@@ -7,7 +7,6 @@ describe('searchAddress', () => {
       what: 'cut',
       day: 'tomorrow',
       from: 50,
-      open: true,
     })
   })
 
@@ -38,6 +37,36 @@ describe('apiSearch', () => {
 
   it('leaves an empty «what» out', () => {
     expect(apiSearch({ what: '' }, 'en', day).q).toBeUndefined()
+  })
+})
+
+describe('dayOf', () => {
+  const today = '2026-11-01'
+
+  it('takes the toggle’s day first', () => {
+    expect(dayOf({ day: 'week', date: '2026-11-20' }, today)).toBe('week')
+    expect(dayOf({}, today)).toBe('today')
+  })
+
+  it('names today and tomorrow from a calendar date, and any other day as a date', () => {
+    expect(dayOf({ date: '2026-11-01' }, today)).toBe('today')
+    expect(dayOf({ date: '2026-11-02' }, today)).toBe('tomorrow')
+    expect(dayOf({ date: '2026-11-20' }, today)).toBe('date')
+  })
+})
+
+describe('price bands', () => {
+  it('knows the menu’s bands and keeps an older range as custom', () => {
+    expect(priceBandOf({})).toBeUndefined()
+    expect(priceBandOf({ to: 100 })).toBe('to100')
+    expect(priceBandOf({ from: 100, to: 200 })).toBe('100to200')
+    expect(priceBandOf({ from: 200 })).toBe('from200')
+    expect(priceBandOf({ from: 50 })).toBe('custom')
+  })
+
+  it('turns a band into the address, none into no range', () => {
+    expect(priceBandAddress('100to200')).toEqual({ from: 100, to: 200 })
+    expect(priceBandAddress(null)).toEqual({ from: undefined, to: undefined })
   })
 })
 
@@ -80,10 +109,8 @@ describe('near', () => {
 describe('filters', () => {
   it('knows when any is on', () => {
     expect(filtered({ day: 'week', sort: 'rating' })).toBe(false)
+    expect(filtered({ r: 5 })).toBe(false)
     expect(filtered({ rating: 4.5 })).toBe(true)
-  })
-
-  it('counts a price range once', () => {
-    expect(filterCount({ from: 10, to: 20, open: true })).toBe(2)
+    expect(filtered({ r: 10 })).toBe(true)
   })
 })

@@ -1,10 +1,11 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import type { Category } from '@yeral/contract/catalog'
-import { DEFAULT_RADIUS_KM, RADIUS_OPTIONS_KM } from '@yeral/domain/geo'
+import { DEFAULT_RADIUS_KM } from '@yeral/domain/geo'
 import { today } from '@yeral/domain/time'
+import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
-import { Chip, ChipRadioGroup } from '@yeral/ui/chip'
+import { ChipRadioGroup } from '@yeral/ui/chip'
 import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
 import { EmptyState } from '@yeral/ui/empty-state'
@@ -12,30 +13,28 @@ import { Input } from '@yeral/ui/input'
 import type { MapArea } from '@yeral/ui/map-frame'
 import { useMediaQuery } from '@yeral/ui/media-query'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
-import { Select } from '@yeral/ui/select'
-
-/** The sort select's value for the default order (distance near a place, popularity otherwise), no `sort` param. */
-const DEFAULT_SORT = 'default'
 import { Skeleton } from '@yeral/ui/skeleton'
-import { List, Map as MapIcon, SearchX, SlidersHorizontal } from 'lucide-react'
+import { List, Map as MapIcon, SearchX } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BusinessRow } from '@/entities/business'
 import { LocationBanner, placeAddress, usePlace, WhereField, type Place } from '@/features/pick-place'
 import { useSdk } from '@yeral/sdk/react'
 import { wrap } from '@/shared/ui'
-import { apiSearch, widerRadius, DAYS, filterCount, filtered, TOP_RATING, type Day, type SearchAddress, type Sort } from '../model/search'
-import { FiltersDrawer } from './filters-drawer'
+import { apiSearch, CLEARED, dayOf, DAYS, filtered, widerRadius, type Day, type SearchAddress } from '../model/search'
 import { ResultsMap } from './results-map'
+import { ResultsToolbar } from './results-toolbar'
 
 /**
- * Search (book C-03, board Search) and a category's page (C-05: the same page with its category, its heading and its intro):
- * the box, the category chips, the filters, the day, the sort, the rows and Show more. Only places with a free time on the
- * day are listed (Q-150). From 1024 the map sits beside the list (C-04), a row and its pin lighting each other; under it a
- * floating Map opens it over the page, with the places as cards under it.
+ * Search (book C-03, board Search; the toolbar from C7-Home C4) and a category's page (C-05: the same page with its
+ * category, its heading and its intro): the box, the category chips, the day, then the heading and the results toolbar
+ * (Distance · Rating · Price · Sort, the active chips, the count), the rows and Show more. Only places with a free time
+ * on the day are listed (Q-150). From 1024 the map sits beside the list (C-04), a row and its pin lighting each other;
+ * under it a floating Map opens it over the page, with the places as cards under it.
  */
 export function SearchPage({ category }: { category?: Category }) {
   const t = useTranslations('search')
+  const fmt = useFmt()
   const lang = useLocale()
   const sdk = useSdk()
   const now = useClock()
@@ -43,7 +42,6 @@ export function SearchPage({ category }: { category?: Category }) {
   const address: SearchAddress = useSearch({ strict: false })
   const go = (patch: Partial<SearchAddress>) =>
     void navigate({ to: '.', search: (prev: SearchAddress) => ({ ...prev, ...patch }), replace: true })
-  const [filters, setFilters] = useState(false)
   const wide = useMediaQuery('(min-width: 1024px)')
   const [hot, setHot] = useState<string | null>(null)
   const [mapOpen, setMapOpen] = useState(false)
@@ -72,8 +70,8 @@ export function SearchPage({ category }: { category?: Category }) {
   const first = list.data?.pages[0]
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
   const nearby = first?.located ?? false
-  const day: Day = address.day ?? 'today'
-  const count = filterCount(address)
+  const day = dayOf(address, today(now))
+  const total = first?.total ?? rows.length
   const name = category?.name
   const title = nearby ? (name ? t('nearName', { name }) : t('near')) : (name ?? t('popular'))
   const radius = address.r ?? DEFAULT_RADIUS_KM
@@ -88,7 +86,6 @@ export function SearchPage({ category }: { category?: Category }) {
     if (id === 'all') void navigate({ to: '/$lang/search', params: { lang }, search })
     else void navigate({ to: '/$lang/c/$category', params: { lang, category: id }, search })
   }
-  const clear = () => go({ from: undefined, to: undefined, rating: undefined, open: undefined, women: undefined, area: undefined })
   const searchArea = (area: MapArea) => go({ area: area.map((n) => n.toFixed(5)).join(','), city: undefined })
   // a pin shows its place: the row beside the map, or the card under it on a phone
   const showPlace = (slug: string) => {
@@ -137,63 +134,30 @@ export function SearchPage({ category }: { category?: Category }) {
             onValueChange={pick}
             options={[{ value: 'all', label: t('all') }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
           />
-          <div className="flex flex-wrap gap-2">
-            <Chip selected={count > 0} onClick={() => setFilters(true)}>
-              <SlidersHorizontal aria-hidden />
-              {count > 0 ? t('filtersOn', { n: count }) : t('filtersButton')}
-            </Chip>
-            <Chip
-              selected={address.rating !== undefined}
-              onClick={() => go({ rating: address.rating === undefined ? TOP_RATING : undefined })}
-            >
-              {t('filters.rating')}
-            </Chip>
-          </div>
+          {/* the day is part of the search (C7-Home C4): with the fields, not in the toolbar; a calendar day from Home shows as none */}
+          <Segmented
+            aria-label={t('day')}
+            size="l"
+            className="self-start"
+            value={day === 'date' ? '' : day}
+            onValueChange={(next) => next && go({ day: next === 'today' ? undefined : (next as Day), date: undefined })}
+          >
+            {DAYS.map((d) => (
+              <SegmentedItem key={d} value={d}>
+                {t(`days.${d}`)}
+              </SegmentedItem>
+            ))}
+          </Segmented>
         </div>
 
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-1">
-            <h1 className="m-0 text-[28px] leading-[34px] font-bold tracking-[-0.02em] text-n-900">{title}</h1>
-            {first && <span className="text-dense text-n-600">{t(`count.${day}`, { n: first.total ?? rows.length })}</span>}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Segmented
-              aria-label={t('day')}
-              value={day}
-              onValueChange={(next) => next && go({ day: next === 'today' ? undefined : (next as Day) })}
-            >
-              {DAYS.map((d) => (
-                <SegmentedItem key={d} value={d}>
-                  {t(`days.${d}`)}
-                </SegmentedItem>
-              ))}
-            </Segmented>
-            {nearby && (
-              <Select
-                size="m"
-                aria-label={t('radius')}
-                className="w-auto"
-                listWidth="content"
-                value={String(radius)}
-                onValueChange={(v) => go({ r: Number(v) })}
-                options={RADIUS_OPTIONS_KM.map((km) => ({ value: String(km), label: t('km', { km }) }))}
-              />
-            )}
-            <Select
-              size="m"
-              aria-label={t('sort')}
-              className="w-auto"
-              listWidth="content"
-              value={address.sort ?? DEFAULT_SORT}
-              onValueChange={(v) => go({ sort: v === DEFAULT_SORT ? undefined : (v as Sort) })}
-              options={[
-                { value: DEFAULT_SORT, label: nearby ? t('sorts.distance') : t('sorts.popular') },
-                { value: 'rating', label: t('sorts.rating') },
-                { value: 'price', label: t('sorts.price') },
-              ]}
-            />
-          </div>
-        </div>
+        <h1 className="m-0 text-[28px] leading-[34px] font-bold tracking-[-0.02em] text-n-900">{title}</h1>
+        <ResultsToolbar
+          address={address}
+          located={nearby}
+          total={total}
+          count={first && t(`count.${day}`, { n: total, date: address.date ? fmt.shortWeekdayDate(address.date) : '' })}
+          onChange={go}
+        />
 
         <LocationBanner
           unknown={located.unknown && !addressed}
@@ -236,7 +200,7 @@ export function SearchPage({ category }: { category?: Category }) {
                   </Button>
                 )}
                 {filtered(address) && (
-                  <Button variant="tertiary" size="s" onClick={clear}>
+                  <Button variant="tertiary" size="s" onClick={() => go(CLEARED)}>
                     {t('clearFilters')}
                   </Button>
                 )}
@@ -276,17 +240,6 @@ export function SearchPage({ category }: { category?: Category }) {
             <MapIcon aria-hidden />
             {t('map.title')}
           </Button>
-        )}
-
-        {filters && (
-          <FiltersDrawer
-            address={address}
-            onApply={(patch) => {
-              go(patch)
-              setFilters(false)
-            }}
-            onClose={() => setFilters(false)}
-          />
         )}
       </div>
       {wide && <aside className="sticky top-0 h-dvh min-w-0 flex-[1_1_0]">{map('h-full')}</aside>}
