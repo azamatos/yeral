@@ -17,6 +17,9 @@ function Page() {
 function Hidden() {
   return <BusinessesPage view="hidden" />
 }
+function CheckAgainList() {
+  return <BusinessesPage view="moved" />
+}
 function Detail() {
   return <p>one business</p>
 }
@@ -57,6 +60,32 @@ export const HiddenView: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('No business is hidden.')).toBeVisible()
     await expect(canvas.getByRole('tab', { name: 'Hidden' })).toHaveAttribute('aria-selected', 'true')
+  },
+}
+
+/** «Check again» (Q-215, Q-275): live businesses with a new name waiting, or what they changed, in the row. */
+export const CheckAgain: Story = {
+  args: {
+    routes: { '/businesses': CheckAgainList, '/businesses/$id': Detail, '/businesses/new': Detail },
+    server: api({
+      moved: [
+        { ...BUSINESS_ITEM, verification: 'verified', pendingName: { name: 'Glow Beauty', at: Date.UTC(2026, 10, 7, 9) } },
+        {
+          ...BUSINESS_ITEM,
+          id: '2',
+          slug: 'nur',
+          name: 'Nur Dental',
+          verification: 'verified',
+          recheck: { at: Date.UTC(2026, 10, 7, 8), what: ['about', 'logo'] },
+        },
+      ],
+    }),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('tab', { name: 'Check again' })).toHaveAttribute('aria-selected', 'true')
+    await expect(await canvas.findByText('New name: Glow Beauty')).toBeVisible()
+    await expect(canvas.getByText('Changed: About and logo')).toBeVisible()
+    await expect(canvas.getAllByText('Check again').length).toBeGreaterThan(2)
   },
 }
 

@@ -170,7 +170,9 @@
     "pageHidden": "{brand}: мы временно скрыли страницу «{business}»: {reason}.",
     "pageShown": "{brand}: страница «{business}» снова открыта.",
     "pageClosed": "{brand}: «{business}» закрыт, как вы просили: страница скрыта, будущие записи отменены, клиенты оповещены. Ваши данные сохранены.",
-    "pageReopened": "{brand}: «{business}» снова открыт в вашем рабочем пространстве."
+    "pageReopened": "{brand}: «{business}» снова открыт в вашем рабочем пространстве.",
+    "nameApproved": "{brand}: новое название «{business}» одобрено.",
+    "nameRejected": "{brand}: новое название «{name}» не одобрено: {reason}. Клиенты по-прежнему видят «{business}». Измените его в рабочем пространстве: {link}"
   },
   "fmt": {
     "money": "{amount} {currency}",

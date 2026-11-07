@@ -1,4 +1,4 @@
-/** The admin tool's businesses (book F-179, S-17; Q-274, Q-275, Q-012, Q-215): `/v1/admin/businesses/*`. */
+/** The admin tool's businesses (book F-179, S-17; Q-274, Q-275, Q-012, Q-215): `/v1/admin/businesses/*`, a new name's verdict too. */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import {
   adminAddBusinessSchema,
@@ -6,6 +6,8 @@ import {
   adminBusinessItemSchema,
   adminBusinessParamSchema,
   adminBusinessSchema,
+  adminNameApproveSchema,
+  adminNameRejectSchema,
   adminReasonSchema,
   adminVerifyQuerySchema,
 } from '@yeral/contract/admin'
@@ -16,9 +18,11 @@ import {
   addBusinessForOwner,
   adminBusiness,
   adminBusinesses,
+  approveName,
   closeBusiness,
   hideBusiness,
   rejectBusiness,
+  rejectName,
   reopenBusiness,
   showBusiness,
   verifyBusiness,
@@ -48,7 +52,7 @@ const verifyRoute = createRoute({
   method: 'post',
   path: '/admin/businesses/{id}/verify',
   tags,
-  summary: 'Verified: public, and the owner told; a verified one that moved is checked again with `moved` as seen',
+  summary: 'Verified: public, and the owner told; what a verified one changed is checked again with `moved` (`recheck.at`) as seen',
   request: { params: adminBusinessParamSchema, query: adminVerifyQuerySchema },
   responses: { ...noContent, 404: errors[404], 409: errors[409], ...signedIn },
 })
@@ -75,6 +79,22 @@ const showRoute = createRoute({
   summary: 'Shown again after being hidden',
   request: { params: adminBusinessParamSchema },
   responses: { ...noContent, 404: errors[404], 409: errors[409], ...signedIn },
+})
+const approveNameRoute = createRoute({
+  method: 'post',
+  path: '/admin/businesses/{id}/name/approve',
+  tags,
+  summary: 'A new name approved (Q-275): clients see it from now on, and the owner is told; `name` as seen',
+  request: { params: adminBusinessParamSchema, ...jsonBody(adminNameApproveSchema) },
+  responses: { ...noContent, 400: errors[400], 404: errors[404], 409: errors[409], ...signedIn },
+})
+const rejectNameRoute = createRoute({
+  method: 'post',
+  path: '/admin/businesses/{id}/name/reject',
+  tags,
+  summary: 'A new name turned down with a reason the owner reads (Q-275); the business keeps its name; `name` as seen',
+  request: { params: adminBusinessParamSchema, ...jsonBody(adminNameRejectSchema) },
+  responses: { ...noContent, 400: errors[400], 404: errors[404], 409: errors[409], ...signedIn },
 })
 
 const addRoute = createRoute({
@@ -133,5 +153,14 @@ export const adminBusinessRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(showRoute, async (c) => {
     await showBusiness(c.var.deps, requireAdmin(c), c.req.valid('param').id)
+    return c.body(null, 204)
+  })
+  .openapi(approveNameRoute, async (c) => {
+    await approveName(c.var.deps, requireAdmin(c), c.req.valid('param').id, c.req.valid('json').name)
+    return c.body(null, 204)
+  })
+  .openapi(rejectNameRoute, async (c) => {
+    const { name, reason } = c.req.valid('json')
+    await rejectName(c.var.deps, requireAdmin(c), c.req.valid('param').id, name, reason)
     return c.body(null, 204)
   })

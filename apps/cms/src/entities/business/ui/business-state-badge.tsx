@@ -8,7 +8,7 @@ const TONES: Record<BusinessState, PillProps['tone']> = {
   hidden: 'danger',
   rejected: 'danger',
   review: 'warning',
-  moved: 'warning',
+  recheck: 'warning',
   verified: 'success',
 }
 

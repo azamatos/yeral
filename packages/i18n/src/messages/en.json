@@ -170,7 +170,9 @@
     "pageHidden": "{brand}: we've hidden {business}'s page for now: {reason}.",
     "pageShown": "{brand}: {business}'s page is open again.",
     "pageClosed": "{brand}: {business} is closed, as you asked: its page is hidden, its bookings ahead are cancelled and their clients told. Your data is kept.",
-    "pageReopened": "{brand}: {business} is open again in your workspace."
+    "pageReopened": "{brand}: {business} is open again in your workspace.",
+    "nameApproved": "{brand}: your new name, {business}, is approved.",
+    "nameRejected": "{brand}: the new name {name} isn't approved: {reason}. Clients still see {business}. Change it in your workspace: {link}"
   },
   "fmt": {
     "money": "{amount} {currency}",

@@ -57,10 +57,16 @@ describe('the business profile (book B-37)', () => {
       },
     })
     expect(changed.status).toBe(200)
-    expect(changed.json).toMatchObject({ name: 'Glow Studio & Spa', phone: '+99312345678', amenities: ['wifi', 'parking'] })
+    // a verified business's new name waits for the Ýeral team (Q-275): the page keeps the approved one
+    expect(changed.json).toMatchObject({
+      name: 'Glow Studio',
+      pendingName: 'Glow Studio & Spa',
+      phone: '+99312345678',
+      amenities: ['wifi', 'parking'],
+    })
     expect(changed.json.about).toEqual({ ...before.json.about, en: 'Hair, nails and quiet.' })
     expect(await page(maysa)).toMatchObject({
-      name: 'Glow Studio & Spa',
+      name: 'Glow Studio',
       about: 'Hair, nails and quiet.',
       phone: '+99312345678',
       amenities: ['wifi', 'parking'],
@@ -80,7 +86,8 @@ describe('the business profile (book B-37)', () => {
     expect(moved.json).toMatchObject({ location, entranceNote: 'Second floor', verification: 'verified' })
     expect(await page(maysa)).toMatchObject({ address: 'Oguzhan köçesi 12', entranceNote: 'Second floor' })
     const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
-    expect(glow!.addressChangedAt?.getTime()).toBe(t.clock.now)
+    expect(glow!.recheckAt?.getTime()).toBe(t.clock.now)
+    expect(glow!.recheck).toContain('address')
     // an empty entrance note is none
     expect((await maysa.req(PROFILE, { method: 'PATCH', body: { entranceNote: '  ' } })).json.entranceNote).toBeNull()
     // an unknown city
@@ -101,7 +108,7 @@ describe('the business profile (book B-37)', () => {
     expect(await page(maysa)).toMatchObject({ floor: '2nd floor' })
     // nothing for the Ýeral team to check again, no "New address", no SMS
     const [after] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
-    expect([after!.addressChangedAt, after!.movedAt]).toEqual([before!.addressChangedAt, before!.movedAt])
+    expect([after!.recheckAt, after!.recheck, after!.movedAt]).toEqual([before!.recheckAt, before!.recheck, before!.movedAt])
     expect((await maysa.req(PROFILE, { method: 'PATCH', body: { floor: 'x'.repeat(41) } })).status).toBe(400)
     // home-based: not before a booking is confirmed
     await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: true } })

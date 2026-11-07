@@ -11,7 +11,7 @@ import { SectionHeader } from '@yeral/ui/section-header'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Building2 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'use-intl'
-import { BusinessStateBadge, businessState } from '@/entities/business'
+import { BusinessStateBadge, businessState, useChangesText } from '@/entities/business'
 import { useSdk } from '@/shared/api'
 import { site } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
@@ -69,15 +69,24 @@ export function BusinessPage({ id }: { id: string }) {
   )
 }
 
+/** What stands out first: why it's off the site, and on a live one a new name waiting and what it changed (Q-215, Q-275). */
 function Notes({ business: b }: { business: AdminBusiness }) {
   const t = useTranslations('business')
   const format = useFormatter()
+  const changes = useChangesText()
   return (
     <>
       {b.reason && <Callout tone="danger">{t('noteRejected', { reason: b.reason })}</Callout>}
       {b.hidden && <Callout tone="danger">{t('noteHidden', { reason: b.hidden.reason })}</Callout>}
       {b.closed && <Callout tone="neutral">{t('noteClosed', { reason: b.closed.reason })}</Callout>}
-      {b.addressChangedAt && <Callout tone="warning">{t('noteMoved', { when: format.dateTime(b.addressChangedAt, STAMP) })}</Callout>}
+      {b.pendingName && (
+        <Callout tone="warning">
+          {t('noteRenamed', { from: b.name, to: b.pendingName.name, when: format.dateTime(b.pendingName.at, STAMP) })}
+        </Callout>
+      )}
+      {b.recheck && (
+        <Callout tone="warning">{t('noteRecheck', { what: changes(b.recheck.what), when: format.dateTime(b.recheck.at, STAMP) })}</Callout>
+      )}
     </>
   )
 }

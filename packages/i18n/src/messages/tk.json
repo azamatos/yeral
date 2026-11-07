@@ -170,7 +170,9 @@
     "pageHidden": "{brand}: {business} sahypasyny wagtlaýynça gizledik: {reason}.",
     "pageShown": "{brand}: {business} sahypasy täzeden açyk.",
     "pageClosed": "{brand}: {business} siziň islegiňiz boýunça ýapyldy: sahypasy gizlendi, öňdäki ýazylyşlar ýatyryldy we müşderilere habar berildi. Maglumatlaryňyz saklanýar.",
-    "pageReopened": "{brand}: {business} iş ýeriňizde täzeden açyk."
+    "pageReopened": "{brand}: {business} iş ýeriňizde täzeden açyk.",
+    "nameApproved": "{brand}: täze adyňyz «{business}» tassyklandy.",
+    "nameRejected": "{brand}: täze at «{name}» tassyklanmady: {reason}. Müşderiler henizem «{business}» adyny görýärler. Iş ýeriňizde üýtgediň: {link}"
   },
   "fmt": {
     "money": "{amount} {currency}",

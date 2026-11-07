@@ -233,11 +233,20 @@ function TextNotes({ id, message, count, max }: { id: string; message: ReactNode
   )
 }
 
+/**
+ * The name (B-37). A verified business's new name waits for the Ýeral team (book Q-275 as changed 07.11.2026): the field
+ * holds the waiting one and says clients see the approved one until then; one the team turned down shows their reason
+ * as a page sent back does, until the next rename.
+ */
 function NameRow({ profile }: { profile: ProfileFormState }) {
   const t = useTranslations('settings.profile')
+  const brand = useTranslations('common')('brand')
   const id = useId()
   const problem = profile.problems.name
   const count = profile.form.name.trim().length
+  const { name: approved, pendingName, nameRejected } = profile.profile
+  // said while the waiting name is what the field holds: anything else typed is a new rename
+  const waiting = !!pendingName && profile.form.name.trim() === pendingName
   return (
     <SettingsRow id={id} label={t('name')} description={t('nameCaption')} wide invalid={!!problem}>
       <Input
@@ -246,7 +255,7 @@ function NameRow({ profile }: { profile: ProfileFormState }) {
         // twice the limit can be typed, so the counter and the error show what's too long (as the board does)
         maxLength={NAME_MAX * 2}
         disabled={profile.saving}
-        aria-describedby={[`${id}-help`, problem && `${id}-message`, `${id}-counter`].filter(Boolean).join(' ')}
+        aria-describedby={[`${id}-help`, problem && `${id}-message`, `${id}-counter`, waiting && `${id}-waiting`].filter(Boolean).join(' ')}
         onChange={(e) => profile.set({ name: e.target.value })}
       />
       <TextNotes
@@ -255,6 +264,22 @@ function NameRow({ profile }: { profile: ProfileFormState }) {
         max={NAME_MAX}
         message={problem === 'nameEmpty' ? t('nameEmpty') : problem === 'nameLong' ? t('nameLong', { max: NAME_MAX }) : null}
       />
+      {waiting && (
+        <FieldMessage id={`${id}-waiting`} status="warning">
+          {t('nameWaiting', { brand, name: approved })}
+        </FieldMessage>
+      )}
+      {nameRejected && (
+        <Callout
+          tone="danger"
+          size="s"
+          icon={<CircleAlert aria-hidden />}
+          live={false}
+          title={t('nameRejected', { brand, name: nameRejected.name })}
+        >
+          {nameRejected.reason}
+        </Callout>
+      )}
     </SettingsRow>
   )
 }

@@ -238,6 +238,8 @@ const fakeApi =
           verification: 'pending',
           verificationReason: null,
           hidden: null,
+          pendingName: null,
+          nameRejected: null,
         })
       if (/^GET \/w\/[^/]+\/settings\/address-search$/.test(route)) {
         if (!search) return json({ error: { code: 'address_search_unavailable' } }, 503)

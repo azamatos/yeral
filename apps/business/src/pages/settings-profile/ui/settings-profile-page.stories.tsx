@@ -66,6 +66,8 @@ const PROFILE: BusinessProfile = {
   verification: 'verified',
   verificationReason: null,
   hidden: null,
+  pendingName: null,
+  nameRejected: null,
 }
 
 const CITIES = {
@@ -142,7 +144,17 @@ const fakeApi =
       if (route === 'PATCH /w/glow-studio/settings/profile') {
         sent.profile.push(body)
         const phone = typeof body.phone === 'string' ? `+993${body.phone}` : profile.phone
-        profile = { ...profile, ...body, phone, about: { ...profile.about, ...(body.about as object | undefined) } }
+        const { name, ...rest } = body
+        // a verified business's new name waits for Ýeral, as the api holds it (Q-275); back to the approved one drops it
+        const naming =
+          typeof name !== 'string'
+            ? {}
+            : profile.verification !== 'verified'
+              ? { name, pendingName: null, nameRejected: null }
+              : name === profile.name
+                ? { pendingName: null }
+                : { pendingName: name, nameRejected: null }
+        profile = { ...profile, ...rest, ...naming, phone, about: { ...profile.about, ...(body.about as object | undefined) } }
         return json(profile)
       }
       if (route === 'GET /w/glow-studio/settings/rules') return json(rules)
@@ -246,6 +258,39 @@ export const Save: Story = {
     await expect(sent.rules).toEqual([{ onlineEnabled: false }])
     const saved = await within(document.body).findByText('Saved')
     await waitFor(() => expect(saved).toBeVisible())
+  },
+}
+
+/**
+ * A verified business renamed (book Q-275): the new name waits for Ýeral's check, and the field says clients see the
+ * approved one until then. Typed back to the approved one, the note goes and Save drops the waiting name.
+ */
+export const RenameWaits: Story = {
+  play: async ({ canvas }) => {
+    const name = await canvas.findByRole('textbox', { name: 'Business name' })
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Glow Beauty')
+    await expect(canvas.queryByText(/Waiting for Ýeral’s check/)).toBeNull()
+    await userEvent.click(within(canvas.getByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'Unsaved changes' })).toBeNull())
+    await expect(name).toHaveValue('Glow Beauty')
+    await expect(await canvas.findByText('Waiting for Ýeral’s check. Until it’s approved, clients see “Glow Studio”.')).toBeVisible()
+    await expect(name).toHaveAccessibleDescription(/Waiting for Ýeral’s check/)
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Glow Studio')
+    await expect(canvas.queryByText(/Waiting for Ýeral’s check/)).toBeNull()
+    await userEvent.click(within(canvas.getByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(sent.profile).toEqual([{ name: 'Glow Beauty' }, { name: 'Glow Studio' }]))
+  },
+}
+
+/** The Ýeral team turned the new name down: their reason under the field, until the next rename. */
+export const NameTurnedDown: Story = {
+  args: { server: fakeApi({ profile: { nameRejected: { name: 'Glow Joke', reason: 'This doesn’t read as a business name.' } } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('Ýeral didn’t approve “Glow Joke”')).toBeVisible()
+    await expect(canvas.getByText('This doesn’t read as a business name.')).toBeVisible()
+    await expect(canvas.getByRole('textbox', { name: 'Business name' })).toHaveValue('Glow Studio')
   },
 }
 

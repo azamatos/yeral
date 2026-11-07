@@ -4,7 +4,7 @@
  */
 import type { DateException, WeekHours } from '@yeral/domain/hours'
 import type { AddressTold } from '@yeral/domain/lifecycle'
-import type { InternalStatusPreset, Interval, Localized } from '@yeral/domain/model'
+import type { InternalStatusPreset, Interval, Localized, RecheckChange } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import {
   boolean,
@@ -122,8 +122,22 @@ export const businesses = pgTable(
     ratingBreakdown: jsonb().$type<Record<'1' | '2' | '3' | '4' | '5', number>>().notNull().default({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }),
     /** Only verified businesses are public (ADR 0018). */
     verification: verificationStatus().notNull().default('pending'),
-    /** A verified business moved (book Q-215): the Ýeral team checks it again and clears this; the page stays public. */
-    addressChangedAt: ts(),
+    /**
+     * A verified business changed what the Ýeral team checked (book Q-215, Q-275 as changed 07.11.2026): it moved, or has
+     * a new About, photo or logo. The change is live; the team checks it again and clears both. The newest change's
+     * time (the team clears the one it looked at), and what changed since the last check.
+     */
+    recheckAt: ts(),
+    recheck: text().array().$type<RecheckChange[]>().notNull().default([]),
+    /**
+     * A verified business's new name, waiting for the Ýeral team (book Q-275 as changed 07.11.2026), and since when:
+     * until it's approved, clients, its page, search and every SMS keep `name`.
+     */
+    pendingName: text(),
+    pendingNameAt: ts(),
+    /** The last new name the team turned down, and why: the owner reads it until they rename the business again. */
+    rejectedName: text(),
+    rejectedNameReason: text(),
     /**
      * When the business last moved: its address line, street or city changed (book Q-215). Its page and the bookings
      * ahead say "New address" for a while; a new pin alone isn't a move, and a move back to `movedFrom` within that

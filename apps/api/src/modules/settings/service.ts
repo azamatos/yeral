@@ -9,7 +9,7 @@ import type {
   businessProfileUpdateSchema,
 } from '@yeral/contract/settings'
 import { addressOf, newAddressSince, sameAddress, sameAddressShown } from '@yeral/domain/lifecycle'
-import { AMENITIES, type Amenity, type Locale, type Localized } from '@yeral/domain/model'
+import { AMENITIES, type Amenity, type Locale, type Localized, type RecheckChange } from '@yeral/domain/model'
 import { LATE_MINUTES, rulesErrors, type BookingRules } from '@yeral/domain/rules'
 import { eq } from 'drizzle-orm'
 import type { z } from 'zod'
@@ -21,6 +21,7 @@ import { emit } from '../../notify'
 import { toRules } from '../availability/context'
 import { queueAddressSms } from '../bookings/address-sms'
 import { logoOf } from '../catalog/map'
+import { recheckOf } from './recheck'
 
 type RulesView = z.infer<typeof bookingRulesSchema>
 type RulesChange = z.infer<typeof bookingRulesUpdateSchema>
@@ -82,6 +83,8 @@ const profileView = (deps: Pick<Deps, 'media'>, b: BusinessRow, lang: Locale): P
   verification: b.verification,
   verificationReason: b.verification === 'rejected' ? b.verificationReason : null,
   hidden: b.hiddenAt ? { reason: b.hiddenReason ?? '' } : null,
+  pendingName: b.pendingName,
+  nameRejected: b.rejectedName ? { name: b.rejectedName, reason: b.rejectedNameReason ?? '' } : null,
 })
 
 export async function profileOf(deps: Pick<Deps, 'db' | 'media'>, businessId: string, lang: Locale): Promise<ProfileView> {
@@ -92,10 +95,11 @@ export async function profileOf(deps: Pick<Deps, 'db' | 'media'>, businessId: st
 
 /**
  * Change some of the profile (B-37). A new category must offer every kind of booking the business takes, and the card's
- * "what it is" becomes its name. A new address keeps everything, the page and its verification included, and marks the
- * business for the Ýeral team to check again (book Q-215: `addressChangedAt`, cleared by the admin tool); a new line,
- * street or city is a move (`movedAt`, `movedFrom`), which every client with a booking ahead hears by SMS
- * (`queueAddressSms`). Back where it moved from while the page still says "New address", it has nothing new to say.
+ * "what it is" becomes its name. A verified business's new name waits for the Ýeral team (`renamed`). A new address
+ * keeps everything, the page and its verification included, and puts a verified business on the team's «check again»
+ * list (book Q-215: `recheckOf`, cleared by the admin tool), as a new About does (Q-275); a new line, street or city is
+ * a move (`movedAt`, `movedFrom`), which every client with a booking ahead hears by SMS (`queueAddressSms`). Back where
+ * it moved from while the page still says "New address", it has nothing new to say.
  */
 export async function updateProfile(
   deps: Pick<Deps, 'db' | 'media' | 'now'>,
@@ -123,7 +127,7 @@ export async function updateProfile(
     if (about && !Object.keys(about).length) issues.push({ path: ['about'], code: 'invalid' })
     if (issues.length) throw invalid(...issues)
 
-    const { location, categoryId, amenities, ...rest } = change
+    const { location, categoryId, amenities, name, ...rest } = change
     const before = addressOf(row)
     // a new pin alone is checked again, but the address the clients read is the same
     const relocated = !!location && !sameAddress(before, location)
@@ -134,14 +138,18 @@ export async function updateProfile(
     const pageMoved = !draft && relocated && !sameAddressShown(before, location, hide, 'pending')
     const from = row.movedFrom && newAddressSince(row.movedAt?.getTime() ?? null, now) !== null ? row.movedFrom : before
     const movedBack = pageMoved && sameAddressShown(from, location, hide, 'pending')
+    // a language written anew is a new About; one only removed says nothing new
+    const newAbout = !!change.about && Object.entries(change.about).some(([l, text]) => !!text && text !== row.about[l as Locale])
+    const rechecked: RecheckChange[] = [...(moved ? ['address' as const] : []), ...(newAbout ? ['about' as const] : [])]
     const set: Partial<typeof businesses.$inferInsert> = {
       ...rest,
+      ...(name === undefined ? {} : renamed(row, name, now)),
       ...(about ? { about } : {}),
       // amenities the list doesn't know (older data) stay
       ...(amenities ? { amenities: [...amenities, ...row.amenities.filter((a) => !(AMENITIES as readonly string[]).includes(a))] } : {}),
       ...(recategorized ? { categoryId, kind: category!.name } : {}),
       ...location,
-      ...(moved ? { addressChangedAt: new Date(now) } : {}),
+      ...recheckOf(row, rechecked, now),
       ...(!draft && rest.phone !== undefined && rest.phone !== row.phone ? { phoneChangedAt: new Date(now) } : {}),
       ...(pageMoved ? (movedBack ? { movedAt: null, movedFrom: null } : { movedAt: new Date(now), movedFrom: from }) : {}),
     }
@@ -151,6 +159,20 @@ export async function updateProfile(
     await emit(tx, { type: 'business.updated', businessId })
     return profileView(deps, saved!, lang)
   })
+}
+
+/**
+ * A new name (book Q-275 as changed 07.11.2026). A verified, finished business's waits for the Ýeral team while
+ * clients, its page, search and every SMS keep the approved one; renamed again, the new one replaces the one waiting.
+ * One still being set up or not verified has nothing public: saved at once. Back to the approved name, the one waiting
+ * goes; any other rename lets the last turned-down one go too.
+ */
+function renamed(row: BusinessRow, name: string, now: number): Partial<typeof businesses.$inferInsert> {
+  if (name === row.name) return row.pendingName ? { pendingName: null, pendingNameAt: null } : {}
+  const held = !row.setupStep && row.verification === 'verified'
+  if (held && name === row.pendingName) return {}
+  const fresh = { rejectedName: null, rejectedNameReason: null }
+  return held ? { ...fresh, pendingName: name, pendingNameAt: new Date(now) } : { ...fresh, name, pendingName: null, pendingNameAt: null }
 }
 
 function mergeLanguages(stored: Localized, change: Localized): Localized {

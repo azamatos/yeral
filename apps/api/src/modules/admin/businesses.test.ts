@@ -225,21 +225,26 @@ describe('the admin tool’s businesses (book F-179)', () => {
     const team = await signedInAdmin(t, 'mover')
     await db
       .update(businesses)
-      .set({ addressChangedAt: new Date(DEMO_NOW) })
+      .set({ recheckAt: new Date(DEMO_NOW), recheck: ['address'] })
       .where(eq(businesses.id, glowId))
     const sent = (await smsTo(MAYSA)).length
-    const moved = (await team.req(`${ADMIN}?view=moved&lang=en`)).json.items as { slug: string; addressChangedAt: number }[]
+    const moved = (await team.req(`${ADMIN}?view=moved&lang=en`)).json.items as {
+      slug: string
+      addressChangedAt: number
+      recheck: { at: number; what: string[] }
+    }[]
     expect(moved.map((b) => b.slug)).toContain('glow-studio')
     // the move the team looked at, not an older or newer one
     expect((await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })).json.error.code).toBe('invalid_status')
     expect((await team.req(`${ADMIN}/${glowId}/verify?moved=${DEMO_NOW - 1}`, { method: 'POST' })).json.error.code).toBe('invalid_status')
     const seen = moved.find((b) => b.slug === 'glow-studio')!.addressChangedAt
+    expect(moved.find((b) => b.slug === 'glow-studio')!.recheck).toEqual({ at: seen, what: ['address'] })
     expect((await team.req(`${ADMIN}/${glowId}/verify?moved=${seen}`, { method: 'POST' })).status).toBe(204)
     expect(((await team.req(`${ADMIN}?view=moved&lang=en`)).json.items as { slug: string }[]).map((b) => b.slug)).not.toContain(
       'glow-studio',
     )
     expect(await smsTo(MAYSA)).toHaveLength(sent)
-    expect((await team.req(`${ADMIN}/${glowId}?lang=en`)).json.actions[0]).toMatchObject({ action: 'business.move_checked' })
+    expect((await team.req(`${ADMIN}/${glowId}?lang=en`)).json.actions[0]).toMatchObject({ action: 'business.rechecked' })
     // a search across them all
     const found = (await team.req(`${ADMIN}?view=all&q=glow&lang=en`)).json.items as { slug: string; name: string }[]
     expect(found.map((b) => b.slug)).toContain('glow-studio')

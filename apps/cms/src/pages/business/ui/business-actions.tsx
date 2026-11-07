@@ -10,12 +10,14 @@ import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { ReasonModal } from '@/shared/ui'
 
-type Asking = 'reject' | 'hide' | 'close' | null
+type Asking = 'reject' | 'hide' | 'close' | 'rejectName' | null
 
 /**
- * What the team can do with a business in its state (book F-179, Q-012, Q-213, Q-215). The api decides; a verdict made
- * by someone else meanwhile comes back as a toast and the page refreshes. Nothing is verified while the sign-in code
- * shows on the screen (Q-036), so the button says why instead of failing.
+ * What the team can do with a business in its state (book F-179, Q-012, Q-213, Q-215, Q-275). The api decides; a verdict
+ * made by someone else meanwhile comes back as a toast and the page refreshes. Nothing is verified while the sign-in
+ * code shows on the screen (Q-036), so the button says why instead of failing. A new name waiting is approved or turned
+ * down with a reason; what a live business changed is marked checked; each names what the team looked at, so a newer
+ * change isn't decided by mistake.
  */
 export function BusinessActions({ business }: { business: AdminBusiness }) {
   const t = useTranslations('business')
@@ -40,6 +42,8 @@ export function BusinessActions({ business }: { business: AdminBusiness }) {
   const show = useMutation(sdk.admin.show(id))
   const close = useMutation(sdk.admin.close(id))
   const reopen = useMutation(sdk.admin.reopen(id))
+  const approveName = useMutation(sdk.admin.approveName(id))
+  const rejectName = useMutation(sdk.admin.rejectName(id))
 
   if (state === 'draft') return <Callout tone="neutral">{t('draft')}</Callout>
   if (state === 'closed')
@@ -50,7 +54,9 @@ export function BusinessActions({ business }: { business: AdminBusiness }) {
     )
 
   const undecided = business.verification !== 'verified'
-  const moved = business.addressChangedAt
+  // what a live business changed; one in review is checked whole by Verify
+  const recheck = undecided ? null : business.recheck
+  const renamed = business.pendingName?.name
   return (
     <div className="flex flex-col gap-3">
       {undecided && (
@@ -66,9 +72,21 @@ export function BusinessActions({ business }: { business: AdminBusiness }) {
           </Button>
         </>
       )}
-      {moved !== null && (
-        <Button variant="primary" loading={verify.isPending} onClick={() => verify.mutate(moved, done(t('moveChecked', { name })))}>
-          {t('moveCheck')}
+      {renamed && (
+        <>
+          <Button
+            variant="primary"
+            loading={approveName.isPending}
+            onClick={() => approveName.mutate({ name: renamed }, done(t('nameApproved', { name: renamed })))}
+          >
+            {t('approveName')}
+          </Button>
+          <Button onClick={() => setAsking('rejectName')}>{t('rejectName')}</Button>
+        </>
+      )}
+      {recheck && (
+        <Button variant="primary" loading={verify.isPending} onClick={() => verify.mutate(recheck.at, done(t('rechecked', { name })))}>
+          {t('recheck')}
         </Button>
       )}
       {business.verification !== 'rejected' && <Button onClick={() => setAsking('reject')}>{t('reject')}</Button>}
@@ -91,6 +109,17 @@ export function BusinessActions({ business }: { business: AdminBusiness }) {
           action={t('reject')}
           pending={reject.isPending}
           onConfirm={(reason) => reject.mutate({ reason }, done(t('rejected', { name })))}
+          onClose={() => setAsking(null)}
+        />
+      )}
+      {asking === 'rejectName' && renamed && (
+        <ReasonModal
+          title={t('rejectNameTitle', { name: renamed })}
+          lead={t('rejectNameLead', { current: name })}
+          hint={t('reasonHint')}
+          action={t('rejectName')}
+          pending={rejectName.isPending}
+          onConfirm={(reason) => rejectName.mutate({ name: renamed, reason }, done(t('nameRejected', { name: renamed })))}
           onClose={() => setAsking(null)}
         />
       )}

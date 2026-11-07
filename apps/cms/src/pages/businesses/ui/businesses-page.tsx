@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { Building2, Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
-import { BusinessStateBadge, businessState } from '@/entities/business'
+import { BusinessStateBadge, businessState, useChangesText } from '@/entities/business'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { TeamPage } from '@/widgets/team-shell'
@@ -82,9 +82,11 @@ export function BusinessesPage({ view = 'review', q }: { view?: AdminBusinessVie
   )
 }
 
+/** A row says what there is to look at again: a new name waiting, and what a live business changed (Q-215, Q-275). */
 function BusinessesTable({ items }: { items: AdminBusinessItem[] }) {
   const t = useTranslations('businesses')
   const format = useFormatter()
+  const changes = useChangesText()
   return (
     <TableFrame>
       <Table columns={COLUMNS} aria-label={t('title')}>
@@ -103,6 +105,8 @@ function BusinessesTable({ items }: { items: AdminBusinessItem[] }) {
                 {b.name}
               </Link>
               <CellNote>{b.slug}</CellNote>
+              {b.pendingName && <CellNote>{t('newName', { name: b.pendingName.name })}</CellNote>}
+              {b.recheck && <CellNote>{t('changed', { what: changes(b.recheck.what) })}</CellNote>}
             </TableCell>
             <TableCell>{b.category.name}</TableCell>
             <TableCell>{b.city.name}</TableCell>

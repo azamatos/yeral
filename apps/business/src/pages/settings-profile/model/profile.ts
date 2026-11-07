@@ -33,7 +33,8 @@ export type ProfileProblem = 'nameEmpty' | 'nameLong' | 'aboutEmpty' | 'aboutLon
 
 export function formFrom(profile: BusinessProfile, onlineEnabled: boolean): ProfileForm {
   return {
-    name: profile.name,
+    // a new name waiting for the Ýeral team is the one asked for (Q-275): back to the approved one drops it
+    name: profile.pendingName ?? profile.name,
     categoryId: profile.categoryId,
     about: profile.about[DEFAULT_LOCALE] ?? '',
     phone: nationalDigits(profile.phone),

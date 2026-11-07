@@ -96,7 +96,7 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     const location = { cityId: 'ashgabat', address: 'Magtymguly şaýoly 5', street: 'Magtymguly şaýoly', lat: 37.95, lng: 58.37 }
     expect((await owner.req(`${W}/settings/profile`, { method: 'PATCH', body: { location } })).status).toBe(200)
     const [draft] = await db.select().from(businesses).where(eq(businesses.slug, slug))
-    expect(draft).toMatchObject({ movedAt: null, addressChangedAt: null, street: 'Magtymguly şaýoly' })
+    expect(draft).toMatchObject({ movedAt: null, recheckAt: null, street: 'Magtymguly şaýoly' })
     const day = { open: 600, close: 1140, break: null }
     const hours = await owner.req(`${W}/settings/hours`, {
       method: 'PUT',

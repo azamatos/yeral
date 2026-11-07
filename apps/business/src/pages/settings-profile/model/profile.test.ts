@@ -24,6 +24,8 @@ const profile: BusinessProfile = {
   verification: 'verified',
   verificationReason: null,
   hidden: null,
+  pendingName: null,
+  nameRejected: null,
 }
 
 describe('Business profile as a form (B-Settings)', () => {
@@ -40,6 +42,13 @@ describe('Business profile as a form (B-Settings)', () => {
       aboutElsewhere: false,
     })
     expect(formFrom(profile, false).paused).toBe(true)
+  })
+
+  it('a new name waiting for Ýeral is the one in the field; the approved one typed back is a change that drops it', () => {
+    const waiting = formFrom({ ...profile, pendingName: 'Glow Beauty' }, true)
+    expect(waiting.name).toBe('Glow Beauty')
+    expect(profileUpdate(waiting, waiting)).toBeNull()
+    expect(profileUpdate({ ...waiting, name: 'Glow Studio' }, waiting)).toEqual({ name: 'Glow Studio' })
   })
 
   it('sends only what changed, trimmed', () => {

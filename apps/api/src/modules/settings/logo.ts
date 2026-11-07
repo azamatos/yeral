@@ -1,6 +1,7 @@
 /**
  * The business's logo (book B-37, F-100): square, the switcher's, the invite card's and the profile's picture. The owner
- * and administrators set and remove it ("change business settings"); the old one goes from the store.
+ * and administrators set and remove it ("change business settings"); the old one goes from the store. A new one puts a
+ * verified business on the Ýeral team's «check again» list (Q-275, `recheckOf`); none at all says nothing new.
  */
 import type { businessLogoSchema } from '@yeral/contract/settings'
 import type { Locale } from '@yeral/domain/model'
@@ -12,6 +13,7 @@ import { emit } from '../../notify'
 import { logoOf } from '../catalog/map'
 import { dropPhoto, replacePhoto } from '../media/photos'
 import { lockedBusiness } from './photos'
+import { recheckOf } from './recheck'
 
 type Logo = z.infer<typeof businessLogoSchema>
 
@@ -20,7 +22,10 @@ export async function setLogo(deps: Deps, business: { id: string }, file: File, 
     deps.db.transaction(async (tx) => {
       const before = await lockedBusiness(tx, business.id)
       const logo = { key, alt: {} }
-      await tx.update(businesses).set({ logo }).where(eq(businesses.id, business.id))
+      await tx
+        .update(businesses)
+        .set({ logo, ...recheckOf(before, ['logo'], deps.now()) })
+        .where(eq(businesses.id, business.id))
       // the switcher and the invite cards show it
       await emit(tx, { type: 'business.updated', businessId: business.id })
       return { result: { logo: logoOf(deps, { logo, name: before.name }, lang) }, replaced: before.logo?.key }
