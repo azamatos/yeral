@@ -54,7 +54,7 @@ const reportRoute = createRoute({
 export const reviewRoutes = new OpenAPIHono<AppEnv>()
   .openapi(listRoute, async (c) => {
     const { business, actor } = await requireMember(c, c.req.valid('param').slug)
-    return c.json(await teamReviews(c.var.deps.db, business, actor, c.req.valid('query')), 200)
+    return c.json(await teamReviews(c.var.deps, business, actor, c.req.valid('query')), 200)
   })
   .openapi(replyRoute, async (c) => {
     const { slug, id } = c.req.valid('param')

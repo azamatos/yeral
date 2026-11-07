@@ -94,6 +94,8 @@ export const REVIEW_REPLY_MAX = 500
 export const REVIEW_REPORT_HOURS = 48
 /** The explanation with a report ("Düşündiriş", B-54): this long at most. */
 export const REVIEW_REPORT_TEXT_MAX = 300
+/** «Ýeral removed a review you reported» (B-Reviews, book Q-262): the business hears it this long after the removal. */
+export const REVIEW_REMOVED_NOTICE_DAYS = 30
 
 /** A review can be written until this long after the visit ends (book Q-126). */
 export const REVIEW_WRITE_DAYS = 30

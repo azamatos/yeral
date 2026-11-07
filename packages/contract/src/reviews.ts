@@ -50,7 +50,16 @@ export const teamReviewSchema = z
   })
   .meta({ id: 'TeamReview' })
 
-/** The summary as clients see it (reported reviews Ýeral is checking aren't counted); null for a specialist. */
+/**
+ * «Ýeral removed a review you reported» (B-Reviews, Q-262): a review the team reported and Ýeral removed, within
+ * `REVIEW_REMOVED_NOTICE_DAYS`. Only who it was by and when: what it said stays with the team's record of the decision.
+ */
+export const removedReviewSchema = z.object({ id: idSchema, author: z.string(), at: epochSchema }).meta({ id: 'RemovedReview' })
+
+/**
+ * The summary as clients see it (reported reviews Ýeral is checking aren't counted); null for a specialist. `removed`
+ * comes with the first page, to the owner and administrators (who report); empty for a specialist and on later pages.
+ */
 export const teamReviewsSchema = listOf(teamReviewSchema)
   .extend({
     summary: z
@@ -62,6 +71,7 @@ export const teamReviewsSchema = listOf(teamReviewSchema)
         unanswered: z.number().int(),
       })
       .nullable(),
+    removed: z.array(removedReviewSchema),
   })
   .meta({ id: 'TeamReviews' })
 
@@ -79,3 +89,4 @@ export const reviewReportInputSchema = z
 
 export type TeamReview = z.infer<typeof teamReviewSchema>
 export type TeamReviews = z.infer<typeof teamReviewsSchema>
+export type RemovedReview = z.infer<typeof removedReviewSchema>

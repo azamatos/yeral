@@ -20,7 +20,9 @@ import { useSdk } from '@/shared/api'
 import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
+import { useRemovedNotices } from '../model/removed-notices'
 import type { ReviewsSearch, ReviewStars } from '../model/search'
+import { RemovedNotice } from './removed-notice'
 import { ReportReviewModal } from './report-review-modal'
 import { ReviewItem } from './review-item'
 
@@ -34,7 +36,8 @@ const LINK =
 /**
  * The reviews (B-Reviews, book B-53, B-54): the rating summary as clients see it, the chips and the specialist in the
  * address, the reviews with their replies, the reply composer, reporting a review to Ýeral, pages of 20. The owner and
- * administrators reply and report; a specialist reads the reviews about their own visits, without the summary.
+ * administrators reply and report, and hear which reported reviews Ýeral removed; a specialist reads the reviews about
+ * their own visits, without the summary.
  */
 export function ReviewsPage() {
   const { workspace } = useWorkspace()
@@ -78,6 +81,8 @@ function Reviews({ workspace }: { workspace: Workspace }) {
   const first = list.data?.pages[0]
   const summary = first?.summary ?? null
   const total = first?.total
+  // «Ýeral removed a review you reported»: the api says it to the owner and administrators, until closed here
+  const removed = useRemovedNotices(slug, first?.removed ?? [])
   const filtered = !!(unanswered || search.stars || staffId)
   const clear = () => go({ filter: undefined, stars: undefined, staff: undefined })
 
@@ -218,6 +223,7 @@ function Reviews({ workspace }: { workspace: Workspace }) {
             <span>{t('specialistIntro')}</span>
           </p>
         )}
+        {manage && removed.open.map((r) => <RemovedNotice key={r.id} removed={r} onClose={() => removed.close(r.id)} />)}
         {(rows.length > 0 || filtered) && (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 flex-wrap items-center gap-2">

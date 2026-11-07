@@ -1887,6 +1887,11 @@
       "noDecision": "No decision in 48 hours",
       "noDecisionHint": "It counts in your rating again."
     },
+    "removed": {
+      "title": "{brand} removed a review you reported.",
+      "text": "{name}’s review no longer shows on your page or counts in your rating.",
+      "close": "Close"
+    },
     "reasons": {
       "fake": "False — this client never came",
       "insulting": "Abusive words",

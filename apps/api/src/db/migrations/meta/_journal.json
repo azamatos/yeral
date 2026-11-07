@@ -358,6 +358,13 @@
       "when": 1794050152647,
       "tag": "0050_confirm_trusted_at_once",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1794053969879,
+      "tag": "0051_drop_demo_columns",
+      "breakpoints": true
     }
   ]
 }
