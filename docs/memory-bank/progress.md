@@ -517,6 +517,30 @@
   commit, the four pages and `/try` answer, the policy names the operator with no placeholder left, `noindex` stays, a demo session opens. Branch
   protection on `main` is on. `yeral-proto` not deleted: Cloudflare wants its custom domain gone first, which is the owner's step.
 
+- **2026-11-06/07 · The owner's review of the live platform, design round 7:** the owner and a partner listed 51 problems and
+  4 ideas (04.11); two read-only reviews traced each to its cause (`log/2026-11-06-owner-review-plan.md`); the round 7 request
+  (`docs/design-requests/2026-11-06-round-7.md`) came back as export v0.7 in three rounds (#305). Agents allowed again for
+  this run (owner 06.11; Fable, then Opus 5.5 from 07.11, xhigh, two at a time), a reviewer per PR. Merged: #302 business
+  fixes and the invite route · #303 cms superadmin/admin and two-step sign-in · #304/#308 sign-in codes through our
+  Telegram bot (ADR 0029; the owner chose a bot over Telegram Gateway's $100 deposit) · #306 client fixes · #307 clients
+  sort/counts · #309 figures and phones · #310/#312 our own Select everywhere · #311 the business reviews page · #313
+  control sizes, buttons, focus · #314 home search · #315 hours · #317 calendar · #318 booking drawer, InfoTip · #319 team
+  and permissions · #320 new-booking client search · #321 clients list and card · #322 booking steps · #324 FilterBar and
+  bookings · #325 business page · #328 the e2e elapse hook (a midday no-show failure). Deployed a908fa5, 7584ebe, 0969e97,
+  3dfec27 (07.11), a backup before each; the server's `.env` got the bot's settings and `SIGN_IN_CODE_ON_SCREEN=false`.
+  Then (07.11, a second session): #326 bookings api filters · #327 calendar follow-ups · #329 clients FilterBar · #330
+  idea 2, "something changed since your last visit" · #316 no demo workspace anywhere (the owner chose to delete the
+  server's rows: after a backup, `DELETE FROM businesses WHERE sandbox; DELETE FROM users WHERE demo;` before the deploy
+  and once more after it, since the old api remade the sandbox in the minutes between). Deployed addedbce (07.11).
+  The sdk sends a list as the key repeated (`tag=VIP&tag=Bride`; `queryList` reads both forms).
+  **Owner's decisions 07.11:** a verified business's new name waits for the Ýeral team (book Q-275 changed; built in
+  #332); docs-only changes go straight to `main`, no PR (AGENTS.md); off-server backups stay in P6 (an MVP for testing);
+  agents on Fable 5.1 (free), Opus 5.5 as the fallback.
+  Lessons: agents overran the 130k stop in their briefs (stop them by message); a PR that changes a contract or a flow must
+  run the story files and e2e helpers that use it; a test hook that moves time must stay inside the rule's window; a
+  background merge script outlives its session (check `ps` for one at a session's start); the stories' fake apis must read
+  query lists as the api does.
+
 ## Roadmap
 
 **Re-planned 2026-10-18:** the product book is closed and its chapter 10 (`docs/product/10-plan.md`) is the build plan:

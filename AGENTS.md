@@ -65,6 +65,9 @@ and milestones: `docs/memory-bank/progress.md`.
 - Finished work: review it (skill `code-review`, fix what it finds), then commit, push and merge on green CI without
   asking. There is no staging (ADR 0020): prove changes locally. Production deploys go by hand while releases are paused (ADR 0009):
   Claude deploys and uses `ssh yeral-vps` on its own, at each slice's end (owner, 2026-10-31).
+- No PR for a docs-only change (owner, 2026-11-07): a decision, the book, the memory bank go straight to `main` when
+  they're made (the owner's account passes `main`'s protection; `main`'s CI still runs). PRs are for code; docs about a
+  code change ride in its PR. A direct push puts every open PR behind, so not in the middle of a merge queue.
 - Ask first before: repository settings, DNS changes, deleting anything in the Cloudflare or GitHub account, paid services,
   adding files from outside the repo.
 - `docs/design/` is the owner's export: read it, don't edit it (a new export replaces the folder). The old mobile designs

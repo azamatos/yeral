@@ -726,7 +726,7 @@ flowchart TD
 
 > Open question Q-274: What a rejected business sees.
 
-- Changes after verification don't send the business back to review on MVP, but the Ýeral team can un-verify a business by hand (Q-275, decided 18.10.2026).
+- Changes after verification don't send the business back to review on MVP, but the Ýeral team can un-verify a business by hand (Q-275, decided 18.10.2026). Owner, 07.11.2026: a verified business's new name waits for the team's approval (clients keep the old name meanwhile, SMS included); a new description, photos or logo go live and put the business on the "check again" list, as a move does.
 
 > Open question Q-275: Re-checking a verified business after changes.
 

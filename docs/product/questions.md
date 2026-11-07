@@ -1084,7 +1084,7 @@ After verification, a business can change its name, address, category and photos
 - A · No automatic re-check on MVP, but the Ýeral team can un-verify a business by hand. (recommended)
 - B · Changing the name, address or category sends the business to review, and the page stays public meanwhile.
 
-answer: A · No automatic re-check on MVP, but the Ýeral team can un-verify a business by hand. (18.10.2026)
+answer: A · No automatic re-check on MVP, but the Ýeral team can un-verify a business by hand. (18.10.2026) Owner, 07.11.2026, changed: a joke or a swear word in a name must never reach clients. A verified business's new name waits for the Ýeral team: clients, the page, search and every SMS keep the old name until the team approves it; the business app says the new name is waiting; the team sees the old and the new name and approves or turns it down with a reason to the owner. The description, photos and logo go live at once and put the business on the admin tool's "check again" list, as a move does (Q-215). No automatic word filter.
 
 ## Q-276 · What the Ýeral team checks before verifying
 chapter: 07 · status: decided
