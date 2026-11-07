@@ -9,6 +9,7 @@ import { cn } from '@yeral/ui/cn'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
 import { Rating } from '@yeral/ui/rating'
 import { Users } from 'lucide-react'
+import { useRef } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { calendarAt } from '@/shared/lib'
 import { doesAll } from '../model/flow'
@@ -23,6 +24,9 @@ type NextFree = { date: string; start: number } | null
  * stays listed, disabled, saying so. When nobody does them all, the note says a free specialist is chosen for each.
  * In move mode (C-30) the api reads the booking's own services and leaves its own time out of the busy ones; the one
  * it's with now says «Current».
+ *
+ * A pick moves on by itself (C7-Booking C4.1, owner's review #39): `onPick`'s `advance` is true for a click, Space and
+ * Enter (the one chosen already too), false while the arrow keys walk the cards, which check each card they reach.
  */
 export function StaffStep({
   detail,
@@ -34,7 +38,7 @@ export function StaffStep({
   detail: BusinessDetail
   serviceIds: string[]
   staff: string
-  onPick: (staff: string) => void
+  onPick: (staff: string, advance: boolean) => void
   /** The booking being moved and who it's with now. */
   move?: { code: string; current: string | null }
 }) {
@@ -59,12 +63,27 @@ export function StaffStep({
     return w ? t(words, { when: w }) : t('noneSoon')
   }
   const anyOne = detail.specialists.some((s) => doesAll(s, serviceIds))
+  // the arrow keys check the card they reach: that's walking the list, not a pick
+  const walking = useRef(false)
   return (
     <div className="flex flex-col gap-6">
       <StepTitle title={move ? words('staffTitle') : t('title')} lead={t('lead')} level={move ? 2 : 1} />
       {!anyOne && <p className="m-0 rounded-ctl-l bg-group px-3.5 py-3 text-small text-n-600">{t('noOneDoesAll')}</p>}
       {free.isError && !free.data && <LoadFailed onRetry={() => void free.refetch()} />}
-      <OptionCardGroup aria-label={t('label')} value={staff} onValueChange={onPick}>
+      <OptionCardGroup
+        aria-label={t('label')}
+        value={staff}
+        onValueChange={(id) => onPick(id, !walking.current)}
+        onPointerDown={() => (walking.current = false)}
+        onKeyDown={(e) => {
+          walking.current = e.key.startsWith('Arrow')
+          if (e.key === 'Enter') onPick(staff, true)
+        }}
+        // a click on the card chosen already changes nothing for the group: it still moves on
+        onClick={(e) => {
+          if (e.detail > 0 && (e.target as HTMLElement).closest('[data-state="checked"]')) onPick(staff, true)
+        }}
+      >
         <OptionCard
           value="any"
           title={t('any')}

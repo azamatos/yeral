@@ -5,7 +5,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { addDays, today } from '@yeral/domain/time'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { AYJEMAL, businessApi, GLOW, PageStory } from '@/shared/storybook'
 import { BookingPage } from './booking-page'
 
@@ -25,20 +25,20 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Step 1: nothing picked, Continue waits; a pick fills the summary and Continue opens the specialist step. */
+/** Step 1: nothing picked and no action; a pick moves straight on to the specialist (#39), the service in the summary. */
 export const Services: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
     await expect(summary.getByText('No service chosen yet.')).toBeVisible()
-    await expect(summary.getByRole('button', { name: 'Continue' })).toBeDisabled()
-    await expect(summary.getByText('Choose at least one service.')).toBeVisible()
+    await expect(summary.queryByRole('button', { name: 'Continue' })).toBeNull()
     await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio')
     await userEvent.click(canvas.getByRole('button', { name: 'Select: Women’s haircut' }))
-    // the service's price and the total
-    await expect(summary.getAllByText('80 TMT')).toHaveLength(2)
-    await userEvent.click(summary.getByRole('button', { name: 'Continue' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a specialist' })).toBeVisible()
+    // the service's price and the total; still no action on a single-pick step
+    await waitFor(() => expect(summary.getAllByText('80 TMT')).toHaveLength(2))
+    await expect(summary.queryByRole('button', { name: 'Continue' })).toBeNull()
+    await expect(summary.getByRole('button', { name: 'Clear the booking' })).toBeVisible()
   },
 }
 
@@ -53,42 +53,35 @@ export const WithSpecialist: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
     const steps = within(canvas.getByRole('navigation', { name: 'Booking steps' }))
-    await expect(steps.getByRole('button', { name: 'Maral · Change' })).toBeEnabled()
+    await expect(steps.getByRole('button', { name: 'Specialist' })).toBeEnabled()
     // a step's name is its number and label
     await expect(steps.getByRole('button', { name: '2 Services' })).toHaveAttribute('aria-current', 'step')
     await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio')
-    await expect(canvas.getByText('The services Maral does')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Select: Manicure' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Change the specialist' })).toBeVisible()
+    await expect(canvas.getByText(/^Maral does \d+ services?$/)).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Select: Women’s haircut' })).toBeNull()
     await userEvent.click(canvas.getByRole('button', { name: 'Select: Manicure' }))
-    const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
-    await expect(summary.getByText('Maral')).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: 'See all services' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'Select: Women’s haircut' }))
-    await expect(await canvas.findByText(/^Maral doesn't do Women’s haircut, so any free specialist takes this booking\./)).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: 'Selected: Women’s haircut' }))
-    await expect(await canvas.findByRole('button', { name: "Only Maral's" })).toBeVisible()
-    await userEvent.click(summary.getByRole('button', { name: 'Continue' }))
+    // the pick moves on to the time, no specialist step between
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
-    await expect(steps.getByRole('button', { name: 'Maral · Change' })).toBeEnabled()
+    const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
+    await waitFor(() => expect(summary.getByText('Maral')).toBeVisible())
   },
 }
 
-/** «Change» on the done specialist step opens that choice with her checked; Continue goes on to the services. */
+/** The done specialist step opens that choice with her checked; picking her again goes back on to the time. */
 export const ChangeSpecialist: Story = {
   args: { path: '/en/b/glow-studio/book?staff=st-maral&first=staff&services=s5&step=time' },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
     const steps = within(canvas.getByRole('navigation', { name: 'Booking steps' }))
-    await userEvent.click(steps.getByRole('button', { name: 'Maral · Change' }))
+    await userEvent.click(steps.getByRole('button', { name: 'Specialist' }))
     const group = within(await canvas.findByRole('radiogroup', { name: 'Specialist' }))
     await expect(group.getByRole('radio', { name: /Maral/ })).toHaveAttribute('aria-checked', 'true')
     // the choice open again: the step reads as the step, not as done
     await expect(steps.getByRole('button', { name: '1 Specialist' })).toHaveAttribute('aria-current', 'step')
     await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio?services=s5')
-    const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
-    await userEvent.click(summary.getByRole('button', { name: 'Continue' }))
-    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
+    await userEvent.click(group.getByRole('radio', { name: /Maral/ }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
   },
 }
 
@@ -101,7 +94,7 @@ export const WithSpecialistAndService: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
     const steps = within(canvas.getByRole('navigation', { name: 'Booking steps' }))
-    await expect(steps.getByRole('button', { name: 'Maral · Change' })).toBeEnabled()
+    await expect(steps.getByRole('button', { name: 'Specialist' })).toBeEnabled()
     await expect(steps.getByRole('button', { name: 'Services' })).toBeEnabled()
     await expect(steps.getByRole('button', { name: '3 Time' })).toHaveAttribute('aria-current', 'step')
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
@@ -122,12 +115,12 @@ export const WithSpecialistNotTheirs: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
     await expect(canvas.getByText(/^Maral doesn't do Women’s haircut, so any free specialist takes this booking\./)).toBeVisible()
-    const steps = within(canvas.getByRole('navigation', { name: 'Booking steps' }))
-    await expect(steps.getByRole('button', { name: 'Any specialist · Change' })).toBeEnabled()
+    // the done step at the top and the summary's specialist row both change her
+    await expect(canvas.getAllByRole('button', { name: 'Change the specialist' })).toHaveLength(2)
   },
 }
 
-/** Step 2: anyone with the earliest time, the people who do the haircut, the others disabled with why. */
+/** Step 2: anyone with the earliest time, the people who do the haircut, the others disabled with why; a pick moves on. */
 export const Specialist: Story = {
   args: { path: '/en/b/glow-studio/book?services=s1&step=staff' },
   play: async ({ canvas }) => {
@@ -136,10 +129,12 @@ export const Specialist: Story = {
     await expect(await group.findByText('Earliest free time: Today 15:30')).toBeVisible()
     await expect(group.getByRole('radio', { name: /Maral/ })).toBeDisabled()
     await expect(group.getAllByText("Doesn't do the selected service")).toHaveLength(3)
-    await userEvent.click(group.getByRole('radio', { name: /Aýna/ }))
-    await expect(group.getByRole('radio', { name: /Aýna/ })).toHaveAttribute('aria-checked', 'true')
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
-    await expect(summary.getByText('Aýna')).toBeVisible()
+    await expect(summary.queryByRole('button', { name: 'Continue' })).toBeNull()
+    await userEvent.click(group.getByRole('radio', { name: /Aýna/ }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await waitFor(() => expect(summary.getByText('Aýna')).toBeVisible())
+    await expect(summary.getByRole('button', { name: 'Change the specialist' })).toBeVisible()
   },
 }
 
@@ -161,10 +156,33 @@ export const Time: Story = {
     await expect(canvas.getByText('Afternoon')).toBeVisible()
     await expect(canvas.queryByText('Morning')).toBeNull()
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
-    await expect(summary.getByRole('button', { name: 'Continue' })).toBeDisabled()
+    await expect(summary.queryByRole('button', { name: 'Continue' })).toBeNull()
     await userEvent.click(canvas.getByRole('button', { name: '16:00' }))
     await expect(await summary.findByText(/· 16:00–17:00$/)).toBeVisible()
-    await expect(summary.getByRole('button', { name: 'Continue' })).toBeEnabled()
+    await waitFor(() => expect(summary.getByRole('button', { name: 'Continue' })).toBeEnabled())
+  },
+}
+
+/**
+ * A second service comes from the summary (C7-Booking C4.4): «Add a service» opens the services, a pick goes back to
+ * the time (the specialist is answered), × shows from two services; Clear starts over and Undo puts it all back.
+ */
+export const AddServiceAndClear: Story = {
+  args: { path: '/en/b/glow-studio/book?services=s1&staff=any&step=time' },
+  play: async ({ canvas }) => {
+    const summary = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await expect(summary.queryByRole('button', { name: 'Remove Women’s haircut' })).toBeNull()
+    await userEvent.click(summary.getByRole('button', { name: 'Add a service' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Select: Manicure' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await waitFor(() => expect(summary.getByRole('button', { name: 'Remove Manicure' })).toBeVisible())
+    await userEvent.click(summary.getByRole('button', { name: 'Clear the booking' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
+    await userEvent.click(await within(document.body).findByRole('button', { name: 'Undo' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await waitFor(() => expect(summary.getByText('Manicure')).toBeVisible())
   },
 }
 
@@ -192,24 +210,24 @@ export const HeldBack: Story = {
   },
 }
 
-/** A time the day no longer has (taken since the link was made) counts as not chosen: Continue waits. */
+/** A time the day no longer has (taken since the link was made) counts as not chosen: no Continue yet. */
 export const StaleTime: Story = {
   args: { path: `/en/b/glow-studio/book?services=s1&step=time&date=${today()}&time=600` },
   play: async ({ canvas }) => {
     const summary = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
     await expect(await canvas.findByRole('button', { name: '15:30' })).toBeVisible()
-    await expect(summary.getByRole('button', { name: 'Continue' })).toBeDisabled()
+    await expect(summary.queryByRole('button', { name: 'Continue' })).toBeNull()
   },
 }
 
-/** Phone: «2/4 · Specialist» in the header, the bar with the count, total and Continue. */
+/** Phone: «2/4 · Specialist» in the header, the bar with the count and total, no Continue on a single-pick step. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   args: { path: '/en/b/glow-studio/book?services=s1,s2&step=staff' },
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
     await expect(bar.getByText('2 services · 140 TMT')).toBeVisible()
-    await expect(bar.getByRole('button', { name: 'Continue' })).toBeEnabled()
+    await expect(bar.queryByRole('button', { name: 'Continue' })).toBeNull()
   },
 }
 
@@ -243,6 +261,12 @@ export const ConfirmAndSend: Story = {
   args: { path: confirm, server: businessApi({ signedIn: AYJEMAL }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Aýjemal Gurbanowa')).toBeVisible()
+    // the number with a «Verified» badge (#50); the booking card with the bigger business block (#51)
+    await expect(canvas.getByText('Verified')).toBeVisible()
+    const card = within(canvas.getByRole('complementary', { name: 'Your booking' }))
+    await expect(card.getByRole('heading', { level: 2, name: 'Glow Studio' })).toBeVisible()
+    await expect(card.getByRole('link', { name: 'Get directions' })).toBeVisible()
+    await expect(card.getByText('Date and time')).toBeVisible()
     await userEvent.type(canvas.getByRole('textbox', { name: /Note for the business/ }), 'Long hair')
     const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
     await expect(summary.getByRole('button', { name: 'Send booking' })).toBeEnabled()

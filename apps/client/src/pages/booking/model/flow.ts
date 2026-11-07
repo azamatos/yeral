@@ -156,6 +156,20 @@ export function currentStep(asked: Step | undefined, choice: Choice, steps: read
   return steps[index] ?? 'services'
 }
 
+/**
+ * Where a pick on a single-pick step goes (C7-Booking C4.1, owner's review #39): a service or a specialist picked moves
+ * straight on to the next step the client hasn't answered yet, so a specialist already chosen (`?staff=`, «any»
+ * included) is passed over and a service from the summary's «Add a service» goes back to the time; Time is the one
+ * step that keeps Continue, so nothing moves past it. `answered` is after the pick.
+ */
+export function stepAfterPick(from: 'services' | 'staff', steps: readonly Step[], answered: { services: boolean; staff: boolean }): Step {
+  const rest = steps.slice(steps.indexOf(from) + 1)
+  return rest.find((s) => (s === 'services' ? !answered.services : s === 'staff' ? !answered.staff : true)) ?? 'time'
+}
+
+/** Whether a step shows the primary (Booking v0.7 «Action»): only Time, once a time is chosen, and Confirm. */
+export const stepHasAction = (step: Step) => step === 'time' || step === 'confirm'
+
 /** Whether the step's own choice is made, so Continue goes on (Booking `valid`). */
 export function stepDone(step: Step, choice: Choice, steps: readonly Step[] = STEPS): boolean {
   if (step === 'services') return choice.services.length > 0

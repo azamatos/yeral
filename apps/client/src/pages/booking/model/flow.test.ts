@@ -13,7 +13,10 @@ import {
   reachedStep,
   servicesOf,
   slotsByPart,
+  stepAfterPick,
   stepDone,
+  stepHasAction,
+  STEPS,
   stepsOf,
   wasOf,
 } from './flow'
@@ -113,6 +116,24 @@ describe('the steps', () => {
     expect(reachedStep(timed, steps)).toBe(3)
     expect(stepDone('staff', none, steps)).toBe(true)
     expect(stepDone('services', none, steps)).toBe(false)
+  })
+})
+
+describe('a pick on a single-pick step', () => {
+  const none = { services: false, staff: false }
+  it('moves from a service straight to the specialist, or to the time when the specialist is chosen already', () => {
+    expect(stepAfterPick('services', STEPS, { ...none, services: true })).toBe('staff')
+    expect(stepAfterPick('services', STEPS, { services: true, staff: true })).toBe('time')
+  })
+  it('moves from a specialist to the time, or to their services while none is picked', () => {
+    expect(stepAfterPick('staff', STEPS, { services: true, staff: true })).toBe('time')
+    const fromStaff = stepsOf('staff')
+    expect(stepAfterPick('staff', fromStaff, { ...none, staff: true })).toBe('services')
+    expect(stepAfterPick('staff', fromStaff, { services: true, staff: true })).toBe('time')
+    expect(stepAfterPick('services', fromStaff, { services: true, staff: true })).toBe('time')
+  })
+  it('leaves the primary to the time and the confirmation', () => {
+    expect(STEPS.filter(stepHasAction)).toEqual(['time', 'confirm'])
   })
 })
 

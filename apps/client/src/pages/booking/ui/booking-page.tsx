@@ -20,9 +20,10 @@ import { TermsNote, wrap } from '@/shared/ui'
 import {
   chosenStaff,
   currentStep,
-  namedSpecialist,
   reachedStep,
+  stepAfterPick,
   stepDone,
+  stepHasAction,
   stepsOf,
   type BookingSearch,
   type Choice,
@@ -88,9 +89,6 @@ export function BookingPage() {
   const done = !locked && !taken && stepDone(step, choice, steps) && (step !== 'confirm' || signedIn)
   const total = selectionTotal(picked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
-  // the done step's name: the address's specialist while nothing's picked yet (`chosenStaff` answers «any» until a
-  // service is), then whoever the picked services leave chosen
-  const firstName = ids.length === 0 ? (namedSpecialist(detail, search.staff)?.name ?? staffName) : staffName
   const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug }, search: { services: serviceIdsParam(ids) } }
 
   // the step shown goes along with every change, so a link held back to an earlier step stays on it
@@ -103,6 +101,10 @@ export function BookingPage() {
       resetScroll: top,
     })
   const go = (to: Step, newEntry: boolean) => set({ step: to }, { newEntry, top: true })
+  // a service or a specialist picked moves straight on (C7-Booking C4.1, #39): one new history entry, so the
+  // browser's Back returns to the pick
+  const moveOn = (from: 'services' | 'staff', patch: Partial<BookingSearch>, answered: { services: boolean; staff: boolean }) =>
+    set({ ...patch, step: stepAfterPick(from, steps, answered) }, { newEntry: true, top: true })
   const pickServices = (id: string) => {
     const next = toggleService(ids, id)
     if (next.length > SERVICES_MAX) {
@@ -111,7 +113,22 @@ export function BookingPage() {
     }
     // a new service leaves the chosen time behind (Booking `set`); the chosen specialist stays in the address even when
     // it rules them out (`chosenStaff` answers «any» meanwhile), so taking it off brings them back
-    set({ services: serviceIdsParam(next), time: undefined })
+    const patch = { services: serviceIdsParam(next), time: undefined }
+    if (next.length > ids.length) moveOn('services', patch, { services: true, staff: search.staff !== undefined })
+    else set(patch)
+  }
+  // Clear (the summary's Tertiary S): back to the first step with nothing picked, Undo puts it all back; a specialist
+  // the flow began with stays (they're its first step)
+  const clear = () => {
+    const before = search
+    void navigate({
+      to: '.',
+      search: search.first === 'staff' ? { first: 'staff', staff: search.staff } : {},
+      resetScroll: true,
+    })
+    toast(t('summary.cleared'), {
+      action: { label: t('summary.undo'), onClick: () => void navigate({ to: '.', search: before, replace: true }) },
+    })
   }
 
   // the sdk's own callbacks keep the cache (the booking, my lists, the free times); the page's run after them
@@ -188,29 +205,36 @@ export function BookingPage() {
           ? t('confirm.pickNew')
           : t('confirm.needNumber')
         : t('summary.pickService')
-  const cta =
-    step === 'confirm' ? (
-      <div className="flex flex-col gap-2">
-        <Button size="l" variant="primary" className="w-full" disabled={!done} loading={send.isPending} onClick={submit}>
-          {t('confirm.send')}
-        </Button>
-        <TermsNote word="booking" />
-      </div>
-    ) : (
-      <Button size="l" variant="primary" className="w-full" disabled={!done} onClick={next}>
-        {t('summary.continue')}
+  // only Time (once a time is chosen) and Confirm have a primary; the single-pick steps move on by themselves
+  const action = stepHasAction(step) && (step === 'confirm' || done)
+  const cta = !action ? null : step === 'confirm' ? (
+    <div className="flex flex-col gap-2">
+      <Button size="l" variant="primary" className="w-full" disabled={!done} loading={send.isPending} onClick={submit}>
+        {t('confirm.send')}
       </Button>
-    )
+      <TermsNote word="booking" />
+    </div>
+  ) : (
+    <Button size="l" variant="primary" className="w-full" disabled={!done} onClick={next}>
+      {t('summary.continue')}
+    </Button>
+  )
   const summary = (withCta: boolean) => (
     <Summary
       detail={detail}
       picked={picked}
       total={total}
-      staffName={index >= steps.indexOf('staff') && picked.length > 0 ? staffName : null}
+      staffName={(index >= steps.indexOf('staff') || search.staff !== undefined) && picked.length > 0 ? staffName : null}
       date={step !== 'services' ? date : null}
       time={step !== 'services' ? time : null}
       cta={withCta ? cta : null}
-      hint={withCta && !done ? hint : null}
+      hint={withCta && !done && step === 'confirm' ? hint : null}
+      confirm={step === 'confirm'}
+      onClear={locked ? undefined : clear}
+      onAdd={locked || step === 'services' ? undefined : () => go('services', true)}
+      onRemove={locked ? undefined : (id) => set({ services: serviceIdsParam(ids.filter((s) => s !== id)), time: undefined })}
+      onChangeStaff={locked || step === 'staff' ? undefined : () => go('staff', true)}
+      onChangeTime={locked || step === 'time' ? undefined : () => go('time', true)}
     />
   )
 
@@ -237,9 +261,7 @@ export function BookingPage() {
           <Stepper
             aria-label={t('stepsLabel')}
             // the specialist chosen on the business page reads as done («Jeren · Change»), until that choice is open again
-            steps={steps.map((s) =>
-              s === 'staff' && search.first === 'staff' && step !== 'staff' ? t('steps.chosen', { name: firstName }) : t(`steps.${s}`),
-            )}
+            steps={steps.map((s) => t(`steps.${s}`))}
             current={index}
             reached={reachedStep(choice, steps)}
             onStepClick={(i) => go(steps[i] ?? 'services', false)}
@@ -258,7 +280,16 @@ export function BookingPage() {
         <div className="flex flex-wrap items-start gap-10 pt-10 pb-24 max-md:pb-10 max-sm:pt-6">
           <main className="min-w-0 flex-[999_1_560px]">
             <div className="flex max-w-180 flex-col">
-              {step === 'services' && <ServicesStep detail={detail} picked={picked} staff={search.staff} onToggle={pickServices} />}
+              {step === 'services' && (
+                <ServicesStep
+                  detail={detail}
+                  picked={picked}
+                  staff={search.staff}
+                  first={search.first === 'staff'}
+                  onToggle={pickServices}
+                  onChangeStaff={() => go('staff', true)}
+                />
+              )}
               {step === 'staff' && (
                 <StaffStep
                   detail={detail}
@@ -266,7 +297,11 @@ export function BookingPage() {
                   staff={staff}
                   // the same specialist again keeps the chosen time; «any» over someone the services rule out (still in
                   // the address) is the client's choice too, so they don't come back
-                  onPick={(id) => id !== (search.staff ?? 'any') && set(id === staff ? { staff: id } : { staff: id, time: undefined })}
+                  onPick={(id, advance) => {
+                    const patch = id === staff ? { staff: id } : { staff: id, time: undefined }
+                    if (advance) moveOn('staff', patch, { services: ids.length > 0, staff: true })
+                    else if (id !== (search.staff ?? 'any')) set(patch)
+                  }}
                 />
               )}
               {step === 'time' && (

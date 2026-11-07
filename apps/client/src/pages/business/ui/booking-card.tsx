@@ -5,7 +5,7 @@ import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
-import { CalendarX2, CircleCheck, Clock, MapPin, Phone, X } from 'lucide-react'
+import { CalendarX2, CircleCheck, Clock, MapPin, Phone, Wallet, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { selectionTotal } from '@/features/pick-services'
@@ -243,9 +243,15 @@ export function BookingCard({
   return (
     <div className={card}>
       <div className="flex flex-col gap-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="text-[19px] leading-6 font-bold tracking-[-0.01em]">{t('card.chosen')}</span>
-          <span className="text-dense text-n-600">{t('card.count', { count: picked.length })}</span>
+        {/* C7-Booking C4.4 (#41): Clear is a Tertiary S in the head, not a bold line between Continue and the pay line */}
+        <div className="flex items-center justify-between gap-3">
+          <span className="flex min-w-0 items-baseline gap-2">
+            <span className="text-[19px] leading-6 font-bold tracking-[-0.01em]">{t('card.chosen')}</span>
+            <span className="text-dense whitespace-nowrap text-n-600">{t('card.count', { count: picked.length })}</span>
+          </span>
+          <Button variant="tertiary" size="s" className="-mr-2.5" onClick={onClear}>
+            {t('card.clear')}
+          </Button>
         </div>
         <ul className="m-0 flex list-none flex-col p-0">
           {picked.map((s) => (
@@ -275,30 +281,34 @@ export function BookingCard({
           ))}
         </ul>
         <div className="-mt-4 h-px bg-n-200" />
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <span className="text-body font-semibold whitespace-nowrap">
-            {t('card.total')} <span className="font-normal text-n-600">· {fmt.duration(total.minutes)}</span>
-          </span>
-          <span
-            className={cn(
-              'ml-auto',
-              total.price.type === 'hidden'
-                ? 'text-right text-body font-medium text-n-600'
-                : 'text-[19px] leading-6 font-bold whitespace-nowrap',
-            )}
-          >
-            {fmt.price(total.price)}
+        {/* the total one row (duration muted), «Pay at the place» 4 under it with an icon, the action 24 below */}
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <span className="whitespace-nowrap">
+              <span className="text-[16px] leading-6 font-semibold">{t('card.total')}</span>
+              <span className="ml-2 text-small text-n-600">{fmt.duration(total.minutes)}</span>
+            </span>
+            <span
+              className={cn(
+                'ml-auto',
+                total.price.type === 'hidden'
+                  ? 'text-right text-body font-medium text-n-600'
+                  : 'text-[24px] leading-8 font-bold tracking-[-0.01em] whitespace-nowrap',
+              )}
+            >
+              {fmt.price(total.price)}
+            </span>
+          </div>
+          <span className="text-n-700 flex items-center gap-2 text-dense">
+            <Wallet aria-hidden className="size-4 flex-none" strokeWidth={1.75} />
+            {t('card.payAtPlace')}
           </span>
         </div>
-        <div className="mt-1">
+        <div className="mt-2">
           <BookLink slug={detail.slug} picked={picked} disabled={disabled}>
             {t('card.continue')}
           </BookLink>
         </div>
-        <Button variant="tertiary" className="-mt-2 w-full" onClick={onClear}>
-          {t('card.clear')}
-        </Button>
-        <span className="text-center text-dense text-n-600">{t('card.payAtPlace')}</span>
       </div>
     </div>
   )
