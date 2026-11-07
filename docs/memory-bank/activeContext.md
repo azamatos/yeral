@@ -6,14 +6,17 @@ _Last updated: 2026-11-07_ · the current state only; the history by day is in `
 
 **2026-11-06/07: the owner's review of the live platform (51 problems, 4 ideas) and design round 7** — the run's record is
 `progress.md` (2026-11-06/07) and `log/2026-11-06-owner-review-plan.md`; each piece's `log/2026-11-0[67]-*.md` says what it left.
-**Live: addedbce (07.11)**, everything through #330 and #316 (no demo workspace; the server's sandbox business and demo
-users deleted after a backup). **In progress:** #332 a verified business's new name waits for the Ýeral team (the
-owner's decision of 07.11, book Q-275 changed: clients and SMS keep the old name; a new description, photos or logo go
-live and join the admin tool's "check again" list, as a move does); the client site's C3 services at scale with the
-business page's phone header, Back and no-photo bar (an agent's PR). **Left from round 7:** A10 callouts, toasts and
-NoteRow; idea 1 (trusted client) and idea 3 (follow, plan only); the FilterBar on the client site's search; the reviews
-page's "removed" notice (the api says nothing of a removed report today); tk/ru strings. Then a migration dropping
-`users.demo` and `businesses.sandbox` (#316 left the columns).
+**Live: 7ad07ba (07.11)**, everything through #333: #316 no demo workspace (the server's sandbox business and demo users
+deleted after a backup); #332 a verified business's new name waits for the Ýeral team (the owner's decision of 07.11,
+book Q-275 changed: clients and SMS keep the old name; a new description, photos or logo go live and join the admin
+tool's «Check again» list, as a move does; migration 0049; its two tk/ru SMS want the owner's native check); #333 C3
+services at scale and the business page's phone header, Back and no-photo bar (the page books one service per Book;
+a second comes from the booking's services step until C4's «Add a service» is built). **Paused by the owner (07.11).**
+**Left from round 7:** C4's «Add a service» in the booking summary (first: the page sends one service now); A10
+callouts, toasts and NoteRow; idea 1 (trusted client) and idea 3 (follow, plan only); the FilterBar on the client
+site's search; the reviews page's "removed" notice (the api says nothing of a removed report today); tk/ru strings.
+Then a migration dropping `users.demo` and `businesses.sandbox` (#316 left the columns). Each piece's log note
+(`log/2026-11-07-name-recheck.md`, `log/2026-11-07-services-at-scale.md` …) lists what it left.
 **Agents:** allowed for this run (owner 06.11): two at a time (two on battery for 07.11), Fable 5.1 at xhigh (free; owner
 07.11), Opus 5.5 as the fallback; budget 30 % of the week that began 07.11. Docs-only changes go straight to `main`.
 
