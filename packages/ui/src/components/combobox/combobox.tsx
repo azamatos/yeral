@@ -21,6 +21,8 @@ export type ComboboxOption = {
   description?: ReactNode
   /** At the start of the row: the address's pin, a client's avatar. */
   icon?: ReactNode
+  /** At the right of the row (13 n-600): «Last visit 2 Oct · 14 visits». */
+  meta?: ReactNode
 }
 
 type State = {
@@ -58,8 +60,10 @@ export type ComboboxProps = {
   section?: ReactNode
   /** In place of the options when none match: «No client found for “65 99 00”». */
   empty?: ReactNode
-  /** The last row, always there while the list is open: «Create a new client». */
+  /** The last row, always there while the list is open: «Create a new client»; alone (no option) it's highlighted. */
   create?: { label: ReactNode; icon?: ReactNode; onSelect: () => void }
+  /** A line under the list when it's cut: «Showing 8 of 23 — keep typing». */
+  more?: ReactNode
   /** `address`: the padded list of B-Onboarding (rows 56, r8); `list`: rows 52 with lines between (B-Calendar). */
   variant?: 'list' | 'address'
   children: ReactNode
@@ -83,7 +87,9 @@ export function Combobox(props: ComboboxProps) {
   const shown = open && focused && !dismissed && (rows > 0 || !!empty)
   const CREATE = '\u0000create'
   const idAt = (i: number) => (i < options.length ? options[i]!.id : create ? CREATE : null)
-  const found = activeId === CREATE ? (create ? options.length : -1) : options.findIndex((o) => o.id === activeId)
+  const chosen = activeId === CREATE ? (create ? options.length : -1) : options.findIndex((o) => o.id === activeId)
+  // nothing matched: the create row is the only answer, so Enter takes it
+  const found = chosen < 0 && options.length === 0 && create ? 0 : chosen
   const setActive = (i: number) => setActiveId(i < 0 ? null : idAt(i))
   const state: State = {
     listId,
@@ -199,7 +205,7 @@ export function ComboboxInput({
 /** The options under the field while it's open: the section label, the options or the empty line, the create row. */
 export function ComboboxList({ className }: { className?: string }) {
   const s = useCombobox()
-  const { options, listLabel, section, empty, create, variant = 'list' } = s.props
+  const { options, listLabel, section, empty, create, more, variant = 'list' } = s.props
   if (!s.shown) return null
   const address = variant === 'address'
   const row = (i: number, on: boolean) =>
@@ -247,6 +253,7 @@ export function ComboboxList({ className }: { className?: string }) {
                 <span className={cn(address ? 'text-button font-medium' : 'font-semibold')}>{o.label}</span>
                 {o.description && <span className="text-dense text-n-600">{o.description}</span>}
               </span>
+              {o.meta && <span className="flex-none text-dense text-n-600">{o.meta}</span>}
             </div>
           ))}
           {create && (
@@ -265,6 +272,7 @@ export function ComboboxList({ className }: { className?: string }) {
           )}
         </div>
       )}
+      {more && options.length > 0 && <div className="border-t border-n-200 px-3 py-2 text-dense text-n-600">{more}</div>}
     </div>
   )
 }

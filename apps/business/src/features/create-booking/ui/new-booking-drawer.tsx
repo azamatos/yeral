@@ -1,5 +1,4 @@
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
-import type { ClientMatch } from '@yeral/contract/clients'
 import { localized } from '@yeral/domain/model'
 import { isPhone, nationalDigits, toE164 } from '@yeral/domain/phone'
 import { addDays, parseYmd, today } from '@yeral/domain/time'
@@ -31,12 +30,13 @@ import {
   servicesOf,
   staffOf,
   totalOf,
+  type ChosenClient,
   type NewBookingStart,
   type Person,
   type TeamSource,
 } from '../model/new-booking'
 import { ClientField } from './client-field'
-import { ServicePicker } from './service-picker'
+import { ServicePicker, type ServiceScope } from './service-picker'
 
 const SECTION_TITLE = 'text-small font-medium text-n-900'
 const LINK =
@@ -74,15 +74,17 @@ export function NewBookingDrawer({
   const errorText = useErrorText()
   const todayDate = today(now)
   const phone = useMediaQuery('(max-width: 767px)')
-  const phoneField = useRef<HTMLInputElement>(null)
+  const clientInput = useRef<HTMLInputElement>(null)
 
   const [source, setSource] = useState<TeamSource>('phone')
   const [digits, setDigits] = useState('')
-  const [picked, setPicked] = useState<ClientMatch | null>(null)
+  const [picked, setPicked] = useState<ChosenClient | null>(null)
+  // the inline New client form in place of the field
+  const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
   const [serviceIds, setServiceIds] = useState<readonly string[]>(start.serviceIds ?? [])
   const [staffId, setStaffId] = useState<string | null>(specialist ? (people[0]?.staffId ?? null) : (start.staffId ?? null))
-  const [allServices, setAllServices] = useState(false)
+  const [scope, setScope] = useState<ServiceScope>('own')
   const [date, setDate] = useState(start.date < todayDate ? todayDate : start.date)
   const [time, setTime] = useState<number | null>(start.start ?? null)
   const [note, setNote] = useState('')
@@ -98,12 +100,23 @@ export function NewBookingDrawer({
   if (!seeded && seed.data?.phone) {
     setSeeded(true)
     setDigits(nationalDigits(seed.data.phone))
+    const c = seed.data
+    setPicked({
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      visits: c.stats.visits,
+      lastVisit: c.stats.lastVisit,
+      phoneOnly: c.settings.phoneOnly,
+    })
   }
 
+  // the lookup by the whole number: the chosen client's alert notes and usual services, or the new client's number
+  // already saved for someone (no duplicates)
   const complete = digits.length === PHONE_RULES.maxDigits
-  const whole = useQuery({ ...sdk.clients.lookup(slug, { phone: digits }), enabled: !picked && complete })
+  const whole = useQuery({ ...sdk.clients.lookup(slug, { phone: digits }), enabled: complete })
   const known = whole.data?.items.find((c) => c.phone && nationalDigits(c.phone) === digits) ?? null
-  const client = picked ?? (complete ? known : null)
+  const client = picked ? known : null
 
   const menu = useQuery(sdk.settings.menu(slug))
   const services = servicesOf(menu.data, serviceIds)
@@ -126,13 +139,13 @@ export function NewBookingDrawer({
   const chosen = time ?? (walkin ? (mine[0]?.start ?? null) : null)
   const timeOk = chosen !== null && mine.some((s) => s.start === chosen)
   const total = totalOf(services)
-  const hasClient = !!client || complete
+  const hasClient = !!picked || (creating && complete && !known)
   const missing = missingOf({ hasClient, services: services.length, staffId: staff, timeOk })
 
   const add = useMutation(sdk.calendar.add(slug))
   const undo = useMutation(sdk.calendar.undo(slug))
   const save = () => {
-    const number = client?.phone ?? toE164(digits)
+    const number = picked?.phone ?? toE164(digits)
     if (!staff || chosen === null || !isPhone(number)) return
     const written = note.trim()
     const newName = name.trim()
@@ -140,7 +153,7 @@ export function NewBookingDrawer({
       {
         source,
         phone: number,
-        ...(!client && newName ? { name: newName } : {}),
+        ...(!picked && newName ? { name: newName } : {}),
         serviceIds: ids,
         staffId: staff,
         date: day,
@@ -153,7 +166,7 @@ export function NewBookingDrawer({
           onClose()
           const words = phone
             ? t('savedQuick', {
-                client: client?.name ?? newName ?? number,
+                client: picked?.name ?? newName ?? number,
                 when: t('quickWhen', { day: dayWord(day).toLowerCase(), time: fmt.time(chosen) }),
                 name: nameOf(staff),
               })
@@ -224,9 +237,9 @@ export function NewBookingDrawer({
         aria-describedby={undefined}
         // the keypad comes up with the sheet (B-Mobile 5a), when there's a number to type
         onOpenAutoFocus={(e) => {
-          if (!phone || !phoneField.current) return
+          if (!phone || !clientInput.current) return
           e.preventDefault()
-          phoneField.current.focus()
+          clientInput.current.focus()
         }}
       >
         <DrawerHeader title={t('title')} closeLabel={t('close')} />
@@ -241,14 +254,17 @@ export function NewBookingDrawer({
 
           <ClientField
             slug={slug}
+            chosen={picked}
+            alerts={client?.alerts ?? []}
+            creating={creating}
             digits={digits}
-            client={client}
             name={name}
-            showAverage={!specialist}
+            known={creating ? known : null}
             quick={phone}
-            phoneRef={phoneField}
+            inputRef={clientInput}
+            onChoose={setPicked}
+            onCreating={setCreating}
             onDigits={setDigits}
-            onClient={setPicked}
             onName={setName}
           />
 
@@ -265,7 +281,7 @@ export function NewBookingDrawer({
                       className="h-11"
                       onClick={() => {
                         // the keypad goes on the first chip (B-Mobile 5b)
-                        phoneField.current?.blur()
+                        clientInput.current?.blur()
                         setServiceIds(on ? ids.filter((id) => id !== s.id) : [...ids, s.id])
                       }}
                     >
@@ -283,11 +299,10 @@ export function NewBookingDrawer({
             <ServicePicker
               menu={menu.data}
               picked={services}
-              onlyOf={given && (specialist || !allServices) ? given : null}
+              person={given}
+              scope={scope}
               showPrices={!specialist}
-              onToggleAll={
-                given && !specialist ? { all: allServices, toggle: () => setAllServices(!allServices), name: given.name } : undefined
-              }
+              onScope={specialist ? undefined : setScope}
               onChange={setServiceIds}
             />
           )}

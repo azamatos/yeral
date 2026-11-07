@@ -1,3 +1,4 @@
+import type { ClientRow } from '@yeral/contract/clients'
 import type { Menu } from '@yeral/contract/services'
 import type { Price } from '@yeral/domain/model'
 import { localOf, QUARTER_HOUR } from '@yeral/domain/time'
@@ -5,6 +6,8 @@ import { localOf, QUARTER_HOUR } from '@yeral/domain/time'
 export type MenuService = Menu['groups'][number]['services'][number]
 export type Person = { staffId: string; name: string; photo?: { url: string } | null }
 export type TeamSource = 'phone' | 'walkin'
+/** The client the booking is for, as the list row or the card gave them (the lookup adds their alert notes). */
+export type ChosenClient = Pick<ClientRow, 'id' | 'name' | 'phone' | 'visits' | 'lastVisit' | 'phoneOnly'>
 
 /** What the drawer opens with: the day on screen, and what a free slot, «Book again» or the client's card fill in. */
 export type NewBookingStart = {

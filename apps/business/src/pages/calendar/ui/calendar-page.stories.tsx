@@ -270,6 +270,23 @@ const gozel = {
   alerts: ['Allergic to ammonia'],
   usualServices: [id(8)],
 }
+/** The clients list as the new booking's one field searches it (B7): Gözel and Jemal, by visits. */
+const clients = [
+  { ...gozel, tags: [], segments: ['regular'], lastVisit: '2026-10-02', total: null, next: null },
+  {
+    id: id(3),
+    name: 'Jemal Berdiýewa',
+    phone: '+99361234567',
+    tags: [],
+    segments: ['new'],
+    phoneOnly: false,
+    visits: 2,
+    lastVisit: '2026-09-20',
+    total: null,
+    avgCheck: null,
+    next: null,
+  },
+]
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -387,13 +404,22 @@ const fakeApi =
         return json({ items })
       }
       if (route === 'GET /w/glow-studio/services') return json(menu)
+      if (route === 'GET /w/glow-studio/clients') {
+        const q = url.searchParams.get('q')?.toLowerCase() ?? ''
+        const digits = /^\d+$/.test(q)
+        const items = clients
+          .filter((c) => !q || (digits ? c.phone.replace(/\D/g, '').includes(q) : c.name.toLowerCase().includes(q)))
+          .slice(0, Number(url.searchParams.get('limit') ?? 12))
+        return json({ items, cursor: null, counts: { all: items.length, regular: 0, new: 0, lapsed: 0, flagged: 0 } })
+      }
       if (route === 'GET /w/glow-studio/clients/lookup') {
         const digits = url.searchParams.get('phone')?.replace(/\D/g, '')
         const name = url.searchParams.get('name')?.toLowerCase()
         const hit = digits ? gozel.phone.slice(4).startsWith(digits) : !!name && gozel.name.toLowerCase().startsWith(name)
         return json({ items: hit ? [gozel] : [] })
       }
-      if (route === `GET /w/glow-studio/clients/${gozel.id}`) return json(gozel)
+      if (route === `GET /w/glow-studio/clients/${gozel.id}`)
+        return json({ ...gozel, stats: { visits: 12, lastVisit: '2026-10-02' }, settings: { phoneOnly: false } })
       if (route === 'POST /w/glow-studio/bookings') {
         const body = (await request.json()) as { staffId: string; date: string; start: number; serviceIds: string[] }
         const who = staff.findIndex((s) => s.staffId === body.staffId) + 1
@@ -1145,11 +1171,14 @@ export const NewBooking: Story = {
   play: async ({ canvas }) => {
     const d = await openNew(canvas)
     await expect(d.getByRole('button', { name: 'Save booking' })).toBeDisabled()
-    await expect(d.getByText('Still needed: client’s phone, service, time')).toBeVisible()
-    await userEvent.type(d.getByRole('textbox', { name: 'Phone number' }), '651')
-    await userEvent.click(await d.findByRole('button', { name: /Gözel Annaýewa/ }))
+    await expect(d.getByText('Still needed: client, service, time')).toBeVisible()
+    const client = d.getByRole('combobox', { name: 'Client' })
+    await userEvent.click(client)
+    await expect(await d.findByText('Frequent clients')).toBeVisible()
+    await userEvent.type(client, '651')
+    await userEvent.click(await d.findByRole('option', { name: /Gözel Annaýewa/ }))
     await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
-    await expect(d.getByText(/12 visits · average check 145 TMT/)).toBeVisible()
+    await expect(d.getByText('Last visit 2 Oct · 12 visits')).toBeVisible()
     await userEvent.click(d.getByRole('checkbox', { name: /Women’s haircut/ }))
     await expect(d.getByText('Still needed: specialist, time')).toBeVisible()
     await userEvent.click(await d.findByRole('button', { name: /^Tomorrow 10:00\s*· Aýna/ }))
@@ -1162,34 +1191,43 @@ export const NewBooking: Story = {
   },
 }
 
-/** A number not saved yet: said so, the name optional. */
+/** Digits nobody has: «+ New client» takes them into the inline form; a number already saved offers that client. */
 export const NewBookingNewClient: Story = {
   play: async ({ canvas }) => {
     const d = await openNew(canvas)
-    const phone = d.getByRole('textbox', { name: 'Phone number' })
-    await userEvent.type(phone, '6123')
+    await userEvent.type(d.getByRole('combobox', { name: 'Client' }), '6199')
+    await expect(await d.findByText('No client “6199”')).toBeVisible()
+    await userEvent.click(d.getByRole('option', { name: 'New client “6199”' }))
+    const phone = await d.findByRole('textbox', { name: 'Phone number' })
+    await expect(phone).toHaveValue('61 99')
+    await userEvent.click(phone)
     await userEvent.tab()
     await expect(await d.findByRole('alert')).toHaveTextContent('The number is incomplete — it needs 8 digits.')
     await userEvent.type(phone, '4567')
-    await expect(await d.findByText('This number isn’t saved yet — it will be added as a new client.')).toBeVisible()
-    await expect(d.getByRole('textbox', { name: /^Name/ })).toBeVisible()
+    await expect(d.getByText('Still needed: service, time')).toBeVisible()
+    await userEvent.clear(phone)
+    await userEvent.type(phone, '65123456')
+    await expect(await d.findByText('This number is saved for Gözel Annaýewa.')).toBeVisible()
+    await userEvent.click(d.getByRole('button', { name: 'Choose Gözel Annaýewa' }))
+    await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
   },
 }
 
-/** Search by name finds the client; no match says so and offers a new one. */
+/** Letters search names: no match offers a new client with the name typed; Change brings the search back with the name. */
 export const NewBookingByName: Story = {
   play: async ({ canvas }) => {
     const d = await openNew(canvas)
-    await userEvent.click(d.getByRole('button', { name: 'Search by name' }))
-    const search = d.getByRole('textbox', { name: 'Name or phone number' })
+    const search = d.getByRole('combobox', { name: 'Client' })
     await userEvent.type(search, 'Zzz')
-    await expect(await d.findByText('No client found for “Zzz”')).toBeVisible()
-    await userEvent.clear(search)
-    await userEvent.type(search, 'Göz')
-    await userEvent.click(await d.findByRole('button', { name: /Gözel Annaýewa/ }))
+    await expect(await d.findByText('No client “Zzz”')).toBeVisible()
+    await userEvent.keyboard('{Enter}')
+    await expect(await d.findByRole('textbox', { name: /^Name/ })).toHaveValue('Zzz')
+    await userEvent.click(d.getByRole('button', { name: 'Cancel' }))
+    await userEvent.type(await d.findByRole('combobox', { name: 'Client' }), 'Göz')
+    await userEvent.click(await d.findByRole('option', { name: /Gözel Annaýewa/ }))
     await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
     await userEvent.click(d.getByRole('button', { name: 'Change' }))
-    await expect(await d.findByRole('textbox', { name: 'Phone number' })).toHaveValue('')
+    await expect(await d.findByRole('combobox', { name: 'Client' })).toHaveValue('Gözel Annaýewa')
   },
 }
 
@@ -1205,8 +1243,9 @@ export const NewBookingFromSlot: Story = {
     await expect(await d.findByRole('checkbox', { name: /Manicure/ })).toBeVisible()
     await expect(d.queryByRole('checkbox', { name: /Hair colouring/ })).toBeNull()
     await expect(d.getByRole('radio', { name: 'Maral' })).toBeChecked()
-    await userEvent.click(d.getByRole('radio', { name: 'Show all services' }))
-    await userEvent.click(await d.findByRole('checkbox', { name: /Hair colouring/ }))
+    await expect(d.getByRole('radio', { name: 'Maral’s services' })).toBeChecked()
+    await userEvent.click(d.getByRole('radio', { name: 'All services' }))
+    await userEvent.click(await d.findByRole('checkbox', { name: /Hair colouring.*Maral doesn’t do this/ }))
     await userEvent.click(d.getByRole('checkbox', { name: /Manicure/ }))
     await expect(await d.findByText(/No one specialist does all the chosen services — make/)).toBeVisible()
     await expect(d.getByRole('radio', { name: 'Maral' })).toBeDisabled()
@@ -1220,7 +1259,8 @@ export const NewBookingWalkIn: Story = {
     await userEvent.click(d.getByRole('radio', { name: 'Walk-in' }))
     await expect(d.getByText(/The client is here — the booking can start at the current time/)).toBeVisible()
     await expect(d.getByRole('switch', { name: /Notify the client/ })).not.toBeChecked()
-    await userEvent.type(d.getByRole('textbox', { name: 'Phone number' }), '65123456')
+    await userEvent.type(d.getByRole('combobox', { name: 'Client' }), '65123456')
+    await userEvent.click(await d.findByRole('option', { name: /Gözel Annaýewa/ }))
     await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
     await userEvent.click(d.getByRole('checkbox', { name: /Women’s haircut/ }))
     await userEvent.click(d.getByRole('radio', { name: 'Aýna' }))
@@ -1270,9 +1310,10 @@ export const QuickBooking: Story = {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(canvas.getByRole('button', { name: 'New booking' }))
     const d = within(await page.findByRole('dialog', { name: 'New booking' }))
-    const phone = d.getByRole('textbox', { name: 'Client’s phone' })
-    await waitFor(() => expect(phone).toHaveFocus())
+    const client = d.getByRole('combobox', { name: 'Client' })
+    await waitFor(() => expect(client).toHaveFocus())
     await userEvent.keyboard('65123456')
+    await userEvent.click(await d.findByRole('option', { name: /Gözel Annaýewa/ }))
     await expect(await d.findByText('Allergic to ammonia')).toBeVisible()
     const chips = within(d.getByRole('group', { name: 'Service' }))
     await expect(chips.getAllByRole('button')[0]).toHaveTextContent('Manicure')
