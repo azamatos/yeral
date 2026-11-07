@@ -24,6 +24,15 @@ const envSchema = z.object({
    */
   SIGN_IN_CODE_ON_SCREEN: z.enum(['true', 'false']).default('false'),
   /**
+   * Numbers that sign in with a fixed code instead of one sent (owner, 07.11.2026: a tester whose Telegram is on a
+   * number of another country can't get the bot's code): `+99364000000:1234,+99365000000:4321`. Kept in the server's
+   * `.env` only, never in the repository; the code's limits (three tries, then a lock; five codes an hour) still hold.
+   */
+  FIXED_SIGN_IN_CODES: z
+    .string()
+    .regex(/^\+\d{8,15}:\d{4}(,\+\d{8,15}:\d{4})*$/, '+<number>:<4 digits>, comma-separated')
+    .optional(),
+  /**
    * The kinds of booking open now (book Q-030): appointments at the first launch; a business or category of another
    * kind stays out of every list and search. Comma-separated (`appointment,table,class`).
    */
@@ -106,6 +115,8 @@ export interface Config {
   logLevel: 'debug' | 'info' | 'warn' | 'error'
   trustedIpHeader?: TrustedIpHeader
   codeOnScreen: boolean
+  /** `FIXED_SIGN_IN_CODES`: a number's fixed sign-in code. */
+  fixedCodes: ReadonlyMap<string, string>
   /** The kinds of booking open now (`BOOKING_TYPES`, book Q-030). */
   bookingTypes: BookingType[]
   /** `EXAMPLE_BUSINESSES`: `setup` adds the first launch's example businesses, showing `examplePhone`. */
@@ -144,6 +155,7 @@ export function loadConfig(source: Record<string, unknown>): Config {
     logLevel: env.LOG_LEVEL,
     trustedIpHeader: env.TRUSTED_IP_HEADER,
     codeOnScreen: env.SIGN_IN_CODE_ON_SCREEN === 'true',
+    fixedCodes: new Map(env.FIXED_SIGN_IN_CODES?.split(',').map((pair) => pair.split(':') as [string, string])),
     bookingTypes: env.BOOKING_TYPES,
     exampleBusinesses: env.EXAMPLE_BUSINESSES === 'true',
     examplePhone,

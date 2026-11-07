@@ -88,6 +88,19 @@ describe('phone login (ADR 0019)', () => {
     expect((await b.req('/v1/auth/verify', { body: { phone, code: won.code } })).status).toBe(200)
   })
 
+  it('a tester’s fixed code (FIXED_SIGN_IN_CODES): nothing sent, even by the bot; the limits hold; others unchanged', async () => {
+    const phone = '+99365000023'
+    const prod = testApp(db, { demo: false, telegram: true, fixedCodes: new Map([[phone, '2468']]) })
+    const b = browser(prod.app)
+    expect((await b.req('/v1/auth/code', { body: { phone } })).json).toEqual({ resendAfterSec: 59, expiresInSec: 300, delivery: 'sms' })
+    expect(prod.sms.sent.filter((m) => m.to === phone)).toHaveLength(0)
+    // the same three tries
+    await b.req('/v1/auth/verify', { body: { phone, code: '1357' } })
+    expect((await b.req('/v1/auth/verify', { body: { phone, code: '2468' } })).status).toBe(200)
+    // another number still goes through the bot
+    expect((await browser(prod.app).req('/v1/auth/code', { body: { phone: '+99365000024' } })).json.delivery).toBe('telegram_link')
+  })
+
   it('only mobile numbers get codes', async () => {
     const res = await browser(t.app).req('/v1/auth/code', { body: { phone: '+993 12 45 67 89' } })
     expect(res.status).toBe(400)
