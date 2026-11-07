@@ -97,7 +97,7 @@ function HoursSettings({ slug }: { slug: string }) {
       if (details?.success) setAffected(details.data)
       // a special day open past midnight that the new week runs into (the special days' section comes next)
       else if (isApiError(error, 'validation_error') && specialDayIssue(error.details)) toast(t('specialDayClash'))
-      else toast(errorText(error))
+      else toast.error(errorText(error))
     }
   }
 

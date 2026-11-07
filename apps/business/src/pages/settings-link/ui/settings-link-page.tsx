@@ -91,7 +91,7 @@ function ChangeLink({ slug }: { slug: string }) {
           if (takenOnSave(error)) {
             toast(ta('taken'))
             void queryClient.invalidateQueries({ queryKey: keys.pageAddressAll() })
-          } else toast(errorText(error))
+          } else toast.error(errorText(error))
         },
       },
     )

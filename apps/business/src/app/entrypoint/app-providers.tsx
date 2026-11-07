@@ -25,5 +25,5 @@ export function AppProviders({ api, locale, children }: { api: Api; locale: Loca
 
 function AppToaster() {
   const t = useTranslations('app')
-  return <Toaster label={t('notifications')} />
+  return <Toaster label={t('notifications')} closeLabel={t('closeNotification')} />
 }

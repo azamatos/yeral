@@ -381,7 +381,7 @@ function useMemberRow({ slug, member: m, owner, services, onLink, onInviteAgain 
     try {
       await action()
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
     }
   }
   // «Copy invite link»: the link exists only in a send's answer (the api keeps its hash), so it sends the invite again

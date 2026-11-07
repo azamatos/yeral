@@ -189,7 +189,7 @@ function Steps({
 
   // `?another=true` goes along until the draft is there to reopen
   const go = (to: WizardStep) => void navigate({ to: '/setup/$step', params: { step: to }, search: true })
-  const failed = (error: unknown) => void toast(errorText(error))
+  const failed = (error: unknown) => void toast.error(errorText(error))
 
   /**
    * The business step's name, category and page address into the draft: a new draft (saved at the address step, with

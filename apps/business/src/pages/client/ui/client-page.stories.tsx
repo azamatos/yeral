@@ -200,7 +200,8 @@ export const Owner: Story = {
     await expect(figures.getByText('Average check')).toBeVisible()
     await expect(figures.getByText('145 TMT')).toBeVisible()
     await expect(figures.getByText('Haircut · Aýna')).toBeVisible()
-    await expect(canvas.getByText('Shown when booking')).toBeVisible()
+    // the alert's meta is one plain line (A10 NoteRow), no pill
+    await expect(canvas.getByText(/· Shown when booking$/)).toBeVisible()
     const alert = canvas.getByText('Use ammonia-free colour — allergy.')
     const plain = canvas.getByText('She can only come in the morning.')
     await expect(alert.compareDocumentPosition(plain) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()

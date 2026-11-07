@@ -121,7 +121,7 @@ export function useServicesStep(
       setState({ form: saved, saved: JSON.stringify(servicesInput(saved, locale)), basis: `menu:${ids}`, edited: false })
       return true
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       return false
     }
   }

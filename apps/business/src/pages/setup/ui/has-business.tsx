@@ -67,7 +67,7 @@ export function HasBusiness({ me, workspaces }: { me: Me; workspaces: Workspace[
       <AccountLine
         who={name ? t('login.who', { name, phone }) : phone}
         // signed out, the setup opens its step 1 by itself
-        onOtherNumber={() => logout.mutate(undefined, { onError: (error) => void toast(errorText(error)) })}
+        onOtherNumber={() => logout.mutate(undefined, { onError: (error) => void toast.error(errorText(error)) })}
         busy={logout.isPending}
       />
     </AuthPage>

@@ -35,7 +35,7 @@ export function DeleteAccount() {
         void navigate({ to: '/$lang', params: { lang }, replace: true })
       },
       onError: (error) => {
-        if (!isApiError(error, 'owns_workspace')) toast(errorText(error))
+        if (!isApiError(error, 'owns_workspace')) toast.error(errorText(error))
       },
     })
 

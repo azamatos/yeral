@@ -82,7 +82,7 @@ export function ReviewModal({ open, onOpenChange, returnFocus, onDone, ...form }
           // the booking moved on meanwhile: what it is now decides what the row, the drawer and the card offer
           for (const queryKey of [keys.booking(form.booking.code, lang), keys.bookingLists(), keys.howWasItAll()])
             void queryClient.invalidateQueries({ queryKey })
-          toast(errorText(error))
+          toast.error(errorText(error))
           onOpenChange(false)
         },
       },
@@ -207,7 +207,7 @@ function ReviewForm({
         <span className="text-dense text-n-600">{t('until', { date: fmt.shortWeekdayDate(until.date), time: fmt.time(until.min) })}</span>
       )}
       {error && (
-        <Callout tone="danger" size="s" live>
+        <Callout tone="danger" live>
           {errorText(error)}
         </Callout>
       )}

@@ -37,7 +37,7 @@ export function useDeleteService(
     try {
       await remove.mutateAsync(service.id)
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       return false
     }
     onDeleted(service)
@@ -50,7 +50,7 @@ export function useDeleteService(
             void restore
               .mutateAsync(service.id)
               .then(() => toast(t('restored', { name })))
-              .catch((error: unknown) => toast(errorText(error))),
+              .catch((error: unknown) => toast.error(errorText(error))),
         },
       })
     return true

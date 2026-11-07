@@ -82,7 +82,7 @@ export function useTeamStep(slug: string, on: boolean, owner: { name: string; ph
       setState((s) => s && { ...s, stored: formFrom(saved.items) })
       return true
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       return false
     }
   }

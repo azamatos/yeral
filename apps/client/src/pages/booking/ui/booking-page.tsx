@@ -197,7 +197,7 @@ export function BookingPage() {
             void navigate({ ...pageLink, replace: true })
             return
           }
-          toast(errorText(error))
+          toast.error(errorText(error))
         },
       },
     )

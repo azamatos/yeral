@@ -219,7 +219,7 @@ export function TimeOff({
   const ask = (error: unknown, daysOff: StaffScheduleView['daysOff'], range: string) => {
     const listed = isApiError(error, 'bookings_affected') && bookingsAffectedDetailsSchema.safeParse(error.details)
     if (listed && listed.success) setAsked({ details: listed.data, daysOff, range })
-    else toast(errorText(error))
+    else toast.error(errorText(error))
   }
 
   const add = async (affected?: AffectedChoice) => {
@@ -251,7 +251,7 @@ export function TimeOff({
       const now = await queryClient.fetchQuery({ ...sdk.team.schedule(slug, m.id), staleTime: 0 })
       await send([...now.daysOff, gone], undefined, now)
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
     }
   }
   const remove = async (i: number) => {
@@ -262,7 +262,7 @@ export function TimeOff({
         action: { label: t('undo'), onClick: () => void undo(gone) },
       })
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
     }
   }
 

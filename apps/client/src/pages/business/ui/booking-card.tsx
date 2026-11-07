@@ -57,12 +57,7 @@ export function ConfirmCallout({ detail, compact = false, className }: { detail:
   const instant = detail.confirmMode === 'instant'
   if (compact)
     return (
-      <Callout
-        tone="accent"
-        size="s"
-        icon={instant ? <Zap aria-hidden className="size-4" /> : <Clock aria-hidden className="size-4" />}
-        className={cn('px-3 py-2.5 font-medium', className)}
-      >
+      <Callout tone="accent" size="compact" icon={instant ? <Zap aria-hidden /> : <Clock aria-hidden />} className={className}>
         {instant ? t('instantShort') : t('byHandShort', { name: detail.name })}
       </Callout>
     )
@@ -74,7 +69,7 @@ export function ConfirmCallout({ detail, compact = false, className }: { detail:
       : t('byHandLead')
   return (
     <Callout tone="accent" icon={icon} title={instant ? t('instant') : t('byHand', { name: detail.name })} className={className}>
-      <span className="text-n-600">{lead}</span>
+      {lead}
     </Callout>
   )
 }

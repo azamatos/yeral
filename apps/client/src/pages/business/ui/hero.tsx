@@ -422,7 +422,7 @@ function ShareButton({ name, slug, className }: { name: string; slug: string; cl
       await navigator.clipboard.writeText(url)
       toast(t('copied'))
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) toast(t('failed'))
+      if (!(error instanceof DOMException && error.name === 'AbortError')) toast.error(t('failed'))
     }
   }
   return (

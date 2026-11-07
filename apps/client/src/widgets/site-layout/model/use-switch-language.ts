@@ -17,7 +17,7 @@ export function useSwitchLanguage() {
   const save = useMutation(sdk.me.update())
   return (lang: string) => {
     if (!isSiteLocale(lang)) return
-    if (me.data && me.data.lang !== lang) save.mutate({ lang }, { onError: (error) => void toast(errorText(error)) })
+    if (me.data && me.data.lang !== lang) save.mutate({ lang }, { onError: (error) => void toast.error(errorText(error)) })
     void navigate({ to: '.', params: (prev: Record<string, string>) => ({ ...prev, lang }), search: true, hash: true })
   }
 }

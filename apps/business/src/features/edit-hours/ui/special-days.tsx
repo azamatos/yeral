@@ -76,7 +76,7 @@ export function SpecialDays({ slug, saved }: { slug: string; saved: Saved }) {
       list.splice(Math.min(at, list.length), 0, gone)
       await update.mutateAsync({ hours: now.hours, specialDays: list })
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
     }
   }
   const remove = async (gone: SpecialDay, affected?: AffectedChoice) => {
@@ -98,7 +98,7 @@ export function SpecialDays({ slug, saved }: { slug: string; saved: Saved }) {
     } catch (error) {
       const details = isApiError(error, 'bookings_affected') ? bookingsAffectedDetailsSchema.safeParse(error.details) : null
       if (details?.success) setDeleting({ day: gone, details: details.data })
-      else toast(errorText(error))
+      else toast.error(errorText(error))
     }
   }
 
@@ -263,7 +263,7 @@ function SpecialDayModal({
       if (details?.success) {
         setConflict(details.data)
         setChoice('keep')
-      } else toast(errorText(error))
+      } else toast.error(errorText(error))
     }
   }
 

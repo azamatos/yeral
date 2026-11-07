@@ -157,7 +157,7 @@ function ServiceEditor({
       onBusy(false)
       onClose()
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       onBusy(false)
       setSaving(false)
     }
@@ -322,7 +322,7 @@ function ServiceEditor({
             {!Array.isArray(team) ? null : form.staffIds.length ? (
               <span className="text-dense text-n-600">{t('whoHint')}</span>
             ) : (
-              <Callout tone="warning" size="s" icon={<TriangleAlert aria-hidden />} live>
+              <Callout tone="warning" icon={<TriangleAlert aria-hidden />} live>
                 {t('whoNone')}
               </Callout>
             )}

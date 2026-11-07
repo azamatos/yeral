@@ -64,7 +64,7 @@ export function useProfileForm(slug: string): ProfileFormState | null {
       setState((s) => s && { ...s, stored: s.form })
       return true
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
       return false
     }
   }

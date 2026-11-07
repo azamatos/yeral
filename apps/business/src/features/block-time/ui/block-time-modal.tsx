@@ -111,7 +111,7 @@ export function BlockTimeModal({
       const details = isApiError(error, 'block_over_bookings') ? blockOverBookingsDetailsSchema.safeParse(error.details) : null
       const first = details?.success ? details.data.bookings[0] : undefined
       if (first) setHit(first)
-      else toast(errorText(error))
+      else toast.error(errorText(error))
     }
   }
 

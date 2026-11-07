@@ -38,7 +38,7 @@ export function LoginPage() {
     if (!signedIn) setDeclined(null)
   }
 
-  const failed = (error: unknown) => void toast(errorText(error))
+  const failed = (error: unknown) => void toast.error(errorText(error))
   const signIn = useSignIn({
     onVerified: (answer) => {
       if ('isThisYou' in answer) setIdentity(answer.isThisYou)

@@ -70,5 +70,5 @@ export function PageStory({
 
 function StoryToaster() {
   const t = useTranslations('app')
-  return <Toaster label={t('notifications')} />
+  return <Toaster label={t('notifications')} closeLabel={t('closeNotification')} />
 }

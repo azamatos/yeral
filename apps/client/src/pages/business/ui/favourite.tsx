@@ -21,7 +21,7 @@ export function FavouriteButton({ slug, wide = false, className }: { slug: strin
   const me = useQuery(sdk.me.get())
   const favourites = useQuery({ ...sdk.me.favorites(lang), enabled: Boolean(me.data) })
   const on = Boolean(me.data && favourites.data?.items.some((b) => b.slug === slug))
-  const save = useMutation({ ...sdk.me.setFavorite(), onError: () => toast(t('failed')) })
+  const save = useMutation({ ...sdk.me.setFavorite(), onError: () => toast.error(t('failed')) })
   const [login, setLogin] = useState(false)
   const label = on ? t('saved') : t('add')
   const press = () => (me.data ? save.mutate({ slug, on: !on }) : setLogin(true))

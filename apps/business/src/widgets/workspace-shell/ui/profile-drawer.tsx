@@ -77,7 +77,7 @@ function Profile({ onDone }: { onDone: () => void }) {
           toast(t('shell.profile.saved'))
           onDone()
         },
-        onError: (error) => void toast(errorText(error)),
+        onError: (error) => void toast.error(errorText(error)),
       },
     )
   }

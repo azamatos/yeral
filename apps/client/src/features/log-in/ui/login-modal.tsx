@@ -48,7 +48,7 @@ function LoginSteps({ onSignedIn }: { onSignedIn: () => void }) {
   const errorText = useErrorText()
   const me = useQuery(sdk.me.get())
   const [identity, setIdentity] = useState<{ name: string | null; ticket: string } | null>(null)
-  const failed = (error: unknown) => void toast(errorText(error))
+  const failed = (error: unknown) => void toast.error(errorText(error))
   // asked as the modal opens, so the phone step's code-on-screen lead is there with it
   useCodeOnScreen()
   const signIn = useSignIn({

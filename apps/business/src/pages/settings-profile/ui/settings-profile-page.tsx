@@ -88,7 +88,7 @@ function ProfileSection({ slug, owner }: { slug: string; owner: boolean }) {
       if (address?.edited) await address.save()
       toast(t('save.saved'))
     } catch (error) {
-      toast(errorText(error))
+      toast.error(errorText(error))
     }
   }
   const discard = () => {
@@ -153,7 +153,7 @@ function AddressSection({ address, disabled }: { address: AddressFormState | nul
           <Spinner />
         </div>
       )}
-      <Callout tone="neutral" size="s" icon={<Info aria-hidden />} live={false}>
+      <Callout tone="neutral" icon={<Info aria-hidden />} live={false}>
         {t.rich('moved', { brand, b: (words) => <b>{words}</b> })}
       </Callout>
       <p className="m-0 text-dense text-n-600">
@@ -197,7 +197,7 @@ function SentBack({ slug, reason, owner, unsaved }: { slug: string; reason: stri
             loading={send.isPending}
             disabled={unsaved}
             aria-describedby={`${titleId}-caption`}
-            onClick={() => send.mutate(undefined, { onSuccess: () => toast(t('sent')), onError: (error) => toast(errorText(error)) })}
+            onClick={() => send.mutate(undefined, { onSuccess: () => toast(t('sent')), onError: (error) => toast.error(errorText(error)) })}
           >
             {t('send')}
           </Button>
@@ -272,7 +272,6 @@ function NameRow({ profile }: { profile: ProfileFormState }) {
       {nameRejected && (
         <Callout
           tone="danger"
-          size="s"
           icon={<CircleAlert aria-hidden />}
           live={false}
           title={t('nameRejected', { brand, name: nameRejected.name })}
@@ -428,7 +427,7 @@ function PauseSection({ profile, owner }: { profile: ProfileFormState; owner: bo
         )}
       </SettingsRow>
       {profile.form.paused && (
-        <Callout tone="neutral" size="s" icon={<Info aria-hidden />} role="status">
+        <Callout tone="neutral" icon={<Info aria-hidden />} role="status">
           {p('paused')}
         </Callout>
       )}

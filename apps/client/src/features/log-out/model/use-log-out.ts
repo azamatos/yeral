@@ -27,7 +27,7 @@ export function useLogOut({ onDone }: { onDone?: () => void } = {}) {
           onDone?.()
           void router.invalidate()
         },
-        onError: (error) => void toast(errorText(error)),
+        onError: (error) => void toast.error(errorText(error)),
       })
     },
     loggingOut,

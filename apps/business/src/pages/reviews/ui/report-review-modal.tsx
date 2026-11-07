@@ -45,7 +45,7 @@ export function ReportReviewModal({ slug, review: r, onClose }: { slug: string; 
           onClose()
         },
         onError: (error) => {
-          toast(errorText(error))
+          toast.error(errorText(error))
           // someone reported it meanwhile: the list (refreshed by the sdk) says so now
           if (isApiError(error, 'already_reported')) onClose()
         },

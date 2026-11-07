@@ -134,7 +134,6 @@ export function WherePanel({
       {located.denied && (
         <Callout
           tone="accent"
-          size="s"
           icon={<MapPinOff aria-hidden />}
           title={t('locationOff')}
           className={cn('flex-none', touch ? 'mx-4 mt-3 mb-1' : 'm-0.5 mb-1.5')}

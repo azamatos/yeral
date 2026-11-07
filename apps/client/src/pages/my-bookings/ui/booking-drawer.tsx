@@ -199,7 +199,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
         },
         onError: (error) => {
           reread()
-          toast(errorText(error))
+          toast.error(errorText(error))
         },
       },
     )
@@ -263,7 +263,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
     )
   if (late)
     footer.push(
-      <Callout key="late" tone="neutral" size="s" icon={<Info />} className="basis-full">
+      <Callout key="late" tone="neutral" icon={<Info />} className="basis-full">
         {t('lateCall')}
       </Callout>,
       <Button key="call" asChild variant="secondary">
@@ -393,7 +393,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
                     onSuccess: () => toast(t('withdrawn')),
                     onError: (error) => {
                       reread()
-                      toast(errorText(error))
+                      toast.error(errorText(error))
                     },
                   },
                 )
@@ -405,7 +405,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
         )}
 
         {b.moveRefused && (
-          <Callout tone="neutral" size="s" icon={<Info />}>
+          <Callout tone="neutral" icon={<Info />}>
             <span className="flex flex-col gap-0.5">
               {t('moveRefused')}
               {b.moveRefused.reason && (

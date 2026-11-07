@@ -31,7 +31,6 @@ export function LocationBanner({
       <>
         <Callout
           tone="neutral"
-          size="s"
           icon={<MapPinOff aria-hidden />}
           className={className}
           action={
@@ -49,7 +48,6 @@ export function LocationBanner({
   return (
     <Callout
       tone="neutral"
-      size="s"
       icon={<LocateFixed aria-hidden />}
       title={t('title')}
       className={className}

@@ -1,37 +1,46 @@
 import { cva, type VariantProps } from 'class-variance-authority'
+import { CircleAlert, CircleCheck, Info, TriangleAlert } from 'lucide-react'
 import type { ComponentProps, ElementType, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
-const callout = cva('flex text-small text-n-900 [&_b]:font-semibold [&_strong]:font-semibold', {
+const callout = cva('flex text-small [&_b]:font-semibold [&_b]:text-n-900 [&_strong]:font-semibold [&_strong]:text-n-900', {
   variants: {
-    // the icon keeps a colour of its own on the two inky tones; the others draw it in the text colour
+    // one tone for the line, the fill and the icon (DS-Lists A10); the title is always ink and the body n-600
     tone: {
-      // neutral: a quiet note on the group grey, no line (B-Settings .note, Account .dnote win over the bordered drafts)
-      neutral: 'border-transparent bg-group [&>[data-callout-icon]]:text-n-600',
+      neutral: 'border-n-200 bg-n-50 [&>[data-callout-icon]]:text-n-600',
+      // «Info» on the board: violet
       accent: 'border-a-line bg-a-50 [&>[data-callout-icon]]:text-a-600',
-      warning: 'border-st-pending-line bg-st-pending-bg text-st-pending-ink',
-      danger: 'border-danger-line bg-error-tint text-danger-ink',
-      success: 'border-st-completed-line bg-st-completed-bg text-st-completed-ink',
-      slate: 'border-st-cancelled-line bg-st-cancelled-bg text-st-cancelled-ink',
+      success: 'border-st-completed-line bg-st-completed-bg [&>[data-callout-icon]]:text-st-completed-ink',
+      warning: 'border-st-pending-line bg-st-pending-bg [&>[data-callout-icon]]:text-st-pending-ink',
+      danger: 'border-danger-line bg-error-tint [&>[data-callout-icon]]:text-danger-ink',
     },
     size: {
-      m: "gap-3 px-4 py-3.5 [&_[data-callout-icon]_svg:not([class*='size-'])]:size-5",
-      s: "gap-2.5 px-3.5 py-3 [&_[data-callout-icon]_svg:not([class*='size-'])]:size-4.5",
+      m: "items-start gap-3 px-4 py-3.5 text-n-600 [&_[data-callout-icon]_svg:not([class*='size-'])]:size-5",
+      // 40 high, one line 13/18 500 ink that truncates rather than wraps: the booking summary, a drawer, a 390 step
+      compact: "h-10 items-center gap-2 px-3 text-dense font-medium text-n-900 [&_[data-callout-icon]_svg:not([class*='size-'])]:size-4",
     },
     layout: {
-      box: 'items-start rounded-ctl-l border',
+      box: 'rounded-ctl-l border',
       // full bleed above the page header: the tone's line only at the bottom, no radius, no dismiss
-      banner: 'items-start border-b px-6 py-3',
+      banner: 'border-b px-6 py-3',
     },
-    // one short action on the right: the row centres on it and the icon drops its 1px nudge
-    inline: { true: 'items-center [&>[data-callout-icon]]:mt-0' },
+    // one short action on the right: the row centres on it
+    inline: { true: 'items-center' },
   },
-  // a neutral banner has no tinted line of its own: it takes the page's divider
-  compoundVariants: [{ layout: 'banner', tone: 'neutral', class: 'border-n-200' }],
+  compoundVariants: [{ size: 'compact', layout: 'box', class: 'rounded-ctl-m' }],
   defaultVariants: { size: 'm' },
 })
 
 export type CalloutTone = NonNullable<VariantProps<typeof callout>['tone']>
+
+/** The icon each tone draws when the screen names none (DS-Lists A10): info, check, triangle, circle alert. */
+const TONE_ICON: Record<CalloutTone, ReactNode> = {
+  neutral: <Info />,
+  accent: <Info />,
+  success: <CircleCheck />,
+  warning: <TriangleAlert />,
+  danger: <CircleAlert />,
+}
 
 export type CalloutProps = Omit<ComponentProps<'div'>, 'title'> &
   Omit<VariantProps<typeof callout>, 'layout' | 'inline'> & {
@@ -42,13 +51,16 @@ export type CalloutProps = Omit<ComponentProps<'div'>, 'title'> &
      * `tone`, `size` and `action`; `banner` is always M.
      */
     layout?: 'box' | 'banner' | 'card'
-    /** Lucide icon, 20 (M, banner), 18 (S) or 22 in the card's tile. No icon, no space for one. */
+    /**
+     * Lucide icon, 20 (M, banner), 16 (compact) or 22 in the card's tile, drawn in the tone's ink. Left out, the tone
+     * draws its own (the board's «Bookings are confirmed at once» is Info with a zap); `null` for a text-only note.
+     */
     icon?: ReactNode
-    /** A line in 600 above the text («18 min left to answer»). For a bold start inside the sentence, put `<b>` in the children. */
+    /** A line in 600 ink above the body («18 min left to answer»). For a bold start inside the sentence, put `<b>` in the children. */
     title?: ReactNode
     /** The element the title renders as: a heading level that fits the page (the card is drawn with an `h3`). */
     titleAs?: ElementType
-    /** S buttons or links under the text (the card stacks them full width). */
+    /** Secondary S buttons or links under the body, 8 apart (the card stacks them full width). */
     actions?: ReactNode
     /** One short action on the right of a one-line callout (S button «Allow»); the row centres on it. */
     action?: ReactNode
@@ -57,18 +69,19 @@ export type CalloutProps = Omit<ComponentProps<'div'>, 'title'> &
     /**
      * The callout appeared or changed in answer to something (a failed load, a saved switch, a waiting request):
      * screen readers hear it — danger as `role="alert"`, every other tone (and the card) as `role="status"`. Static
-     * notes stay silent (`live={false}` for a static danger note). Defaults follow the board: on for danger and the
-     * banner, off for the rest. A status is heard most reliably when it changes while mounted, so a screen that must
-     * be heard keeps the Callout on screen and swaps its children.
+     * notes are `role="note"` as the board draws them (`live={false}` for a static danger note). Defaults follow the
+     * board: on for danger and the banner, off for the rest. A status is heard most reliably when it changes while
+     * mounted, so a screen that must be heard keeps the Callout on screen and swaps its children.
      */
     live?: boolean
   }
 
 /**
- * Callout — DS-Patterns → 02 Feedback → «Callout · tones, sizes, actions». A tinted note in the flow (`box`), a page
- * banner, or a calm info card. Six tones: neutral (notes), accent (tips), warning (pending, time running out), danger
- * (errors), success (it worked), slate (something cancelled). No dismiss: no screen closes a callout. Every word comes
- * in as props.
+ * Callout — DS-Lists → 05 Callouts (A10): a 1 px line, a soft fill and an icon in one tone; the title ink 600, the
+ * body n-600. Five tones: neutral (notes), accent = Info (violet: tips, «Bookings are confirmed at once»), success (it
+ * worked), warning (in review, time running out), danger (hidden, failed). Sizes M (pad 14 16, icon 20) and compact
+ * (40 high, one line). A page `banner` and the calm info `card` keep their older boards. No close button: a callout
+ * stays while its fact is true. Every word comes in as props.
  */
 export function Callout({
   tone,
@@ -123,24 +136,38 @@ export function Callout({
   }
 
   const isLive = live ?? (t === 'danger' || layout === 'banner')
+  const role = isLive ? (t === 'danger' ? 'alert' : 'status') : 'note'
+  const drawnIcon = icon === undefined ? TONE_ICON[t] : icon
+  const iconSlot = drawnIcon ? (
+    <span data-callout-icon aria-hidden className="flex flex-none">
+      {drawnIcon}
+    </span>
+  ) : null
+
+  if (size === 'compact' && layout === 'box') {
+    return (
+      <div role={role} {...props} className={cn(callout({ tone: t, size, layout }), className)}>
+        {iconSlot}
+        <span className="min-w-0 flex-1 truncate">{children ?? title}</span>
+        {action && <span className="flex flex-none">{action}</span>}
+      </div>
+    )
+  }
+
   const Title = titleAs ?? 'p'
   return (
     <div
-      role={isLive ? (t === 'danger' ? 'alert' : 'status') : undefined}
+      role={role}
       {...props}
       className={cn(
         // the banner is always drawn at M (pad 12 24, icon 20)
-        callout({ tone: t, size: layout === 'banner' ? 'm' : size, layout, inline: Boolean(action) }),
+        callout({ tone: t, size: 'm', layout, inline: Boolean(action) }),
         className,
       )}
     >
-      {icon && (
-        <span data-callout-icon aria-hidden className="mt-px flex flex-none">
-          {icon}
-        </span>
-      )}
+      {iconSlot}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        {title && <Title className="font-semibold">{title}</Title>}
+        {title && <Title className="font-semibold text-n-900">{title}</Title>}
         {children && <div>{children}</div>}
         {actions && <div className="flex flex-wrap gap-2 pt-2">{actions}</div>}
       </div>

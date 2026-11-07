@@ -95,7 +95,7 @@ function Profile({ me }: { me: Me }) {
           // Save went with the save bar: the focus goes back to the name
           if (!document.activeElement || document.activeElement === document.body) firstRef.current?.focus()
         },
-        onError: (error) => void toast(errorText(error)),
+        onError: (error) => void toast.error(errorText(error)),
       },
     )
   }

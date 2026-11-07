@@ -307,7 +307,7 @@ export function MovePage() {
           if (moveRefusal(error, staff)) return
           // cancelled meanwhile, its free change time over: what the booking is now decides
           void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(code, lang).queryKey })
-          toast(errorText(error))
+          toast.error(errorText(error))
         },
       },
     )

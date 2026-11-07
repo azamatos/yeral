@@ -45,14 +45,14 @@ export function ChangePhoneBox({
     },
     onFailed: (error) => {
       if (isApiError(error, 'phone_change_unavailable')) {
-        toast(errorText(error))
+        toast.error(errorText(error))
         onUnavailable()
       } else if (isApiError(error, 'phone_taken')) {
         // taken meanwhile (at the code): back to the number, which says so
         const phone = steps.state.sentTo ?? steps.state.phone
         if (steps.state.step === 'code') steps.changeNumber()
         setRefused({ phone, why: 'taken' })
-      } else toast(errorText(error))
+      } else toast.error(errorText(error))
     },
   })
   const { state } = steps

@@ -333,7 +333,7 @@ export function SignInCodeStep({
       ) : (
         <>
           {!sms && shownCode && !blocked && (
-            <Callout size="s" live className="items-center text-body">
+            <Callout icon={null} live className="items-center text-body">
               {copy.yourCode} <b className="ml-1 text-[17px] leading-[22px] font-semibold tracking-[0.08em]">{shownCode}</b>
             </Callout>
           )}

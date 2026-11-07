@@ -282,7 +282,7 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
         },
         onError: (error) => {
           setPicked(null)
-          toast(errorText(error))
+          toast.error(errorText(error))
         },
       },
     )

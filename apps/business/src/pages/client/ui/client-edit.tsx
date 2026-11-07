@@ -52,7 +52,7 @@ export function ClientEdit({ slug, card, today, onDone }: { slug: string; card: 
           toast(t('saved'))
           onDone()
         },
-        onError: (error) => toast(errorText(error)),
+        onError: (error) => toast.error(errorText(error)),
       },
     )
   }

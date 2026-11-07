@@ -77,7 +77,7 @@ export function AddStatusModal({
           setForm(BLANK)
         },
         // another tab took the name meanwhile
-        onError: (error) => (isApiError(error, 'validation_error') ? setRefused(name) : toast(errorText(error))),
+        onError: (error) => (isApiError(error, 'validation_error') ? setRefused(name) : toast.error(errorText(error))),
       },
     )
   }
