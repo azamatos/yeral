@@ -1,6 +1,6 @@
 /**
- * FilterBar — DS-Lists A5 (Rest, Searching, Active, SingleMenu, MultiAtScale, Sort, Disabled, Phone, PhoneSheet):
- * one bar for every list. Stories are the component's tests.
+ * FilterBar — DS-Lists A5 (Rest, Searching, Active, SingleMenu, MultiAtScale, Sort, Disabled, DisabledHint, PlainDefault,
+ * SearchedElsewhere, Phone, PhoneSheet): one bar for every list. Stories are the component's tests.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Plus } from 'lucide-react'
@@ -76,17 +76,46 @@ const sorts = [
   { value: 'booked', label: 'Booked, newest first' },
 ]
 
-type State = { q: string; staff: string | null; services: string[]; status: string[]; sort: string }
+type State = { q: string; staff: string | null; services: string[]; status: string[]; sort: string; distance: string | null }
 
-function Harness({ initial, disabled }: { initial?: Partial<State>; disabled?: boolean }) {
-  const [s, setS] = useState<State>({ q: '', staff: null, services: [], status: [], sort: 'soonest', ...initial })
+function Harness({
+  initial,
+  disabled,
+  disabledHint,
+  distance,
+  searched,
+}: {
+  initial?: Partial<State>
+  disabled?: boolean
+  /** Why Specialist is off: a tooltip instead of a dead button. */
+  disabledHint?: string
+  /** A Distance filter whose «Within 5 km» is the plain default. */
+  distance?: boolean
+  /** The query lives in a header bar: the count shows with nothing chosen. */
+  searched?: boolean
+}) {
+  const [s, setS] = useState<State>({ q: '', staff: null, services: [], status: [], sort: 'soonest', distance: null, ...initial })
   const set = (patch: Partial<State>) => setS((prev) => ({ ...prev, ...patch }))
   const shown = Math.max(0, 214 - s.services.length * 40 - (s.staff ? 120 : 0) - s.status.length * 20 - s.q.length * 50)
   return (
     <FilterBar
       labels={labels}
-      search={{ value: s.q, onChange: (q) => set({ q }), placeholder: 'Client, phone or booking code' }}
+      search={searched ? undefined : { value: s.q, onChange: (q) => set({ q }), placeholder: 'Client, phone or booking code' }}
+      searched={searched}
       filters={[
+        ...(distance
+          ? [
+              {
+                id: 'distance',
+                label: 'Distance',
+                plain: '5',
+                options: [1, 3, 5, 10, 25].map((km) => ({ value: String(km), label: `Within ${km} km` })),
+                value: s.distance,
+                onValueChange: (v: string | null) => set({ distance: v }),
+                chip: (o: { label: string }) => `Distance: ${o.label.replace('Within ', '')}`,
+              },
+            ]
+          : []),
         {
           id: 'staff',
           label: 'Specialist',
@@ -95,6 +124,7 @@ function Harness({ initial, disabled }: { initial?: Partial<State>; disabled?: b
           value: s.staff,
           onValueChange: (staff) => set({ staff }),
           disabled,
+          disabledHint,
         },
         {
           id: 'service',
@@ -212,6 +242,47 @@ export const Disabled: Story = {
   args: { disabled: true },
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('combobox', { name: 'Specialist' })).toBeDisabled()
+  },
+}
+
+/** Off with a reason: the button keeps focus for its tooltip, looks disabled and opens nothing. */
+export const DisabledHint: Story = {
+  args: { disabled: true, disabledHint: 'Pick a service first' },
+  play: async ({ canvas }) => {
+    const specialist = canvas.getByRole('combobox', { name: 'Specialist' })
+    await expect(specialist).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.hover(specialist)
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent('Pick a service first')
+    await userEvent.click(specialist)
+    await expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  },
+}
+
+/** A plain default: «Within 5 km» is checked with nothing chosen and no «Anyone» row; another radius tints and chips; the default clears. */
+export const PlainDefault: Story = {
+  args: { distance: true },
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Distance' }))
+    const list = await screen.findByRole('listbox')
+    await expect(within(list).queryByRole('option', { name: /Anyone/ })).not.toBeInTheDocument()
+    await expect(within(list).getByRole('option', { name: /Within 5 km/ })).toHaveAttribute('aria-selected', 'true')
+    await userEvent.click(within(list).getByRole('option', { name: /Within 10 km/ }))
+    await expect(canvas.getByRole('combobox', { name: 'Distance · Within 10 km' })).toBeVisible()
+    await expect(canvas.getByText('Distance: 10 km')).toBeVisible()
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Distance · Within 10 km' }))
+    await userEvent.click(within(await screen.findByRole('listbox')).getByRole('option', { name: /Within 5 km/ }))
+    await expect(canvas.getByRole('combobox', { name: 'Distance' })).toBeVisible()
+    await expect(canvas.queryByText(/Distance: /)).not.toBeInTheDocument()
+  },
+}
+
+/** The query lives in a header bar (client search): the count shows on row 2 with nothing chosen, Clear all only with chips. */
+export const SearchedElsewhere: Story = {
+  args: { searched: true },
+  play: async ({ canvas }) => {
+    await expect(canvas.queryByRole('textbox')).not.toBeInTheDocument()
+    await expect(canvas.getByText('214 of 214 bookings')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Clear all' })).not.toBeInTheDocument()
   },
 }
 

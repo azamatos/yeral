@@ -219,8 +219,6 @@
     "box": "Service, place or specialist",
     "categories": "Categories",
     "all": "All",
-    "filtersButton": "Filters",
-    "filtersOn": "Filters: {n}",
     "day": "Which day",
     "sort": "Sort",
     "near": "Places near you",
@@ -229,7 +227,8 @@
     "count": {
       "today": "{n, plural, one {# place} other {# places}} · free time today",
       "tomorrow": "{n, plural, one {# place} other {# places}} · free time tomorrow",
-      "week": "{n, plural, one {# place} other {# places}} · free time this week"
+      "week": "{n, plural, one {# place} other {# places}} · free time this week",
+      "date": "{n, plural, one {# place} other {# places}} · free time on {date}"
     },
     "days": {
       "today": "Today",
@@ -237,17 +236,15 @@
       "week": "This week"
     },
     "sorts": {
+      "recommended": "Recommended",
       "distance": "Nearest",
-      "popular": "Most popular",
       "rating": "Rating",
-      "price": "Price"
+      "price": "Price, lowest first"
     },
     "nothing": "No free time here",
     "nothingHint": "Widen the area, pick another day or clear the filters.",
     "tryTomorrow": "Try tomorrow",
     "widen": "Make it {km} km",
-    "radius": "How far",
-    "km": "{km} km",
     "clearFilters": "Clear filters",
     "showMore": "Show more",
     "map": {
@@ -259,15 +256,33 @@
       "here": "Search this area"
     },
     "filters": {
-      "title": "Filters",
-      "close": "Close",
-      "from": "Price from",
-      "to": "Price to",
-      "rating": "Rating 4.5+",
-      "openNow": "Open now",
-      "women": "Women only",
+      "filters": "Filters",
+      "clearAll": "Clear all",
       "clear": "Clear",
-      "apply": "Show results"
+      "close": "Close",
+      "back": "Back",
+      "showResults": "{n, plural, one {Show # place} other {Show # places}}",
+      "searchIn": "Search",
+      "remove": "Remove {chip}",
+      "nothingMatches": "Nothing matches “{q}”",
+      "chip": "{filter}: {value}",
+      "distance": "Distance",
+      "within": "Within {km} km",
+      "km": "{km} km",
+      "needsLocation": "Turn on location to filter by distance",
+      "rating": "Rating",
+      "anyRating": "Any rating",
+      "ratingFrom": "{r}+",
+      "price": "Price",
+      "anyPrice": "Any price",
+      "upTo": "Up to {price}",
+      "between": "{from}–{to}",
+      "andUp": "{price} and up",
+      "openNow": "Open now",
+      "anyOpen": "Open or closed",
+      "women": "Women only",
+      "everyone": "Everyone",
+      "yes": "Yes"
     }
   },
   "notFound": {

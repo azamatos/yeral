@@ -6,6 +6,7 @@ import { Button } from '../button'
 import { CountBadge } from '../count-badge'
 import { Drawer, DrawerContent } from '../drawer'
 import { Input } from '../input'
+import { Tooltip } from '../tooltip'
 import {
   flatOptions,
   MultiSelect,
@@ -45,17 +46,30 @@ type FilterCommon = {
   label: string
   options: readonly SelectEntry[]
   disabled?: boolean
+  /**
+   * Why a single filter is off («Turn on location to filter by distance»): a tooltip on the button, which stays
+   * focusable, and a line in the sheet instead of its options.
+   */
+  disabledHint?: string
   /** A chip's words for a chosen option; «Specialist: Jeren» without it. */
   chip?: (option: SelectOption) => string
   /** A single filter's trigger words for the chosen option («Upcoming booking · Yes»); its label without it. */
   short?: (option: SelectOption) => string
 }
 
-export type FilterDef = FilterCommon &
-  (
-    | { multiple?: false; value: string | null; onValueChange: (value: string | null) => void; anyLabel: string }
-    | { multiple: true; value: readonly string[]; onValueChange: (value: string[]) => void }
+type SingleDef = FilterCommon & { multiple?: false; value: string | null; onValueChange: (value: string | null) => void } & (
+    | { /** «Anyone»: the row that clears the filter. */ anyLabel: string; plain?: undefined }
+    | {
+        /**
+         * The option that means nothing is filtered (Distance · Within 5 km): checked while the value is null, the
+         * trigger stays plain, no chip, no «Anyone» row; picking it gives null.
+         */
+        plain: string
+        anyLabel?: undefined
+      }
   )
+
+export type FilterDef = SingleDef | (FilterCommon & { multiple: true; value: readonly string[]; onValueChange: (value: string[]) => void })
 
 export type SortDef = {
   /** «Sort»: the trigger reads «Sort: Time, soonest first». */
@@ -73,6 +87,8 @@ export type FilterBarProps = {
   action?: ReactNode
   /** «24 of 100 clients»: row 2 while something is filtered or searched, and beside Filters under 768. */
   count?: ReactNode
+  /** The list is searched by a field outside the bar (a header query bar): row 2 shows the count as with the bar's own search. */
+  searched?: boolean
   labels: FilterBarLabels
   /** Clear all in one go (one address change); without it each filter and the search clear one by one. */
   onClearAll?: () => void
@@ -82,15 +98,22 @@ export type FilterBarProps = {
 /** The filter-button look (DS-Lists A5 `.fb`): the Select trigger, 500, tinted while active. */
 const buttonClass = cn(selectTriggerClass, selectTriggerSize.m, 'w-auto flex-none font-medium whitespace-nowrap')
 const activeClass = 'border-a-line bg-a-50 text-a-600 hover:border-a-200 [&>svg]:text-a-600'
+/** Off but focusable (it carries a tooltip): the disabled look by `aria-disabled`. */
+const offClass =
+  'aria-disabled:cursor-not-allowed aria-disabled:border-n-200 aria-disabled:bg-n-50 aria-disabled:text-n-400 aria-disabled:hover:border-n-200 aria-disabled:[&>svg]:text-n-400'
 
-const chosen = (f: FilterDef) => (f.multiple ? f.value.length : f.value ? 1 : 0)
-const optionsOf = (f: FilterDef) => (f.multiple ? f.options : [{ value: ANY, label: f.anyLabel }, ...f.options])
+/** A single filter's chosen value; its plain option counts as none. */
+const singleValue = (f: SingleDef) => (f.value && f.value !== f.plain ? f.value : null)
+const chosen = (f: FilterDef) => (f.multiple ? f.value.length : singleValue(f) ? 1 : 0)
+const optionsOf = (f: FilterDef) => (f.multiple || f.plain !== undefined ? f.options : [{ value: ANY, label: f.anyLabel }, ...f.options])
+/** The rows checked in a menu: the values, or the plain / «Anyone» row while nothing is chosen. */
+const pickedOf = (f: FilterDef) => new Set(f.multiple ? f.value : [singleValue(f) ?? f.plain ?? ANY])
 
 /** The active chips: one per chosen value, in the filters' order. */
 function chipsOf(filters: readonly FilterDef[]) {
   return filters.flatMap((f) => {
     const all = flatOptions(f.options)
-    const values = f.multiple ? f.value : f.value ? [f.value] : []
+    const values = f.multiple ? f.value : singleValue(f) ? [f.value!] : []
     return values.flatMap((v) => {
       const option = all.find((o) => o.value === v)
       if (!option) return []
@@ -102,16 +125,19 @@ function chipsOf(filters: readonly FilterDef[]) {
 
 function pickIn(f: FilterDef, next: string) {
   if (f.multiple) f.onValueChange(f.value.includes(next) ? f.value.filter((v) => v !== next) : [...f.value, next])
-  else f.onValueChange(next === ANY ? null : next)
+  else f.onValueChange(next === ANY || next === f.plain ? null : next)
 }
 
 /** One filter's single menu (DS-Lists A5 FilterButton · single): «Specialist», «Specialist · Jeren» while active. */
-function SingleFilter({ filter, labels }: { filter: Extract<FilterDef, { multiple?: false }>; labels: FilterBarLabels }) {
+function SingleFilter({ filter, labels }: { filter: SingleDef; labels: FilterBarLabels }) {
   const [open, setOpen] = useState(false)
   const sheet = useSheet()
-  const current = filter.value ? flatOptions(filter.options).find((o) => o.value === filter.value) : undefined
+  const value = singleValue(filter)
+  const current = value ? flatOptions(filter.options).find((o) => o.value === value) : undefined
   const currentLabel = current && (filter.short?.(current) ?? current.label)
   const options = optionsOf(filter)
+  // off with a reason: the button keeps hover and focus for its tooltip and opens nothing
+  const hinted = !!filter.disabled && !!filter.disabledHint
   const trigger = (
     <button
       type="button"
@@ -119,9 +145,10 @@ function SingleFilter({ filter, labels }: { filter: Extract<FilterDef, { multipl
       aria-haspopup="listbox"
       aria-expanded={open}
       aria-label={current ? `${filter.label} · ${currentLabel}` : filter.label}
-      disabled={filter.disabled}
+      disabled={filter.disabled && !hinted}
+      aria-disabled={hinted || undefined}
       data-state={open ? 'open' : 'closed'}
-      className={cn(buttonClass, current && activeClass)}
+      className={cn(buttonClass, current && activeClass, hinted && offClass)}
     >
       <span className="truncate">
         {filter.label}
@@ -135,6 +162,12 @@ function SingleFilter({ filter, labels }: { filter: Extract<FilterDef, { multipl
       <ChevronDown aria-hidden strokeWidth={1.75} className="transition-transform group-data-[state=open]:rotate-180" />
     </button>
   )
+  if (hinted)
+    return (
+      <Tooltip content={filter.disabledHint} side="bottom">
+        {trigger}
+      </Tooltip>
+    )
   return (
     <SelectLayer
       open={open}
@@ -147,7 +180,7 @@ function SingleFilter({ filter, labels }: { filter: Extract<FilterDef, { multipl
     >
       <OptionList
         options={options}
-        picked={new Set([filter.value ?? ANY])}
+        picked={pickedOf(filter)}
         onPick={(next) => {
           pickIn(filter, next)
           setOpen(false)
@@ -272,7 +305,9 @@ function FiltersSheet({
     const all = flatOptions(f.options)
     if (f.multiple)
       return f.value.length === 1 ? all.find((o) => o.value === f.value[0])?.label : f.value.length ? String(f.value.length) : ''
-    return f.value ? all.find((o) => o.value === f.value)?.label : f.anyLabel
+    if (f.disabled && f.disabledHint) return f.disabledHint
+    const value = singleValue(f)
+    return value ? all.find((o) => o.value === value)?.label : (f.anyLabel ?? all.find((o) => o.value === f.plain)?.label)
   }
   return (
     <Drawer
@@ -308,7 +343,7 @@ function FiltersSheet({
           <OptionList
             multi={!!inner.multiple}
             options={optionsOf(inner)}
-            picked={new Set(inner.multiple ? inner.value : [inner.value ?? ANY])}
+            picked={pickedOf(inner)}
             onPick={(next) => {
               pickIn(inner, next)
               if (!inner.multiple) setDrill(null)
@@ -339,15 +374,19 @@ function FiltersSheet({
                   ) : (
                     <>
                       <h3 className="m-0 px-4 pt-3 text-label text-n-500 uppercase">{f.label}</h3>
-                      <OptionList
-                        multi={!!f.multiple}
-                        options={optionsOf(f)}
-                        picked={new Set(f.multiple ? f.value : [f.value ?? ANY])}
-                        onPick={(next) => pickIn(f, next)}
-                        sheet
-                        searchable={false}
-                        label={f.label}
-                      />
+                      {f.disabled ? (
+                        <p className="m-0 px-4 pt-1 pb-3 text-small text-n-500">{f.disabledHint}</p>
+                      ) : (
+                        <OptionList
+                          multi={!!f.multiple}
+                          options={optionsOf(f)}
+                          picked={pickedOf(f)}
+                          onPick={(next) => pickIn(f, next)}
+                          sheet
+                          searchable={false}
+                          label={f.label}
+                        />
+                      )}
                     </>
                   )}
                 </section>
@@ -377,7 +416,17 @@ function FiltersSheet({
  * under them; the Filters sheet holds the same menus; the main action is the page's own there (A5 draws none in the
  * row). Fully controlled: the page keeps the values (its URL).
  */
-export function FilterBar({ search, filters, sort, action, count, labels, onClearAll, className }: FilterBarProps) {
+export function FilterBar({
+  search,
+  filters,
+  sort,
+  action,
+  count,
+  searched: searchedElsewhere,
+  labels,
+  onClearAll,
+  className,
+}: FilterBarProps) {
   const phone = useSheet()
   const [sheetOpen, setSheetOpen] = useState(false)
   const chips = chipsOf(filters)
@@ -388,7 +437,7 @@ export function FilterBar({ search, filters, sort, action, count, labels, onClea
       filters.forEach((f) => (f.multiple ? f.onValueChange([]) : f.onValueChange(null)))
       search?.onChange('')
     })
-  const searched = !!search?.value.trim()
+  const searched = !!search?.value.trim() || !!searchedElsewhere
   const searchField = search && (
     <div className={cn('relative min-w-0', phone ? 'w-full' : 'w-72 flex-none')}>
       <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 text-n-500" strokeWidth={1.75} />
@@ -441,7 +490,7 @@ export function FilterBar({ search, filters, sort, action, count, labels, onClea
         {sort && <SortMenu sort={sort} labels={labels} />}
         {action}
       </div>
-      {(chips.length > 0 || searched) && (
+      {(chips.length > 0 || (searched && count != null)) && (
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           {chipRow}
           {chips.length > 0 && (
