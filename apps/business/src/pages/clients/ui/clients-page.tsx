@@ -16,6 +16,7 @@ import {
   Table,
   TableCell,
   TableColumnHeader,
+  TableFrame,
   TableHeader,
   TableIconAction,
   TableRow,
@@ -36,8 +37,8 @@ import type { ClientsSearch } from '../model/search'
 import { AddClientModal } from './add-client-modal'
 
 // DS-Lists A6 `.tr`: Name · Phone · Tags · Visits · Last visit · Total · Next booking · one icon (cells pad 8 each side)
-const COLUMNS = 'minmax(180px,1.6fr) 192px minmax(120px,1.4fr) 80px 112px 128px 168px 48px'
-const NO_TOTAL = 'minmax(180px,1.6fr) 192px minmax(120px,1.4fr) 80px 112px 168px 48px'
+const COLUMNS = 'minmax(160px,1.3fr) 184px minmax(184px,1.5fr) 72px 112px 112px 160px 48px'
+const NO_TOTAL = 'minmax(160px,1.3fr) 184px minmax(184px,1.5fr) 72px 112px 160px 48px'
 
 /**
  * The clients list (B7-Clients B5, DS-Lists A6): the search, the segment chips with their counts, one line per client —
@@ -204,65 +205,67 @@ function Clients({ slug }: { slug: string }) {
             ))}
           </ul>
         ) : (
-          <Table columns={seesTotal ? COLUMNS : NO_TOTAL} aria-label={t('table')}>
-            <TableHeader>
-              {sortHeader('name', t('columns.name'))}
-              <TableColumnHeader>{t('columns.phone')}</TableColumnHeader>
-              <TableColumnHeader>{t('columns.tags')}</TableColumnHeader>
-              {sortHeader('visits', t('columns.visits'), true)}
-              {sortHeader('lastVisit', t('columns.last'))}
-              {seesTotal && sortHeader('total', t('columns.total'), true)}
-              {sortHeader('nextBooking', t('columns.next'))}
-              <TableColumnHeader>
-                <span className="sr-only">{t('columns.actions')}</span>
-              </TableColumnHeader>
-            </TableHeader>
-            {rows.map((r) => (
-              <TableRow key={r.id} className="h-14 min-h-0">
-                <TableCell className="py-0">
-                  <TableRowLink asChild>
-                    <Link to="/w/$slug/clients/$id" params={{ slug, id: r.id }}>
-                      <TruncatedText>{name(r)}</TruncatedText>
-                    </Link>
-                  </TableRowLink>
-                </TableCell>
-                <TableCell className="flex-row items-center gap-1 py-0">
-                  {r.phone ? (
-                    <>
-                      <span className="whitespace-nowrap">{fmt.phone(r.phone)}</span>
-                      <TableIconAction label={t('copy')} onClick={() => copy(r.phone!)}>
-                        <Copy aria-hidden />
-                      </TableIconAction>
-                    </>
-                  ) : (
-                    <CellNote>{t('noNumber')}</CellNote>
-                  )}
-                </TableCell>
-                <TableCell className="py-0">
-                  <TableTags moreLabel={(count) => t('moreTags', { count })}>
-                    {tagChips({ phoneOnly: r.phoneOnly, segments: r.segments, tags: r.tags })}
-                  </TableTags>
-                </TableCell>
-                <TableCell numeric className="py-0">
-                  {fmt.number(r.visits)}
-                </TableCell>
-                <TableCell className="py-0">{last(r)}</TableCell>
-                {seesTotal && (
-                  <TableCell numeric className="py-0">
-                    {r.total !== null ? fmt.money(r.total) : ''}
+          <TableFrame className="rounded-m">
+            <Table columns={seesTotal ? COLUMNS : NO_TOTAL} aria-label={t('table')}>
+              <TableHeader>
+                {sortHeader('name', t('columns.name'))}
+                <TableColumnHeader>{t('columns.phone')}</TableColumnHeader>
+                <TableColumnHeader>{t('columns.tags')}</TableColumnHeader>
+                {sortHeader('visits', t('columns.visits'), true)}
+                {sortHeader('lastVisit', t('columns.last'))}
+                {seesTotal && sortHeader('total', t('columns.total'), true)}
+                {sortHeader('nextBooking', t('columns.next'))}
+                <TableColumnHeader>
+                  <span className="sr-only">{t('columns.actions')}</span>
+                </TableColumnHeader>
+              </TableHeader>
+              {rows.map((r) => (
+                <TableRow key={r.id} className="h-14 min-h-0">
+                  <TableCell className="py-0">
+                    <TableRowLink asChild>
+                      <Link to="/w/$slug/clients/$id" params={{ slug, id: r.id }}>
+                        <TruncatedText>{name(r)}</TruncatedText>
+                      </Link>
+                    </TableRowLink>
                   </TableCell>
-                )}
-                <TableCell className="py-0">
-                  <TruncatedText>{next(r)}</TruncatedText>
-                </TableCell>
-                <TableCell className="py-0">
-                  <TableIconAction label={t('bookFor', { name: name(r) })} onClick={() => book(r.id)}>
-                    <CalendarPlus aria-hidden />
-                  </TableIconAction>
-                </TableCell>
-              </TableRow>
-            ))}
-          </Table>
+                  <TableCell className="flex-row items-center gap-1 py-0">
+                    {r.phone ? (
+                      <>
+                        <span className="whitespace-nowrap">{fmt.phone(r.phone)}</span>
+                        <TableIconAction label={t('copy')} onClick={() => copy(r.phone!)}>
+                          <Copy aria-hidden />
+                        </TableIconAction>
+                      </>
+                    ) : (
+                      <CellNote>{t('noNumber')}</CellNote>
+                    )}
+                  </TableCell>
+                  <TableCell className="py-0">
+                    <TableTags moreLabel={(count) => t('moreTags', { count })}>
+                      {tagChips({ phoneOnly: r.phoneOnly, segments: r.segments, tags: r.tags })}
+                    </TableTags>
+                  </TableCell>
+                  <TableCell numeric className="py-0">
+                    {fmt.number(r.visits)}
+                  </TableCell>
+                  <TableCell className="py-0">{last(r)}</TableCell>
+                  {seesTotal && (
+                    <TableCell numeric className="py-0">
+                      {r.total !== null ? fmt.money(r.total) : ''}
+                    </TableCell>
+                  )}
+                  <TableCell className="py-0">
+                    <TruncatedText>{next(r)}</TruncatedText>
+                  </TableCell>
+                  <TableCell className="py-0">
+                    <TableIconAction label={t('bookFor', { name: name(r) })} onClick={() => book(r.id)}>
+                      <CalendarPlus aria-hidden />
+                    </TableIconAction>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </Table>
+          </TableFrame>
         )}
         {list.hasNextPage && (
           <Button variant="secondary" className="self-center" loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>
