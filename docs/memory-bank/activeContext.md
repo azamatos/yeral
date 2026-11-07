@@ -4,23 +4,19 @@ _Last updated: 2026-11-07_ · the current state only; the history by day is in `
 
 ## Current focus
 
-**2026-11-06/07: the owner's review of the live platform (51 problems, 4 ideas) and design round 7.** Plan:
-`log/2026-11-06-owner-review-plan.md`; the design request `docs/design-requests/2026-11-06-round-7.md`; the owner's
-export v0.7 (rounds 7.1 foundations, 7.2 business, 7.3 client: complete) is in `docs/design/` (#305). Agents were
-allowed again for this run (owner 06.11: two at a time, xhigh; Opus 5.5 since 07.11). Merged and live (deploys
-a908fa5, 7584ebe, then the next): #302 business fixes and the invite route · #303 the admin tool's superadmin/admin
-roles and two-step sign-in (ADR 0026, Q-011) · #304/#308 sign-in codes through our Telegram bot @yeral_app_bot
-(ADR 0029; `SIGN_IN_CODE_ON_SCREEN=false` on the server, so verifying businesses works) · #306 client fixes · #307
-clients sort and counts · #305 tokens and Geist · #309 figures and phone format · #310/#312 our own Select, MultiSelect,
-TimeField everywhere · #311 the business reviews page · #313 control sizes, tertiary/danger-quiet buttons, focus rings ·
-#314 the home search bar · #315 hours editors · #317 calendar toolbar and week · #318 booking drawer and InfoTip · #319
-team table and permissions matrix · #320 new-booking client search · #321 clients list and card · #322 booking steps.
-**Open: #316** (no demo workspace anywhere) waits for the owner: deploying it needs the server's sandbox rows deleted
-(`DELETE FROM businesses WHERE sandbox; DELETE FROM users WHERE demo;`, after a backup) or a filter kept. **Left from
-round 7:** the FilterBar (A5) for bookings, client search and services; breadcrumbs (A7); callouts/toasts (A10); the
-business page hero, tabs as panels and services at scale (C2, C3); C4's add-a-service sheet and phone summary; week
-blocks clipping their time; the calendar's 390 sheets; ideas 1–3 (D). Each piece's log note (`log/2026-11-0[67]-*.md`)
-lists what it left.
+**2026-11-06/07: the owner's review of the live platform (51 problems, 4 ideas) and design round 7** — the run's record is
+`progress.md` (2026-11-06/07) and `log/2026-11-06-owner-review-plan.md`; each piece's `log/2026-11-0[67]-*.md` says what it left.
+Live since 3dfec27: everything through #322. **Merged, to deploy next:** #324 FilterBar and bookings, #325 business page,
+#328 e2e hook. **Open, to land in order** (rebase on `main` → CI green on the head → squash → `main`'s run green): #326
+bookings api filters (several specialists/services, status, sort, total), #327 calendar follow-ups (week blocks, 390
+sheets), #329 clients FilterBar (tag, upcoming), idea 2's PR (`feat/changed-since-visit`: "something changed since your
+last visit" on the confirm step). Then deploy and check the live sites. **Waiting on the owner:** #316 (no demo workspace
+anywhere) needs the server's sandbox rows deleted (`DELETE FROM businesses WHERE sandbox; DELETE FROM users WHERE demo;`,
+after a backup) or a filter kept — the owner's call. **Left from round 7:** the business page's phone header, Back and the
+no-photo bar, and C3 services at scale; A10 callouts, toasts and NoteRow; idea 1 (trusted client) and idea 3 (follow, plan
+only); the FilterBar on the client site's search; the reviews page's "removed" notice (an api field); tk/ru strings.
+**Agents:** allowed for this run (owner 06.11): Opus 5.5 at xhigh, two at a time, a reviewer per PR; budget 30 % of the
+week that began 07.11.
 
 **Before (2026-11-01): P4 done, the first launch (P5) is live.** Slice 4 (#263–#286) is daily work;
 slice 5 (#288 search, category pages and Home; #289 the results map; #290 location; #291 sitemap, robots, JSON-LD and
