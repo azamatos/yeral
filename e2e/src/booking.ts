@@ -64,20 +64,21 @@ export async function chooseAndSignIn(page: Page, phone: string, opts: { staff?:
   await expect(page.getByRole('button', { name: /^Selected: / })).toHaveCount(2)
   await page.getByRole('link', { name: 'Continue' }).click()
 
+  // a pick moves on by itself (design v0.7 · C4, the owner's #39): no Continue on the specialist step, and a click on
+  // the specialist already chosen («Any specialist» by default) moves on too — check() would do nothing there
   if (opts.staff === 'first')
     await page
       .getByRole('radio', { name: /^(?!Any specialist)/ })
       .first()
-      .check()
-  else await page.getByRole('radio', { name: 'Any specialist' }).check()
-  await page.getByRole('button', { name: 'Continue' }).click()
+      .click()
+  else await page.getByRole('radio', { name: 'Any specialist' }).click()
 
   const time = await pickFirstFreeTime(page)
   await page.getByRole('button', { name: 'Continue' }).click()
 
   await page.getByRole('button', { name: 'Confirm your number' }).click()
   await signInWithCode(page.getByRole('dialog'), phone, clientName(phone))
-  await expect(page.getByRole('img', { name: 'Number confirmed' })).toBeVisible()
+  await expect(page.getByText('Verified', { exact: true })).toBeVisible()
   const url = page.url()
   const date = new URL(url).searchParams.get('date')
   expect(date, 'the booking page carries the chosen day').toMatch(/^\d{4}-\d{2}-\d{2}$/)
