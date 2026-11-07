@@ -79,15 +79,16 @@ export const ChangeSpecialist: Story = {
     await expect(group.getByRole('radio', { name: /Maral/ })).toHaveAttribute('aria-checked', 'true')
     // the choice open again: the step reads as the step, not as done
     await expect(steps.getByRole('button', { name: '1 Specialist' })).toHaveAttribute('aria-current', 'step')
-    await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio?services=s5')
+    // the business page keeps nothing picked (Venue v0.7 · C3)
+    await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio')
     await userEvent.click(group.getByRole('radio', { name: /Maral/ }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
   },
 }
 
 /**
- * A service picked on the business page, then Maral's «Book» (`?services=&staff=&first=staff&step=time`): the specialist
- * and the services are done, the flow opens on the time; Back is the services, not the business page.
+ * A link with a service and Maral (`?services=&staff=&first=staff&step=time`): the specialist and the services are
+ * done, the flow opens on the time; Back is the services, not the business page.
  */
 export const WithSpecialistAndService: Story = {
   args: { path: '/en/b/glow-studio/book?services=s5&staff=st-maral&first=staff&step=time' },
@@ -102,7 +103,7 @@ export const WithSpecialistAndService: Story = {
     await expect(summary.getByText('Manicure')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Back' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose services' })).toBeVisible()
-    await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio?services=s5')
+    await expect(canvas.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/en/b/glow-studio')
   },
 }
 

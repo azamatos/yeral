@@ -5,9 +5,9 @@ import type { Price } from '@yeral/domain/model'
 type Service = BusinessDetail['serviceGroups'][number]['services'][number]
 
 /**
- * The services a visitor picked on the business page (Venue «Saýla», book C-06), kept in the address as
- * `?services=id,id` so a shared link and the booking flow see the same choice. Ids the page no longer has (a service
- * removed meanwhile) are dropped; the order is the order they were picked in, as the summary card lists them.
+ * The services picked for the booking (book C-06, C-12), kept in its address as `?services=id,id` so a shared link
+ * sees the same choice. Ids the page no longer has (a service removed meanwhile) are dropped; the order is the order
+ * they were picked in, as the summary card lists them.
  */
 export function parseServiceIds(raw: string | undefined): string[] {
   if (!raw) return []

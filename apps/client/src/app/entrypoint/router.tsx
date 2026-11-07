@@ -33,4 +33,8 @@ declare module '@tanstack/react-router' {
   interface Register {
     router: ReturnType<typeof getRouter>
   }
+  interface StaticDataRouteOption {
+    /** The page keeps its own top bar on the phone (the business page's cover with Back): the site header goes under 768. */
+    phoneHeader?: 'none'
+  }
 }

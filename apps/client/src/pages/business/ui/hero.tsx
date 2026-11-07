@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 import type { BusinessDetail } from '@yeral/contract/catalog'
 import { nowMin, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
@@ -8,7 +8,7 @@ import { cn } from '@yeral/ui/cn'
 import { Modal, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { Pill } from '@yeral/ui/pill'
 import { toast } from '@yeral/ui/toast'
-import { Images, LayoutGrid, MapPin, Share2, Star } from 'lucide-react'
+import { ChevronLeft, Images, LayoutGrid, MapPin, Share2, Star } from 'lucide-react'
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { site } from '@/shared/config'
@@ -21,6 +21,8 @@ type Detail = BusinessDetail
 
 /** Glass IconButtons on the photo (Venue v0.7 `.glass`): white 88 % with a 12 px blur, the icon ink. */
 const glass = 'border-transparent bg-white/88 text-n-900 backdrop-blur-md hover:bg-n-0'
+/** Plain IconButtons on the phone's white bar (Venue v0.7 `.pbar` `.ipl`): no box, the icon ink, a fill on hover. */
+const plain = 'border-transparent text-n-900 hover:border-transparent hover:bg-n-100'
 
 /** How far the phone's cover folds: 300 high, down to the 56 px bar (Venue v0.7 · C2 «Cover collapse»). */
 const COVER = 300
@@ -69,8 +71,8 @@ function useCoverFold(coverRef: RefObject<HTMLDivElement | null>, on: boolean) {
       const form = calm ? (s >= FORM_FROM ? 1 : 0) : clamp((s - FORM_FROM) / (FOLD - FORM_FROM))
       const p = calm ? form : s / FOLD
       const k = 1 - (1 - 16 / 28) * p
-      // the name ends 16 px after the round photo, centred in the bar
-      const end = { x: 56, y: (BAR - 32 * (16 / 28)) / 2 }
+      // the name ends after Back and the round photo (4 + 40 + 4 + 32 + 8), centred in the bar
+      const end = { x: 88, y: (BAR - 32 * (16 / 28)) / 2 }
       photo.style.transform = calm ? '' : `translateY(${s / 2}px)`
       photo.style.opacity = calm ? '' : String(1 - form)
       meta.style.opacity = calm ? '' : String(1 - clamp(s / META_OUT))
@@ -146,9 +148,11 @@ export function StatusPill({ open, className }: { open: Detail['open']; classNam
 /**
  * The hero (Venue v0.7 · C2, option B «Cover», the owner's #40): one wide photo with the name, rating, StatusPill and
  * address on a fixed gradient (white text stays ≥ 4.5 : 1 on any photo), Favourite and Share as glass buttons, photos
- * 2–5 as thumbnails with «All photos» on the last. On phones the cover is 300 high and folds into a 56 px bar with the
- * round photo and the name as the page scrolls (`useCoverFold`). No photos: the initial tile and the name on white.
- * Returns the bar and the cover side by side, so the bar can stick for the whole page.
+ * 2–5 as thumbnails with «All photos» on the last. On phones the site header gives way to the cover: 300 high, with
+ * Back among the round buttons, it folds into a 56 px bar with Back, the round photo and the name as the page scrolls
+ * (`useCoverFold`). No photos: the initial tile and the name on white; on the phone the same 56 px bar from the start
+ * (the folded one, Back, the initial and the name), the rest of the identity under it. Returns the bar and the cover
+ * side by side, so the bar can stick for the whole page.
  */
 export function Hero({ detail }: { detail: Detail }) {
   const cover = useRef<HTMLDivElement>(null)
@@ -156,25 +160,36 @@ export function Hero({ detail }: { detail: Detail }) {
   const t = useTranslations('business')
   const [first, ...rest] = detail.photos
   useCoverFold(cover, Boolean(first))
-  const actions = (onPhoto: boolean) => (
+  const actions = (className?: string) => (
     <>
       {/* the owner's page in review isn't public: nothing to keep among favourites */}
-      {!detail.preview && <FavouriteButton slug={detail.slug} className={onPhoto ? cn(glass, 'max-md:rounded-pill') : undefined} />}
-      <ShareButton name={detail.name} slug={detail.slug} className={onPhoto ? cn(glass, 'max-md:rounded-pill') : undefined} />
+      {!detail.preview && <FavouriteButton slug={detail.slug} className={className} />}
+      <ShareButton name={detail.name} slug={detail.slug} className={className} />
     </>
   )
   if (!first)
     return (
-      <div className="flex items-start gap-6 pt-4 max-md:flex-col max-md:gap-4 max-md:pt-6">
-        <span
-          aria-hidden
-          className="grid size-16 flex-none place-items-center rounded-card bg-a-50 text-[28px] leading-8 font-bold text-a-600"
-        >
-          {Array.from(detail.name)[0]}
-        </span>
-        <Identity detail={detail} onPhoto={false} />
-        <div className="flex flex-none gap-2 md:ml-auto md:pt-2">{actions(false)}</div>
-      </div>
+      <>
+        {/* the phone's bar as the cover's folded one (Venue v0.7 `.pbar`): Back, the initial, the name, plain buttons */}
+        <div className="sticky top-0 z-20 -mx-4 flex h-14 items-center gap-1 bg-n-0 px-1 sm:hidden">
+          <BackButton />
+          <span aria-hidden className="mr-2 grid size-8 flex-none place-items-center rounded-pill bg-a-50 text-small font-bold text-a-600">
+            {Array.from(detail.name)[0]}
+          </span>
+          <h1 className="m-0 min-w-0 flex-1 truncate text-[16px] leading-6 font-semibold text-n-900">{detail.name}</h1>
+          {actions(plain)}
+        </div>
+        <div className="flex items-start gap-6 pt-4 max-md:flex-col max-md:gap-4 max-md:pt-6 max-sm:pt-4">
+          <span
+            aria-hidden
+            className="grid size-16 flex-none place-items-center rounded-card bg-a-50 text-[28px] leading-8 font-bold text-a-600 max-sm:hidden"
+          >
+            {Array.from(detail.name)[0]}
+          </span>
+          <Identity detail={detail} onPhoto={false} nameInBar />
+          <div className="flex flex-none gap-2 max-sm:hidden md:ml-auto md:pt-2">{actions()}</div>
+        </div>
+      </>
     )
   const thumbs = rest.slice(0, 4)
   return (
@@ -182,11 +197,14 @@ export function Hero({ detail }: { detail: Detail }) {
       {/* the phone's bar (sticky over the cover; at 768 and wider only the buttons, over the cover's corner) */}
       <div className="pointer-events-none sticky top-0 z-20 -mb-14 h-14 max-md:-mx-6 max-sm:-mx-4 md:relative md:mt-4 md:-mb-15 md:h-15">
         <span data-part="fill" aria-hidden className="absolute inset-0 bg-n-0 opacity-0 md:hidden" />
+        <div className="pointer-events-auto absolute top-2 left-3 sm:hidden">
+          <BackButton className={cn(glass, 'rounded-pill')} />
+        </div>
         <img
           data-part="round"
           src={first.url}
           alt=""
-          className="absolute top-3 left-4 size-8 rounded-pill object-cover opacity-0 md:hidden"
+          className="absolute top-3 left-12 size-8 rounded-pill object-cover opacity-0 md:hidden"
         />
         <span
           data-part="name"
@@ -211,7 +229,7 @@ export function Hero({ detail }: { detail: Detail }) {
               {detail.photos.length}
             </Button>
           )}
-          {actions(true)}
+          {actions(cn(glass, 'max-md:rounded-pill'))}
         </div>
       </div>
       <div
@@ -262,11 +280,34 @@ export function Hero({ detail }: { detail: Detail }) {
 }
 
 /**
+ * Back on the phone's bar (Venue v0.7 · C2, the 390 cover: the site header is gone there): the page before, or Home
+ * when this page was the first one opened (a shared link).
+ */
+function BackButton({ className }: { className?: string }) {
+  const t = useTranslations('business')
+  const lang = useLocale()
+  const router = useRouter()
+  const navigate = useNavigate()
+  return (
+    <Button
+      variant="secondary"
+      iconOnly
+      aria-label={t('back')}
+      className={cn(plain, className)}
+      onClick={() => (router.history.canGoBack() ? router.history.back() : void navigate({ to: '/$lang', params: { lang } }))}
+    >
+      <ChevronLeft aria-hidden />
+    </Button>
+  )
+}
+
+/**
  * The identity (Venue v0.7 `.idn`): the name (44/48, two lines at most; 28/32 on one line on phones), «★ 4.9 · 96
  * reviews» (the count opens the Reviews tab), the StatusPill, the address with its distance. White on the photo, ink on
- * white. Phones add the category to the meta line (no breadcrumbs there) and give the pill its own line.
+ * white. Phones add the category to the meta line (no breadcrumbs there) and give the pill its own line; with the name
+ * in the phone's bar (no photos), it's left out here on the phone.
  */
-function Identity({ detail, onPhoto }: { detail: Detail; onPhoto: boolean }) {
+function Identity({ detail, onPhoto, nameInBar = false }: { detail: Detail; onPhoto: boolean; nameInBar?: boolean }) {
   const t = useTranslations('business')
   const fmt = useFmt()
   const lang = useLocale()
@@ -282,6 +323,7 @@ function Identity({ detail, onPhoto }: { detail: Detail; onPhoto: boolean }) {
         className={cn(
           'm-0 line-clamp-2 text-[44px] leading-12 font-bold tracking-[-0.025em] max-md:line-clamp-1 max-md:text-[28px] max-md:leading-8 max-md:tracking-[-0.02em] max-[559px]:text-[32px] max-[559px]:leading-9',
           onPhoto ? 'text-white' : 'text-n-900',
+          nameInBar && 'max-sm:hidden',
         )}
       >
         {detail.name}

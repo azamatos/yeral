@@ -44,25 +44,26 @@ export interface Chosen {
 }
 
 /**
- * The client picks two services on the salon's page, a specialist (anyone, or the first named one) and the first free
- * time, then signs in on the confirm step.
+ * The client books a service from the salon's page (its row's «Book» opens the booking on the specialist step, design
+ * v0.7 · C3), adds a second one on the services step, picks a specialist (anyone, or the first named one) and the
+ * first free time, then signs in on the confirm step.
  */
 export async function chooseAndSignIn(page: Page, phone: string, opts: { staff?: 'any' | 'first' } = {}): Promise<Chosen> {
   await page.goto(`${CLIENT_URL}/en/b/${SALON.slug}`)
-  // the page comes rendered from the server: a click before React takes it over is lost, so the first one retries
-  await expect(async () => {
-    await page
-      .getByRole('button', { name: /^Select: / })
-      .first()
-      .click()
-    await expect(page.getByRole('button', { name: /^Selected: / })).toHaveCount(1, { timeout: 1_000 })
-  }).toPass()
+  // the page comes rendered from the server: the row's Book is a link, so it works before React takes the page over
+  await page
+    .getByRole('link', { name: /^Book / })
+    .first()
+    .click()
+  await expect(page.getByRole('radio', { name: 'Any specialist' })).toBeVisible()
+  // the second service comes from the services step (the summary's «Add a service», C7-Booking, isn't built yet):
+  // Back opens it with the first one picked, and one more pick moves on by itself
+  await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page.getByRole('button', { name: /^Selected: / })).toHaveCount(1)
   await page
     .getByRole('button', { name: /^Select: / })
     .first()
     .click()
-  await expect(page.getByRole('button', { name: /^Selected: / })).toHaveCount(2)
-  await page.getByRole('link', { name: 'Continue' }).click()
 
   // a pick moves on by itself (design v0.7 · C4, the owner's #39): no Continue on the specialist step, and a click on
   // the specialist already chosen («Any specialist» by default) moves on too — check() would do nothing there

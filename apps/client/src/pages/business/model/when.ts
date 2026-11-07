@@ -28,22 +28,6 @@ export function openLine(open: BusinessDetail['open'], today: string, fmt: Fmt, 
 }
 
 /**
- * The hours of the business day under way (`currentBusinessDate`: yesterday's while it runs past midnight, book
- * Q-105), a special day winning over the week (`businessDay`); closed, the special day's name when it has one.
- */
-export function dayHours(
-  detail: Pick<BusinessDetail, 'hours' | 'specialDays'>,
-  now: number,
-  fmt: Fmt,
-): { hours: string } | { closed: true; reason: string | null } {
-  const calendar = calendarOf(detail)
-  const date = currentBusinessDate(calendar, now)
-  const day = businessDay(calendar, date)
-  if (day) return { hours: fmt.timeRange(day.open, day.close) }
-  return { closed: true, reason: detail.specialDays.find((d) => d.date === date)?.name ?? null }
-}
-
-/**
  * «Today 15:30», «Tomorrow 10:00», «Fri, 16 Oct 10:00»: a next free time on the card, the bar and the specialists' cards;
  * a start past midnight reads on the next calendar day.
  */

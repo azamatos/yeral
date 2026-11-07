@@ -15,7 +15,7 @@ import { ChevronLeft, X } from 'lucide-react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { ChangedNotice } from '@/entities/business'
-import { parseServiceIds, pickedServices, selectionTotal, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
+import { parseServiceIds, pickedServices, selectionTotal, serviceIdsParam, SERVICES_MAX, toggleService } from '../model/selection'
 import { useErrorText } from '@/shared/i18n'
 import { TermsNote, wrap } from '@/shared/ui'
 import {
@@ -94,7 +94,8 @@ export function BookingPage() {
   const done = !locked && !taken && stepDone(step, choice, steps) && (step !== 'confirm' || (signedIn && !mustTick))
   const total = selectionTotal(picked)
   const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
-  const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug }, search: { services: serviceIdsParam(ids) } }
+  // the business page keeps nothing picked (Venue v0.7 · C3): Back and Close leave the choice behind
+  const pageLink = { to: '/$lang/b/$slug' as const, params: { lang, slug: detail.slug } }
 
   // the step shown goes along with every change, so a link held back to an earlier step stays on it
   const set = (patch: Partial<BookingSearch>, { newEntry = false, top = false } = {}) =>

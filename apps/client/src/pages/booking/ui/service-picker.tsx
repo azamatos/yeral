@@ -8,23 +8,20 @@ import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 
 /**
- * The services to pick from, on the business page (Venue «Hyzmatlar», book C-06) and the booking's first step
- * (Booking `step=services`, C-12): the groups' chips filter the list (not scroll; «All» first), each group's services
- * with their duration and price (a price kept for the place in grey), and «Select» / «Selected» on each row while
- * picking is open. A paused or phone-only page lists the services without the toggles (States 05). The page gives the
- * heading above it; `groupHeading` is the level its groups' names take under that heading.
+ * The services to pick from on the booking's first step (Booking `step=services`, C-12; the business page books one
+ * service per row instead, Venue v0.7 · C3): the groups' chips filter the list (not scroll; «All» first), each
+ * group's services with their duration and price (a price kept for the place in grey), and «Select» / «Selected» on
+ * each row. The page gives the heading above it; `groupHeading` is the level its groups' names take under that heading.
  */
 export function ServicePicker({
   groups,
   picked,
   onToggle,
-  canPick = true,
   groupHeading,
 }: {
   groups: BusinessDetail['serviceGroups']
   picked: readonly string[]
   onToggle: (id: string) => void
-  canPick?: boolean
   groupHeading: 'h2' | 'h3'
 }) {
   const t = useTranslations('services')
@@ -68,20 +65,18 @@ export function ServicePicker({
                       </span>
                     </span>
                   </div>
-                  {canPick && (
-                    <Button
-                      size="s"
-                      variant={on ? 'tint' : 'secondary'}
-                      aria-pressed={on}
-                      // the words seen stay in the name screen readers hear (axe: label-content-name-mismatch)
-                      aria-label={on ? t('selectedLabel', { name: s.name }) : t('selectLabel', { name: s.name })}
-                      className="min-w-28 flex-none"
-                      onClick={() => onToggle(s.id)}
-                    >
-                      {on && <Check strokeWidth={2} />}
-                      {on ? t('selected') : t('select')}
-                    </Button>
-                  )}
+                  <Button
+                    size="s"
+                    variant={on ? 'tint' : 'secondary'}
+                    aria-pressed={on}
+                    // the words seen stay in the name screen readers hear (axe: label-content-name-mismatch)
+                    aria-label={on ? t('selectedLabel', { name: s.name }) : t('selectLabel', { name: s.name })}
+                    className="min-w-28 flex-none"
+                    onClick={() => onToggle(s.id)}
+                  >
+                    {on && <Check strokeWidth={2} />}
+                    {on ? t('selected') : t('select')}
+                  </Button>
                 </div>
               )
             })}

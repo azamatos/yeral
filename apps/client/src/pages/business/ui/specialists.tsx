@@ -13,22 +13,17 @@ import { Section } from './sections'
 
 /**
  * Venue «Hünärmenler» (book C-06 step 4, COMPONENTS StaffCard): a card each (avatar 64, name, specialization, rating,
- * «Next free:» and «Book»), as many in a row as fit at 170. «Book» opens the booking with that person chosen, and the
- * services already picked on the page with them (at the specialist step, as the card's Continue does); on the owner's
- * preview it's there, disabled (Q-153); a paused or phone-only page shows neither the time nor the button.
+ * «Next free:» and «Book»), as many in a row as fit at 170. «Book» opens the booking on their services with that person
+ * chosen (C7-Booking C4.2); on the owner's preview it's there, disabled (Q-153); a paused or phone-only page shows
+ * neither the time nor the button.
  */
-export function Specialists({ detail, state, picked }: { detail: BusinessDetail; state: BookingState; picked: readonly string[] }) {
+export function Specialists({ detail, state }: { detail: BusinessDetail; state: BookingState }) {
   const t = useTranslations('business.team')
   const card = useTranslations('business.card')
   const fmt = useFmt()
   const lang = useLocale()
   const now = useClock()
   const bookable = state === 'online' || state === 'preview'
-  const services = picked.length > 0 ? { services: picked.join(',') } : {}
-  // services picked here and a specialist who does them all: both steps are answered, the booking opens on the time;
-  // one who doesn't do all of them opens on the services, which say so (owner's review, #39: no step to walk again)
-  const stepFor = (s: BusinessDetail['specialists'][number]) =>
-    picked.length > 0 && picked.every((id) => s.serviceIds.includes(id)) ? { step: 'time' as const } : {}
   return (
     <Section id="specialists" title={t('title')}>
       <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(170px,100%),1fr))] gap-4 p-0">
@@ -54,7 +49,7 @@ export function Specialists({ detail, state, picked }: { detail: BusinessDetail;
                   to="/$lang/b/$slug/book"
                   params={{ lang, slug: detail.slug }}
                   // the booking opens on their services with them chosen, no specialist step on the way (`stepsOf`)
-                  search={{ ...services, ...stepFor(s), staff: s.id, first: 'staff' }}
+                  search={{ staff: s.id, first: 'staff' }}
                   // the word seen stays in the name heard (axe: label-content-name-mismatch)
                   aria-label={t('bookLabel', { name: s.name })}
                 >
