@@ -226,3 +226,30 @@ export function weekCell(view: Pick<CalendarView, 'bookings' | 'moves'>, column:
   const booked = live.reduce((sum, p) => sum + p.end - p.start, 0)
   return { date, off: null, bookings, requests, percent: working > 0 ? Math.min(100, Math.round((booked / working) * 100)) : 0 }
 }
+
+/**
+ * Side by side where they overlap (B7-Calendar's week: two bookings at one time share the column): each item's lane
+ * and how many lanes its cluster of overlapping items takes, in the order given (sorted by start).
+ */
+export function lanesOf<T extends Stretch>(items: readonly T[]): (T & { lane: number; lanes: number })[] {
+  const sorted = [...items].sort((a, b) => a.start - b.start || a.end - b.end)
+  const out: (T & { lane: number; lanes: number })[] = []
+  let cluster: (T & { lane: number; lanes: number })[] = []
+  let ends: number[] = []
+  let clusterEnd = -1
+  for (const item of sorted) {
+    if (item.start >= clusterEnd) {
+      cluster = []
+      ends = []
+    }
+    let lane = ends.findIndex((end) => end <= item.start)
+    if (lane === -1) lane = ends.length
+    ends[lane] = item.end
+    clusterEnd = Math.max(clusterEnd, item.end)
+    const placed = { ...item, lane, lanes: 0 }
+    cluster.push(placed)
+    for (const c of cluster) c.lanes = ends.length
+    out.push(placed)
+  }
+  return out
+}

@@ -58,9 +58,10 @@ type Common = {
   className?: string
   /**
    * `field` (default): a form's 48 field with the calendar icon. `title`: a toolbar's day as a title, 17/24 600 with a
-   * chevron, 36 high (B-Calendar `.dbtn`).
+   * chevron, 36 high (B-Calendar `.dbtn`). `nav`: the S 32 date inside a DateNav box, 14/20 600 with a chevron, tinted
+   * while open (B7-Calendar `.dnav .dd`).
    */
-  look?: 'field' | 'title'
+  look?: 'field' | 'title' | 'nav'
 }
 type Single = Common & { mode?: 'single'; value: Ymd | null; onValueChange: (date: Ymd) => void }
 type Range = Common & { mode: 'range'; value: DateRange | null; onValueChange: (range: DateRange) => void }
@@ -208,18 +209,20 @@ export function DatePicker(props: DatePickerProps) {
           className={cn(
             look === 'title'
               ? 'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-ctl-m border-0 bg-transparent px-2.5 text-[17px] leading-6 font-semibold tracking-[-0.01em] whitespace-nowrap text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none'
-              : cn(
-                  inputClass,
-                  'flex h-12 cursor-pointer items-center justify-between gap-2 text-left disabled:cursor-default disabled:bg-n-50 disabled:text-n-500',
-                ),
+              : look === 'nav'
+                ? 'inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[7px] border-0 bg-transparent pr-2 pl-2.5 text-ctl-m leading-5 font-semibold whitespace-nowrap text-n-900 hover:bg-n-100 focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-a-50 data-[state=open]:text-a-600 data-[state=open]:[&>svg]:text-a-600'
+                : cn(
+                    inputClass,
+                    'flex h-12 cursor-pointer items-center justify-between gap-2 text-left disabled:cursor-default disabled:bg-n-50 disabled:text-n-500',
+                  ),
             className,
           )}
         >
           <span id={valueId} className={cn('truncate', !shown && 'text-n-500')}>
             {shown ?? copy.placeholder}
           </span>
-          {look === 'title' ? (
-            <ChevronDown aria-hidden className="size-4.5 flex-none text-n-600" />
+          {look === 'title' || look === 'nav' ? (
+            <ChevronDown aria-hidden className={cn('flex-none text-n-600', look === 'nav' ? 'size-4' : 'size-4.5')} />
           ) : (
             <CalendarDays aria-hidden className="size-5 flex-none text-n-500" />
           )}

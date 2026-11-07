@@ -82,7 +82,8 @@ export function DayGrid({
   /** The reader is a specialist: the refusal under «Busy elsewhere» speaks to them. */
   specialist?: boolean
   /** One person's wide column (B-Calendar `dayOne`, book B-17). */
-  only?: string
+  /** The people picked (B7-Calendar's PeoplePicker): their columns only; one person's is the wide one. */
+  only?: readonly string[]
   /** Move mode (book B-26): a free slot takes the booking instead of opening the menu. */
   moving?: Moving
   onOpen: (pick: Pick) => void
@@ -156,7 +157,7 @@ export function DayGrid({
     }
   }
 
-  const columns = only ? view.columns.filter((c) => c.staffId === only) : view.columns
+  const columns = only?.length ? view.columns.filter((c) => only.includes(c.staffId)) : view.columns
   if (columns.length === 0) return <p className="m-0 px-4 py-10 text-small text-n-600 sm:px-8">{t('nobody')}</p>
 
   return (
@@ -231,7 +232,7 @@ export function DayGrid({
             <DayColumn
               key={c.staffId}
               className={phone(c)}
-              wide={!!only}
+              wide={only?.length === 1}
               view={view}
               column={c}
               date={date}

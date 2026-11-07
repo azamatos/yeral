@@ -2,6 +2,7 @@ import type { CalendarView } from '@yeral/contract/calendar'
 import { describe, expect, it } from 'vitest'
 import {
   besideLive,
+  lanesOf,
   buffersOf,
   cutoffOn,
   gridHours,
@@ -187,5 +188,22 @@ describe('the calendar day’s grid', () => {
     expect(cutoffOn(DAY, now)).toBe(630)
     expect(cutoffOn(BEFORE, now)).toBe(630 + 1440)
     expect(cutoffOn('2026-10-15', now)).toBe(630 - 1440)
+  })
+})
+
+describe('lanesOf', () => {
+  it('puts bookings at one time side by side and leaves the rest alone', () => {
+    const lanes = lanesOf([
+      { start: 600, end: 660 },
+      { start: 960, end: 1020 },
+      { start: 990, end: 1050 },
+      { start: 1050, end: 1110 },
+    ])
+    expect(lanes.map((l) => [l.start, l.lane, l.lanes])).toEqual([
+      [600, 0, 1],
+      [960, 0, 2],
+      [990, 1, 2],
+      [1050, 0, 1],
+    ])
   })
 })
