@@ -37,6 +37,7 @@ export function Summary({
   hint,
   move,
   confirm = false,
+  notice,
   onClear,
   onAdd,
   onRemove,
@@ -54,6 +55,8 @@ export function Summary({
   /** The booking's time now («Thursday, 15 October · 14:30–15:30»). */
   move?: { before: string }
   confirm?: boolean
+  /** On Confirm: what changed since the client's last visit (`ChangedNotice`), at the head of the card. */
+  notice?: ReactNode
   onClear?: () => void
   onAdd?: () => void
   onRemove?: (id: string) => void
@@ -172,6 +175,7 @@ export function Summary({
   if (confirm)
     return (
       <div className="flex flex-col rounded-card border border-n-200 bg-n-0 p-6 max-sm:p-4">
+        {notice && <div className="mb-4">{notice}</div>}
         <div className="flex items-start gap-4 max-sm:flex-col max-sm:gap-3">
           {photo && (
             <img

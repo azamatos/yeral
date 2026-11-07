@@ -310,6 +310,93 @@ export const SlotTaken: Story = {
   },
 }
 
+const moved = { address: { was: 'Görogly street 52, 1st floor' }, hours: false, phone: false }
+
+/**
+ * The business moved since Aýjemal's last visit (C7-Booking D1, book F-245): the notice leads the booking card, Send
+ * booking waits for «I've seen the new address» with one line under it; ticked, it sends.
+ */
+export const ChangedAddress: Story = {
+  args: { path: confirm, server: businessApi({ signedIn: AYJEMAL, business: { ...GLOW, changedSinceLastVisit: moved } }) },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await expect(await card.findByText('Glow Studio has moved since your last visit')).toBeVisible()
+    await expect(card.getByText('Was: Görogly street 52, 1st floor')).toBeVisible()
+    await expect(card.getByRole('button', { name: 'Send booking' })).toBeDisabled()
+    await expect(card.getByText('Tick “I’ve seen the new address” to send.')).toBeVisible()
+    await userEvent.click(card.getByRole('checkbox', { name: 'I’ve seen the new address' }))
+    await waitFor(() => expect(card.getByRole('button', { name: 'Send booking' })).toBeEnabled())
+    await expect(card.queryByText('Tick “I’ve seen the new address” to send.')).toBeNull()
+    await userEvent.click(card.getByRole('button', { name: 'Send booking' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Booking sent' })).toBeVisible()
+  },
+}
+
+/** Moved and new hours: one notice with the booking day's hours, one tick; Send booking waits for it. */
+export const ChangedAddressAndHours: Story = {
+  args: {
+    path: confirm,
+    server: businessApi({ signedIn: AYJEMAL, business: { ...GLOW, changedSinceLastVisit: { ...moved, hours: true } } }),
+  },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await expect(await card.findByText('Glow Studio has moved and changed its hours')).toBeVisible()
+    await expect(card.getAllByRole('checkbox')).toHaveLength(1)
+    await expect(card.getByRole('button', { name: 'Send booking' })).toBeDisabled()
+  },
+}
+
+/** New hours only inform: the notice, and Send booking is on at once. */
+export const ChangedHours: Story = {
+  args: {
+    path: confirm,
+    server: businessApi({ signedIn: AYJEMAL, business: { ...GLOW, changedSinceLastVisit: { address: null, hours: true, phone: false } } }),
+  },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await expect(await card.findByText('New hours since your last visit')).toBeVisible()
+    await expect(card.queryByRole('checkbox')).toBeNull()
+    await waitFor(() => expect(card.getByRole('button', { name: 'Send booking' })).toBeEnabled())
+  },
+}
+
+/** Nothing changed since the last visit (or no visit): no notice, Send booking on. */
+export const ChangedNothing: Story = {
+  args: { path: confirm, server: businessApi({ signedIn: AYJEMAL }) },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await waitFor(() => expect(card.getByRole('button', { name: 'Send booking' })).toBeEnabled())
+    await expect(card.queryByText(/since your last visit/)).toBeNull()
+    await expect(card.queryByRole('checkbox')).toBeNull()
+  },
+}
+
+/** Signed out nobody's last visit is known: no notice; signing in is what Send booking waits for. */
+export const ChangedSignedOut: Story = {
+  args: { path: confirm, server: businessApi({ business: { ...GLOW, changedSinceLastVisit: moved } }) },
+  play: async ({ canvas }) => {
+    const card = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await expect(await card.findByText('First confirm your phone number.')).toBeVisible()
+    await expect(card.queryByText(/since your last visit/)).toBeNull()
+    await expect(card.getByRole('button', { name: 'Send booking' })).toBeDisabled()
+  },
+}
+
+/** Phone: the notice heads the card in the flow; the bar's Send booking waits for the tick. */
+export const ChangedAddressPhone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  args: { path: confirm, server: businessApi({ signedIn: AYJEMAL, business: { ...GLOW, changedSinceLastVisit: moved } }) },
+  play: async ({ canvas }) => {
+    const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
+    // the card in the flow (the one beside it is hidden under 768)
+    const flow = within(canvas.getByRole('main'))
+    await expect(await flow.findByText('Glow Studio has moved since your last visit')).toBeVisible()
+    await expect(bar.getByRole('button', { name: 'Send booking' })).toBeDisabled()
+    await userEvent.click(flow.getByRole('checkbox', { name: 'I’ve seen the new address' }))
+    await waitFor(() => expect(bar.getByRole('button', { name: 'Send booking' })).toBeEnabled())
+  },
+}
+
 /** Phone, step 4: the summary in the flow and Send booking in the bar. */
 export const ConfirmPhone: Story = {
   globals: { viewport: { value: 'xs' } },
