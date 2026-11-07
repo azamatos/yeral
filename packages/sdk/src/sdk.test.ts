@@ -432,6 +432,27 @@ describe('sdk', () => {
   })
 })
 
+describe('the bookings list’s filters', () => {
+  it('several specialists, services and statuses go comma-separated; an empty list is no filter', async () => {
+    const f = fixture(() => json(200, { items: [], total: 0, tabTotal: 0, cursor: null }))
+    const [a, b] = ['0b6f1a4e-6a43-4f8e-9a51-3d3f1c3b9a10', '1c7a2b5f-7b54-4f9f-8b62-4e4f2d4cab21']
+    const p = {
+      tab: 'upcoming' as const,
+      lang: 'tk' as const,
+      staff: [a, b],
+      service: [],
+      status: ['pending' as const],
+      sort: 'booked' as const,
+    }
+    await f.queryClient.fetchInfiniteQuery(f.sdk.calendar.bookings('glow-studio', p) as never)
+    const url = f.calls[0]!.url
+    expect(url.searchParams.get('staff')).toBe(`${a},${b}`)
+    expect(url.searchParams.has('service')).toBe(false)
+    expect([url.searchParams.get('status'), url.searchParams.get('sort')]).toEqual(['pending', 'booked'])
+    expect(new URL(f.sdk.calendar.exportUrl('glow-studio', p)).searchParams.get('staff')).toBe(`${a},${b}`)
+  })
+})
+
 describe('live events', () => {
   const me = { id: 'u1', name: 'Aýjemal Gurbanowa' }
   const eventsFixture = () =>

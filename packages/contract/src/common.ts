@@ -108,6 +108,24 @@ export const idListQuery = z
   .transform((s) => [...new Set(s.split(',').filter(Boolean))])
   .pipe(z.array(idSchema).min(1).max(10))
 
+/**
+ * A list filter in a query string, repeated or comma-separated (`staff=a&staff=b`, `staff=a,b`, one `staff=a` as
+ * before); a value listed twice counts once.
+ */
+export function queryList<T extends z.ZodType<string, string>>(item: T, max = 50) {
+  return z
+    .union([z.string(), z.array(z.string())])
+    .transform((v) => [
+      ...new Set(
+        (Array.isArray(v) ? v : [v])
+          .flatMap((s) => s.split(','))
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ),
+    ])
+    .pipe(z.array(item).min(1).max(max))
+}
+
 /** Ids in a request body, each at most once (a service is booked once per booking). */
 export const uniqueIdsSchema = z.array(idSchema).refine((ids) => new Set(ids).size === ids.length, 'Each id at most once')
 

@@ -1,8 +1,8 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { BOOKING_TABS, type BookingRow as Row } from '@yeral/contract/calendar'
+import { BOOKING_SORTS, BOOKING_TABS, type BookingRow as Row, type BookingSort } from '@yeral/contract/calendar'
 import type { BusinessHours } from '@yeral/domain/hours'
-import { localized } from '@yeral/domain/model'
+import { localized, type BookingStatus } from '@yeral/domain/model'
 import type { Level } from '@yeral/domain/permissions'
 import { today } from '@yeral/domain/time'
 import { Button } from '@yeral/ui/button'
@@ -17,14 +17,15 @@ import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { BookingDrawer, RequestDrawer } from '@/widgets/booking-drawer'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
-import { rangeOf, type BookingsSearch, type BookingsTab, type BookingsWhen } from '../model/search'
+import { joined, listOf, rangeOf, TAB_STATUSES, type BookingsSearch, type BookingsTab, type BookingsWhen } from '../model/search'
 import { BookingsTable } from './bookings-table'
 import { RequestsTab } from './requests-tab'
 
 /**
  * The bookings list (B-Bookings, book B-30; design v0.7 B8): the tabs Today · Upcoming · Past · Cancelled, the filters (search by client,
- * number or code; specialist; service; date), «Show more», Export CSV, the same drawers as the calendar by `?booking=`
- * and `?request=`. Everything on the page is in its address. A specialist reads their own rows.
+ * number or code; specialists; services; statuses; date), the order, «24 of 214 bookings», «Show more», Export CSV, the
+ * same drawers as the calendar by `?booking=` and `?request=`. Everything on the page is in its address. A specialist
+ * reads their own rows.
  */
 export function BookingsPage() {
   const { workspace } = useWorkspace()
@@ -56,19 +57,26 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
     return () => clearTimeout(timer)
   })
 
+  const listTab = requests ? ('today' as const) : tab
+  // a status another tab can't hold (an old link, a tab switched by hand) filters nothing here
+  const statuses = listOf(search.status).filter((s): s is BookingStatus => TAB_STATUSES[listTab].includes(s as BookingStatus))
   const query = {
-    tab: requests ? ('today' as const) : tab,
+    tab: listTab,
     q: search.q,
-    staff: search.staff,
-    service: search.service,
+    staff: listOf(search.staff),
+    service: listOf(search.service),
+    status: statuses,
+    sort: search.sortBy,
     ...rangeOf(search.when, todayDate),
     lang: locale,
   }
   const list = useInfiniteQuery({ ...sdk.calendar.bookings(slug, query), placeholderData: keepPreviousData, enabled: !requests })
   const waiting = useQuery(sdk.requests.list(slug)).data?.items.length ?? 0
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
-  const filtered = !!(search.q || search.staff || search.service || search.when)
+  const filtered = !!(search.q || search.staff || search.service || statuses.length || search.when)
+  const counted = list.data?.pages[0]
   const f = useTranslations('bookings.filters')
+  const st = useTranslations('status')
   const labels: FilterBarLabels = {
     filters: f('filters'),
     clearAll: f('clearAll'),
@@ -99,12 +107,12 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
     })
   const clear = () => {
     setTyped('')
-    go({ q: undefined, staff: undefined, service: undefined, when: undefined })
+    go({ q: undefined, staff: undefined, service: undefined, status: undefined, when: undefined })
   }
 
   if (list.isError && !list.data) throw list.error
 
-  // the bar's menus (DS-Lists A5): the api filters one specialist and one service, so both stay single
+  // the bar's menus (DS-Lists A5): specialists, services (grouped, searchable) and statuses take several each
   const filters: FilterDef[] = [
     ...(specialist
       ? []
@@ -112,23 +120,35 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
           {
             id: 'staff',
             label: t('staffFilter'),
-            anyLabel: t('allStaff'),
-            value: search.staff ?? null,
-            onValueChange: (v: string | null) => go({ staff: v ?? undefined }),
+            multiple: true as const,
+            value: query.staff,
+            onValueChange: (v: string[]) => go({ staff: joined(v) }),
             options: (people.data?.columns ?? []).map((c) => ({ value: c.staffId, label: c.name })),
           },
         ]),
     {
       id: 'service',
       label: t('serviceFilter'),
-      anyLabel: t('allServices'),
-      value: search.service ?? null,
-      onValueChange: (v) => go({ service: v ?? undefined }),
+      multiple: true,
+      value: query.service,
+      onValueChange: (v) => go({ service: joined(v) }),
       options: (menu.data?.groups ?? []).map((g) => ({
         label: localized(g.name, locale),
         options: g.services.map((s) => ({ value: s.id, label: localized(s.name, locale) })),
       })),
     },
+    ...(TAB_STATUSES[listTab].length
+      ? [
+          {
+            id: 'status',
+            label: t('statusFilter'),
+            multiple: true as const,
+            value: statuses,
+            onValueChange: (v: string[]) => go({ status: joined(v) }),
+            options: TAB_STATUSES[listTab].map((value) => ({ value, label: st(value) })),
+          },
+        ]
+      : []),
     {
       id: 'when',
       label: t('dateFilter'),
@@ -146,7 +166,13 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
         search={{ value: typed, onChange: setTyped, placeholder: t('search') }}
         filters={filters}
         onClearAll={clear}
-        count={list.isPending ? undefined : f(list.hasNextPage ? 'shown' : 'count', { n: rows.length })}
+        sort={{
+          label: t('sort'),
+          value: search.sortBy ?? (listTab === 'today' || listTab === 'upcoming' ? 'soonest' : 'latest'),
+          options: BOOKING_SORTS.map((value) => ({ value, label: t(`sorts.${value}`) })),
+          onValueChange: (v) => go({ sortBy: v as BookingSort }),
+        }}
+        count={counted && (filtered ? f('of', { n: counted.total, total: counted.tabTotal }) : f('count', { n: counted.total }))}
         action={
           !specialist &&
           rows.length > 0 && (
@@ -203,7 +229,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
   return (
     <WorkspacePage title={sections('bookings')}>
       <div className="flex flex-col gap-4">
-        <Tabs value={tab} onValueChange={(next) => go({ tab: next === 'requests' ? undefined : (next as BookingsTab) })}>
+        <Tabs value={tab} onValueChange={(next) => go({ tab: next === 'requests' ? undefined : (next as BookingsTab), status: undefined })}>
           <TabsList aria-label={t('tabsLabel')}>
             <TabsTrigger value="requests">
               {t('tabs.requests')}

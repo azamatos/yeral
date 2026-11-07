@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bookingsSearch, rangeOf } from './search'
+import { bookingsSearch, joined, listOf, rangeOf } from './search'
 
 describe('the bookings list’s address', () => {
   it('keeps a tab and filters it knows', () => {
@@ -9,6 +9,19 @@ describe('the bookings list’s address', () => {
       when: 'week',
       staff: 's',
     })
+  })
+
+  it('reads several specialists, services and statuses; an old one-value link still opens', () => {
+    expect(bookingsSearch({ staff: 'a,b,a', service: ['x', 'y,z'], status: 'pending,lost,confirmed', sortBy: 'booked' })).toEqual({
+      staff: 'a,b',
+      service: 'x,y,z',
+      status: 'pending,confirmed',
+      sortBy: 'booked',
+    })
+    expect(bookingsSearch({ staff: ',', status: 'lost', sortBy: 'random' })).toEqual({})
+    expect(listOf('a,b')).toEqual(['a', 'b'])
+    expect(listOf(undefined)).toEqual([])
+    expect(joined([])).toBeUndefined()
   })
 
   it('knows the requests tab', () => {

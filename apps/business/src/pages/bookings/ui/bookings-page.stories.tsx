@@ -73,6 +73,9 @@ const rows = {
   today: [
     row(DAY, 600, 'confirmed', 'Gözel A.', 'Women’s haircut', { source: 'phone' }),
     row(DAY, 720, 'completed', 'Bahar N.', 'Manicure', { client: { id: null, name: 'Bahar N.', phone: null, isNew: true } }),
+    row(DAY, 840, 'pending', 'Leýli G.', 'Gel manicure', {
+      items: [{ serviceId: id(6), service: 'Gel manicure', staffId: id(3), staff: 'Jeren', start: 840, end: 900 }],
+    }),
   ],
   upcoming: [row(LATER, 660, 'confirmed', 'Jemal B.', 'Pedicure')],
   past: [] as BookingRow[],
@@ -134,7 +137,17 @@ const answer = (request: Request, level: Workspace['level'], more: boolean, none
   if (/^POST \/w\/glow-studio\/requests\/[^/]+\/(confirm|decline)$/.test(route)) return json({})
   if (route === 'GET /w/glow-studio/services')
     return json({
-      groups: [{ id: id(1), name: { en: 'Hair' }, services: [{ id: id(5), name: { en: 'Women’s haircut' }, staffIds: [id(2)] }] }],
+      groups: [
+        { id: id(1), name: { en: 'Hair' }, services: [{ id: id(5), name: { en: 'Women’s haircut' }, staffIds: [id(2)] }] },
+        {
+          id: id(4),
+          name: { en: 'Nails' },
+          services: [
+            { id: id(6), name: { en: 'Gel manicure' }, staffIds: [id(3)] },
+            { id: id(7), name: { en: 'Pedicure' }, staffIds: [id(3)] },
+          ],
+        },
+      ],
     })
   if (route === 'GET /w/glow-studio/settings/hours') return json({ hours: [], specialDays: [] })
   if (route === 'GET /w/glow-studio/settings/statuses') return json({ items: [], max: 5 })
@@ -148,9 +161,20 @@ const answer = (request: Request, level: Workspace['level'], more: boolean, none
   if (route === 'GET /w/glow-studio/bookings') {
     const tab = url.searchParams.get('tab') as keyof typeof rows
     const q = url.searchParams.get('q')?.toLowerCase()
-    const items = rows[tab].filter((r) => !q || r.client.name?.toLowerCase().includes(q) || r.code.toLowerCase().includes(q))
-    if (more && !url.searchParams.get('cursor')) return json({ items: items.slice(0, 1), cursor: 'next' })
-    return json({ items: more ? items.slice(1) : items, cursor: null })
+    // several specialists, services and statuses come comma-separated; a list matches any of its values
+    const listed = (key: string) => url.searchParams.get(key)?.split(',') ?? []
+    const [staff, service, status] = [listed('staff'), listed('service'), listed('status')]
+    const found = rows[tab].filter(
+      (r) =>
+        (!q || r.client.name?.toLowerCase().includes(q) || r.code.toLowerCase().includes(q)) &&
+        (!staff.length || r.items.some((i) => staff.includes(i.staffId ?? ''))) &&
+        (!service.length || r.items.some((i) => service.includes(i.serviceId ?? ''))) &&
+        (!status.length || status.includes(r.status)),
+    )
+    const items = url.searchParams.get('sort') === 'latest' ? [...found].reverse() : found
+    const counts = { total: items.length, tabTotal: rows[tab].length }
+    if (more && !url.searchParams.get('cursor')) return json({ items: items.slice(0, 1), ...counts, cursor: 'next' })
+    return json({ items: more ? items.slice(1) : items, ...counts, cursor: null })
   }
   const one = /^GET \/w\/glow-studio\/bookings\/([^/]+)$/.exec(route)
   if (one) {
@@ -229,14 +253,16 @@ export const Search: Story = {
   },
 }
 
-/** The filter bar (DS-Lists A5): Service picks one, the chip and the count show on row 2, the address keeps it, Clear all clears. */
+/** The filter bar (DS-Lists A5): Service ticks one (grouped), the chip and «N of M» show on row 2, the address keeps it, Clear all clears. */
 export const Filters: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('table', { name: 'Bookings' })
     await userEvent.click(canvas.getByRole('combobox', { name: 'Service' }))
-    await userEvent.click(within(await page.findByRole('listbox')).getByRole('option', { name: 'Women’s haircut' }))
-    await expect(await canvas.findByRole('combobox', { name: 'Service · Women’s haircut' })).toBeVisible()
+    await userEvent.click(within(await page.findByRole('listbox')).getByRole('option', { name: /Women’s haircut/ }))
+    await userEvent.keyboard('{Escape}')
+    await expect(await canvas.findByRole('combobox', { name: 'Service · 1' })).toBeVisible()
     await expect(canvas.getByText('Service: Women’s haircut')).toBeVisible()
+    await expect(await canvas.findByText('2 of 3 bookings')).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Export CSV' })).toHaveAttribute('href', expect.stringContaining('service='))
     await userEvent.click(canvas.getByRole('combobox', { name: 'Date' }))
     await userEvent.click(within(await page.findByRole('listbox')).getByRole('option', { name: 'Tomorrow' }))
@@ -252,7 +278,48 @@ export const OldLink: Story = {
   args: { path: '/w/glow-studio/bookings?tab=today&when=week&staff=00000000-0000-4000-8000-000000000003' },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('combobox', { name: 'Date · This week' })).toBeVisible()
-    await expect(await canvas.findByRole('combobox', { name: 'Specialist · Jeren' })).toBeVisible()
+    await expect(await canvas.findByRole('combobox', { name: 'Specialist · 1' })).toBeVisible()
+    await expect(canvas.getByText('Specialist: Jeren')).toBeVisible()
+  },
+}
+
+/** Several specialists and a status ticked, the order changed: the triggers count, «N of M», the address and the export keep them. */
+export const SeveralFilters: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('table', { name: 'Bookings' })
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Specialist' }))
+    const people = await page.findByRole('listbox')
+    await userEvent.click(within(people).getByRole('option', { name: /Maral/ }))
+    await userEvent.click(within(people).getByRole('option', { name: /Jeren/ }))
+    await userEvent.keyboard('{Escape}')
+    await expect(await canvas.findByRole('combobox', { name: 'Specialist · 2' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Status' }))
+    const statuses = await page.findByRole('listbox')
+    await userEvent.click(within(statuses).getByRole('option', { name: /Pending/ }))
+    await userEvent.click(within(statuses).getByRole('option', { name: /Confirmed/ }))
+    await userEvent.keyboard('{Escape}')
+    await expect(await canvas.findByText('2 of 3 bookings')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Sort: Time, soonest first' }))
+    await userEvent.click(within(await page.findByRole('listbox')).getByRole('option', { name: 'Time, latest first' }))
+    await expect(await canvas.findByRole('button', { name: 'Sort: Time, latest first' })).toBeVisible()
+    const names = within(canvas.getByRole('table', { name: 'Bookings' })).getAllByRole('button', { name: /Leýli G\.|Gözel A\./ })
+    await expect(names.map((b) => b.textContent).filter(Boolean)).toEqual(['Leýli G.', 'Gözel A.'])
+    await expect(canvas.getByRole('link', { name: 'Export CSV' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/status=(pending|confirmed)(%2C|,)/),
+    )
+  },
+}
+
+/** A link with several values in each filter and an order opens as it was (the 1440 screenshot). */
+export const SeveralFromLink: Story = {
+  args: {
+    path: `/w/glow-studio/bookings?tab=today&staff=${id(2)},${id(3)}&service=${id(5)},${id(6)}&status=pending,confirmed&sortBy=latest`,
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('2 of 3 bookings')).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Service · 2' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Sort: Time, latest first' })).toBeVisible()
   },
 }
 

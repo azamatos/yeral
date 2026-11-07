@@ -1600,6 +1600,13 @@
     "serviceFilter": "Service",
     "allServices": "All services",
     "dateFilter": "Date",
+    "statusFilter": "Status",
+    "sort": "Sort",
+    "sorts": {
+      "soonest": "Time, soonest first",
+      "latest": "Time, latest first",
+      "booked": "Booked, newest first"
+    },
     "allTime": "All time",
     "clear": "Clear",
     "clearFilters": "Clear filters",
@@ -1693,7 +1700,7 @@
       "remove": "Remove {chip}",
       "nothingMatches": "Nothing matches “{q}”",
       "count": "{n, plural, one {# booking} other {# bookings}}",
-      "shown": "{n} shown"
+      "of": "{n} of {total, plural, one {# booking} other {# bookings}}"
     }
   },
   "clients": {

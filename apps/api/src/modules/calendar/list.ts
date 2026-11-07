@@ -7,6 +7,7 @@
 import type { bookingExportQuerySchema, bookingFiltersSchema, bookingListQuerySchema, bookingRowSchema } from '@yeral/contract/calendar'
 import { currentBusinessDate } from '@yeral/domain/hours'
 import { effectiveStatus } from '@yeral/domain/lifecycle'
+import type { BookingStatus } from '@yeral/domain/model'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { formatPhone } from '@yeral/domain/phone'
 import { createFmt, createT } from '@yeral/i18n/fmt'
@@ -18,7 +19,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { groupBy } from '../../lib/group'
 import { loadHours } from '../availability/context'
-import { itemsOfBookings, ranOutAt, stateOf, type BookingRow } from '../bookings/repo'
+import { itemsOfBookings, ranOutAt, spanMinuteAt, stateOf, type BookingRow } from '../bookings/repo'
 import { teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { text } from '../catalog/map'
 import { likeOf, phoneLike } from '../catalog/search'
@@ -33,9 +34,28 @@ type Row = z.infer<typeof bookingRowSchema>
 /** The most rows one export holds, in the tab's order; the response says how many matched (`X-Total-Count`). */
 export const EXPORT_MAX = 10_000
 
-/** The booking has an item of this service. */
-const withService = (serviceId: string) =>
-  sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${bookings.id} and ${bookingItems.serviceId} = ${serviceId})`
+/** The booking has an item of one of these services. */
+const withServices = (serviceIds: string[]) =>
+  sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${bookings.id} and ${inArray(bookingItems.serviceId, serviceIds)})`
+
+/** The booking has an item with one of these specialists. */
+const withStaffIn = (staffIds: string[]) =>
+  sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${bookings.id} and ${inArray(bookingItems.staffId, staffIds)})`
+
+/**
+ * A status as people see it now (`effectiveStatus`): a request that ran out is cancelled, a confirmed visit that ended
+ * is completed.
+ */
+function statusOf(status: BookingStatus, now: number): SQL {
+  const ended = sql`upper(${bookings.span}) <= ${spanMinuteAt(now)}`
+  return {
+    pending: sql`(${bookings.status} = 'pending' and not ${ranOutAt(now)})`,
+    confirmed: sql`(${bookings.status} = 'confirmed' and not ${ended})`,
+    completed: sql`(${bookings.status} = 'completed' or (${bookings.status} = 'confirmed' and ${ended}))`,
+    cancelled: sql`(${bookings.status} = 'cancelled' or ${ranOutAt(now)})`,
+    noshow: sql`${bookings.status} = 'noshow'`,
+  }[status]
+}
 
 /**
  * A booking code, a client's name (as on the booking, or as the team keeps it on the card now), or digits of their
@@ -51,9 +71,18 @@ function searchOf(q: string | undefined): SQL | undefined {
   )
 }
 
-/** The tab, the reader's reach and the filters; a specialist asking for someone else's is refused. */
-async function whereOf(db: Queryable, business: Business, actor: Actor, q: Filters & { codes?: string[] }, now: number): Promise<SQL> {
-  if (q.staff && !canOn(actor, 'calendar', [q.staff])) throw new ApiError('forbidden')
+/**
+ * The tab and the reader's reach (`tab`), and with the filters (`filtered`); a specialist asking for someone else's is
+ * refused.
+ */
+async function whereOf(
+  db: Queryable,
+  business: Business,
+  actor: Actor,
+  q: Filters & { codes?: string[] },
+  now: number,
+): Promise<{ tab: SQL; filtered: SQL }> {
+  if (q.staff?.some((id) => !canOn(actor, 'calendar', [id]))) throw new ApiError('forbidden')
   const today = currentBusinessDate(await loadHours(db, business.id), now)
   const cancelled = sql`(${bookings.status} = 'cancelled' or ${ranOutAt(now)})`
   const tab = {
@@ -63,41 +92,49 @@ async function whereOf(db: Queryable, business: Business, actor: Actor, q: Filte
     cancelled,
   }[q.tab]
   const own = scopeOf(actor, 'calendar') === 'own' ? actor.staffId : null
-  return and(
-    eq(bookings.businessId, business.id),
-    isNull(bookings.rescheduleOf),
-    tab,
-    own ? withStaff(own) : undefined,
-    q.staff ? withStaff(q.staff) : undefined,
-    q.service ? withService(q.service) : undefined,
+  const reach = and(eq(bookings.businessId, business.id), isNull(bookings.rescheduleOf), tab, own ? withStaff(own) : undefined)!
+  const filtered = and(
+    reach,
+    q.staff ? withStaffIn(q.staff) : undefined,
+    q.service ? withServices(q.service) : undefined,
+    q.status ? or(...q.status.map((s) => statusOf(s, now))) : undefined,
+    q.source ? inArray(bookings.source, q.source) : undefined,
     q.from ? gte(bookings.date, q.from) : undefined,
     q.to ? lte(bookings.date, q.to) : undefined,
     q.codes ? inArray(bookings.code, q.codes) : undefined,
     searchOf(q.q),
   )!
+  return { tab: reach, filtered }
 }
 
-/** Today's and those ahead the soonest first; the past and the cancelled the newest first. */
-const orderOf = (tab: Filters['tab']) =>
-  tab === 'today' || tab === 'upcoming'
+/** The asked order; by default today's and those ahead the soonest first, the past and the cancelled the newest first. */
+function orderOf(q: Pick<Filters, 'tab' | 'sort'>) {
+  const sort = q.sort ?? (q.tab === 'today' || q.tab === 'upcoming' ? 'soonest' : 'latest')
+  if (sort === 'booked') return [desc(bookings.createdAt), asc(bookings.code)]
+  return sort === 'soonest'
     ? [asc(bookings.date), asc(bookings.start), asc(bookings.code)]
     : [desc(bookings.date), desc(bookings.start), asc(bookings.code)]
+}
 
 /** The rows of one page or export, and how many match in all (counted again when the page is past the end). */
-async function rowsOf(db: Queryable, where: SQL, tab: Filters['tab'], limit: number, offset: number) {
+async function rowsOf(db: Queryable, where: SQL, q: Pick<Filters, 'tab' | 'sort'>, limit: number, offset: number) {
   const found = await db
     .select({ b: bookings, total: sql<number>`(count(*) over ())::int` })
     .from(bookings)
     .where(where)
-    .orderBy(...orderOf(tab))
+    .orderBy(...orderOf(q))
     .limit(limit)
     .offset(offset)
   if (found[0] || !offset) return { rows: found.map((f) => f.b), total: found[0]?.total ?? 0 }
+  return { rows: [], total: await countOf(db, where) }
+}
+
+async function countOf(db: Queryable, where: SQL): Promise<number> {
   const [counted] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(bookings)
     .where(where)
-  return { rows: [], total: counted?.n ?? 0 }
+  return counted?.n ?? 0
 }
 
 export async function bookingList(
@@ -105,11 +142,16 @@ export async function bookingList(
   business: Business,
   actor: Actor,
   q: ListQuery,
-): Promise<{ items: Row[]; total: number; cursor: string | null }> {
+): Promise<{ items: Row[]; total: number; tabTotal: number; cursor: string | null }> {
   const { db } = deps
   const now = deps.now()
   const offset = Number(q.cursor ?? 0)
-  const { rows, total } = await rowsOf(db, await whereOf(db, business, actor, q, now), q.tab, q.limit, offset)
+  const where = await whereOf(db, business, actor, q, now)
+  const filtered = !!(q.q || q.staff || q.service || q.status || q.source || q.from || q.to)
+  const [{ rows, total }, tabTotal] = await all(db, [
+    () => rowsOf(db, where.filtered, q, q.limit, offset),
+    async () => (filtered ? countOf(db, where.tab) : null),
+  ])
   const clientIds = [...new Set(rows.flatMap((b) => (b.clientId ? [b.clientId] : [])))]
   const [items, facts] = await all(db, [
     () =>
@@ -145,6 +187,7 @@ export async function bookingList(
       }
     }),
     total,
+    tabTotal: tabTotal ?? total,
     cursor: offset + q.limit < total ? String(offset + q.limit) : null,
   }
 }
@@ -174,7 +217,7 @@ export async function exportBookings(
   if (scopeOf(actor, 'calendar') !== 'all') throw new ApiError('forbidden')
   const { db } = deps
   const now = deps.now()
-  const { rows, total } = await rowsOf(db, await whereOf(db, business, actor, q, now), q.tab, EXPORT_MAX, 0)
+  const { rows, total } = await rowsOf(db, (await whereOf(db, business, actor, q, now)).filtered, q, EXPORT_MAX, 0)
   const itemsBy = groupBy(
     await itemsOfBookings(
       db,
