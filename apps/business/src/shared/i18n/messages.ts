@@ -5,12 +5,14 @@
  */
 import { DEFAULT_LOCALE, isLocale, MARKET_LOCALES, messages as shared, appMessages, type Locale, type SharedMessages } from '@yeral/i18n'
 import en from '../../../messages/en.json'
+import ru from '../../../messages/ru.json'
+import tk from '../../../messages/tk.json'
 
 export type BusinessMessages = typeof en
 export type Messages = SharedMessages & BusinessMessages
 
-/** The app's namespaces per language. The first launch offers English only (`MARKET_LOCALES`). */
-export const BUSINESS_MESSAGES: Partial<Record<Locale, BusinessMessages>> = { en }
+/** The app's namespaces per language: the market's (`MARKET_LOCALES`), each with every key of the English source. */
+export const BUSINESS_MESSAGES: Partial<Record<Locale, BusinessMessages>> = { en, tk, ru }
 
 /**
  * The language the app speaks: the person's own when this market offers it (the business app takes it from the

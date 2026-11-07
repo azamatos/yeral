@@ -91,10 +91,10 @@ describe('phoneRules', () => {
   })
 })
 
-describe('the first launch', () => {
-  it('serves Turkmenistan in English only (book chapter 1, ADR 0022)', () => {
+describe('the Turkmenistan market', () => {
+  it('offers Turkmen, Russian and English, English the main one until the client site is translated (ADR 0022, book Q-292)', () => {
     expect(MARKET.code).toBe('tm')
-    expect(MARKET.languages).toEqual(['en'])
+    expect(MARKET.languages).toEqual(['tk', 'ru', 'en'])
     expect(MARKET.defaultLanguage).toBe('en')
   })
 })

@@ -67,12 +67,14 @@ export function phoneRules(rules: Omit<PhoneRules, 'mobile'>): PhoneRules {
 }
 
 /**
- * Turkmenistan: manats, +993 numbers, Ashgabat time (UTC+5, no daylight saving). The first launch offers English only;
- * Turkmen and Russian join for the Turkmenistan launch (book chapter 1, "Launch"; ADR 0022).
+ * Turkmenistan: manats, +993 numbers, Ashgabat time (UTC+5, no daylight saving). Turkmen and Russian joined English on
+ * 2026-11-07 (book chapter 1, "Launch"; ADR 0022): the business app and the api's texts speak them; the client site
+ * offers a language once it has its words (`SITE_LOCALES`). English stays the main language until the client site is
+ * translated; then it becomes Turkmen (book Q-292).
  */
 export const TURKMENISTAN: Market = {
   code: 'tm',
-  languages: ['en'],
+  languages: ['tk', 'ru', 'en'],
   defaultLanguage: 'en',
   currency: 'TMT',
   timeZone: 'Asia/Ashgabat',
