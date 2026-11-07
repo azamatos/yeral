@@ -58,14 +58,21 @@ export async function chooseAndSignIn(page: Page, phone: string, opts: { staff?:
   const specialists = page.getByRole('group', { name: 'Specialist' })
   await expect(specialists.getByRole('button', { name: /^Any specialist/ })).toBeVisible()
   // the second service comes from the services step (the summary's «Add a service» does the same from 1024): Back
-  // opens it with the first one picked (its row shows the check, `aria-pressed`), and one more pick moves on by itself
+  // opens it with the first one picked (its row shows the check, `aria-pressed`), and one more pick moves on by itself.
+  // The rows are the step's only buttons, inside `main`: to Playwright a button without `aria-pressed` (the header's
+  // steps, the summary's) counts as `pressed: false` too, so the page as a whole would give the stepper's first step
+  const main = page.getByRole('main')
   await page.getByRole('button', { name: 'Back' }).click()
-  await expect(page.getByRole('button', { pressed: true })).toHaveCount(1)
-  await page.getByRole('button', { pressed: false }).first().click()
+  await expect(main.getByRole('button', { pressed: true })).toHaveCount(1)
+  await main.getByRole('button', { pressed: false }).first().click()
 
   // a pick moves on by itself (design v0.7 · C4, the owner's #39): the rows are buttons with a chevron, «Any
-  // specialist» first; no Continue on the specialist step
-  if (opts.staff === 'first') await specialists.getByRole('button').nth(1).click()
+  // specialist» first, then only the people who do every picked service; no Continue on the specialist step
+  if (opts.staff === 'first')
+    await specialists
+      .getByRole('button', { name: /^(?!Any specialist)/ })
+      .first()
+      .click()
   else await specialists.getByRole('button', { name: /^Any specialist/ }).click()
 
   const time = await pickFirstFreeTime(page)
