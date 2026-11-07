@@ -564,15 +564,21 @@ function MemberEditor({
           </Button>
         )}
         {canSave ? (
-          <Button
-            variant="primary"
-            disabled={!dirty || !valid || offSaving}
-            loading={saving}
-            loadingLabel={t('saving')}
-            onClick={() => void save()}
-          >
-            {t('save')}
-          </Button>
+          // Cancel · Save on the right (B7-Team member footer); Remove from the team sits on the left
+          <span className="flex items-center gap-2">
+            <Button variant="secondary" disabled={saving} onClick={onClose}>
+              {t('cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              disabled={!dirty || !valid || offSaving}
+              loading={saving}
+              loadingLabel={t('saving')}
+              onClick={() => void save()}
+            >
+              {t('save')}
+            </Button>
+          </span>
         ) : (
           <Button variant="secondary" disabled={saving} onClick={onClose}>
             {t('close')}

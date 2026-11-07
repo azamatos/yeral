@@ -8,6 +8,9 @@ export type InfoTipProps = {
   label: string
   /** What the popover says: one or two sentences. */
   children: ReactNode
+  /** Where the popover opens; below and from the start by default. */
+  side?: 'top' | 'bottom'
+  align?: 'start' | 'center' | 'end'
   className?: string
 }
 
@@ -16,7 +19,7 @@ export type InfoTipProps = {
  * popover (13/18, padding 12, r10, raised) on click, tap or Enter; Esc and an outside click close it. It replaces the
  * hint lines under fields. The words come from the caller.
  */
-export function InfoTip({ label, children, className }: InfoTipProps) {
+export function InfoTip({ label, children, side = 'bottom', align = 'start', className }: InfoTipProps) {
   return (
     <PopoverPrimitive.Root>
       <PopoverPrimitive.Trigger
@@ -33,8 +36,8 @@ export function InfoTip({ label, children, className }: InfoTipProps) {
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
           aria-label={label}
-          side="bottom"
-          align="start"
+          side={side}
+          align={align}
           sideOffset={6}
           collisionPadding={16}
           className="z-70 w-70 max-w-[calc(100vw-32px)] rounded-ctl-m border border-n-200 bg-n-0 p-3 text-dense font-normal text-n-900 shadow-raised outline-none data-[state=open]:animate-pop-in"

@@ -204,9 +204,9 @@ const json = (body: unknown, status = 200) =>
 
 /** The api as the shell and this section ask it. */
 const fakeApi =
-  (level: Workspace['level']): (() => typeof fetch) =>
+  (level: Workspace['level'], extra: TeamMember[] = []): (() => typeof fetch) =>
   () => {
-    let people = team
+    let people = [...team, ...extra]
     let staffed = menu
     const schedules = new Map<string, Schedule>()
     return async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -354,35 +354,83 @@ type Story = StoryObj<typeof meta>
 
 const body = within(document.body)
 
-/** The owner's team: the groups, each row's level, services, hours and status. */
+const row = (canvas: typeof body, name: RegExp) => within(canvas.getByRole('row', { name }))
+
+/**
+ * The owner's team as one table (design v0.7 · B9): everyone with their level, whether they take bookings, services,
+ * hours and one status pill; the invites and the removed people are rows of the same table.
+ */
 export const Owner: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 2, name: 'Team' })).toBeVisible()
-    const specialists = within(await canvas.findByRole('group', { name: 'Specialists' }))
-    await expect(specialists.getByText('Maral Ataýewa')).toBeVisible()
-    await expect(await specialists.findByText('2 services')).toBeVisible()
-    await expect(await specialists.findByText('Own shift')).toBeVisible()
-    await expect(specialists.getByText('12:00–19:00')).toBeVisible()
-    // Leýli works without the app until she accepts her invite
-    await expect(specialists.getByText('Doesn’t use the app')).toBeVisible()
-    await expect(specialists.getByText('works without the app until they accept')).toBeVisible()
-    const management = within(canvas.getByRole('group', { name: 'Management' }))
-    await expect(management.getByText('You')).toBeVisible()
-    const invites = within(canvas.getByRole('group', { name: 'Invites' }))
-    await expect(invites.getByText('6 days left')).toBeVisible()
-    await expect(invites.getByText('They’ll see the invite when they sign in with +993 64 •• •• 90')).toBeVisible()
-    await expect(invites.getByText('Expired')).toBeVisible()
-    await expect(within(canvas.getByRole('group', { name: 'No longer on the team' })).getByText('Removed')).toBeVisible()
+    const table = within(await canvas.findByRole('table', { name: 'Team' }))
+    // no groups: the owner's row is a row like the others, marked «You»
+    await expect(canvas.queryByRole('group')).toBeNull()
+    await expect(row(table, /Maýsa Annaýewa/).getByText('You')).toBeVisible()
+    await expect(row(table, /Maýsa Annaýewa/).getByText('Doesn’t take bookings')).toBeInTheDocument()
+    const maral = row(table, /Maral Ataýewa/)
+    await expect(maral.getByText('Yes')).toBeInTheDocument()
+    await expect(maral.getByText('2')).toBeVisible()
+    await expect(await maral.findByText('Business hours')).toBeVisible()
+    await expect(maral.getByText('Active')).toBeVisible()
+    // Jeren's own shift as its one time range
+    await expect(await row(table, /Jeren Hojaýewa/).findByText('12:00–19:00')).toBeVisible()
+    // Leýli doesn't use the app: one neutral pill, no second line
+    await expect(row(table, /Leýli Berdiýewa/).getByText('Doesn’t use the app')).toBeVisible()
+    await expect(row(table, /Gülnar Öwezowa/).getByText(/^Invited · until /)).toBeVisible()
+    await expect(row(table, /Ogul/).getByText(/^Expired · /)).toBeVisible()
+    await expect(row(table, /Aýna Myradowa/).getByText(/^Removed · /)).toBeVisible()
+    await expect(row(table, /Bahar Nurlyýewa/).getByText('Left · today')).toBeVisible()
+    await expect(canvas.getByText('9 people')).toBeVisible()
+    // «Takes bookings» ⓘ
+    await userEvent.click(table.getByRole('button', { name: 'About takes bookings' }))
+    await expect(await body.findByRole('dialog')).toHaveTextContent(/Anyone with at least one service takes bookings/)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument())
     await waitFor(() => expect(document.title).toBe('Team · Settings · Glow Studio · Ýeral Business'))
   },
 }
 
-/** «Copy invite link»: the link comes with a resend (the api keeps only its hash), then it's on the clipboard. */
+/** The job title sits in the name's tooltip; a long name stays on one line and truncates. */
+export const LongName: Story = {
+  args: {
+    server: fakeApi('owner', [
+      person('long', 'Ogulgerek', 'specialist', {
+        fullName: 'Ogulgerek Annagurbanowa-Hojamuhammedowa',
+        specialization: 'Massage therapist and beautician',
+      }),
+    ]),
+  },
+  play: async ({ canvas }) => {
+    const name = await canvas.findByRole('button', { name: 'Ogulgerek Annagurbanowa-Hojamuhammedowa' })
+    await expect(name).toHaveClass('truncate')
+    await userEvent.hover(name)
+    await expect(await body.findByRole('tooltip')).toHaveTextContent('Massage therapist and beautician')
+  },
+}
+
+/** Search by name or phone and the two filters narrow the table; Clear brings everyone back. */
+export const Filtered: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.type(await canvas.findByRole('textbox', { name: 'Name or phone number' }), '65 99')
+    await waitFor(() => expect(canvas.getByText('1 person')).toBeVisible())
+    await expect(canvas.getByRole('row', { name: /Aýna Myradowa/ })).toBeVisible()
+    await userEvent.clear(canvas.getByRole('textbox', { name: 'Name or phone number' }))
+    await pick(canvas.getByRole('combobox', { name: 'Takes bookings' }), 'Doesn’t take bookings')
+    await waitFor(() => expect(canvas.queryByRole('row', { name: /Maral Ataýewa/ })).toBeNull())
+    await expect(canvas.getByRole('row', { name: /Selbi Orazowa/ })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear' }))
+    await waitFor(() => expect(canvas.getByText('9 people')).toBeVisible())
+  },
+}
+
+/** «Copy invite link» from the invite's menu: the link comes with a resend (the api keeps only its hash), then it's on the clipboard. */
 export const CopyInviteLink: Story = {
   play: async ({ canvas }) => {
     const write = spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined)
     try {
-      await userEvent.click(await canvas.findByRole('button', { name: 'Copy invite link: Gülnar Öwezowa' }))
+      await userEvent.click(await canvas.findByRole('button', { name: 'Gülnar Öwezowa: actions' }))
+      await userEvent.click(await body.findByRole('menuitem', { name: 'Copy invite link' }))
       const dialog = within(await body.findByRole('dialog', { name: 'Invite link for Gülnar Öwezowa' }))
       await userEvent.click(await dialog.findByRole('button', { name: 'Copy' }))
       await expect(write).toHaveBeenCalledWith('https://business.yeral.localhost/invite/gulnar-token-0123456789')
@@ -477,7 +525,7 @@ export const AddMember: Story = {
       const sent = await body.findByText(/^Invite sent to Gülşat · valid until/)
       await waitFor(() => expect(sent).toBeVisible())
       await expect(body.queryByRole('dialog', { name: 'Add a team member' })).toBeNull()
-      await expect(await within(canvas.getByRole('group', { name: 'Invites' })).findByText('Gülşat')).toBeVisible()
+      await expect(await canvas.findByRole('row', { name: /Gülşat/ })).toHaveTextContent(/Invited · until/)
       await userEvent.click(within(sent.closest<HTMLElement>('[data-sonner-toast]')!).getByRole('button', { name: 'Copy invite link' }))
       const link = within(await body.findByRole('dialog', { name: 'Invite link for Gülşat' }))
       await userEvent.click(await link.findByRole('button', { name: 'Copy' }))
@@ -610,8 +658,8 @@ export const DrawerServices: Story = {
     await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
     const saved = await body.findByText('Jeren: changes saved')
     await waitFor(() => expect(saved).toBeVisible())
-    const specialists = within(canvas.getByRole('group', { name: 'Specialists' }))
-    await expect(await specialists.findByText('3 services')).toBeVisible()
+    // the Services count on her row follows
+    await waitFor(() => expect(within(canvas.getByRole('row', { name: /Jeren Hojaýewa/ })).getByText('3')).toBeVisible())
   },
 }
 
@@ -710,7 +758,10 @@ export const RemoveNothingAhead: Story = {
     await userEvent.click(modal.getByRole('button', { name: 'Remove Jeren' }))
     const done = await body.findByText('Jeren removed from the team')
     await waitFor(() => expect(done).toBeVisible())
-    await expect(await within(canvas.getByRole('group', { name: 'No longer on the team' })).findByText('Jeren Hojaýewa')).toBeVisible()
+    // her row stays, dimmed, with «Removed» and Reactivate instead of opening the member page
+    await waitFor(() => expect(canvas.getByRole('row', { name: /Jeren Hojaýewa/ })).toHaveTextContent('Removed'))
+    await expect(canvas.getByRole('button', { name: 'Reactivate: Jeren Hojaýewa' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Jeren Hojaýewa' })).toBeNull()
   },
 }
 
@@ -764,23 +815,36 @@ export const DrawerPhone: Story = {
   },
 }
 
-/** The administrator sees the team with a note, and nothing to change here. */
+/** The administrator sees the same table with a note, and no row action: nothing to change here. */
 export const Admin: Story = {
   args: { server: fakeApi('admin') },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText(/Only the owner adds and removes people/)).toBeVisible()
     await expect(await canvas.findByText('Maral Ataýewa')).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Add a team member' })).toBeNull()
-    await expect(canvas.queryByRole('button', { name: /^Copy invite link: / })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: /: actions$/ })).toBeNull()
     await expect(canvas.queryByRole('button', { name: /^Reactivate: / })).toBeNull()
   },
 }
 
-/** Under 1024: each row's level, services and hours in one line under the name, the status under it. */
+/** Under 1024 the table keeps its columns and scrolls inside its box. */
 export const Tablet: Story = { globals: { viewport: { value: 'sm' } } }
 
-/** The phone. */
-export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+/** The phone: people as list items — name and level, then the job and services, a status pill when it isn't Active. */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('button', { name: 'Maral Ataýewa' })).toBeVisible()
+    await expect(canvas.queryByRole('table')).toBeNull()
+    const items = within(canvas.getByRole('list', { name: 'Team' })).getAllByRole('listitem')
+    await expect(items).toHaveLength(9)
+    await expect(items[2]).toHaveTextContent('Maral AtaýewaSpecialistNail artist · 2 services')
+    await expect(items[0]).toHaveTextContent('Maýsa AnnaýewaYouOwnerDoesn’t take bookings')
+    await expect(within(items[0]!).queryByText('Active')).toBeNull()
+    await expect(within(items[5]!).getByText(/^Invited · until /)).toBeVisible()
+    await expect(within(items[7]!).getByRole('button', { name: 'Reactivate: Aýna Myradowa' })).toBeVisible()
+  },
+}
 
 /** An own shift's break as the gap between two times; a first time that ends after the second starts is refused. */
 export const DrawerBreakInvalid: Story = {
