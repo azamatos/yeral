@@ -8,8 +8,7 @@ import { today } from '@yeral/domain/time'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { EmptyState } from '@yeral/ui/empty-state'
-import { Input } from '@yeral/ui/input'
-import { Select } from '@yeral/ui/select'
+import { FilterBar, type FilterBarLabels, type FilterDef } from '@yeral/ui/filter-bar'
 import { Spinner } from '@yeral/ui/spinner'
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { CalendarX2, Download, SearchX } from 'lucide-react'
@@ -22,11 +21,8 @@ import { rangeOf, type BookingsSearch, type BookingsTab, type BookingsWhen } fro
 import { BookingsTable } from './bookings-table'
 import { RequestsTab } from './requests-tab'
 
-/** A filter's value for «All …», no search param. */
-const ALL = 'all'
-
 /**
- * The bookings list (B-Bookings, book B-30): the tabs Today · Upcoming · Past · Cancelled, the filters (search by client,
+ * The bookings list (B-Bookings, book B-30; design v0.7 B8): the tabs Today · Upcoming · Past · Cancelled, the filters (search by client,
  * number or code; specialist; service; date), «Show more», Export CSV, the same drawers as the calendar by `?booking=`
  * and `?request=`. Everything on the page is in its address. A specialist reads their own rows.
  */
@@ -60,7 +56,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
     return () => clearTimeout(timer)
   })
 
-  const filters = {
+  const query = {
     tab: requests ? ('today' as const) : tab,
     q: search.q,
     staff: search.staff,
@@ -68,10 +64,22 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
     ...rangeOf(search.when, todayDate),
     lang: locale,
   }
-  const list = useInfiniteQuery({ ...sdk.calendar.bookings(slug, filters), placeholderData: keepPreviousData, enabled: !requests })
+  const list = useInfiniteQuery({ ...sdk.calendar.bookings(slug, query), placeholderData: keepPreviousData, enabled: !requests })
   const waiting = useQuery(sdk.requests.list(slug)).data?.items.length ?? 0
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
   const filtered = !!(search.q || search.staff || search.service || search.when)
+  const f = useTranslations('bookings.filters')
+  const labels: FilterBarLabels = {
+    filters: f('filters'),
+    clearAll: f('clearAll'),
+    clear: t('clear'),
+    close: f('close'),
+    back: f('back'),
+    showResults: f('showResults'),
+    searchIn: f('searchIn'),
+    remove: (chip) => f('remove', { chip }),
+    nothingMatches: (q) => f('nothingMatches', { q }),
+  }
 
   // who and what the filters offer: the calendar's people, the menu
   const people = useQuery({ ...sdk.calendar.view(slug, { date: todayDate, days: 1, lang: locale }), enabled: !specialist })
@@ -96,74 +104,61 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
 
   if (list.isError && !list.data) throw list.error
 
+  // the bar's menus (DS-Lists A5): the api filters one specialist and one service, so both stay single
+  const filters: FilterDef[] = [
+    ...(specialist
+      ? []
+      : [
+          {
+            id: 'staff',
+            label: t('staffFilter'),
+            anyLabel: t('allStaff'),
+            value: search.staff ?? null,
+            onValueChange: (v: string | null) => go({ staff: v ?? undefined }),
+            options: (people.data?.columns ?? []).map((c) => ({ value: c.staffId, label: c.name })),
+          },
+        ]),
+    {
+      id: 'service',
+      label: t('serviceFilter'),
+      anyLabel: t('allServices'),
+      value: search.service ?? null,
+      onValueChange: (v) => go({ service: v ?? undefined }),
+      options: (menu.data?.groups ?? []).map((g) => ({
+        label: localized(g.name, locale),
+        options: g.services.map((s) => ({ value: s.id, label: localized(s.name, locale) })),
+      })),
+    },
+    {
+      id: 'when',
+      label: t('dateFilter'),
+      anyLabel: t('allTime'),
+      value: search.when ?? null,
+      onValueChange: (v) => go({ when: (v as BookingsWhen | null) ?? undefined }),
+      options: (['today', 'tomorrow', 'week'] as const).map((value) => ({ value, label: t(`date.${value}`) })),
+    },
+  ]
+
   const body = (
     <>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          size="m"
-          aria-label={t('search')}
-          placeholder={t('search')}
-          className="w-full sm:w-72"
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-        />
-        {!specialist && (
-          <Select
-            size="m"
-            aria-label={t('staffFilter')}
-            className="w-auto max-sm:hidden"
-            listWidth="content"
-            value={search.staff ?? ALL}
-            onValueChange={(v) => go({ staff: v === ALL ? undefined : v })}
-            options={[
-              { value: ALL, label: t('allStaff') },
-              ...(people.data?.columns ?? []).map((c) => ({ value: c.staffId, label: c.name })),
-            ]}
-          />
-        )}
-        <Select
-          size="m"
-          aria-label={t('serviceFilter')}
-          className="w-auto max-sm:hidden"
-          listWidth="content"
-          value={search.service ?? ALL}
-          onValueChange={(v) => go({ service: v === ALL ? undefined : v })}
-          options={[
-            { value: ALL, label: t('allServices') },
-            ...(menu.data?.groups ?? []).map((g) => ({
-              label: localized(g.name, locale),
-              options: g.services.map((s) => ({ value: s.id, label: localized(s.name, locale) })),
-            })),
-          ]}
-        />
-        <Select
-          size="m"
-          aria-label={t('dateFilter')}
-          className="w-auto max-sm:hidden"
-          listWidth="content"
-          value={search.when ?? ALL}
-          onValueChange={(v) => go({ when: v === ALL ? undefined : (v as BookingsWhen) })}
-          options={[
-            { value: ALL, label: t('allTime') },
-            { value: 'today', label: t('dateToday') },
-            { value: 'week', label: t('dateWeek') },
-          ]}
-        />
-        {filtered && (
-          <Button variant="tertiary" size="s" onClick={clear}>
-            {t('clear')}
-          </Button>
-        )}
-        <span className="flex-1" />
-        {!specialist && rows.length > 0 && (
-          <Button asChild variant="secondary" size="s" className="max-sm:hidden">
-            <a href={sdk.calendar.exportUrl(slug, filters)} download>
-              <Download aria-hidden />
-              {t('export')}
-            </a>
-          </Button>
-        )}
-      </div>
+      <FilterBar
+        labels={labels}
+        search={{ value: typed, onChange: setTyped, placeholder: t('search') }}
+        filters={filters}
+        onClearAll={clear}
+        count={list.isPending ? undefined : f(list.hasNextPage ? 'shown' : 'count', { n: rows.length })}
+        action={
+          !specialist &&
+          rows.length > 0 && (
+            <Button asChild variant="secondary" size="m" className="max-sm:hidden">
+              <a href={sdk.calendar.exportUrl(slug, query)} download>
+                <Download aria-hidden />
+                {t('export')}
+              </a>
+            </Button>
+          )
+        }
+      />
       {list.isPending ? (
         <div className="flex justify-center py-16">
           <Spinner label={t('loading')} />
@@ -181,7 +176,7 @@ function Bookings({ slug, level }: { slug: string; level: Level }) {
             }
           />
         ) : (
-          <EmptyState icon={<CalendarX2 aria-hidden />} title={t(`empty.${filters.tab}`)} />
+          <EmptyState icon={<CalendarX2 aria-hidden />} title={t(`empty.${query.tab}`)} />
         )
       ) : (
         <>

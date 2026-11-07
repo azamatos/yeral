@@ -246,7 +246,8 @@ export function MultiSelect({
       {icon}
       <span className="flex min-w-0 items-center gap-2 truncate">
         {summary ?? (
-          <>
+          // one text run: the row's gap would split «Services · 3» around the dot
+          <span className="truncate">
             {label}
             {count > 0 && (
               <>
@@ -254,7 +255,7 @@ export function MultiSelect({
                 <span className="font-semibold">{count}</span>
               </>
             )}
-          </>
+          </span>
         )}
       </span>
       {loading ? (

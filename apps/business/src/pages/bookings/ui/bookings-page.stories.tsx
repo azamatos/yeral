@@ -229,6 +229,33 @@ export const Search: Story = {
   },
 }
 
+/** The filter bar (DS-Lists A5): Service picks one, the chip and the count show on row 2, the address keeps it, Clear all clears. */
+export const Filters: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('table', { name: 'Bookings' })
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Service' }))
+    await userEvent.click(within(await page.findByRole('listbox')).getByRole('option', { name: 'Women’s haircut' }))
+    await expect(await canvas.findByRole('combobox', { name: 'Service · Women’s haircut' })).toBeVisible()
+    await expect(canvas.getByText('Service: Women’s haircut')).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Export CSV' })).toHaveAttribute('href', expect.stringContaining('service='))
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Date' }))
+    await userEvent.click(within(await page.findByRole('listbox')).getByRole('option', { name: 'Tomorrow' }))
+    await expect(await canvas.findByText('Date: Tomorrow')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }))
+    await waitFor(() => expect(canvas.queryByText(/Service: |Date: /)).toBeNull())
+    await expect(canvas.getByRole('combobox', { name: 'Service' })).toBeVisible()
+  },
+}
+
+/** An old link's filters still open: the triggers read them. */
+export const OldLink: Story = {
+  args: { path: '/w/glow-studio/bookings?tab=today&when=week&staff=00000000-0000-4000-8000-000000000003' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('combobox', { name: 'Date · This week' })).toBeVisible()
+    await expect(await canvas.findByRole('combobox', { name: 'Specialist · Jeren' })).toBeVisible()
+  },
+}
+
 /** «Show more» adds the next page. */
 export const ShowMore: Story = {
   args: { server: fakeApi('owner', { more: true }) },
@@ -271,10 +298,15 @@ export const Specialist: Story = {
   },
 }
 
-/** On a phone the rows are a list, and one opens the same drawer. */
+/** On a phone the rows are a list, and one opens the same drawer; the filters sit in the Filters sheet. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Filters' }))
+    const sheet = within(await page.findByRole('dialog', { name: 'Filters' }))
+    await userEvent.click(sheet.getByRole('option', { name: 'Today' }))
+    await userEvent.click(sheet.getByRole('button', { name: 'Show results' }))
+    await expect(await canvas.findByRole('button', { name: 'Filters 1' })).toBeVisible()
     await userEvent.click(await canvas.findByRole('button', { name: /Gözel A\./ }))
     await expect(await page.findByRole('dialog', { name: 'Booking' })).toBeVisible()
   },
@@ -289,6 +321,8 @@ export const Requests: Story = {
     await expect(within(table).getByRole('button', { name: 'Confirm Mähri G.' })).toBeVisible()
     await expect(within(table).getByText(/→/)).toBeVisible()
     await expect(within(table).getByText('Answers: Maral')).toBeVisible()
+    await expect(within(table).getByRole('columnheader', { name: 'Answer by' })).toBeVisible()
+    await expect(within(table).getByRole('columnheader', { name: 'Answer' })).toBeVisible()
     await expect(within(table).queryByRole('checkbox', { name: 'Select Selbi H.' })).toBeNull()
     await userEvent.click(within(table).getByRole('button', { name: 'Confirm Mähri G.' }))
     await page.findByText('Booking confirmed · the client is notified')

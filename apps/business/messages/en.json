@@ -1596,13 +1596,11 @@
     },
     "search": "Client, phone or booking code",
     "staffFilter": "Specialist",
-    "allStaff": "All specialists",
+    "allStaff": "Anyone",
     "serviceFilter": "Service",
     "allServices": "All services",
     "dateFilter": "Date",
     "allTime": "All time",
-    "dateToday": "Today",
-    "dateWeek": "This week",
     "clear": "Clear",
     "clearFilters": "Clear filters",
     "export": "Export CSV",
@@ -1610,6 +1608,7 @@
     "showMore": "Show more",
     "requests": {
       "table": "Requests",
+      "answerBy": "Answer by",
       "answer": "Answer",
       "arrow": "→",
       "timeLeft": "{time} left to answer",
@@ -1678,6 +1677,23 @@
       "move": "Move to another time",
       "bookAgain": "Book again",
       "openClient": "Open the client’s card"
+    },
+    "date": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "week": "This week"
+    },
+    "filters": {
+      "filters": "Filters",
+      "clearAll": "Clear all",
+      "close": "Close",
+      "back": "Back",
+      "showResults": "Show results",
+      "searchIn": "Search",
+      "remove": "Remove {chip}",
+      "nothingMatches": "Nothing matches “{q}”",
+      "count": "{n, plural, one {# booking} other {# bookings}}",
+      "shown": "{n} shown"
     }
   },
   "clients": {

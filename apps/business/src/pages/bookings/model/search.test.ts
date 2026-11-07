@@ -13,6 +13,7 @@ describe('the bookings list’s address', () => {
 
   it('knows the requests tab', () => {
     expect(bookingsSearch({ tab: 'requests' })).toEqual({ tab: 'requests' })
+    expect(bookingsSearch({ when: 'tomorrow' })).toEqual({ when: 'tomorrow' })
   })
 
   it('drops what it doesn’t', () => {
@@ -22,6 +23,7 @@ describe('the bookings list’s address', () => {
   it('turns the date choice into days, Monday to Sunday', () => {
     expect(rangeOf(undefined, '2026-10-14')).toEqual({})
     expect(rangeOf('today', '2026-10-14')).toEqual({ from: '2026-10-14', to: '2026-10-14' })
+    expect(rangeOf('tomorrow', '2026-10-18')).toEqual({ from: '2026-10-19', to: '2026-10-19' })
     expect(rangeOf('week', '2026-10-14')).toEqual({ from: '2026-10-12', to: '2026-10-18' })
     expect(rangeOf('week', '2026-10-18')).toEqual({ from: '2026-10-12', to: '2026-10-18' })
   })

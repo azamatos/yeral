@@ -23,7 +23,7 @@ import { useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 
-const COLUMNS = '44px minmax(170px,1.3fr) minmax(140px,1.1fr) minmax(100px,.7fr) minmax(170px,1.2fr) minmax(200px,1fr)'
+const COLUMNS = '44px minmax(170px,1.3fr) minmax(140px,1.1fr) minmax(100px,.7fr) minmax(170px,1.2fr) 148px minmax(88px,.8fr)'
 
 /** Everyone asked, some at once: what landed, and what didn't. */
 async function settle<T>(items: readonly T[], run: (item: T) => Promise<unknown>) {
@@ -217,6 +217,7 @@ export function RequestsTab({
             <TableColumnHeader>{b('columns.service')}</TableColumnHeader>
             <TableColumnHeader>{b('columns.specialist')}</TableColumnHeader>
             <TableColumnHeader>{b('columns.time')}</TableColumnHeader>
+            <TableColumnHeader>{t('answerBy')}</TableColumnHeader>
             <TableColumnHeader>{t('answer')}</TableColumnHeader>
           </TableHeader>
           {items.map((r) => (
@@ -243,13 +244,13 @@ export function RequestsTab({
               <TableCell>{services(r)}</TableCell>
               <TableCell>{staff(r)}</TableCell>
               <TableCell>{time(r)}</TableCell>
-              {/* one line (design §5): the timer and the inline ✓ ✕, never stacked */}
+              {/* one line each (design v0.7 B8): «Answer by» holds the timer, «Answer» the ✓ tint and ✕ outline */}
+              <TableCell className="items-start">{timer(r)}</TableCell>
               <TableCell className="flex-row flex-nowrap items-center gap-1.5">
-                {timer(r)}
                 {r.canAnswer ? (
                   <>
                     <Button
-                      variant="plain"
+                      variant="tint"
                       size="s"
                       iconOnly
                       className="flex-none"
@@ -260,7 +261,7 @@ export function RequestsTab({
                       <Check aria-hidden />
                     </Button>
                     <Button
-                      variant="plain"
+                      variant="secondary"
                       size="s"
                       iconOnly
                       className="flex-none"
