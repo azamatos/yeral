@@ -13,14 +13,40 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+/** DS · Lists A7: the parents look like links, chevrons between, the current page in ink 600. */
 export const Crumbs: Story = {
   render: () => (
-    <Breadcrumbs label="Ýol">
-      <Crumb href="#home">Baş sahypa</Crumb>
-      <Crumb href="#barbers">Dellekhanalar</Crumb>
-      <Crumb current>Barber Loft</Crumb>
+    <Breadcrumbs label="You are here">
+      <Crumb href="#home">Home</Crumb>
+      <Crumb href="#beauty">Beauty</Crumb>
+      <Crumb current>Glow Studio</Crumb>
     </Breadcrumbs>
   ),
+  play: async ({ canvas }) => {
+    const nav = canvas.getByRole('navigation', { name: 'You are here' })
+    await expect(canvas.getByRole('link', { name: 'Beauty' })).toHaveAttribute('href', '#beauty')
+    await expect(canvas.getByText('Glow Studio')).toHaveAttribute('aria-current', 'page')
+    await expect(getComputedStyle(canvas.getByText('Glow Studio')).fontWeight).toBe('600')
+    await expect(nav.querySelectorAll('svg')).toHaveLength(2)
+  },
+}
+
+/** A long current page is cut with «…» on one line (the full name on hover). */
+export const LongName: Story = {
+  render: () => (
+    <div style={{ width: 320 }}>
+      <Breadcrumbs label="You are here">
+        <Crumb href="#home">Home</Crumb>
+        <Crumb href="#beauty">Beauty</Crumb>
+        <Crumb current>Gözellik merkezi «Aýperi» — saç, dyrnak we ýüz ideg</Crumb>
+      </Breadcrumbs>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    const current = canvas.getByText(/^Gözellik merkezi/)
+    await expect(current).toHaveAttribute('title', 'Gözellik merkezi «Aýperi» — saç, dyrnak we ýüz ideg')
+    await expect(current.scrollWidth).toBeGreaterThan(current.clientWidth)
+  },
 }
 
 function Pages() {

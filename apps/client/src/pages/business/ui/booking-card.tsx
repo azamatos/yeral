@@ -5,11 +5,11 @@ import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
-import { CalendarX2, CircleCheck, Clock, MapPin, Phone, Wallet, X } from 'lucide-react'
+import { CalendarX2, CircleCheck, Phone, Wallet, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { selectionTotal } from '@/features/pick-services'
-import { confirmLine, dayHours, nextFreeText, openLine } from '../model/when'
+import { confirmLine, nextFreeText } from '../model/when'
 import type { BookingState } from './business-page'
 import { FavouriteButton } from './favourite'
 
@@ -23,50 +23,6 @@ function InfoRow({ icon, children, className }: { icon: ReactNode; children: Rea
       {icon}
       {children}
     </div>
-  )
-}
-
-/**
- * Today's hours on one line and whether it's open on its own (green while open; two lines, so neither wraps mid-phrase:
- * owner's review, #19), the address with its floor and distance.
- */
-function PlaceRows({ detail }: { detail: Detail }) {
-  const t = useTranslations('business')
-  const fmt = useFmt()
-  const now = useClock()
-  const hours = dayHours(detail, now, fmt)
-  const open = openLine(detail.open, today(now), fmt, t)
-  return (
-    <>
-      <InfoRow icon={<Clock aria-hidden />}>
-        <span className="flex flex-col">
-          <span>
-            {'hours' in hours
-              ? t('card.today', { hours: hours.hours })
-              : hours.reason
-                ? t('card.closedFor', { reason: hours.reason })
-                : t('card.closedToday')}
-          </span>
-          <span className={cn('font-semibold', open.isOpen ? 'text-st-completed-ink' : 'text-n-600')}>{open.text}</span>
-        </span>
-      </InfoRow>
-      <InfoRow icon={<MapPin aria-hidden />}>
-        <span className="flex flex-col">
-          <span>{fmt.addressIn(detail.address, detail.city.name)}</span>
-          {(detail.floor || detail.distanceM !== null) && (
-            <span>
-              {detail.floor}
-              {detail.distanceM !== null && (
-                <span className="text-dense text-n-600">
-                  {detail.floor ? ' · ' : ''}
-                  {fmt.distance(detail.distanceM)}
-                </span>
-              )}
-            </span>
-          )}
-        </span>
-      </InfoRow>
-    </>
   )
 }
 
@@ -180,10 +136,6 @@ export function BookingCard({
             <span className="text-[22px] leading-7 font-bold tracking-[-0.01em]">{fmt.phone(detail.phone)}</span>
             <CallLink phone={detail.phone} className="w-full" />
           </div>
-          <div className="h-px bg-n-200 max-md:hidden" />
-          <div className="flex flex-col gap-4 max-md:hidden">
-            <PlaceRows detail={detail} />
-          </div>
         </div>
       </div>
     )
@@ -200,10 +152,6 @@ export function BookingCard({
           </div>
           <CallLink phone={detail.phone} size="m" variant="secondary" className="w-full" />
           <FavouriteButton slug={detail.slug} wide />
-          <div className="h-px bg-n-200" />
-          <div className="flex flex-col gap-4">
-            <PlaceRows detail={detail} />
-          </div>
         </div>
       </div>
     )
@@ -223,7 +171,6 @@ export function BookingCard({
           </BookLink>
           <div className="h-px bg-n-200" />
           <div className="flex flex-col gap-4">
-            <PlaceRows detail={detail} />
             <InfoRow icon={<Phone aria-hidden />} className="items-center [&>svg]:mt-0">
               <a href={`tel:${detail.phone}`} className="flex-1 text-n-900 hover:text-a-600">
                 {fmt.phone(detail.phone)}

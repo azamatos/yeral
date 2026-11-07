@@ -35,11 +35,10 @@ export const Default: Story = {
     const crumbs = within(canvas.getByRole('navigation', { name: 'You are here' }))
     await expect(crumbs.getByRole('link', { name: 'Beauty salon' })).toHaveAttribute('href', '/en/c/beauty')
     await expect(canvas.getAllByRole('link', { name: 'Beauty salon' })).toHaveLength(1)
-    // the open line once, in the card, on its own line under today's hours; the header says only the state (#19)
-    await expect(canvas.getByText('Open until 20:00')).toBeVisible()
+    // the state as the cover's StatusPill; the hours live once, in About (A7, #19): the card only books
+    await expect(canvas.getAllByText('Open until 20:00')[0]).toBeVisible()
     const card = within(canvas.getByRole('complementary', { name: 'Booking' }))
-    await expect(card.getByText('Today 09:00–20:00')).toBeVisible()
-    await expect(canvas.getAllByText('Open now · until 20:00')).toHaveLength(1)
+    await expect(card.queryByText(/09:00–20:00/)).toBeNull()
     await expect(card.getByText(/^Today 15:30$/)).toBeVisible()
     await expect(card.getByRole('link', { name: 'Book' })).toHaveAttribute('href', '/en/b/glow-studio/book')
     await userEvent.click(canvas.getByRole('button', { name: 'Select: Women’s haircut' }))
@@ -63,7 +62,7 @@ export const Default: Story = {
 export const Cover: Story = {
   play: async ({ canvas, canvasElement }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio' })).toBeVisible()
-    await expect(canvas.getByText('Open until 20:00')).toBeVisible()
+    await expect(canvas.getAllByText('Open until 20:00')[0]).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Share' })).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Photo 2 of 5' })).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'All photos · 5' }))
@@ -229,9 +228,8 @@ export const Closed: Story = {
   },
   play: async ({ canvas }) => {
     const card = within(await canvas.findByRole('complementary', { name: 'Booking' }))
-    await expect(card.getByText(/Closed today · Holiday/)).toBeVisible()
-    await expect(card.getByText('Closed · opens tomorrow at 09:00')).toBeVisible()
-    // the cover's StatusPill says it too
+    await expect(card.queryByText(/Closed/)).toBeNull()
+    // the StatusPill on the cover and beside About's hours
     await expect(canvas.getAllByText('Closed · opens tomorrow at 09:00')).toHaveLength(2)
     // the hours table's today says so too
     const hours = within(canvas.getByRole('region', { name: 'About' }))
@@ -457,7 +455,7 @@ export const About: Story = {
   },
 }
 
-/** A day to midnight (Venue `hoursCase=midnight`, E1): «09:00–24:00» and «Open now · until 24:00». */
+/** A day to midnight (Venue `hoursCase=midnight`, E1): «09:00–24:00» and «Open until 24:00». */
 export const Midnight: Story = {
   args: {
     path: '/en/b/glow-studio?tab=about',
@@ -466,9 +464,8 @@ export const Midnight: Story = {
     }),
   },
   play: async ({ canvas }) => {
-    // the card's line only; the header says just «Open now» (#19)
-    await expect(await canvas.findAllByText('Open now · until 24:00')).toHaveLength(1)
-    await expect(canvas.getByText('Open until 24:00')).toBeVisible()
+    // the StatusPill on the cover and beside About's hours
+    await expect(await canvas.findAllByText('Open until 24:00')).toHaveLength(2)
     const about = within(canvas.getByRole('region', { name: 'About' }))
     await expect(about.getAllByText('09:00–24:00')).toHaveLength(7)
   },
