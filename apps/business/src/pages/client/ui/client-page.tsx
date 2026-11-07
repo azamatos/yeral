@@ -119,7 +119,7 @@ function Client({ slug, id, level, staffId }: { slug: string; id: string; level:
             {editing ? (
               <ClientEdit slug={slug} card={card} today={todayDate} onDone={() => setEditing(false)} />
             ) : (
-              <ClientHead card={card} manage={manage} onEdit={() => setEditing(true)} />
+              <ClientHead slug={slug} card={card} manage={manage} onEdit={() => setEditing(true)} />
             )}
             <ClientStats card={card} now={now} money={!specialist && levelCan(level, 'revenue')} specialist={specialist} />
             <ClientNotes slug={slug} card={card} />

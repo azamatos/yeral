@@ -132,6 +132,10 @@ const fakeApi =
         }
         return json({})
       }
+      if (route === 'GET /w/glow-studio/clients') {
+        const tagged = (n: number, tags: string[]) => ({ id: `c-${n}`, tags })
+        return json({ items: [tagged(1, ['VIP', 'Student']), tagged(2, ['Student']), tagged(3, ['Kids'])], total: 3, cursor: null })
+      }
       if (route === `POST ${path}/notes`) {
         const body = (await request.json()) as { text: string; alert: boolean }
         sent.push(body)
@@ -187,7 +191,11 @@ export const Owner: Story = {
     await expect(top.getByRole('link', { name: 'Clients' })).toHaveAttribute('href', '/w/glow-studio/clients')
     await expect(top.getByRole('link', { name: 'New booking' })).toBeVisible()
     await expect(canvas.getByText('Ýeral account')).toBeVisible()
-    await expect(canvas.getByText('since March 2024 · Instagram')).toBeVisible()
+    const facts = within(canvas.getByText('Client since').closest('dl')!)
+    await expect(facts.getByText('Client since')).toBeVisible()
+    await expect(facts.getByText('March 2024')).toBeVisible()
+    await expect(facts.getByText('Instagram')).toBeVisible()
+    await expect(canvas.getByRole('group', { name: 'Tags' })).toHaveTextContent('VIP')
     const figures = within(canvas.getByRole('list', { name: 'Key figures' }))
     await expect(figures.getByText('Average check')).toBeVisible()
     await expect(figures.getByText('145 TMT')).toBeVisible()
@@ -251,7 +259,7 @@ export const Edit: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
     await page.findByText('Changes saved')
     await expect(await canvas.findByRole('heading', { level: 2, name: 'Aýjemal G.' })).toBeVisible()
-    await expect(edits).toEqual([{ name: 'Aýjemal G.', birthday: '1994-03-14', source: 'instagram', tags: ['VIP'] }])
+    await expect(edits).toEqual([{ name: 'Aýjemal G.', birthday: '1994-03-14', source: 'instagram' }])
   },
 }
 
@@ -341,6 +349,42 @@ export const DeleteBlocked: Story = {
 }
 
 /** A specialist: their own figures, no average, no Change, no switches; a note still goes. */
+const tagEdits: unknown[] = []
+
+/** Tags in place (A8): a suggestion by use, Enter saves at once with `tags` alone — no form, no Save. */
+export const AddTag: Story = {
+  args: { server: fakeApi({}, tagEdits) },
+  play: async ({ canvas }) => {
+    tagEdits.length = 0
+    const tags = within(await canvas.findByRole('group', { name: 'Tags' }))
+    await userEvent.click(tags.getByRole('button', { name: 'Add tag' }))
+    const list = within(await tags.findByRole('listbox', { name: 'Tags' }))
+    await expect(list.getByRole('option', { name: /Student\s*2/ })).toBeVisible()
+    await expect(list.queryByRole('option', { name: /VIP/ })).toBeNull()
+    await userEvent.type(tags.getByRole('combobox', { name: 'Tag name' }), 'stu{Enter}')
+    await waitFor(() => expect(tagEdits).toEqual([{ tags: ['VIP', 'Student'] }]))
+    await expect(tags.getByRole('button', { name: 'Remove tag Student' })).toBeVisible()
+    await userEvent.type(tags.getByRole('combobox', { name: 'Tag name' }), 'Mornings only{Enter}')
+    await waitFor(() => expect(tagEdits.at(-1)).toEqual({ tags: ['VIP', 'Student', 'Mornings only'] }))
+  },
+}
+
+/** Removing a tag saves at once and offers Undo, which puts it back; automatic tags have no ×. */
+export const RemoveTagUndo: Story = {
+  args: { server: fakeApi({ start: { ...card, segments: ['regular'] } }, tagEdits) },
+  play: async ({ canvas }) => {
+    tagEdits.length = 0
+    const tags = within(await canvas.findByRole('group', { name: 'Tags' }))
+    await expect(tags.getByText('Regular')).toBeVisible()
+    await expect(tags.queryByRole('button', { name: 'Remove tag Regular' })).toBeNull()
+    await userEvent.click(tags.getByRole('button', { name: 'Remove tag VIP' }))
+    await waitFor(() => expect(tagEdits).toEqual([{ tags: [] }]))
+    await userEvent.click(await page.findByRole('button', { name: 'Undo' }))
+    await waitFor(() => expect(tagEdits.at(-1)).toEqual({ tags: ['VIP'] }))
+    await waitFor(() => expect(tags.getByRole('button', { name: 'Remove tag VIP' })).toBeVisible())
+  },
+}
+
 export const Specialist: Story = {
   args: {
     server: fakeApi({ level: 'specialist', start: { ...card, stats: { ...card.stats, avgCheck: null } } }),
@@ -350,6 +394,8 @@ export const Specialist: Story = {
     await expect(canvas.getByText('with you')).toBeVisible()
     await expect(canvas.queryByText('Average check')).toBeNull()
     await expect(canvas.queryByRole('button', { name: 'Change' })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: 'Add tag' })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: 'Remove tag VIP' })).toBeNull()
     await expect(canvas.queryByRole('switch')).toBeNull()
     await expect(canvas.queryByRole('button', { name: 'Delete client' })).toBeNull()
     await expect(canvas.getByRole('button', { name: 'Add note' })).toBeVisible()
@@ -375,6 +421,7 @@ export const Phone: Story = {
     await expect(within(canvas.getByRole('banner')).getByRole('link', { name: 'Clients' })).toBeVisible()
     await expect(canvas.getByRole('list', { name: 'History' })).toBeVisible()
     await expect(canvas.queryByRole('table', { name: 'History' })).toBeNull()
+    await expect(canvas.getByRole('button', { name: 'Add tag' })).toBeVisible()
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   },
 }

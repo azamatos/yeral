@@ -1873,8 +1873,6 @@
     "noAccess": "This client isn’t in your list",
     "noAccessHint": "You see only clients who have a booking with you.",
     "backToClients": "Back to clients",
-    "since": "since {month}",
-    "sinceSource": "{since} · {source}",
     "call": "Call",
     "account": "Ýeral account",
     "change": "Change",
@@ -1899,7 +1897,6 @@
       "name": "Name and surname",
       "phone": "Phone",
       "phoneLocked": "The client changes this number in their Ýeral account; it updates here too.",
-      "tagsCaption": "New, Regular, Lapsed and Reported are set by themselves.",
       "cancel": "Cancel",
       "save": "Save",
       "saving": "Saving the changes…",
@@ -1977,6 +1974,24 @@
       "confirm": "Delete client",
       "deleting": "Deleting the client…",
       "done": "Client deleted"
+    },
+    "facts": {
+      "since": "Client since",
+      "source": "Source",
+      "birthday": "Birthday"
+    },
+    "tags": {
+      "label": "Tags",
+      "add": "Add tag",
+      "field": "Tag name",
+      "addAnother": "Add another",
+      "remove": "Remove tag {tag}",
+      "create": "Create “{text}”",
+      "duplicate": "Already added",
+      "tooLong": "{max} characters at most",
+      "suggestions": "Tags",
+      "removed": "Tag removed",
+      "undo": "Undo"
     }
   },
   "newBooking": {
