@@ -50,6 +50,7 @@ const client = (n: number, name: string | null, patch: Partial<ClientRow> = {}):
   phone: `+9936512345${n}`,
   tags: [],
   segments: [],
+  trusted: false,
   phoneOnly: false,
   visits: 3,
   lastVisit: addDays(DAY, -9),
@@ -61,6 +62,7 @@ const client = (n: number, name: string | null, patch: Partial<ClientRow> = {}):
 const rows = [
   client(1, 'Gözel Annaýewa', {
     segments: ['regular'],
+    trusted: true,
     tags: ['VIP'],
     visits: 11,
     next: { code: 'YR-48001', date: addDays(DAY, 1), start: 660, status: 'confirmed', holdUntil: null },
@@ -110,10 +112,13 @@ const answer = async (request: Request, level: Workspace['level'], none: boolean
     const q = url.searchParams.get('q')?.toLowerCase()
     const segment = url.searchParams.get('segment')
     const tags = url.searchParams.getAll('tag').map((x) => x.toLowerCase())
+    const auto = url.searchParams.get('auto')
     const upcoming = url.searchParams.get('upcoming')
     const byQ = (r: ClientRow) => !q || !!r.name?.toLowerCase().includes(q)
     const bySegment = (r: ClientRow) => !segment || r.segments.includes(segment as never)
-    const byTag = (r: ClientRow) => !tags.length || r.tags.some((x) => tags.includes(x.toLowerCase()))
+    // one Tag filter: the team's tags or the automatic one keep a client
+    const byTag = (r: ClientRow) =>
+      (!tags.length && !auto) || r.tags.some((x) => tags.includes(x.toLowerCase())) || (auto === 'trusted' && r.trusted)
     const byUpcoming = (r: ClientRow) => !upcoming || (upcoming === 'yes') === !!r.next
     const all = none ? [] : rows
     const under = (...keep: ((r: ClientRow) => boolean)[]) => all.filter((r) => keep.every((k) => k(r)))
@@ -140,6 +145,7 @@ const answer = async (request: Request, level: Workspace['level'], none: boolean
       counts,
       upcoming: { yes: ahead.filter((r) => r.next).length, no: ahead.filter((r) => !r.next).length },
       tags: tagCounts,
+      auto: { trusted: tagged.filter((r) => r.trusted).length },
       everyone: all.length,
     })
   }
@@ -258,6 +264,25 @@ export const TagFilter: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }))
     await waitFor(() => expect(canvas.queryByText('Tag: VIP')).toBeNull())
     await expect(await canvas.findByText('Ogulnabat Ç.')).toBeVisible()
+  },
+}
+
+/** Trusted (v0.7 · D): the automatic tag first on the row; the Tag menu's «Automatic» group with its count keeps only them. */
+export const TrustedTag: Story = {
+  play: async ({ canvas }) => {
+    const table = within(await canvas.findByRole('table', { name: 'Clients' }))
+    const tags = within(table.getByRole('row', { name: /Gözel Annaýewa/ }))
+    await expect(tags.getByText('Trusted')).toHaveAttribute('title', 'Trusted on Ýeral: 5 or more visits, no missed bookings')
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Tag' }))
+    const menu = within(await page.findByRole('listbox', { name: 'Tag' }))
+    // the group's heading is decoration for the screen reader (the group is named by it)
+    await expect(menu.getByText('Automatic')).toBeInTheDocument()
+    await expect(menu.getByRole('option', { name: /Trusted/ })).toHaveTextContent('1')
+    await userEvent.click(menu.getByRole('option', { name: /Trusted/ }))
+    await userEvent.keyboard('{Escape}')
+    await expect(await canvas.findByText('Tag: Trusted')).toBeVisible()
+    await expect(await canvas.findByText('1 of 4 clients')).toBeVisible()
+    await waitFor(() => expect(canvas.queryByText('Ogulnabat Ç.')).toBeNull())
   },
 }
 

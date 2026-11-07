@@ -87,6 +87,50 @@ export function clientSegments(visits: readonly ClientVisit[], complaints: numbe
   return segmentsOf({ recentVisits, firstVisit: stats.firstVisit, lastVisit: stats.lastVisit, complaints }, today)
 }
 
+/** "Trusted on Ýeral" (design v0.7 · D, book F-246): this many completed visits on Ýeral, at any business… */
+export const TRUSTED_MIN_VISITS = 5
+/** …and no no-show or report against the account within this many days (12 months); an older one is forgotten. */
+export const TRUSTED_STRIKE_DAYS = 365
+
+/** What the Trusted mark is worked out from: the account's bookings at every business on Ýeral. */
+export interface TrustFacts {
+  /** Completed visits, as people see them now. */
+  visits: number
+  /** Of them, on days after the last strike (all of them without one). */
+  visitsSince: number
+  /** The day of the last no-show or report against the account; null without one. */
+  lastStrike: string | null
+}
+
+/**
+ * Where the account stands: `trusted`, the mark; `almost`, on the way to it («2 more visits…»); `paused`, a no-show or
+ * a report within 12 months took it away («Trusted is paused»). `visits` is the count toward the mark: all completed
+ * visits, or those since the strike while it counts.
+ */
+export type TrustedStanding =
+  { state: 'trusted' | 'almost'; visits: number; pausedSince: null } | { state: 'paused'; visits: number; pausedSince: string }
+
+/** A strike counts while it's younger than `TRUSTED_STRIKE_DAYS` (one on 7 Nov 2025 is forgotten on 7 Nov 2026). */
+export const strikeCounts = (lastStrike: string | null, today: string): lastStrike is string =>
+  lastStrike !== null && diffDays(today, lastStrike) < TRUSTED_STRIKE_DAYS
+
+/**
+ * The Trusted rule (design v0.7 · D): 5 or more completed visits on Ýeral and no no-show or report in the last
+ * 12 months; a strike takes the mark away at once, and 5 visits after it bring it back. Worked out, never stored: a
+ * no-show taken back gives the mark back. The business sees only whether it's `trusted`, never the count.
+ */
+export function trustedStanding(f: TrustFacts, today: string): TrustedStanding {
+  const strike = f.lastStrike
+  if (!strikeCounts(strike, today)) {
+    return f.visits >= TRUSTED_MIN_VISITS
+      ? { state: 'trusted', visits: f.visits, pausedSince: null }
+      : { state: 'almost', visits: f.visits, pausedSince: null }
+  }
+  return f.visitsSince >= TRUSTED_MIN_VISITS
+    ? { state: 'trusted', visits: f.visitsSince, pausedSince: null }
+    : { state: 'paused', visits: f.visitsSince, pausedSince: strike }
+}
+
 /**
  * Whether the no-shows counted since the business last lifted the block reach its limit (book Q-127). A limit of 0
  * never does.

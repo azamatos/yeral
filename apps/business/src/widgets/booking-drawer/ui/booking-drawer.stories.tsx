@@ -57,6 +57,7 @@ export const Confirmed: Story = {
     // the client card (v0.7 · B4): the number with its copy button, the tags, the facts, the alert note with its meta
     await expect(d.getByRole('button', { name: 'Copy the number' })).toBeVisible()
     await expect(await d.findByText('Regular')).toBeVisible()
+    await expect(d.getByText('Trusted')).toBeVisible()
     await expect(d.getByText('VIP')).toBeVisible()
     await expect(d.getByText('Visits').nextElementSibling).toHaveTextContent('12')
     await expect(d.getByText('Last visit').nextElementSibling).toHaveTextContent('5 Oct')

@@ -175,6 +175,7 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
         phone: r.clientPhone,
         visits: seen?.visits ?? 0,
         noShows: seen?.noShows ?? 0,
+        trusted: seen?.trusted ?? false,
         alerts: (r.clientId && alerts.get(r.clientId)) || [],
       },
       canAnswer: canAnswerRequest(actor, answerers, facts),

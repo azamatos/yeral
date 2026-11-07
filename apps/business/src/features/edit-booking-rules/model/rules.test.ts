@@ -16,6 +16,7 @@ describe('the booking rules form', () => {
       cancelWindowMinutes: 120,
       askCancelReason: true,
       blockAfterNoShows: 2,
+      confirmTrustedAtOnce: false,
       bufferOther: null,
     })
   })

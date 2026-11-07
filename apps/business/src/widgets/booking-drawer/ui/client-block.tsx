@@ -13,6 +13,7 @@ import { Phone } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
+import { TrustedTag } from '@/entities/client'
 
 /** The last visits the drawer lists (B-Calendar «Recent visits»). */
 export const RECENT_VISITS = 3
@@ -79,8 +80,10 @@ export function ClientBlock({
           )}
         </span>
       </div>
-      {card && (tags.length > 0 || card.settings.phoneOnly) && (
+      {card && (card.trusted || tags.length > 0 || card.settings.phoneOnly) && (
         <div className="flex flex-wrap items-center gap-1.5">
+          {/* Trusted first (v0.7 · D): the mark only, the team answers them quickly */}
+          {card.trusted && <TrustedTag size="m" />}
           {tags.map((tag) => (
             <Pill
               key={tag.key}

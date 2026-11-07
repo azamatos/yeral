@@ -5,6 +5,7 @@ import {
   meSchema,
   sendCodeResponseSchema,
   sendCodeSchema,
+  trustedStandingSchema,
   updateMeSchema,
   verifyCodeSchema,
 } from '@yeral/contract/account'
@@ -21,6 +22,7 @@ import { clientIp } from '../../lib/rate-limit'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
 import { buildCards } from '../catalog/cards'
+import { trustedStandingOf } from '../clients/trusted'
 import { isPublic, takesOpenTypes } from '../catalog/map'
 import { publicBusiness } from '../catalog/detail'
 import { changePhone, deletionCounts, releaseAccount } from './account'
@@ -37,6 +39,13 @@ const meRoute = createRoute({
   tags,
   summary: 'Who is signed in',
   responses: { 200: json(meSchema), 401: errors[401] },
+})
+const trustedRoute = createRoute({
+  method: 'get',
+  path: '/me/trusted',
+  tags,
+  summary: '"Trusted on Ýeral": the mark, how far the account is from it, or that it\'s paused (design v0.7 · D)',
+  responses: { 200: json(trustedStandingSchema), 401: errors[401] },
 })
 const updateRoute = createRoute({
   method: 'patch',
@@ -138,6 +147,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     return c.json(await toMe(c.var.deps.db, row, c.var.deps), 200)
   })
   .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c), c.var.deps), 200))
+  .openapi(trustedRoute, async (c) => c.json(await trustedStandingOf(c.var.deps.db, requireUser(c).id, c.var.deps.now()), 200))
   .openapi(updateRoute, async (c) => {
     const user = requireUser(c)
     const { name, firstName, surname, lang, notifications: n } = c.req.valid('json')

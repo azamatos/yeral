@@ -8,17 +8,27 @@
  */
 import {
   CLIENT_SORT_DIR,
+  type ClientAutoTag,
   type ClientSegmentCounts,
   type ClientSort,
   type ClientTagCount,
   type ClientUpcoming,
   type SortDir,
 } from '@yeral/contract/clients'
-import { LAPSED_DAYS, NEW_DAYS, REGULAR_MIN_VISITS, REGULAR_WINDOW_DAYS, segmentsOf, type ClientSegment } from '@yeral/domain/clients'
+import {
+  LAPSED_DAYS,
+  NEW_DAYS,
+  REGULAR_MIN_VISITS,
+  REGULAR_WINDOW_DAYS,
+  segmentsOf,
+  TRUSTED_MIN_VISITS,
+  TRUSTED_STRIKE_DAYS,
+  type ClientSegment,
+} from '@yeral/domain/clients'
 import { MARKET } from '@yeral/domain/market'
 import { scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, localOf } from '@yeral/domain/time'
-import { and, asc, desc, eq, inArray, isNull, sql, type AnyColumn, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, clientNotes, clients } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -34,6 +44,39 @@ export const doneAt = (now: number) =>
 /** A waiting request, or a confirmed visit that hasn't ended. */
 export const aheadAt = (now: number) =>
   sql`(${awaitingAnswer(now)} or (${bookings.status} = 'confirmed' and upper(${bookings.span}) > ${spanMinuteAt(now)}))`
+
+/**
+ * An account's trust facts (`trustedStanding` in `@yeral/domain/clients`) over its bookings at every business, as
+ * `userId` names it: one row of `visits` (completed as people see them now), `visits_since` (of them, on days after
+ * the last no-show or report) and `last_strike` (that day); no row for an account with no booking. The inner
+ * `"bookings"` is this subquery's own, whatever the query around it joins.
+ */
+export const trustFactsSql = (userId: SQL, now: number) => sql`(
+  select
+    count(*) filter (where ${doneAt(now)}) as visits,
+    count(*) filter (where ${doneAt(now)} and ${bookings.date} > coalesce(s.last, '0001-01-01')) as visits_since,
+    s.last as last_strike
+  from ${bookings}
+  cross join (
+    select max(x.date) as last from "bookings" x
+    where x.user_id = ${userId} and x.reschedule_of is null and (x.status = 'noshow' or x.complaint_type is not null)
+  ) s
+  where ${bookings.userId} = ${userId} and ${bookings.rescheduleOf} is null
+  group by s.last
+)`
+
+/**
+ * Whether the client row's account is trusted now (design v0.7 · D): the SQL twin of `trustedStanding`, for the list's
+ * rows, the Tag filter and its count. False for a client without an account.
+ */
+export const trustedSql = (now: number) => {
+  // a strike counts while it's younger than TRUSTED_STRIKE_DAYS (`strikeCounts`)
+  const forgotten = addDays(localOf(now).date, -TRUSTED_STRIKE_DAYS)
+  return sql<boolean>`coalesce((
+    select (case when f.last_strike is null or f.last_strike <= ${forgotten} then f.visits else f.visits_since end) >= ${TRUSTED_MIN_VISITS}
+    from ${trustFactsSql(sql`${clients.userId}`, now)} f
+  ), false)`
+}
 
 /** The booking has an item with this person. */
 export const withStaff = (staffId: string, bookingId: AnyColumn = bookings.id) =>
@@ -81,6 +124,8 @@ export interface ClientFacts {
   lastVisit: string | null
   noShows: number
   segments: ClientSegment[]
+  /** "Trusted on Ýeral" (design v0.7 · D): the account's mark; false without an account. */
+  trusted: boolean
   /** The soonest waiting request or visit ahead. */
   nextId: string | null
 }
@@ -147,6 +192,8 @@ function factsOf(businessId: string, actor: Actor, now: number, q: FactsScope) {
       lastVisit,
       noShows: sql<number>`count(*) filter (where ${bookings.status} = 'noshow')::int`,
       reports,
+      // on the client's account, whatever the join's bookings: the row's own columns go with its id
+      trusted: trustedSql(now),
       nextId: sql<
         string | null
       >`((array_agg(${bookings.id} order by ${bookings.date}, ${bookings.start}) filter (where ${aheadAt(now)}))[1])::text`,
@@ -160,14 +207,18 @@ function factsOf(businessId: string, actor: Actor, now: number, q: FactsScope) {
   }
 }
 
-/** The client has any of these tags, whatever their case (the Tag filter). */
-export function taggedSql(tags: readonly string[] | undefined): SQL | undefined {
-  if (!tags?.length) return undefined
-  const lowered = [...new Set(tags.map((tag) => tag.toLowerCase()))]
-  return sql`exists (select 1 from unnest(${clients.tags}) as t(v) where lower(t.v) in (${sql.join(
-    lowered.map((tag) => sql`${tag}`),
-    sql`, `,
-  )}))`
+/**
+ * The Tag filter: the client has any of these tags, whatever their case, or the automatic tag asked for (`auto`:
+ * Trusted, design v0.7 · D).
+ */
+export function taggedSql(tags: readonly string[] | undefined, auto: ClientAutoTag | undefined, now: number): SQL | undefined {
+  const own = tags?.length
+    ? sql`exists (select 1 from unnest(${clients.tags}) as t(v) where lower(t.v) in (${sql.join(
+        [...new Set(tags.map((tag) => tag.toLowerCase()))].map((tag) => sql`${tag}`),
+        sql`, `,
+      )}))`
+    : undefined
+  return or(own, auto === 'trusted' ? trustedSql(now) : undefined)
 }
 
 /** Has a booking ahead, or hasn't: the `ahead` flag as `upcoming` asks. */
@@ -220,6 +271,7 @@ export async function clientFacts(
         { recentVisits: r.recentVisits, firstVisit: r.firstVisit, lastVisit: r.lastVisit, complaints: r.reports },
         f.today,
       ),
+      trusted: r.trusted,
       nextId: r.nextId,
     })),
     total: rows[0]?.matching ?? 0,
@@ -239,14 +291,16 @@ export interface ListFacets {
   counts: ClientSegmentCounts
   upcoming: { yes: number; no: number }
   tags: ClientTagCount[]
+  /** The Tag menu's "Automatic" group. */
+  auto: { trusted: number }
   everyone: number
 }
 
 /**
  * What the list's menus count, each under the other filters but not its own (a chip's count holds the search, the
  * tags and Upcoming booking, whatever chip is on): the chips, Upcoming booking yes/no, every tag on the clients the
- * reader sees (a case-insensitive tag under its most used spelling, the most held first), and the clients the reader
- * sees in all. One query over one row per client.
+ * reader sees (a case-insensitive tag under its most used spelling, the most held first) and the Trusted mark, and
+ * the clients the reader sees in all. One query over one row per client.
  */
 export async function listFacets(db: Queryable, businessId: string, actor: Actor, now: number, q: ListFilters): Promise<ListFacets> {
   const f = factsOf(businessId, actor, now, {})
@@ -261,6 +315,7 @@ export async function listFacets(db: Queryable, businessId: string, actor: Actor
       lapsed: f.chip.lapsed.as('lapsed'),
       flagged: f.chip.flagged.as('flagged'),
       ahead: f.ahead.as('ahead'),
+      trusted: trustedSql(now).as('trusted'),
     })
     .from(clients)
     .leftJoin(bookings, f.join)
@@ -273,7 +328,9 @@ export async function listFacets(db: Queryable, businessId: string, actor: Actor
   const upcoming = upcomingOf(flag('ahead'), q.upcoming) ?? yes
   const count = (...when: SQL[]) => sql`(count(*) filter (where ${sql.join(when, sql` and `)}))::int`
   const base = [sql`e.searched`, sql`e.tagged`]
-  const { rows } = await db.execute<ClientSegmentCounts & { yes: number; no: number; tags: ClientTagCount[]; everyone: number }>(sql`
+  const { rows } = await db.execute<
+    ClientSegmentCounts & { yes: number; no: number; tags: ClientTagCount[]; trusted: number; everyone: number }
+  >(sql`
     with e as (${each})
     select
       count(*)::int as everyone,
@@ -284,6 +341,7 @@ export async function listFacets(db: Queryable, businessId: string, actor: Actor
       ${count(...base, upcoming, flag('flagged'))} as "flagged",
       ${count(...base, segment, flag('ahead'))} as "yes",
       ${count(...base, segment, sql`not ${flag('ahead')}`)} as "no",
+      ${count(sql`e.searched`, segment, upcoming, sql`e.trusted`)} as "trusted",
       (select coalesce(json_agg(json_build_object('name', x.name, 'count', x.count) order by x.count desc, lower(x.name)), '[]')
         from (
           select mode() within group (order by t.v) as name, ${count(sql`e.searched`, segment, upcoming)} as count
@@ -296,6 +354,7 @@ export async function listFacets(db: Queryable, businessId: string, actor: Actor
     counts: { all: r.all, regular: r.regular, new: r.new, lapsed: r.lapsed, flagged: r.flagged },
     upcoming: { yes: r.yes, no: r.no },
     tags: r.tags,
+    auto: { trusted: r.trusted },
     everyone: r.everyone,
   }
 }

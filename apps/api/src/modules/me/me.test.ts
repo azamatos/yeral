@@ -511,6 +511,7 @@ describe('account', () => {
         '/v1/w/{slug}/reviews/{id}/report',
         '/v1/setup',
         '/v1/me/setup',
+        '/v1/me/trusted',
         '/v1/w/{slug}/setup',
         '/v1/w/{slug}/setup/finish',
         '/v1/w/{slug}/setup/services',

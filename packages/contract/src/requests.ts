@@ -67,6 +67,8 @@ export const requestSchema = z
       phone: phoneSchema.nullable(),
       visits: z.number().int(),
       noShows: z.number().int(),
+      /** "Trusted on Ýeral" (design v0.7 · D): the mark, so the team can answer them quickly. */
+      trusted: z.boolean(),
       alerts: z.array(z.string()),
     }),
     /** May the viewer confirm or decline it. */

@@ -1,8 +1,10 @@
 import {
+  CLIENT_AUTO_TAGS,
   CLIENT_SORTS,
   CLIENT_TAG_FILTER_MAX,
   CLIENT_UPCOMING,
   SORT_DIRS,
+  type ClientAutoTag,
   type ClientSort,
   type ClientUpcoming,
   type SortDir,
@@ -10,13 +12,15 @@ import {
 import { CLIENT_SEGMENTS, CLIENT_TAG_MAX, type ClientSegment } from '@yeral/domain/clients'
 
 /**
- * The clients list's address (B-Clients, book B-32; design v0.7 B5): the search, the chip, the tags (any of them),
- * Upcoming booking, the sort and its direction, the add-client modal.
+ * The clients list's address (B-Clients, book B-32; design v0.7 B5): the search, the chip, the tags (any of them) and
+ * the automatic tag (Trusted, v0.7 · D) of the one Tag filter, Upcoming booking, the sort and its direction, the
+ * add-client modal.
  */
 export type ClientsSearch = {
   q?: string
   segment?: ClientSegment
   tag?: string[]
+  auto?: ClientAutoTag
   upcoming?: ClientUpcoming
   sort?: ClientSort
   dir?: SortDir
@@ -34,6 +38,7 @@ function tagsOf(value: unknown): string[] {
 export function clientsSearch(search: Record<string, unknown>): ClientsSearch {
   const segment = CLIENT_SEGMENTS.find((s) => s === search.segment)
   const tag = tagsOf(search.tag)
+  const auto = CLIENT_AUTO_TAGS.find((a) => a === search.auto)
   const upcoming = CLIENT_UPCOMING.find((u) => u === search.upcoming)
   const sort = CLIENT_SORTS.find((s) => s === search.sort)
   const dir = sort && SORT_DIRS.find((d) => d === search.dir)
@@ -41,6 +46,7 @@ export function clientsSearch(search: Record<string, unknown>): ClientsSearch {
     ...(typeof search.q === 'string' && search.q ? { q: search.q } : {}),
     ...(segment ? { segment } : {}),
     ...(tag.length ? { tag } : {}),
+    ...(auto ? { auto } : {}),
     ...(upcoming ? { upcoming } : {}),
     ...(sort ? { sort } : {}),
     ...(dir ? { dir } : {}),

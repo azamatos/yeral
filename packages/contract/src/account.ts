@@ -10,6 +10,7 @@ import {
   phoneInputSchema,
   phoneSchema,
   photoSchema,
+  ymdSchema,
 } from './common'
 import { NAME_MAX } from '@yeral/domain/names'
 
@@ -119,6 +120,21 @@ export const meSchema = z
   })
   .meta({ id: 'Me' })
 export type Me = z.infer<typeof meSchema>
+
+/**
+ * "Trusted on Ýeral" as the account sees it (design v0.7 · D, `GET /v1/me/trusted`): the mark, or how far they are
+ * («2 more visits…»), or that it's paused since a missed booking. `visits` counts toward `TRUSTED_MIN_VISITS`: every
+ * completed visit on Ýeral, or those after the strike while it counts.
+ */
+export const trustedStandingSchema = z
+  .object({
+    state: z.enum(['trusted', 'almost', 'paused']),
+    visits: z.number().int(),
+    /** The day of the no-show or report that paused it; null unless `paused`. */
+    pausedSince: ymdSchema.nullable(),
+  })
+  .meta({ id: 'TrustedStanding' })
+export type TrustedStandingView = z.infer<typeof trustedStandingSchema>
 
 /** The link page's login: the code goes to the booking's own phone, so only the code is sent (book F-068). */
 export const linkVerifySchema = z

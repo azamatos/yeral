@@ -11,6 +11,7 @@ import { toast } from '@yeral/ui/toast'
 import { LogOut } from 'lucide-react'
 import { useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
+import { TrustedCard } from '@/entities/client'
 import { useLogOut } from '@/features/log-out'
 import { useErrorText } from '@/shared/i18n'
 import { ChangePhoneBox } from './change-phone-box'
@@ -26,10 +27,13 @@ export function AccountProfilePage() {
   const t = useTranslations('profile')
   const sdk = useSdk()
   const me = useQuery(sdk.me.get())
+  // the Trusted card on top (C7-Booking D2, design v0.7 · D): the mark, how far they are, or that it's paused
+  const trusted = useQuery({ ...sdk.me.trusted(), enabled: !!me.data })
   if (!me.data) return null
   return (
     <>
       <h1 className="m-0 mb-6 text-h2">{t('title')}</h1>
+      {trusted.data && <TrustedCard standing={trusted.data} className="mb-8" />}
       {/* a fresh form for each person (another sign-in) */}
       <Profile key={me.data.id} me={me.data} />
     </>

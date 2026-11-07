@@ -46,16 +46,20 @@ describe('booking rules (book B-41, B-42)', () => {
       cancelWindowMinutes: 120,
       askCancelReason: true,
       blockAfterNoShows: 2,
+      confirmTrustedAtOnce: false,
       lateMinutes: 15,
     })
     const selbi = await as(SELBI)
     try {
-      const changed = await selbi.req(RULES, { method: 'PATCH', body: { askCancelReason: false, requestAnswerers: 'desk' } })
+      const changed = await selbi.req(RULES, {
+        method: 'PATCH',
+        body: { askCancelReason: false, requestAnswerers: 'desk', confirmTrustedAtOnce: true },
+      })
       expect(changed.status).toBe(200)
-      expect(changed.json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk', holdMinutes: 30 })
-      expect((await maysa.req(RULES)).json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk' })
+      expect(changed.json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk', holdMinutes: 30, confirmTrustedAtOnce: true })
+      expect((await maysa.req(RULES)).json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk', confirmTrustedAtOnce: true })
     } finally {
-      await maysa.req(RULES, { method: 'PATCH', body: { askCancelReason: true, requestAnswerers: 'both' } })
+      await maysa.req(RULES, { method: 'PATCH', body: { askCancelReason: true, requestAnswerers: 'both', confirmTrustedAtOnce: false } })
     }
     // a save with nothing in it changes nothing
     expect((await selbi.req(RULES, { method: 'PATCH', body: {} })).json).toEqual(rules.json)

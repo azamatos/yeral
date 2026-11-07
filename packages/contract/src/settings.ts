@@ -53,6 +53,11 @@ export const bookingRulesSchema = z
     askCancelReason: z.boolean(),
     /** After this many no-shows a client books only by phone: 0 (never) to 5. */
     blockAfterNoShows: z.number().int(),
+    /**
+     * "Confirm trusted clients at once" (design v0.7 · D): in manual mode a trusted client's request is confirmed at
+     * once; off by default. Nothing in instant mode (kept while the mode changes).
+     */
+    confirmTrustedAtOnce: z.boolean(),
     /** How late a client may be: 15 minutes everywhere in the MVP (book Q-118); not a setting yet (F-103). */
     lateMinutes: z.number().int(),
   })

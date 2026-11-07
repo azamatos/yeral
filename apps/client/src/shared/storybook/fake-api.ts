@@ -3,7 +3,7 @@
  * real api). Each story makes its own with the people it needs; every mount gets a fresh copy, so a story that signs
  * someone in or out starts from the same place each time.
  */
-import type { Me } from '@yeral/contract/account'
+import type { Me, TrustedStandingView } from '@yeral/contract/account'
 
 const notifications = { confirmation: true, reminderDay: true, reminder2h: true, reviewAsk: false }
 
@@ -91,6 +91,8 @@ export interface AuthApiOptions {
   phoneChangeRefused?: boolean
   /** Someone else takes the new number between the code and its check (`phone_taken` at verify). */
   takenAtVerify?: boolean
+  /** "Trusted on Ýeral" as `GET /me/trusted` answers it (design v0.7 · D); nothing earned without it. */
+  trusted?: TrustedStandingView
 }
 
 /**
@@ -111,6 +113,7 @@ export const authApi =
     ownsBusiness = false,
     phoneChangeRefused = false,
     takenAtVerify = false,
+    trusted = { state: 'almost', visits: 0, pausedSince: null },
   }: AuthApiOptions = {}) =>
   (): typeof fetch => {
     const accounts = new Map(people.map((p) => [p.phone, structuredClone(p)]))
@@ -169,6 +172,7 @@ export const authApi =
         return json(null, 204)
       }
       if (route === 'GET /me') return me ? json(me) : refuse(401, 'unauthorized')
+      if (route === 'GET /me/trusted') return me ? json(trusted) : refuse(401, 'unauthorized')
       // the person's own routes need someone signed in; anything else this fake doesn't know is a 404, as on the api
       if (!me)
         return route === 'PATCH /me' || route.startsWith('DELETE /me') || route.startsWith('POST /me/')

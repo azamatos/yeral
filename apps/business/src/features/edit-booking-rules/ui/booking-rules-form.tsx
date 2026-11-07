@@ -1,8 +1,10 @@
+import { TRUSTED_MIN_VISITS, TRUSTED_STRIKE_DAYS } from '@yeral/domain/clients'
 import { REQUEST_ANSWERERS, BUFFER_MAX, LATE_MINUTES, type RequestAnswerers } from '@yeral/domain/rules'
 import type { ConfirmMode } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
 import { Callout } from '@yeral/ui/callout'
 import { FieldMessage } from '@yeral/ui/field'
+import { InfoTip } from '@yeral/ui/info-tip'
 import { Input } from '@yeral/ui/input'
 import { NumberStepper } from '@yeral/ui/number-stepper'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
@@ -28,6 +30,9 @@ const OTHER_START = 25
 
 /** The first free times the time-step caption shows («10:00, 10:15, 10:30…»). */
 const EXAMPLE_START = 10 * 60
+
+/** «…no missed bookings in the last 12 months»: the strike window as the ⓘ says it. */
+const TRUSTED_STRIKE_MONTHS = Math.round(TRUSTED_STRIKE_DAYS / 30.44)
 
 /**
  * Settings → Booking rules (B-Settings `isRules`, design §8 and §28.5, book B-05, B-41, B-42): confirmation (and the
@@ -82,6 +87,29 @@ export function BookingRulesForm({ rules, bufferNote }: { rules: RulesFormState;
               value={form.holdMinutes}
               onValueChange={(holdMinutes) => set({ holdMinutes })}
             />
+          </SettingsRow>
+        )}
+        {/* only for a place that confirms by hand (C7-Booking D2, v0.7): an ⓘ instead of a hint line */}
+        {manual && (
+          <SettingsRow
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                {t('trusted')}
+                <InfoTip label={t('trustedInfoLabel')}>
+                  {t('trustedInfo', { n: TRUSTED_MIN_VISITS, months: TRUSTED_STRIKE_MONTHS, brand: tc('brand') })}
+                </InfoTip>
+              </span>
+            }
+          >
+            {({ id, labelId }) => (
+              <Switch
+                id={id}
+                aria-labelledby={labelId}
+                disabled={saving}
+                checked={form.confirmTrustedAtOnce}
+                onCheckedChange={(confirmTrustedAtOnce) => set({ confirmTrustedAtOnce })}
+              />
+            )}
           </SettingsRow>
         )}
       </Section>

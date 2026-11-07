@@ -40,7 +40,7 @@ const request = (code: string, kind: BookingRequest['kind'], over: Partial<Booki
     note: null,
     from: kind === 'move' ? { date: today(now), start: 600, end: 645 } : null,
     fits: kind === 'move' ? true : null,
-    client: { id: null, name: 'Ejegyz T.', phone: '+99365123456', visits: 2, noShows: 0, alerts: [] },
+    client: { id: null, name: 'Ejegyz T.', phone: '+99365123456', visits: 2, noShows: 0, trusted: false, alerts: [] },
     canAnswer: true,
     answeredBy: 'anyone',
     ...over,
@@ -111,7 +111,15 @@ type Story = StoryObj<typeof meta>
 type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
 
 const body = () => within(document.body)
-const client = (name: string): BookingRequest['client'] => ({ id: null, name, phone: null, visits: 0, noShows: 0, alerts: [] })
+const client = (name: string): BookingRequest['client'] => ({
+  id: null,
+  name,
+  phone: null,
+  visits: 0,
+  noShows: 0,
+  trusted: false,
+  alerts: [],
+})
 
 /** A request arrives (an earlier story's toasts cleared first: sonner keeps them across mounts). */
 async function arrives(canvas: Canvas) {

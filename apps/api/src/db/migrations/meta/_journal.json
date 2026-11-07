@@ -351,6 +351,13 @@
       "when": 1794044063948,
       "tag": "0049_name_recheck",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1794050152647,
+      "tag": "0050_confirm_trusted_at_once",
+      "breakpoints": true
     }
   ]
 }

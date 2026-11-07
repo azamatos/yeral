@@ -6,6 +6,7 @@ import { cn } from '@yeral/ui/cn'
 import { CalendarDays, LogOut, UserRound } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { TrustedBadge } from '@/entities/client'
 import { useLogOut } from '@/features/log-out'
 import { PersonMark, wrap } from '@/shared/ui'
 
@@ -29,6 +30,8 @@ export function AccountLayout({ children }: { children: ReactNode }) {
   const lang = useLocale()
   const sdk = useSdk()
   const me = useQuery(sdk.me.get())
+  // the Trusted badge under the name (C7-Booking D2): only once someone is signed in
+  const trusted = useQuery({ ...sdk.me.trusted(), enabled: !!me.data })
   const navigate = useNavigate()
   const { logOut, loggingOut } = useLogOut()
   const signedOut = me.data === null
@@ -44,8 +47,9 @@ export function AccountLayout({ children }: { children: ReactNode }) {
           {me.data && (
             <div className="flex items-center gap-3.5 px-3 max-md:hidden">
               <PersonMark firstName={me.data.firstName} size={56} />
-              <div className="flex min-w-0 flex-col gap-0.5">
+              <div className="flex min-w-0 flex-col items-start gap-0.5">
                 {name && <span className="text-[16px] leading-[22px] font-semibold break-words">{name}</span>}
+                {trusted.data?.state === 'trusted' && <TrustedBadge className="my-0.5" />}
                 <span className="text-dense text-n-600">{formatPhone(me.data.phone)}</span>
               </div>
             </div>

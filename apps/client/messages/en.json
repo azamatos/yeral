@@ -86,7 +86,9 @@
     "mine": "My account",
     "sections": "Account sections",
     "profileAndSettings": "Profile and settings",
-    "bookings": "My bookings"
+    "bookings": "My bookings",
+    "trusted": "Trusted",
+    "trustedTip": "Trusted on Ýeral: {n, number} or more visits, no missed bookings"
   },
   "profile": {
     "title": "Profile and settings",
@@ -123,6 +125,20 @@
     "save": "Save",
     "saving": "Saving",
     "saved": "Changes saved"
+  },
+  "trusted": {
+    "title": "You’re a trusted client",
+    "visits": "{count, plural, one {# visit} other {# visits}} on {brand}, no missed bookings",
+    "seen": "Businesses see the Trusted mark next to your name.",
+    "atOnce": "Places that confirm bookings by hand can confirm yours at once.",
+    "stays": "It stays while you come to your bookings or cancel in time.",
+    "almostTitle": "{n, plural, one {# more visit} other {# more visits}} to become a trusted client",
+    "almostSub": "{visits, number} of {max, number} visits, no missed bookings",
+    "almostNote": "Trusted clients get the mark businesses see, and faster confirmations at places that offer it.",
+    "pausedTitle": "Trusted is paused",
+    "pausedSub": "A missed booking on {date}",
+    "pausedNote": "{max, plural, one {# visit} other {# visits}} without a missed booking bring the mark back.",
+    "progress": "{visits, number} of {max, number} visits"
   },
   "footer": {
     "forClients": "For clients",

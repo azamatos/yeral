@@ -20,6 +20,7 @@ import { ArrowLeftRight, Clock, Globe, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
+import { TrustedTag } from '@/entities/client'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { DeclineModal } from './decline-modal'
@@ -306,6 +307,7 @@ function RequestBody({
             <span className="text-[16px] leading-[22px] font-semibold text-n-900">{r.client.name}</span>
             {r.client.phone && <span className="text-dense text-n-600">{fmt.phone(r.client.phone)}</span>}
             <span className="mt-1 flex flex-wrap items-center gap-2">
+              {r.client.trusted && <TrustedTag />}
               {r.client.visits === 0 ? (
                 <Pill tone="accent">{t('newClient')}</Pill>
               ) : (

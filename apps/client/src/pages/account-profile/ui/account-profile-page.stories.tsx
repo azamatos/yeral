@@ -99,6 +99,37 @@ export const Discard: Story = {
   },
 }
 
+/** Trusted (C7-Booking D2, v0.7 · D): the badge under the name in the aside and the card on top of the profile. */
+export const Trusted: Story = {
+  args: { server: authApi({ people: [AYJEMAL], signedIn: AYJEMAL, trusted: { state: 'trusted', visits: 7, pausedSince: null } }) },
+  play: async ({ canvas }) => {
+    const card = await canvas.findByRole('region', { name: 'You’re a trusted client' })
+    await expect(card).toHaveTextContent('7 visits on Ýeral, no missed bookings')
+    const aside = canvas.getByRole('complementary', { name: 'My account' })
+    await expect(within(aside).getByText('Trusted')).toBeVisible()
+  },
+}
+
+/** Not there yet: the card counts the visits (3 of 5); no badge. */
+export const AlmostThere: Story = {
+  name: 'Almost there',
+  args: { server: authApi({ people: [AYJEMAL], signedIn: AYJEMAL, trusted: { state: 'almost', visits: 3, pausedSince: null } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('region', { name: '2 more visits to become a trusted client' })).toHaveTextContent(
+      '3 of 5 visits, no missed bookings',
+    )
+    await expect(within(canvas.getByRole('complementary', { name: 'My account' })).queryByText('Trusted')).toBeNull()
+  },
+}
+
+/** Paused after a missed booking: when, and what brings it back. */
+export const Paused: Story = {
+  args: { server: authApi({ people: [AYJEMAL], signedIn: AYJEMAL, trusted: { state: 'paused', visits: 0, pausedSince: '2026-09-02' } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('region', { name: 'Trusted is paused' })).toHaveTextContent('A missed booking on 2 Sep')
+  },
+}
+
 /** Once codes go by SMS: «Change», a number that has an account refused, then the code; the new number shows. */
 export const ChangeNumber: Story = {
   name: 'Change the number',
