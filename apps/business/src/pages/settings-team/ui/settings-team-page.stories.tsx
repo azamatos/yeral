@@ -726,8 +726,9 @@ export const DrawerHours: Story = {
     // Sunday the business is closed: no shift opens it
     await expect(drawer.getByRole('switch', { name: 'Sunday: works' })).toBeDisabled()
     await typeTime(drawer.getByRole('combobox', { name: 'Monday: ends' }), '20:00')
-    await userEvent.click(drawer.getByRole('button', { name: 'Monday: add a break' }))
-    await expect(drawer.getByRole('combobox', { name: 'Monday: break starts' })).toBeVisible()
+    await userEvent.click(drawer.getByRole('button', { name: 'Monday: add break' }))
+    await expect(drawer.getByRole('combobox', { name: 'Monday, 2nd time starts' })).toHaveDisplayValue('14:00')
+    await expect(drawer.getByRole('combobox', { name: 'Monday: ends' })).toHaveDisplayValue('13:00')
     await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
     const saved = await body.findByText('Jeren’s shift saved')
     await waitFor(() => expect(saved).toBeVisible())
@@ -780,3 +781,18 @@ export const Tablet: Story = { globals: { viewport: { value: 'sm' } } }
 
 /** The phone. */
 export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+
+/** An own shift's break as the gap between two times; a first time that ends after the second starts is refused. */
+export const DrawerBreakInvalid: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Jeren Hojaýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Jeren Hojaýewa' }))
+    await userEvent.click(drawer.getByRole('tab', { name: 'Hours' }))
+    await userEvent.click(await drawer.findByRole('button', { name: 'Monday: add break' }))
+    await expect(drawer.getByRole('combobox', { name: 'Monday, 2nd time starts' })).toHaveDisplayValue('14:00')
+    await typeTime(drawer.getByRole('combobox', { name: 'Monday: ends' }), '15:00')
+    await expect(await drawer.findByRole('alert')).toHaveTextContent('The break must end after it starts.')
+    await userEvent.click(drawer.getByRole('button', { name: /^Monday: remove the break/ }))
+    await waitFor(() => expect(drawer.queryByRole('alert')).not.toBeInTheDocument())
+  },
+}

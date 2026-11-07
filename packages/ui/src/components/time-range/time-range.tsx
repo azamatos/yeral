@@ -82,6 +82,9 @@ export type TimeRangeFieldProps = {
   nextDay?: (close: string) => ReactNode
   /** A message under the pickers (14 px icon, `role="alert"`); both pickers turn invalid and point at it. */
   error?: ReactNode
+  /** Both pickers invalid without a message of their own: the row's message (`describedBy` its id) says what's wrong. */
+  invalid?: boolean
+  describedBy?: string
   disabled?: boolean
   /** Minutes between the options: the hours pass the contract's `HOURS_STEP` (30, book Q-128). */
   step?: number
@@ -109,6 +112,8 @@ export function TimeRangeField({
   remove,
   nextDay,
   error,
+  invalid: invalidProp,
+  describedBy,
   disabled,
   step = 30,
   size = 'm',
@@ -127,9 +132,9 @@ export function TimeRangeField({
   const late = value.close - base > DAY
   const closeTime = late ? value.close - base - DAY : value.close - base
   const night = (time: number) => (dayStart !== undefined && time < dayStart ? time + DAY : time)
-  const invalid = !!error
+  const invalid = !!error || !!invalidProp
   const pill = nextDay && late
-  const describe = (...ids: (string | false)[]) => ids.filter(Boolean).join(' ') || undefined
+  const describe = (...ids: (string | false | undefined)[]) => ids.filter(Boolean).join(' ') || undefined
   return (
     <div
       role={label ? 'group' : undefined}
@@ -147,7 +152,7 @@ export function TimeRangeField({
         size={size}
         label={fromLabel}
         invalid={invalid}
-        describedBy={describe(invalid && messageId)}
+        describedBy={describe(!!error && messageId, describedBy)}
         disabled={disabled}
         onChange={(time) => {
           const open = night(time)
@@ -165,7 +170,7 @@ export function TimeRangeField({
         size={size}
         label={toLabel}
         invalid={invalid}
-        describedBy={describe(!!pill && pillId, invalid && messageId)}
+        describedBy={describe(!!pill && pillId, !!error && messageId, describedBy)}
         disabled={disabled}
         onChange={(time) => onChange({ open: value.open, close: inside ? night(time) : closeAt(value.open, time) })}
       />

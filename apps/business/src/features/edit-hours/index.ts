@@ -12,4 +12,5 @@ export {
 } from './model/hours'
 export { HoursAffectedBookings, type AffectedChoice } from './ui/affected-bookings'
 export { SpecialDays } from './ui/special-days'
+export { HoursRow } from './ui/hours-row'
 export { SameHoursSwitch, WeekHoursRows } from './ui/week-hours'

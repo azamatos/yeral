@@ -398,7 +398,15 @@ function MemberEditor({
             )}
             {shift && wasShift && week && schedule.data ? (
               <>
-                <ShiftEditor form={shift} saved={wasShift} business={week} owner={owner} name={name} onChange={setShift} />
+                <ShiftEditor
+                  form={shift}
+                  saved={wasShift}
+                  business={week}
+                  businessName={business}
+                  owner={owner}
+                  name={name}
+                  onChange={setShift}
+                />
                 <span aria-hidden className="h-px flex-none bg-n-200" />
                 <TimeOff
                   slug={slug}
