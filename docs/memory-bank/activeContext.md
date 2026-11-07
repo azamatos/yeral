@@ -10,13 +10,17 @@ _Last updated: 2026-11-07_ · the current state only; the history by day is in `
 deleted after a backup); #332 a verified business's new name waits for the Ýeral team (the owner's decision of 07.11,
 book Q-275 changed: clients and SMS keep the old name; a new description, photos or logo go live and join the admin
 tool's «Check again» list, as a move does; migration 0049; its two tk/ru SMS want the owner's native check); #333 C3
-services at scale and the business page's phone header, Back and no-photo bar (the page books one service per Book;
-a second comes from the booking's services step until C4's «Add a service» is built). **Paused by the owner (07.11).**
-**Left from round 7:** C4's «Add a service» in the booking summary (first: the page sends one service now); A10
-callouts, toasts and NoteRow; idea 1 (trusted client) and idea 3 (follow, plan only); the FilterBar on the client
-site's search; the reviews page's "removed" notice (the api says nothing of a removed report today); tk/ru strings.
-Then a migration dropping `users.demo` and `businesses.sandbox` (#316 left the columns). Each piece's log note
-(`log/2026-11-07-name-recheck.md`, `log/2026-11-07-services-at-scale.md` …) lists what it left.
+services at scale and the business page's phone header, Back and no-photo bar. **Then live at ffb8ab5 (07.11):** #334
+trusted client (book F-246; tag, badge, «Confirm trusted clients at once», migration 0050) · #335 C4 «Add a service»
+from the summary (the time kept while it fits), rows, the confirm card, the phone sheet · #336 testers' fixed sign-in
+codes (`FIXED_SIGN_IN_CODES` in the server's `.env` only: the owner's number, whose Telegram is Russian) · #337 the
+reviews page's «Ýeral removed a review you reported» notice + migration 0051 dropping `users.demo`/`businesses.sandbox`
+· #338 the client search on the FilterBar (Open now and Women only kept: book C-03 wins on behaviour) · #339 A10
+callouts, toasts (`toast.error` = an alert) and NoteRow. **Left from round 7:** C1's compact header SearchBar on
+Search and the business page (then the on-page What/Where fields and the day control go); the result cards'
+StatusPill / service line / time slots (C4 VenueResultRow); idea 3 (follow, plan only); tk/ru strings (with #332's two
+SMS for the owner to check). Each piece's log note (`log/2026-11-07-*.md`) lists what it left. CI's e2e now streams
+its output and stops before the job's limit (`globalTimeout`).
 **Agents:** allowed for this run (owner 06.11): two at a time (two on battery for 07.11), Fable 5.1 at xhigh (free; owner
 07.11), Opus 5.5 as the fallback; budget 30 % of the week that began 07.11. Docs-only changes go straight to `main`.
 

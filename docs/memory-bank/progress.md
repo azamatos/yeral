@@ -537,7 +537,13 @@
   #332); docs-only changes go straight to `main`, no PR (AGENTS.md); off-server backups stay in P6 (an MVP for testing);
   agents on Fable 5.1 (free), Opus 5.5 as the fallback. Built by two agents the same day: #332 the name hold and the
   «Check again» list (Opus 5.5; migration 0049), #333 C3 services at scale and the business page's phone header
-  (Fable 5.1). Deployed daad8ff and 7ad07ba (07.11); then paused by the owner.
+  (Fable 5.1). Deployed daad8ff and 7ad07ba (07.11); paused by the owner, then resumed with two Fable agents at a time:
+  #334 trusted client, #335 C4 booking leftovers, #336 testers' fixed sign-in codes (the owner's Telegram is on a
+  Russian number), #337 the removed-review notice and migration 0051 dropping the demo columns, #338 the client search
+  on the FilterBar, #339 A10 callouts/toasts/NoteRow; deployed 959e31c, 35d824a, 85d96f1, f3107b0, 28383a8, ffb8ab5.
+  Lessons: a PR title over 100 characters fails CI (count it in the brief); Playwright's `{ pressed: false }` matches
+  every button without `aria-pressed` (scope rows to their container); turbo's grouped logs hid a hung e2e until the job
+  was cancelled (now `--log-order=stream` and `globalTimeout`); toasts outlive a story (dismiss them in `beforeEach`).
   Lessons: agents overran the 130k stop in their briefs (stop them by message); a PR that changes a contract or a flow must
   run the story files and e2e helpers that use it; a test hook that moves time must stay inside the rule's window; a
   background merge script outlives its session (check `ps` for one at a session's start); the stories' fake apis must read
