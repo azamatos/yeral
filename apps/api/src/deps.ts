@@ -32,6 +32,8 @@ export interface Deps {
    * unused account go ("Is this you?").
    */
   codeOnScreen: boolean
+  /** Numbers that sign in with a fixed code, nothing sent (`FIXED_SIGN_IN_CODES`, owner 07.11.2026). */
+  fixedCodes: ReadonlyMap<string, string>
   /** The kinds of booking open now (book Q-030): the others stay out of lists and search. */
   bookingTypes: readonly BookingType[]
   /** The key the Ýeral team's authenticator secrets are sealed under (ADR 0026); null: no admin tool here. */
@@ -69,6 +71,7 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     log,
     trustedIpHeader: config.trustedIpHeader,
     codeOnScreen: config.codeOnScreen,
+    fixedCodes: config.fixedCodes,
     adminKey: config.adminKey,
     bookingTypes: config.bookingTypes,
     e2eHooks: config.e2eHooks,

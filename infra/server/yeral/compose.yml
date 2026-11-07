@@ -52,6 +52,8 @@ services:
       # 25.10.2026 (the owner), so the business app can be tried live before the launch: test data only (operations.md).
       # Off (`SIGN_IN_CODE_ON_SCREEN=false` in .env) once codes go through our Telegram bot: the api refuses both at once
       SIGN_IN_CODE_ON_SCREEN: ${SIGN_IN_CODE_ON_SCREEN:-true}
+      # testers' fixed sign-in codes (`+993…:1234`, comma-separated), from .env only, never in the repo; empty = none
+      FIXED_SIGN_IN_CODES: ${FIXED_SIGN_IN_CODES:-}
       # our Telegram bot (ADR 0029), from .env (infra/server/README.md): with the token set, sign-in codes and the other
       # SMS-port texts reach the phones linked to its chats. All three or none; empty = no bot
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}

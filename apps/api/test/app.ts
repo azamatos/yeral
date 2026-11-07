@@ -33,6 +33,7 @@ export function testApp(
     trustedIpHeader?: Deps['trustedIpHeader']
     demo?: boolean
     codeOnScreen?: boolean
+    fixedCodes?: Deps['fixedCodes']
     smsDelivers?: boolean
     telegram?: boolean
     adminKey?: Uint8Array<ArrayBuffer> | null
@@ -55,6 +56,7 @@ export function testApp(
     log: nullLogger,
     trustedIpHeader: opts.trustedIpHeader,
     codeOnScreen: opts.codeOnScreen ?? false,
+    fixedCodes: opts.fixedCodes ?? new Map(),
     adminKey: opts.adminKey === undefined ? DEV_ADMIN_KEY : opts.adminKey,
     // every kind, so the table and class paths stay tested; the first launch's rule has its own test
     bookingTypes: opts.bookingTypes ?? BOOKING_TYPES,

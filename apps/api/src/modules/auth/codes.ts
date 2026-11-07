@@ -101,7 +101,9 @@ export async function sendCode(
     if (!r.ok) throw rateLimited(r.retryAfterSec)
   }
 
-  const code = newCode(deps)
+  // a tester's fixed sign-in code (`FIXED_SIGN_IN_CODES`): nothing is sent, the person knows it
+  const fixed = req.purpose === 'login' ? deps.fixedCodes.get(req.phone) : undefined
+  const code = fixed ?? newCode(deps)
   const row = {
     codeHash: await hashOf(req.purpose, req.phone, code),
     expiresAt: new Date(now + CODE_TTL_SEC * 1000),
@@ -126,6 +128,7 @@ export async function sendCode(
     .returning({ phone: loginCodes.phone })
   if (!saved) throw new ApiError('resend_too_soon', { retryAfterSec: RESEND_SEC })
   const timers = { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC }
+  if (fixed) return { ...timers, delivery: 'sms' }
   const text = codeSmsText(req.lang, code)
   if (deps.telegram) {
     const bot = { ...deps, telegram: deps.telegram.bot }

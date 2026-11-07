@@ -92,6 +92,11 @@ secrets. Run it again whenever the api's address or `TELEGRAM_WEBHOOK_SECRET` ch
 `make-example` opens no new examples (`--off` still takes one back), the Ýeral team can verify real businesses, and
 "Change number" works (operations.md).
 
+**A tester who can't get the bot's code** (their Telegram is on another country's number; owner, 07.11.2026): put
+`FIXED_SIGN_IN_CODES=+993XXXXXXXX:NNNN` (comma-separated for several) in `/srv/yeral/.env`, never in the repo, and deploy
+(or `docker compose -f /srv/yeral/compose.yml up -d api`). That number signs in with that code and nothing is sent; the
+code's limits still hold. Take the line out when the tester no longer needs it.
+
 **After a deploy that changed the headers** (`yeral.caddy` or the client site's policy, "Security headers" below),
 with the browser console open and no CSP violation reported (`Refused to load…` / `violates the following Content
 Security Policy directive`):
