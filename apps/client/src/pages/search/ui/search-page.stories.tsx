@@ -1,6 +1,7 @@
 /**
  * Search — book C-03, C-05, board Search and the C7-Home results toolbar, over a `fetch` that answers like the api: the
- * rows with their time chips, a category's page, the day, the toolbar's filters and sort, nothing found, Show more, a phone.
+ * rows with their time chips, a category's page, the day from the header's bar, the toolbar's filters and sort, nothing
+ * found, Show more, a phone.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { BusinessCard, Category } from '@yeral/contract/catalog'
@@ -8,7 +9,34 @@ import { addDays, today } from '@yeral/domain/time'
 import { MapTiles } from '@yeral/ui/map-frame'
 import { expect, screen, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
+import { HeaderSearch, HeaderSearchPhone } from '@/widgets/search-bar'
 import { SearchPage } from './search-page'
+
+/** The page under the header's search (the site's `_site` layout puts it there): the compact bar, the phone's summary field. */
+function Page({ category }: { category?: Category }) {
+  return (
+    <>
+      <div className="flex h-20 items-center px-8 max-sm:hidden">
+        <HeaderSearch mode="results" />
+      </div>
+      <div className="sm:hidden">
+        <HeaderSearchPhone />
+      </div>
+      <SearchPage category={category} />
+    </>
+  )
+}
+
+type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
+
+/** Opens the header bar's When, picks a quick day, and searches. */
+async function pickDay(canvas: Canvas, day: string) {
+  await userEvent.click(canvas.getByRole('button', { name: /^When / }))
+  const panel = await canvas.findByRole('dialog', { name: 'When' })
+  await userEvent.click(within(panel).getByRole('radio', { name: day }))
+  await userEvent.click(within(panel).getByRole('button', { name: 'Done' }))
+  await userEvent.click(canvas.getByRole('button', { name: 'Search' }))
+}
 
 /** Opens a Select's list (a portal: found on `screen`) and picks a row; waits for the list to close. */
 async function pick(trigger: HTMLElement, option: string | RegExp) {
@@ -70,6 +98,7 @@ const fakeApi =
     const mine = fakeFetch(({ route, query }) => {
       if (route === 'GET /categories') return json({ items: CATEGORIES })
       if (route === 'GET /cities') return json(CITIES)
+      if (route === 'GET /search/suggest') return json({ categories: [], services: [], businesses: [] })
       if (route === 'GET /search') {
         last = query
         const at = Number(query.get('cursor') ?? 0)
@@ -89,7 +118,7 @@ const fakeApi =
     })
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const path = new URL(new Request(input, init).url).pathname
-      return /\/(categories|cities|search|places\/suggest)$/.test(path) ? mine(input, init) : signIn(input, init)
+      return /\/(categories|cities|search|places\/suggest|search\/suggest)$/.test(path) ? mine(input, init) : signIn(input, init)
     }
   }
 
@@ -101,13 +130,13 @@ const meta = {
   globals: { viewport: { value: 'xl' } },
   args: {
     routes: {
-      '/$lang/search': () => <SearchPage />,
+      '/$lang/search': () => <Page />,
       '/$lang/area': () => (
         <MapTiles style={ONE_COLOUR}>
-          <SearchPage />
+          <Page />
         </MapTiles>
       ),
-      '/$lang/c/$category': () => <SearchPage category={barber} />,
+      '/$lang/c/$category': () => <Page category={barber} />,
       '/$lang/b/$slug': () => <p>A business</p>,
       '/$lang/b/$slug/book': () => <p>The booking</p>,
     },
@@ -158,24 +187,28 @@ export const CategoryPage: Story = {
   },
 }
 
-/** Tomorrow asks for that date, and says so. */
+/** Tomorrow, from the header bar's When, asks for that date and says so; the filters stay. */
 export const Tomorrow: Story = {
+  args: { path: '/en/search?rating=4' },
   play: async ({ canvas }) => {
-    await canvas.findByRole('link', { name: 'Barber Loft' })
-    await userEvent.click(canvas.getByRole('radio', { name: 'Tomorrow' }))
+    await expect(await canvas.findByText('Rating: 4.0+')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'When Any time' })).toBeVisible()
+    await pickDay(canvas, 'Tomorrow')
     await expect(await canvas.findByText('2 places · free time tomorrow')).toBeVisible()
     await expect(last.get('date')).toBe(addDays(DAY, 1))
+    await expect(last.get('minRating')).toBe('4')
+    await expect(canvas.getByRole('button', { name: 'When Tomorrow' })).toBeVisible()
   },
 }
 
-/** A calendar day from Home's When: the count names it, no day of the toggle is on, and Today clears it. */
+/** A calendar day from Home's When: the count names it, the bar's When shows it, and Today clears it. */
 export const CalendarDay: Story = {
   args: { path: `/en/search?date=${addDays(DAY, 5)}` },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText(/^2 places · free time on \w+, \d+ \w+$/)).toBeVisible()
     await expect(last.get('date')).toBe(addDays(DAY, 5))
-    await expect(canvas.getByRole('radio', { name: 'Today' })).not.toBeChecked()
-    await userEvent.click(canvas.getByRole('radio', { name: 'Today' }))
+    await expect(canvas.getByRole('button', { name: /^When \w+, \d+ \w+$/ })).toBeVisible()
+    await pickDay(canvas, 'Today')
     await expect(await canvas.findByText('2 places · free time today')).toBeVisible()
     await waitFor(() => expect(last.has('date')).toBe(false))
   },
@@ -292,7 +325,8 @@ export const NoMatch: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Clear search' }))
     await expect(await canvas.findByRole('link', { name: 'Barber Loft' })).toBeVisible()
     await expect(canvas.getByRole('combobox', { name: 'Rating' })).toBeVisible()
-    await expect(canvas.getByRole('textbox', { name: 'Service, place or specialist' })).toHaveValue('')
+    // the words are gone everywhere, the header's bar included
+    await expect(canvas.queryByText(/hairx/)).toBeNull()
   },
 }
 
@@ -335,14 +369,24 @@ export const WiderArea: Story = {
   },
 }
 
-/** Where? keeps to a city, and the offer to share a location goes. */
+/** A city from the header bar's Where keeps the list to it, and the offer to share a location goes. */
 export const PickACity: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: 'Show my location' })
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Where?' }))
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Where' }))
     await userEvent.click(await canvas.findByRole('option', { name: 'Ashgabat' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Search' }))
     await waitFor(() => expect(last.get('city')).toBe('ashgabat'))
     await waitFor(() => expect(canvas.queryByRole('button', { name: 'Show my location' })).toBeNull())
+  },
+}
+
+/** «I'll type an address» on the banner opens the header bar's Where. */
+export const TypeAnAddress: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: "I'll type an address" }))
+    await expect(canvas.getByRole('combobox', { name: 'Where' })).toHaveFocus()
+    await expect(await canvas.findByRole('option', { name: /Near me/ })).toBeVisible()
   },
 }
 

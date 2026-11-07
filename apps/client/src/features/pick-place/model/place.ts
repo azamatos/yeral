@@ -1,5 +1,5 @@
 import type { LatLng } from '@yeral/domain/geo'
-import { useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 /** Where the client looks (book C-01, Q-107): around them, around a typed place, or in a city. */
 export type Place = ({ kind: 'near' } & LatLng) | ({ kind: 'point'; label: string } & LatLng) | { kind: 'city'; id: string }
@@ -117,4 +117,18 @@ export function usePlace() {
   }
   /** The banner: until a place is known, once this browser has been read. */
   return { place, unknown: read && !place, denied, locating, pick, askBrowser }
+}
+
+// «I'll type an address» on a page whose Where field lives in the site header (the results page): the field's owner answers
+const editAsked = new Set<() => void>()
+
+/** Asks whoever holds the Where field to open it. */
+export const askToEditPlace = () => editAsked.forEach((listener) => listener())
+
+/** The Where field's owner: `onAsked` opens it. */
+export function useEditPlaceRequest(onAsked: () => void) {
+  useEffect(() => {
+    editAsked.add(onAsked)
+    return () => void editAsked.delete(onAsked)
+  })
 }

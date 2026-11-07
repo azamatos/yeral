@@ -9,9 +9,10 @@ import { Modal, ModalContent, ModalHeader } from '@yeral/ui/modal'
 import { CalendarDays, MapPin, Search } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { LocationHelp, placeAddress } from '@/features/pick-place'
+import { LocationHelp } from '@/features/pick-place'
+import { draftOf, type SearchDraft } from '../model/draft'
 import { useListbox } from '../model/use-listbox'
-import { ANY_TIME, isAnyTime, whenAddress, type When } from '../model/when'
+import { ANY_TIME, isAnyTime, type When } from '../model/when'
 import { useWhat, WhatPanel } from './what-panel'
 import { useWhenLabel, WhenPanel } from './when-panel'
 import { useWhere, WherePanel, type Located } from './where-panel'
@@ -42,8 +43,9 @@ const field =
 
 /**
  * The phone's full-screen search (C7-Home 390): the three fields stay on top, the active one's suggestions fill the
- * rest, «Show N places» counts live and runs the search; Back keeps the values. A suggestion picked fills its field
- * and moves to the next one.
+ * rest, «Show N places» counts live and runs the search (to `/search`, or through `onSearch`: the results page's
+ * summary field refines the page in place); Back keeps the values. A suggestion picked fills its field and moves to
+ * the next one.
  */
 export function SearchSheet({
   field: active,
@@ -54,6 +56,7 @@ export function SearchSheet({
   onWhen,
   located,
   onClose,
+  onSearch,
 }: {
   field: Field
   onField: (field: Field) => void
@@ -63,6 +66,7 @@ export function SearchSheet({
   onWhen: (when: When) => void
   located: Located
   onClose: () => void
+  onSearch?: (draft: SearchDraft) => void
 }) {
   const t = useTranslations('searchBar')
   const lang = useLocale()
@@ -76,10 +80,12 @@ export function SearchSheet({
   const [whereDirty, setWhereDirty] = useState(false)
 
   const today = todayOf()
-  const address = () => ({ what: what.trim() || undefined, ...placeAddress(located.place), ...whenAddress(when, today) })
+  const address = () => draftOf(what, located.place, when, today)
   const go = (q = what) => {
     onClose()
-    void navigate({ to: '/$lang/search', params: { lang }, search: { ...address(), what: q.trim() || undefined } })
+    const draft = draftOf(q, located.place, when, today)
+    if (onSearch) onSearch(draft)
+    else void navigate({ to: '/$lang/search', params: { lang }, search: draft })
   }
   const whatRows = useWhat(
     what,

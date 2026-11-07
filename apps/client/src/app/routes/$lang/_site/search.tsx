@@ -7,6 +7,8 @@ import { pageHead } from '@/shared/lib'
 // Search (book C-03), rendered on the server: a failed read is left to the page, which asks again in the browser.
 export const Route = createFileRoute('/$lang/_site/search')({
   validateSearch: searchAddress,
+  // the header's compact SearchBar refines this page in place (C7-Home C1)
+  staticData: { searchHeader: 'results' },
   loaderDeps: ({ search }) => search,
   loader: async ({ context, params, deps }) => {
     const lang = siteLocale(params.lang)

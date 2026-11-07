@@ -1,7 +1,8 @@
 /**
  * The home SearchBar (C7-Home C1, design v0.7) over a `fetch` that answers like the api: rest, What open with the
  * categories, typing with the three groups and the keyboard, nothing found, Where with Near me and the cities, location
- * off, When as chips + month + time of day, and the search they send.
+ * off, When as chips + month + time of day, and the search they send; the header's compact bar on the results page and
+ * the business page, and the phone's Back + summary field.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Category } from '@yeral/contract/catalog'
@@ -11,6 +12,7 @@ import { expect, screen as page, userEvent, waitFor, within } from 'storybook/te
 import { usePlace } from '@/features/pick-place'
 import { authApi, fakeFetch, json, PageStory } from '@/shared/storybook'
 import { wrap } from '@/shared/ui'
+import { HeaderSearch, HeaderSearchPhone } from './header-search'
 import { SearchBar } from './search-bar'
 import { SearchCard } from './search-card'
 
@@ -23,8 +25,33 @@ function Home() {
     </div>
   )
 }
-function Results() {
+function Address() {
   return <p>Search: {JSON.stringify(useSearch({ strict: false }))}</p>
+}
+/** The results page: the header's bar (the phone's summary field) over the address it reads. */
+function Results() {
+  return (
+    <>
+      <div className="flex h-20 items-center border-b border-n-200 px-8 pb-50 max-sm:hidden">
+        <HeaderSearch mode="results" />
+      </div>
+      <div className="sm:hidden">
+        <HeaderSearchPhone />
+      </div>
+      <Address />
+    </>
+  )
+}
+/** The business page: the header's bar starts a new search. */
+function Business() {
+  return (
+    <>
+      <div className="flex h-20 items-center border-b border-n-200 px-8 max-sm:hidden">
+        <HeaderSearch mode="new" />
+      </div>
+      <p>A business</p>
+    </>
+  )
 }
 
 const category = (id: string, name: string, icon: string, hint: string) =>
@@ -97,7 +124,7 @@ const meta = {
       '/$lang': Home,
       '/$lang/search': Results,
       '/$lang/c/$category': () => <p>A category</p>,
-      '/$lang/b/$slug': () => <p>A business</p>,
+      '/$lang/b/$slug': Business,
     },
     path: '/en',
     server: fakeApi(),
@@ -260,6 +287,74 @@ export const WhenDate: Story = {
     await pick()
     await userEvent.keyboard('{Enter}')
     await expect(await canvas.findByText(`Search: {"date":"${day}"}`)).toBeVisible()
+  },
+}
+
+/**
+ * The header's compact bar on the results page (600 × 48, r 999, the round ink button): the address's words and When
+ * in its fields, Where as kept; a search refines the address in place, the filters kept.
+ */
+export const Compact: Story = {
+  args: { path: '/en/search?what=Haircut&day=tomorrow&tod=evening&rating=4.5' },
+  play: async ({ canvas }) => {
+    const bar = within(await canvas.findByRole('search', { name: 'Search' }))
+    const what = bar.getByRole('combobox', { name: 'What' })
+    await expect(what).toHaveValue('Haircut')
+    await expect(bar.getByRole('combobox', { name: 'Where' })).toHaveValue('Near me')
+    await expect(bar.getByRole('button', { name: 'When Tomorrow · Evening' })).toBeVisible()
+    await expect(bar.getByRole('button', { name: 'Search' }).getBoundingClientRect().height).toBe(40)
+    await userEvent.clear(what)
+    await userEvent.type(what, 'Beard trim')
+    await userEvent.click(bar.getByRole('button', { name: 'Search' }))
+    await expect(await canvas.findByText(/^Search: \{"what":"Beard trim","day":"tomorrow","tod":"evening","rating":4\.5\}$/)).toBeVisible()
+    // the bar follows the address (a new one)
+    await expect(within(canvas.getByRole('search', { name: 'Search' })).getByRole('combobox', { name: 'What' })).toHaveValue('Beard trim')
+  },
+}
+
+/** A new place from the header's Where: the radius and the map area, which were the old place's, go with it. */
+export const CompactPlace: Story = {
+  args: { path: '/en/search?near=37.95,58.39&r=10&area=1,2,3,4' },
+  play: async ({ canvas }) => {
+    const bar = within(await canvas.findByRole('search', { name: 'Search' }))
+    await userEvent.click(bar.getByRole('combobox', { name: 'Where' }))
+    await userEvent.click(await canvas.findByRole('option', { name: 'Mary' }))
+    await userEvent.click(bar.getByRole('button', { name: 'Search' }))
+    await expect(await canvas.findByText('Search: {"city":"mary"}')).toBeVisible()
+  },
+}
+
+/** The bar on the business page starts empty, and a search goes to the results page. */
+export const CompactNew: Story = {
+  args: { path: '/en/b/glow-studio' },
+  play: async ({ canvas }) => {
+    const bar = within(await canvas.findByRole('search', { name: 'Search' }))
+    await expect(bar.getByRole('combobox', { name: 'What' })).toHaveValue('')
+    await expect(bar.getByRole('button', { name: 'When Any time' })).toBeVisible()
+    await userEvent.type(bar.getByRole('combobox', { name: 'What' }), 'hair{Enter}')
+    await expect(await canvas.findByText('Search: {"what":"hair"}')).toBeVisible()
+  },
+}
+
+/**
+ * The results page on the phone: Back and the summary field («Haircut» over «Near me · Tomorrow») in the header's
+ * place; the field opens the sheet with the address's values, and «Show 24 places» refines the page.
+ */
+export const PhoneSummary: Story = {
+  globals: { viewport: { value: 'xs' } },
+  args: { path: '/en/search?what=Haircut&day=tomorrow' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('button', { name: 'Back' })).toBeVisible()
+    const field = canvas.getByRole('button', { name: 'Edit search: Haircut Near me · Tomorrow' })
+    await expect(field).toHaveTextContent('Near me · Tomorrow')
+    await userEvent.click(field)
+    const sheet = within(await page.findByRole('dialog', { name: 'Search' }))
+    await expect(sheet.getByRole('combobox', { name: 'What' })).toHaveValue('Haircut')
+    await userEvent.click(sheet.getByRole('button', { name: 'When Tomorrow' }))
+    await userEvent.click(await sheet.findByRole('radio', { name: 'Any time' }))
+    await userEvent.click(await sheet.findByRole('button', { name: 'Show 24 places' }))
+    await expect(await canvas.findByText('Search: {"what":"Haircut"}')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Edit search: Haircut Near me · Any time' })).toBeVisible()
   },
 }
 
