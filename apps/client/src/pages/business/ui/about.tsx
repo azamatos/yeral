@@ -12,6 +12,7 @@ import { useTranslations } from 'use-intl'
 import { addressLine } from '@/shared/lib'
 import { DirectionsButton, PlaceMap } from '@/shared/ui'
 import { confirmLine, weekRows } from '../model/when'
+import { StatusPill } from './hero'
 import { Section } from './sections'
 
 /** An icon row (Venue `.ir`): 20 icon, 15/22 text, 12 apart. */
@@ -69,7 +70,14 @@ function Hours({ detail }: { detail: BusinessDetail }) {
   const fmt = useFmt()
   const now = useClock()
   return (
-    <Part title={t('hours')}>
+    <Part
+      title={
+        <span className="flex flex-wrap items-center gap-3">
+          {t('hours')}
+          <StatusPill open={detail.open} />
+        </span>
+      }
+    >
       <div className="flex flex-col border-b border-n-200">
         {weekRows(detail, now, fmt).map((d) => (
           <div

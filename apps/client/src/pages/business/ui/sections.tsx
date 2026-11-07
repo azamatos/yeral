@@ -1,125 +1,94 @@
+import { useNavigate } from '@tanstack/react-router'
 import { cn } from '@yeral/ui/cn'
-import { tabClass } from '@yeral/ui/tabs'
-import { useEffect, useState, type MouseEvent, type ReactNode } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
+import { useRef, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 
-/** The page's parts the section nav leads to, in its order (Venue `.tabs`). */
+/** The page's panels, in the tab bar's order (Venue v0.7 `BusinessTabs`): Services is the default. */
 export const SECTIONS = ['services', 'specialists', 'reviews', 'about'] as const
 export type SectionId = (typeof SECTIONS)[number]
 
-/** The sticky nav's height and a little air: a section scrolled to starts below it (Venue `.sect` 60). */
-const UNDER_NAV = 61
+/** `?tab=` as one of the page's panels; anything else (or a panel the page hasn't got) is Services. */
+export function pickTab(tab: string | undefined, ids: readonly SectionId[]): SectionId {
+  return ids.find((id) => id === tab) ?? 'services'
+}
 
-/**
- * The part being read: the last one whose top has passed under the nav, or the last of all once the page can't scroll
- * further (a short last part never reaches the nav). Read once a frame while scrolling.
- */
-function useCurrent(ids: readonly SectionId[]): SectionId | undefined {
-  const [current, setCurrent] = useState(ids[0])
-  const key = ids.join(' ')
-  useEffect(() => {
-    const parts = key.split(' ') as SectionId[]
-    let frame = 0
-    const read = () => {
-      frame = 0
-      const end = innerHeight + scrollY >= document.documentElement.scrollHeight - 2
-      let at = parts[0]
-      for (const id of parts) {
-        const top = document.getElementById(id)?.getBoundingClientRect().top
-        if (top !== undefined && (top <= UNDER_NAV || (end && top < innerHeight))) at = id
-      }
-      setCurrent(at)
-    }
-    const update = () => {
-      if (!frame) frame = requestAnimationFrame(read)
-    }
-    read()
-    addEventListener('scroll', update, { passive: true })
-    addEventListener('resize', update, { passive: true })
-    return () => {
-      cancelAnimationFrame(frame)
-      removeEventListener('scroll', update)
-      removeEventListener('resize', update)
-    }
-  }, [key])
-  return current
+/** The search params that open a panel: Services, the default, keeps the address clean. */
+export function tabSearch(id: SectionId) {
+  return (prev: Record<string, unknown>) => ({ ...prev, tab: id === 'services' ? undefined : id })
 }
 
 /**
- * A press on a link to a part of the page (the nav, «96 reviews»): scrolls there, smoothly unless motion is reduced,
- * and moves the focus into it, without a new entry in the history; without the part, the link's own `#` jump.
+ * The tab bar and its panels (Venue v0.7 · C2 «Each tab is its own panel», the owner's #38): Services · Specialists ·
+ * Reviews · About under the hero, each a panel of its own instead of anchors on one long page. Only the panel changes:
+ * the hero, the bar and the booking card stay put. The open tab lives in `?tab=` (replaced, so Back leaves the page);
+ * every panel is rendered (on the server too, for search engines) and the closed ones hidden, so each keeps its state
+ * (the reviews loaded, the group picked) while another is open. The panel area keeps at least the window's height under
+ * the bar, so a short panel never pulls the page up. Switching while the bar is stuck jumps (instantly) to where the
+ * new panel starts right under it; otherwise the scroll stays. ← → Home End move between the tabs (Radix Tabs).
  */
-export function goTo(id: SectionId) {
-  return (e: MouseEvent) => {
-    const part = document.getElementById(id)
-    if (!part) return
-    e.preventDefault()
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
-    part.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' })
-    part.focus({ preventScroll: true })
-  }
-}
-
-/**
- * The section nav (Venue `.tabs`, Mobile 4): Services · Specialists · Reviews · About, sticky at the top, the part being
- * read underlined. Links to the parts on the same page, so they work before the page's script; a press `goTo`es there.
- */
-export function SectionNav({ ids }: { ids: readonly SectionId[] }) {
+export function SectionTabs({
+  ids,
+  current,
+  counts,
+  label,
+  belowBar,
+  children,
+}: {
+  ids: readonly SectionId[]
+  current: SectionId
+  counts: Partial<Record<SectionId, number>>
+  label: string
+  /** Phones with a cover: the bar sticks under the folded cover's 56 px bar. */
+  belowBar: boolean
+  children: Record<SectionId, ReactNode>
+}) {
   const t = useTranslations('business.sections')
-  const current = useCurrent(ids)
+  const navigate = useNavigate()
+  const top = useRef<HTMLDivElement>(null)
+  const bar = useRef<HTMLDivElement>(null)
+  const open = (value: string) => {
+    const id = pickTab(value, ids)
+    const mark = top.current
+    const stuckAt = bar.current ? parseFloat(getComputedStyle(bar.current).top) || 0 : 0
+    const y = mark?.getBoundingClientRect().top ?? 0
+    // the bar is stuck: the new panel starts right under it, never in its middle
+    if (y < stuckAt) scrollTo({ top: scrollY + y - stuckAt, behavior: 'instant' })
+    void navigate({ to: '.', search: tabSearch(id), replace: true, resetScroll: false })
+  }
   return (
-    <nav
-      aria-label={t('label')}
-      className="sticky top-0 z-5 flex [scrollbar-width:none] gap-7 overflow-x-auto border-b border-n-200 bg-n-0 max-sm:gap-6"
-    >
-      {ids.map((id) => (
-        <a
-          key={id}
-          href={`#${id}`}
-          aria-current={current === id ? 'true' : undefined}
-          className={cn(
-            tabClass,
-            'flex-none aria-[current=true]:border-a-500 aria-[current=true]:font-semibold aria-[current=true]:text-n-900',
-          )}
-          onClick={goTo(id)}
-        >
-          {t(id)}
-        </a>
-      ))}
-    </nav>
+    <Tabs value={current} onValueChange={open}>
+      <div ref={top} aria-hidden />
+      <div ref={bar} className={cn('sticky top-0 z-10 bg-n-0 pt-4 max-sm:pt-2', belowBar && 'max-md:top-14')}>
+        <TabsList aria-label={label}>
+          {ids.map((id) => (
+            <TabsTrigger key={id} value={id} className="flex-none">
+              <span id={`tab-${id}-label`}>{t(id)}</span>
+              {/* «Services 100» is the tab's name too; phones show no counts */}
+              {counts[id] ? <span className="ml-1.5 font-medium text-n-500 max-sm:hidden"> {counts[id]}</span> : null}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
+      <div className={cn('min-h-[calc(100dvh-60px)]', belowBar && 'max-md:min-h-[calc(100dvh-108px)]')}>
+        {ids.map((id) => (
+          <TabsContent key={id} value={id} forceMount aria-labelledby={`tab-${id}-label`} className="data-[state=inactive]:hidden">
+            {children[id]}
+          </TabsContent>
+        ))}
+      </div>
+    </Tabs>
   )
 }
 
 /**
- * One part of the page under the nav (Venue `.sect`): its `h2` 26/32 700 (22/28 on phones), 48 above and below with a
- * line between parts (40 on phones), and it starts below the sticky nav when scrolled to.
+ * A panel's content: 24 under the tab bar (Venue v0.7 `[role=tabpanel]` padding-top 24), its title for screen readers
+ * and search engines only, since the tab above says it (the repeated section titles are gone, C2).
  */
-export function Section({
-  id,
-  title,
-  first = false,
-  children,
-  className,
-}: {
-  id: SectionId
-  title: ReactNode
-  first?: boolean
-  children: ReactNode
-  className?: string
-}) {
-  const titleId = `${id}-title`
+export function Section({ id, title, children, className }: { id: SectionId; title: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section
-      id={id}
-      aria-labelledby={titleId}
-      tabIndex={-1}
-      className={cn(
-        'flex scroll-mt-15 flex-col gap-5 py-12 outline-none focus:shadow-none max-sm:py-10',
-        first ? 'pt-8 max-sm:pt-6' : 'border-t border-n-200',
-        className,
-      )}
-    >
-      <h2 id={titleId} className="m-0 text-[26px] leading-8 font-bold tracking-[-0.02em] max-sm:text-[22px] max-sm:leading-7">
+    <section aria-labelledby={`${id}-title`} className={className ?? 'flex flex-col gap-5 pt-6 pb-12 max-sm:pb-10'}>
+      <h2 id={`${id}-title`} className="sr-only">
         {title}
       </h2>
       {children}

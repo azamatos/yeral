@@ -11,8 +11,11 @@ import { businessJsonLd, pageHead } from '@/shared/lib'
 // phone-only client). An unknown, closed or hidden business is the 404 page; one still in review is the friendly
 // «This page hasn't opened yet» 404 (C-10); an old address (chapter 9, 25.10.2026) moves to the new one for good.
 export const Route = createFileRoute('/$lang/_site/b/$slug')({
-  // `?services=id,id`: what was picked (anything else is ignored, not an error)
-  validateSearch: z.object({ services: z.string().optional().catch(undefined) }),
+  // `?services=id,id`: what was picked; `?tab=`: the open panel (anything else is ignored, not an error)
+  validateSearch: z.object({
+    services: z.string().optional().catch(undefined),
+    tab: z.enum(['specialists', 'reviews', 'about']).optional().catch(undefined),
+  }),
   loader: async ({ context, params }) => {
     const lang = siteLocale(params.lang)
     // the first reviews come with the page, read alongside it, once: a failure doesn't hold the page up with retries
