@@ -101,11 +101,18 @@ export function usePlace() {
     keepPlace(next)
     setDenied(false)
   }
-  const askBrowser = () => {
+  /** Asks the browser; true once it answered with a position, false when it said no (`denied` says so). */
+  const askBrowser = (): Promise<boolean> => {
     setLocating(true)
     return locate()
-      .then((at) => pick({ kind: 'near', ...at }))
-      .catch(() => setDenied(true))
+      .then((at) => {
+        pick({ kind: 'near', ...at })
+        return true
+      })
+      .catch(() => {
+        setDenied(true)
+        return false
+      })
       .finally(() => setLocating(false))
   }
   /** The banner: until a place is known, once this browser has been read. */

@@ -1,3 +1,4 @@
+import { cn } from '@yeral/ui/cn'
 import {
   Car,
   Coffee,
@@ -33,8 +34,8 @@ const ICONS: Record<string, LucideIcon> = {
   utensils: Utensils,
 }
 
-/** A category's icon (Home `.cat`); a new category from the CMS gets a plain one until it's listed here. */
-export function CategoryIcon({ name }: { name: string }) {
-  const Icon = ICONS[name] ?? Store
-  return <Icon aria-hidden className="size-6 text-a-600" />
+/** A category's icon (Home `.cat`, the search bar's chips); a new category from the CMS gets a plain one until it's listed here. */
+export function CategoryIcon({ name, className }: { name: string | undefined; className?: string }) {
+  const Icon = (name && ICONS[name]) || Store
+  return <Icon aria-hidden className={cn('size-6 text-a-600', className)} />
 }
