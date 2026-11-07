@@ -11,15 +11,20 @@ export function Tooltip({
   content,
   side = 'top',
   variant = 'hint',
+  open,
+  onOpenChange,
   children,
 }: {
   content: ReactNode
   side?: 'top' | 'bottom' | 'left' | 'right'
   variant?: 'hint' | 'label'
+  /** Controlled, for a hint shown only sometimes (a cut-off cell's full text). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   children: ReactNode
 }) {
   return (
-    <TooltipPrimitive.Root>
+    <TooltipPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Content
