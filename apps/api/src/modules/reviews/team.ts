@@ -2,13 +2,14 @@
  * "Teswirler" as the team keeps them (book B-53, B-54): the reviews with their summary, filters and sort; the reply,
  * written, changed and taken away (its undo brings it back as it was); and reporting a review to Ýeral, which takes it
  * out of the rating while Ýeral checks it, 48 hours at most (Q-261). The owner and administrators reply and report
- * ("reply to / report reviews"); a specialist reads the reviews of their own visits, without the summary. A business
- * can't delete a review. Each change tells the screens of everyone who may read the review, its specialist included.
+ * ("reply to / report reviews"), and hear which reported reviews Ýeral removed (Q-262); a specialist reads the reviews
+ * of their own visits, without the summary. A business can't delete a review. Each change tells the screens of
+ * everyone who may read the review, its specialist included.
  */
 import type { reviewReplyInputSchema, reviewReportInputSchema, teamReviewsQuerySchema, teamReviewsSchema } from '@yeral/contract/reviews'
-import { REVIEW_REPORT_HOURS } from '@yeral/domain/lifecycle'
+import { REVIEW_REMOVED_NOTICE_DAYS, REVIEW_REPORT_HOURS } from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
-import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, sql, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lte, or, sql, type SQL } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { businesses, reviews, staff } from '../../db/schema'
@@ -50,7 +51,8 @@ export async function unansweredCounts(db: Queryable, businessIds: readonly stri
 /** The report as the team sees it: checking (not counted), counted again after 48 hours, or kept by Ýeral. */
 const stateOf = (r: ReviewRow) => (r.clearedAt ? 'cleared' : r.recountedAt ? 'counted' : 'checking')
 
-export async function teamReviews(db: Queryable, business: Business, actor: Actor, q: Query): Promise<TeamReviews> {
+export async function teamReviews(deps: Pick<Deps, 'db' | 'now'>, business: Business, actor: Actor, q: Query): Promise<TeamReviews> {
+  const { db } = deps
   // a specialist reads those of their own visits (`calendar: own`), and asks for nobody else's
   if (q.staff && !canOn(actor, 'calendar', [q.staff])) throw new ApiError('forbidden')
   const own = scopeOf(actor, 'calendar') === 'own' ? actor.staffId : null
@@ -63,10 +65,12 @@ export async function teamReviews(db: Queryable, business: Business, actor: Acto
     q.stars ? eq(reviews.rating, q.stars) : undefined,
   )!
   const offset = Number(q.cursor ?? 0)
-  const [{ rows, total }, summary] = await all(db, [
+  // the first page has the summary and the removal notices; "Ýene görkez" doesn't need them again
+  const [{ rows, total }, summary, removed] = await all(db, [
     () => pageOf(db, where, q, offset),
-    // the first page has it; "Ýene görkez" doesn't need it again
     async () => (own || offset ? null : summaryOf(db, business.id)),
+    // the notices go to who reports (the owner and administrators): a specialist never hears of a report
+    async () => (offset || scopeOf(actor, 'reviewsReply') !== 'all' ? [] : removedOf(db, business.id, deps.now())),
   ])
   const people = [...new Set(rows.flatMap((r) => [r.replyBy, r.reportedBy].filter((id): id is string => !!id)))]
   const [visits, names] = await all(db, [
@@ -95,7 +99,28 @@ export async function teamReviews(db: Queryable, business: Business, actor: Acto
     total,
     cursor: offset + q.limit < total ? String(offset + q.limit) : null,
     summary,
+    removed,
   }
+}
+
+/**
+ * «Ýeral removed a review you reported» (B-Reviews, Q-262: only the business hears the result): the reviews the team
+ * reported and Ýeral removed in the last `REVIEW_REMOVED_NOTICE_DAYS` days, the newest first. One Ýeral removed without
+ * a report isn't news to the business; what a removed review said stays with the team's record of the decision.
+ */
+async function removedOf(db: Queryable, businessId: string, now: number): Promise<TeamReviews['removed']> {
+  const rows = await db
+    .select({ id: reviews.id, author: reviews.authorName, at: reviews.removedAt })
+    .from(reviews)
+    .where(
+      and(
+        eq(reviews.businessId, businessId),
+        isNotNull(reviews.reportedAt),
+        gte(reviews.removedAt, new Date(now - REVIEW_REMOVED_NOTICE_DAYS * 86_400_000)),
+      ),
+    )
+    .orderBy(desc(reviews.removedAt), asc(reviews.id))
+  return rows.map((r) => ({ id: r.id, author: r.author, at: r.at!.getTime() }))
 }
 
 /** One page, and how many match in all (counted again when the page is past the end). */

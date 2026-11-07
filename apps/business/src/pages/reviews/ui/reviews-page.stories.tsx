@@ -6,12 +6,13 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
-import type { TeamReview } from '@yeral/contract/reviews'
+import type { RemovedReview, TeamReview } from '@yeral/contract/reviews'
 import type { Workspace } from '@yeral/contract/team'
 import type { ReviewReportReason } from '@yeral/domain/model'
 import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
+import { removedNoticesKey } from '../model/removed-notices'
 import { ReviewsPage } from './reviews-page'
 
 /** Opens our own Select (design v0.7 · A2) and picks a row in its listbox. */
@@ -157,13 +158,20 @@ const many = (): Sample[] => [
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
-type Options = { reviews?: () => Sample[]; failMore?: boolean; stall?: boolean; reportedMeanwhile?: boolean }
+type Options = {
+  reviews?: () => Sample[]
+  /** Reported reviews Ýeral removed in the last 30 days: the owner's and administrators' notices. */
+  removed?: () => RemovedReview[]
+  failMore?: boolean
+  stall?: boolean
+  reportedMeanwhile?: boolean
+}
 
 /** The api as the stories need it: the list with its filters and pages, the summary recounted after every change. */
 const fakeApi =
   (
     level: Workspace['level'],
-    { reviews = samples, failMore = false, stall = false, reportedMeanwhile = false }: Options = {},
+    { reviews = samples, removed = () => [], failMore = false, stall = false, reportedMeanwhile = false }: Options = {},
   ): (() => typeof fetch) =>
   () => {
     const rows = reviews()
@@ -208,6 +216,7 @@ const fakeApi =
           total: items.length,
           cursor: offset + 20 < items.length ? String(offset + 20) : null,
           summary: level === 'specialist' ? null : summary(),
+          removed: level === 'specialist' || offset ? [] : removed(),
         })
       }
       const m = /^(PUT|DELETE|POST) \/w\/glow-studio\/reviews\/([^/]+)\/(reply|report)$/.exec(route)
@@ -403,6 +412,33 @@ export const Reported: Story = {
     await expect(canvas.getByText('No decision in 48 hours')).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Review by Selbi A.: actions' })).toBeNull()
     await expect(canvas.queryByRole('button', { name: 'Review by Bahar M.: actions' })).toBeNull()
+  },
+}
+
+/**
+ * «Ýeral removed a review you reported» (Q-262): one notice per removed review, by name only, until closed; this browser
+ * remembers what was closed, so it doesn't come back on the next visit.
+ */
+export const Removed: Story = {
+  args: {
+    server: fakeApi('owner', {
+      reviews: () => samples().filter((r) => r.author !== 'Merdan K.'),
+      removed: () => [
+        { id: id(103), author: 'Merdan K.', at: now - DAY },
+        { id: id(110), author: 'Bahar M.', at: now - 3 * DAY },
+      ],
+    }),
+  },
+  beforeEach: () => localStorage.removeItem(removedNoticesKey('glow-studio')),
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('Merdan K.’s review no longer shows on your page or counts in your rating.')).toBeVisible()
+    await expect(canvas.getByText('Bahar M.’s review no longer shows on your page or counts in your rating.')).toBeVisible()
+    await expect(canvas.getAllByText('Ýeral removed a review you reported.')).toHaveLength(2)
+    await expect(canvas.queryByText('Merdan K.')).toBeNull()
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Close' })[0]!)
+    await expect(canvas.queryByText('Merdan K.’s review no longer shows on your page or counts in your rating.')).toBeNull()
+    await expect(canvas.getByText('Bahar M.’s review no longer shows on your page or counts in your rating.')).toBeVisible()
+    await expect(JSON.parse(localStorage.getItem(removedNoticesKey('glow-studio')) ?? '[]')).toEqual([id(103)])
   },
 }
 

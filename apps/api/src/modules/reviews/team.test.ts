@@ -1,4 +1,5 @@
 /** "Teswirler" (book B-53, B-54): the team's list, the reply, a report to Ýeral and its 48-hour recount. */
+import { REVIEW_REMOVED_NOTICE_DAYS } from '@yeral/domain/lifecycle'
 import { addDays, today } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -100,6 +101,7 @@ describe('the team’s reviews (book B-53, B-54)', () => {
       items: TeamReview[]
       total: number
       summary: { rating: number | null; count: number; breakdown: Record<string, number>; unanswered: number } | null
+      removed: { id: string; author: string; at: number }[]
     }
   const ratingOf = async () => {
     const [b] = await db.select().from(businesses).where(eq(businesses.id, glowId))
@@ -247,6 +249,15 @@ describe('the team’s reviews (book B-53, B-54)', () => {
     expect((await gone.client.req(`/v1/me/bookings/${gone.code}/review`, { body: { rating: 5, text: 'Again' } })).status).toBe(409)
     expect((await team.req('/v1/admin/reviews?view=removed')).json.items[0]).toMatchObject({ id: goneId, removed: { reason: 'Insults' } })
     expect((await team.req(`/v1/admin/reviews/${goneId}/remove`, { body: { reason: 'Again' } })).json.error.code).toBe('invalid_status')
+    // «Ýeral removed a review you reported» (Q-262): the owner and administrators hear it on the first page, by name and
+    // time only; the specialist of the visit doesn't; after 30 days nobody does
+    const notice = { id: goneId, author: 'Reviewer', at: t.clock.now }
+    expect((await page(maysa)).removed).toEqual([notice])
+    expect((await page(await as(SELBI))).removed).toEqual([notice])
+    expect((await page(maysa, '&cursor=20')).removed).toEqual([])
+    expect((await page(await as(MARAL))).removed).toEqual([])
+    t.clock.now += REVIEW_REMOVED_NOTICE_DAYS * 86_400_000 + 60_000
+    expect((await page(await as(MAYSA))).removed).toEqual([])
     expect(kept.code).toBeTruthy()
   })
 
@@ -281,6 +292,8 @@ describe('the team’s reviews (book B-53, B-54)', () => {
     const before = await ratingOf()
     expect((await team.req(`/v1/admin/reviews/${aId}/remove`, { body: { reason: 'Spam' } })).status).toBe(204)
     expect((await ratingOf()).count).toBe(before.count - 1)
+    // removed without the business's report: no notice to the business
+    expect((await page(maysa)).removed.map((r) => r.id)).not.toContain(aId)
     // the author's edit of a removed review moves nothing
     await a.client.req(`/v1/me/bookings/${a.code}/review`, { method: 'PATCH', body: { rating: 5, text: 'Edited' } })
     expect((await ratingOf()).count).toBe(before.count - 1)
@@ -295,5 +308,7 @@ describe('the team’s reviews (book B-53, B-54)', () => {
     const kept = await ratingOf()
     expect((await team.req(`/v1/admin/reviews/${bId}/remove`, { body: { reason: 'Insults' } })).status).toBe(204)
     expect((await ratingOf()).count).toBe(kept.count - 1)
+    // reported by the business, then removed: the notice, without what the review said
+    expect((await page(maysa)).removed.find((r) => r.id === bId)).toEqual({ id: bId, author: 'Reviewer', at: t.clock.now })
   })
 })
