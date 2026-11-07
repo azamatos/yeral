@@ -9,12 +9,15 @@ _Last updated: 2026-11-07_ · the current state only; the history by day is in `
 Live since 3dfec27: everything through #322. **Merged, to deploy next:** #324 FilterBar and bookings, #325 business page,
 #328 e2e hook. **Open, to land in order** (rebase on `main` → CI green on the head → squash → `main`'s run green): #326
 bookings api filters (several specialists/services, status, sort, total), #327 calendar follow-ups (week blocks, 390
-sheets), #329 clients FilterBar (tag, upcoming), idea 2's PR (`feat/changed-since-visit`: "something changed since your
-last visit" on the confirm step). Then deploy and check the live sites. **Waiting on the owner:** #316 (no demo workspace
-anywhere) needs the server's sandbox rows deleted (`DELETE FROM businesses WHERE sandbox; DELETE FROM users WHERE demo;`,
-after a backup) or a filter kept — the owner's call. **Left from round 7:** the business page's phone header, Back and the
+sheets), #329 clients FilterBar (tag, upcoming), #330 idea 2 ("something changed since your last visit" on the confirm
+step), #316 (no demo workspace anywhere: the owner chose 07.11 to delete the server's sandbox rows with its deploy,
+`DELETE FROM businesses WHERE sandbox; DELETE FROM users WHERE demo;` after a backup). Then deploy and check the live
+sites. **Next, the owner's decision of 07.11 (book Q-275 changed):** a verified business's new name waits for the Ýeral
+team's approval (clients and SMS keep the old one); a new description, photos or logo go live and join the admin tool's
+"check again" list, as a move does. **Left from round 7:** the business page's phone header, Back and the
 no-photo bar, and C3 services at scale; A10 callouts, toasts and NoteRow; idea 1 (trusted client) and idea 3 (follow, plan
-only); the FilterBar on the client site's search; the reviews page's "removed" notice (an api field); tk/ru strings.
+only); the FilterBar on the client site's search; the reviews page's "removed" notice (the api says nothing of a removed
+report today); tk/ru strings.
 **Agents:** allowed for this run (owner 06.11): Opus 5.5 at xhigh, two at a time, a reviewer per PR; budget 30 % of the
 week that began 07.11.
 
