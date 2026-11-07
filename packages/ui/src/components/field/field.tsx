@@ -1,6 +1,7 @@
 import { CircleAlert, CircleCheck, TriangleAlert } from 'lucide-react'
 import { createContext, useContext, useId, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { InfoTip } from '../info-tip'
 
 export type FieldStatus = 'error' | 'warning' | 'success'
 
@@ -79,6 +80,8 @@ export type FieldProps = {
   id?: string
   /** Words after the label in regular n-600: «(optional)». */
   optional?: ReactNode
+  /** A ⓘ after the label (v0.7 · A9) whose popover says `text`; `label` names the button («About the internal status»). */
+  info?: { label: string; text: ReactNode }
   /**
    * A character counter right of the hint (B-Onboarding `.ccount`): `text` is «12 / 80» formatted by the screen,
    * `value` and `max` set its tone — n-600, warning ink from 90 % of `max`, danger ink 600 over `max`. It describes the
@@ -100,6 +103,7 @@ export function Field({
   className,
   id,
   optional,
+  info,
   counter,
   children,
 }: FieldProps) {
@@ -121,10 +125,21 @@ export function Field({
   return (
     <FieldContext.Provider value={{ id: controlId, labelId, describedBy, invalid: tone === 'error', status: tone, disabled }}>
       <div className={cn('flex min-w-0 flex-col gap-1.5', className)}>
-        <label id={labelId} htmlFor={controlId} className="text-dense font-semibold text-n-900">
-          {label}
-          {optional && <span className="font-normal text-n-600"> {optional}</span>}
-        </label>
+        {info ? (
+          // the ⓘ is a button of its own, outside the label, so a click on it isn't a click on the control
+          <span className="flex items-center gap-1.5">
+            <label id={labelId} htmlFor={controlId} className="text-dense font-semibold text-n-900">
+              {label}
+              {optional && <span className="font-normal text-n-600"> {optional}</span>}
+            </label>
+            <InfoTip label={info.label}>{info.text}</InfoTip>
+          </span>
+        ) : (
+          <label id={labelId} htmlFor={controlId} className="text-dense font-semibold text-n-900">
+            {label}
+            {optional && <span className="font-normal text-n-600"> {optional}</span>}
+          </label>
+        )}
         {children}
         {note && tone && (
           <FieldMessage id={messageId} status={tone} live={messageLive}>

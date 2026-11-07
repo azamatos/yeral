@@ -1,13 +1,15 @@
 import { Link } from '@tanstack/react-router'
 import type { CalendarBooking } from '@yeral/contract/calendar'
 import type { ClientCard } from '@yeral/contract/clients'
+import { localOf } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
-import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
+import { CopyField } from '@yeral/ui/copy-field'
+import { InfoTip } from '@yeral/ui/info-tip'
 import { Pill } from '@yeral/ui/pill'
-import { Phone, TriangleAlert } from 'lucide-react'
+import { Phone } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, useJoin } from '@/entities/booking'
@@ -19,9 +21,10 @@ export const RECENT_VISITS = 3
 const hidden = (chunks: ReactNode) => <span className="sr-only">{chunks}</span>
 
 /**
- * The client in the booking drawer (B-Calendar `.cli`, DS-Business BookingDrawer): the name and number, their facts
- * from the card («12 visits · average check 145 TMT», no-shows, Phone only), Call and «Book again», and the link to
- * the card. The card comes from the page's cache (`sdk.clients.card`), so a booking opens before it's read.
+ * The client in the booking drawer as one card (B7-Booking `.ccard`, v0.7 · B4): the name is the link to the card,
+ * the number with its copy button, the tags, the facts (visits, last visit, no-shows) as labelled facts, the notes
+ * «shown when they book» as note rows, and Call and «Book again» as two equal buttons. The card comes from the page's
+ * cache (`sdk.clients.card`), so a booking opens before it's read.
  */
 export function ClientBlock({
   slug,
@@ -37,79 +40,114 @@ export function ClientBlock({
   const t = useTranslations('bookingDrawer.booking')
   const fmt = useFmt()
   const name = client.name ?? t('unnamed')
+  const tags = card
+    ? [
+        ...card.segments.map((s) => ({ key: `s:${s}`, label: t(`segments.${s}`), reported: s === 'flagged' })),
+        ...card.tags.map((tag) => ({ key: `t:${tag}`, label: tag, reported: false })),
+      ]
+    : []
+  const alerts = card?.notes.filter((n) => n.alert) ?? []
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-start gap-3">
+    <div className="flex flex-col gap-4 rounded-ctl-l border border-n-200 bg-n-0 p-4">
+      <div className="flex items-center gap-3">
         <Avatar name={client.name ?? ''} size={40} letters={1} tone="tint" decorative />
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="flex min-w-0 flex-1 flex-col">
           {/* the name is the Link to the card (A4): no bare «Open the client's card» */}
           {client.id ? (
             <Link
               to="/w/$slug/clients/$id"
               params={{ slug, id: client.id }}
               className={cn(
-                'self-start text-[16px] leading-[22px] font-semibold text-n-900',
+                'self-start text-[16px] leading-6 font-semibold text-n-900',
                 'no-underline hover:underline hover:underline-offset-3 focus-visible:rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-a-400',
               )}
             >
               {name}
             </Link>
           ) : (
-            <span className="text-[16px] leading-[22px] font-semibold text-n-900">{name}</span>
+            <span className="text-[16px] leading-6 font-semibold text-n-900">{name}</span>
           )}
-          {client.phone && <span className="text-dense text-n-600">{fmt.phone(client.phone)}</span>}
-          {card && (
-            <span className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-dense text-n-600">
-                {t('visits', { n: card.stats.visits })}
-                {/* the average only with «See revenue» (the api leaves it out otherwise) */}
-                {card.stats.avgCheck !== null && t('avgCheck', { amount: fmt.money(card.stats.avgCheck) })}
-              </span>
-              {card.stats.noShows > 0 && <Pill tone="danger">{t('noShows', { n: card.stats.noShows })}</Pill>}
-              {card.settings.phoneOnly && <Pill tone="warning">{t('phoneOnly')}</Pill>}
-            </span>
+          {client.phone && (
+            <CopyField
+              variant="inline"
+              value={client.phone}
+              display={fmt.phone(client.phone)}
+              label={t('copyPhone')}
+              copy={{ copy: t('copyPhone'), copied: t('copied') }}
+              className="text-small text-n-900"
+            />
           )}
-          {/* Call and Book again: two equal Secondary M (A4) */}
-          <span className="flex gap-2 pt-2.5">
-            {client.phone && (
-              <Button asChild variant="secondary" className="flex-1">
-                {/* named by what it shows, the rest hidden: the visible word starts the name in every language (axe) */}
-                <a href={`tel:${client.phone}`}>
-                  <Phone aria-hidden />
-                  {t.rich('callName', { name, phone: fmt.phone(client.phone), hidden })}
-                </a>
-              </Button>
-            )}
-            {onBookAgain && (
-              <Button variant="secondary" className="flex-1" onClick={onBookAgain}>
-                {t('bookAgain')}
-              </Button>
-            )}
-          </span>
         </span>
       </div>
+      {card && (tags.length > 0 || card.settings.phoneOnly) && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {tags.map((tag) => (
+            <Pill
+              key={tag.key}
+              size="m"
+              tone={tag.reported ? 'danger' : 'neutral'}
+              className={tag.reported ? undefined : 'bg-n-0 text-n-900'}
+            >
+              {tag.label}
+            </Pill>
+          ))}
+          {card.settings.phoneOnly && (
+            <span className="inline-flex items-center gap-1">
+              <Pill size="m" className="text-n-900">
+                {t('phoneOnly')}
+              </Pill>
+              <InfoTip label={t('phoneOnlyInfoLabel')}>
+                {t('phoneOnlyInfo', { byCount: card.settings.phoneOnlyByCount ? 'yes' : 'no' })}
+              </InfoTip>
+            </span>
+          )}
+        </div>
+      )}
+      {card && (
+        <dl className="m-0 grid grid-cols-3 gap-3">
+          <Fact label={t('facts.visits')} value={card.stats.visits} />
+          <Fact label={t('facts.lastVisit')} value={card.stats.lastVisit ? fmt.shortDate(card.stats.lastVisit) : t('facts.never')} />
+          {card.stats.noShows > 0 && <Fact label={t('facts.noShows')} value={card.stats.noShows} danger />}
+        </dl>
+      )}
+      {alerts.map((note) => (
+        <div key={note.id} className="flex flex-col gap-0.5">
+          <span className="text-small text-n-900">{note.text}</span>
+          <span className="text-micro text-n-600">
+            {t('noteMeta', { by: note.by ?? t('unnamed'), date: fmt.shortDate(localOf(note.at).date) })}
+          </span>
+        </div>
+      ))}
+      {(client.phone || onBookAgain) && (
+        <div className="flex gap-2">
+          {/* Call and Book again: two equal Secondary M (A4) */}
+          {client.phone && (
+            <Button asChild variant="secondary" className="flex-1">
+              {/* named by what it shows, the rest hidden: the visible word starts the name in every language (axe) */}
+              <a href={`tel:${client.phone}`}>
+                <Phone aria-hidden />
+                {t.rich('callName', { name, phone: fmt.phone(client.phone), hidden })}
+              </a>
+            </Button>
+          )}
+          {onBookAgain && (
+            <Button variant="secondary" className="flex-1" onClick={onBookAgain}>
+              {t('bookAgain')}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
-/** The client's notes «shown when they book» (B-Calendar `.wbox`): one callout each, the whole team sees them. */
-export function AlertNotes({ card }: { card: ClientCard | undefined }) {
-  const t = useTranslations('bookingDrawer.booking')
-  const alerts = card?.notes.filter((n) => n.alert) ?? []
+/** One labelled fact (B7-Booking `.fk`): the label 12/16 above the value 14/20. */
+function Fact({ label, value, danger }: { label: string; value: ReactNode; danger?: boolean }) {
   return (
-    <>
-      {alerts.map((note) => (
-        <Callout
-          key={note.id}
-          tone="warning"
-          size="s"
-          icon={<TriangleAlert aria-hidden />}
-          title={<span className="text-label uppercase">{t('alert')}</span>}
-        >
-          {note.text}
-        </Callout>
-      ))}
-    </>
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <dt className="text-micro whitespace-nowrap text-n-600">{label}</dt>
+      <dd className={cn('m-0 text-small', danger ? 'font-semibold text-danger-ink' : 'text-n-900')}>{value}</dd>
+    </div>
   )
 }
 

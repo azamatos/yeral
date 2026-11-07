@@ -17,8 +17,9 @@ import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { toast } from '@yeral/ui/toast'
-import { Globe, Phone, User, X } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Tooltip } from '@yeral/ui/tooltip'
+import { Globe, Phone, User } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BOOKING_STATUS_ICON, canMoveBooking, useInternalStatusName, useJoin } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
@@ -27,7 +28,7 @@ import { canCancelBooking, canRemoveReport, reportKinds } from '../model/report-
 import { useNoteAutosave } from '../model/use-note-autosave'
 import { useReportActions, type ReportActions } from '../model/use-report-actions'
 import { CancelBookingModal } from './cancel-booking-modal'
-import { AlertNotes, ClientBlock, RecentVisits, RECENT_VISITS } from './client-block'
+import { ClientBlock, RecentVisits, RECENT_VISITS } from './client-block'
 import { ReportBox } from './report-box'
 import { ReportMenu } from './report-menu'
 
@@ -160,14 +161,15 @@ function Body({
 
   return (
     <DrawerBody>
-      <div className="flex flex-wrap items-center gap-3">
+      {/* the status and the source as two equal badges (B7-Booking `.sstrip`, v0.7 · B4) */}
+      <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={b.status} icon={<Icon aria-hidden strokeWidth={2} className="size-3.5" />}>
           {s(b.status)}
         </StatusBadge>
-        <SourceLine booking={b} />
+        <SourceBadge booking={b} />
+        {b.status === 'cancelled' && <span className="text-dense text-n-600">{t('cancelledBy', { by: b.cancelledBy ?? 'system' })}</span>}
       </div>
       {b.status === 'confirmed' && <InternalStatusField slug={slug} booking={b} statuses={statuses} />}
-      <AlertNotes card={card} />
       <ClientBlock slug={slug} client={b.client} card={card} onBookAgain={onBookAgain} />
       <KeyValueList
         items={[
@@ -197,8 +199,8 @@ function Body({
       {b.clientNote && <Quote label={t('clientNote')}>{t('noteText', { note: b.clientNote })}</Quote>}
       <Field
         label={t('internalNote')}
-        // the caption carries the state (B-Calendar `noteCap`): saving, saved, or saved automatically before anything's
-        // typed; a failed save has the error alone
+        info={{ label: t('noteInfoLabel'), text: t('noteInfo') }}
+        // the line under it carries the state alone (B7-Booking: typed → «Saved»); a failed save has the error alone
         hint={
           note.state === 'failed'
             ? undefined
@@ -206,7 +208,7 @@ function Body({
               ? t('noteSaving')
               : note.typed || b.internalNote
                 ? t('noteSaved')
-                : t('noteAuto')
+                : undefined
         }
         error={note.state === 'failed' && t('noteFailed', { error: errorText(note.error) })}
       >
@@ -223,21 +225,26 @@ function Body({
   )
 }
 
-/** Where the booking came from, or who cancelled it (B-Calendar `.src`). */
-function SourceLine({ booking: b }: { booking: CalendarBooking }) {
+/**
+ * Who made the booking (B7-Booking `.bdg.src`): «Booked online», «Booked by phone» (the team, after a call) or
+ * «Walk-in», a badge the size of the status's, with a tooltip saying what it means.
+ */
+function SourceBadge({ booking: b }: { booking: CalendarBooking }) {
   const t = useTranslations('bookingDrawer.booking')
-  const icon = 'size-3.5'
-  const line = (node: ReactNode, words: string) => (
-    <span className="inline-flex items-center gap-1.5 text-dense font-medium text-n-600">
-      {node}
-      {words}
-    </span>
+  const kind = b.source === 'phone' ? 'byPhone' : b.source === 'walkin' ? 'walkIn' : isOnlineSource(b.source) ? 'online' : null
+  if (!kind) return null
+  const Icon = kind === 'byPhone' ? Phone : kind === 'walkIn' ? User : Globe
+  return (
+    <Tooltip content={t(`${kind}Tip`)}>
+      <span
+        tabIndex={0}
+        className="inline-flex h-6.5 items-center gap-1.5 rounded-pill border border-n-200 bg-n-50 px-2.5 text-dense font-semibold whitespace-nowrap text-n-600 focus-visible:shadow-focus focus-visible:outline-none"
+      >
+        <Icon aria-hidden strokeWidth={1.75} className="size-3.5" />
+        {t(kind)}
+      </span>
+    </Tooltip>
   )
-  if (b.status === 'cancelled')
-    return line(<X aria-hidden strokeWidth={1.75} className={icon} />, t('cancelledBy', { by: b.cancelledBy ?? 'system' }))
-  if (b.source === 'phone') return line(<Phone aria-hidden strokeWidth={1.75} className={icon} />, t('byPhone'))
-  if (b.source === 'walkin') return line(<User aria-hidden strokeWidth={1.75} className={icon} />, t('walkIn'))
-  return isOnlineSource(b.source) ? line(<Globe aria-hidden strokeWidth={1.75} className={icon} />, t('online')) : null
 }
 
 /**
@@ -286,7 +293,7 @@ function InternalStatusField({ slug, booking: b, statuses }: { slug: string; boo
   })
   if (!offered.length) return null
   return (
-    <Field label={t('internalStatus')} hint={t('internalStatusCaption')}>
+    <Field label={t('internalStatus')} info={{ label: t('internalStatusInfoLabel'), text: t('internalStatusInfo') }}>
       <Select
         size="m"
         className="max-w-60"
