@@ -5,6 +5,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useLocation } from '@tanstack/react-router'
+import { toast as sonner } from '@yeral/ui/toast'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { AccountLayout } from '@/widgets/account-layout'
 import { SiteLayout } from '@/widgets/site-layout'
@@ -40,6 +41,10 @@ const meta = {
     server: authApi({ people: [AYJEMAL], signedIn: AYJEMAL }),
   },
   argTypes: { routes: { control: false }, server: { control: false } },
+  // toasts outlive a story (sonner keeps them at module level), and an error one is an `alert` a later story counts
+  beforeEach: () => {
+    sonner.dismiss()
+  },
 } satisfies Meta<typeof PageStory>
 export default meta
 type Story = StoryObj<typeof meta>
