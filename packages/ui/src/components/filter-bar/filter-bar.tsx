@@ -371,7 +371,8 @@ function FiltersSheet({
  * FilterBar (DS-Lists A5): one bar for every list. Row 1 (M 40): Search · the filter menus · Sort · the list's main
  * action. Row 2 while anything is filtered or searched: the active filters as removable chips, Clear all, the result
  * count. Under 768: the search on its own row, then «Filters · N», the count and Sort as an icon button; the chips
- * under them; the Filters sheet holds the same menus. Fully controlled: the page keeps the values (its URL).
+ * under them; the Filters sheet holds the same menus; the main action is the page's own there (A5 draws none in the
+ * row). Fully controlled: the page keeps the values (its URL).
  */
 export function FilterBar({ search, filters, sort, action, count, labels, onClearAll, className }: FilterBarProps) {
   const phone = useSheet()
@@ -420,7 +421,6 @@ export function FilterBar({ search, filters, sort, action, count, labels, onClea
           {countText}
           <span className="flex-1" />
           {sort && <SortMenu sort={sort} labels={labels} iconOnly />}
-          {action}
         </div>
         {chips.length > 0 && <div className="flex flex-wrap items-center gap-2">{chipRow}</div>}
         <FiltersSheet filters={filters} labels={labels} open={sheetOpen} onOpenChange={setSheetOpen} clearAll={clearAll} />

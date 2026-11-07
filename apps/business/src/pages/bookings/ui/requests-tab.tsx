@@ -245,7 +245,7 @@ export function RequestsTab({
               <TableCell>{staff(r)}</TableCell>
               <TableCell>{time(r)}</TableCell>
               {/* one line each (design v0.7 B8): «Answer by» holds the timer, «Answer» the ✓ tint and ✕ outline */}
-              <TableCell>{timer(r)}</TableCell>
+              <TableCell className="items-start">{timer(r)}</TableCell>
               <TableCell className="flex-row flex-nowrap items-center gap-1.5">
                 {r.canAnswer ? (
                   <>
