@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { apiSearch, areaOf, CLEARED, dayOf, filtered, nearOf, priceBandAddress, priceBandOf, searchAddress, widerRadius } from './search'
+import {
+  apiSearch,
+  areaOf,
+  canWiden,
+  CLEARED,
+  dayOf,
+  filtered,
+  nearOf,
+  priceBandAddress,
+  priceBandOf,
+  searchAddress,
+  WIDEST_RADIUS_KM,
+} from './search'
 
 describe('searchAddress', () => {
   it('reads what it knows and leaves the rest out', () => {
@@ -107,10 +119,11 @@ describe('near', () => {
     expect(apiSearch({ r: 10 }, 'en', '2026-11-01').r).toBeUndefined()
   })
 
-  it('widens one step at a time, up to the last', () => {
-    expect(widerRadius()).toBe(10)
-    expect(widerRadius(10)).toBe(25)
-    expect(widerRadius(25)).toBeUndefined()
+  it('can go further away until the widest radius', () => {
+    expect(WIDEST_RADIUS_KM).toBe(25)
+    expect(canWiden()).toBe(true)
+    expect(canWiden(10)).toBe(true)
+    expect(canWiden(25)).toBe(false)
   })
 })
 

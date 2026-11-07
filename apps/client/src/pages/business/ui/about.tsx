@@ -9,10 +9,10 @@ import { Pill } from '@yeral/ui/pill'
 import { Car, CircleCheck, Clock, CreditCard, Info, MapPin as Place, Phone, Snowflake, Wallet, Wifi } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
+import { StatusPill } from '@/entities/business'
 import { addressLine } from '@/shared/lib'
 import { DirectionsButton, PlaceMap } from '@/shared/ui'
 import { confirmLine, weekRows } from '../model/when'
-import { StatusPill } from './hero'
 import { Section } from './sections'
 
 /** An icon row (Venue `.ir`): 20 icon, 15/22 text, 12 apart. */

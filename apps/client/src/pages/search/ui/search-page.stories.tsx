@@ -74,7 +74,9 @@ const fakeApi =
         last = query
         const at = Number(query.get('cursor') ?? 0)
         const wide = query.has('minRating')
-        const items = none || wide ? [] : (pages[at] ?? [])
+        // words no place has
+        const miss = query.get('q') === 'hairx'
+        const items = none || wide || miss ? [] : (pages[at] ?? [])
         return json({
           items,
           total: pages.flat().length,
@@ -116,7 +118,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The rows: name, rating, the line, from, four times and how many more; only categories that take appointments; the toolbar at rest. */
+/** The rows: name, rating, the category (no street, no position), open until, from, three times and «+N»; only categories that take appointments; the toolbar at rest. */
 export const Results: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Popular places' })).toBeVisible()
@@ -127,11 +129,15 @@ export const Results: Story = {
     await expect(canvas.getByRole('button', { name: 'Sort: Recommended' })).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Clear all' })).toBeNull()
     await expect(canvas.getByRole('link', { name: 'Barber Loft' })).toHaveAttribute('href', '/en/b/barber-loft')
-    await expect(canvas.getAllByText('Barbershop · Magtymguly şaýoly 12')).toHaveLength(2)
+    const row = within(canvas.getByRole('link', { name: 'Barber Loft' }).closest('article')!)
+    await expect(row.getByText('Barbershop')).toBeVisible()
+    await expect(canvas.queryByText(/Magtymguly/)).toBeNull()
+    await expect(row.getByText('Open until 19:00')).toBeVisible()
     // an example business is no longer marked (owner's review, #40)
     await expect(canvas.queryByText('Example')).toBeNull()
     await expect(canvas.getAllByText('from 40 TMT')).toHaveLength(2)
-    await expect(canvas.getAllByText('+3')).toHaveLength(2)
+    await expect(row.getAllByRole('link', { name: /^Book Barber Loft at/ })).toHaveLength(3)
+    await expect(row.getByRole('link', { name: '4 more times' })).toHaveAttribute('href', `/en/b/barber-loft/book?date=${DAY}&step=time`)
     await expect(canvas.getByRole('link', { name: 'Book Barber Loft at 11:00' })).toHaveAttribute(
       'href',
       `/en/b/barber-loft/book?date=${DAY}&time=660`,
@@ -274,6 +280,22 @@ export const NoPlaces: Story = {
   },
 }
 
+/** Words no place has (C7-Home `SearchNoResults`): the toolbar goes, the spelling is questioned, Clear search brings the places back. */
+export const NoMatch: Story = {
+  args: { path: '/en/search?what=hairx' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('No places for “hairx”')).toBeVisible()
+    await expect(canvas.getByText('Check the spelling, or try one of these.')).toBeVisible()
+    await expect(canvas.queryByRole('combobox', { name: 'Rating' })).toBeNull()
+    // not around a position: nothing further to search
+    await expect(canvas.queryByRole('button', { name: 'Search further away' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear search' }))
+    await expect(await canvas.findByRole('link', { name: 'Barber Loft' })).toBeVisible()
+    await expect(canvas.getByRole('combobox', { name: 'Rating' })).toBeVisible()
+    await expect(canvas.getByRole('textbox', { name: 'Service, place or specialist' })).toHaveValue('')
+  },
+}
+
 /** Show more loads the next page under the first. */
 export const ShowMore: Story = {
   args: { server: fakeApi({ pages: [[CARDS[0]!], [CARDS[1]!]] }) },
@@ -302,13 +324,14 @@ export const NearAPosition: Story = {
   },
 }
 
-/** Nothing near: one step wider. */
+/** Nothing near: «Search further away» goes straight to the widest radius, then there is nothing further. */
 export const WiderArea: Story = {
   args: { path: '/en/search?near=37.95,58.39', server: fakeApi({ none: true }) },
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: 'Make it 10 km' }))
-    await waitFor(() => expect(last.get('r')).toBe('10'))
-    await expect(await canvas.findByRole('button', { name: 'Make it 25 km' })).toBeVisible()
+    await userEvent.click(await canvas.findByRole('button', { name: 'Search further away' }))
+    await waitFor(() => expect(last.get('r')).toBe('25'))
+    await waitFor(() => expect(canvas.queryByRole('button', { name: 'Search further away' })).toBeNull())
+    await expect(canvas.getByRole('button', { name: 'Try tomorrow' })).toBeVisible()
   },
 }
 
@@ -333,7 +356,7 @@ export const MapBesideTheList: Story = {
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Glow Studio, 11:00' }).className).toContain('bg-n-900'))
     await userEvent.unhover(row)
     await userEvent.click(pin)
-    await waitFor(() => expect(canvas.getByRole('link', { name: 'Barber Loft' }).closest('[id^=row-]')!.className).toContain('bg-a-50'))
+    await waitFor(() => expect(canvas.getByRole('link', { name: 'Barber Loft' }).closest('[id^=row-]')!.className).toContain('bg-n-50'))
   },
 }
 

@@ -2,12 +2,10 @@ import type { BusinessCard } from '@yeral/contract/catalog'
 import { useFmt } from '@yeral/i18n'
 import { useTranslations } from 'use-intl'
 
-/** «Barbershop · Magtymguly şaýoly 12 · 1.2 km»; the distance only when the search has a position. */
+/** «Barbershop · 1.2 km» (C7-Home `VenueResultRow`, A7: two short items, no street); the category alone without a position. */
 export function useCardLine() {
   const t = useTranslations('businessCard')
   const fmt = useFmt()
-  return (card: BusinessCard) => {
-    const line = t('line', { category: card.category.name, street: card.street })
-    return card.distanceM === null ? line : t('lineFar', { line, distance: fmt.distance(card.distanceM) })
-  }
+  return (card: BusinessCard) =>
+    card.distanceM === null ? card.category.name : t('line', { category: card.category.name, distance: fmt.distance(card.distanceM) })
 }
