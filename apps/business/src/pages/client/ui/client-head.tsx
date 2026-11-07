@@ -6,7 +6,7 @@ import { Pill } from '@yeral/ui/pill'
 import { toast } from '@yeral/ui/toast'
 import { Copy, Phone } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { ClientTags } from '@/entities/client'
+import { useClientTagChips } from '@/entities/client'
 
 /**
  * The card's head (B-Client `.hdr`): the avatar, the full name, the number with Copy and Call, «Ýeral account» when an
@@ -17,6 +17,7 @@ export function ClientHead({ card, manage, onEdit }: { card: ClientCard; manage:
   const clients = useTranslations('clients')
   const sources = useTranslations('clients.sources')
   const fmt = useFmt()
+  const tagChips = useClientTagChips()
   const { phone } = card
   const copy = (number: string) => void navigator.clipboard.writeText(number).then(() => toast(clients('copied')))
   const since = t('since', { month: fmt.monthYear(card.since) })
@@ -51,7 +52,7 @@ export function ClientHead({ card, manage, onEdit }: { card: ClientCard; manage:
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <ClientTags phoneOnly={card.settings.phoneOnly} segments={card.segments} tags={card.tags} size="m" />
+          {tagChips({ phoneOnly: card.settings.phoneOnly, segments: card.segments, tags: card.tags, size: 'm' })}
           <span className="text-dense text-n-600">{card.source ? t('sinceSource', { since, source: sources(card.source) }) : since}</span>
         </div>
       </div>

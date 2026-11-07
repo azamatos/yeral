@@ -1696,8 +1696,9 @@
     "table": "Clients",
     "loading": "Loading the clients",
     "columns": {
-      "client": "Client",
+      "name": "Name",
       "phone": "Phone",
+      "tags": "Tags",
       "visits": "Visits",
       "last": "Last visit",
       "total": "Total",
@@ -1705,16 +1706,14 @@
       "actions": "Actions"
     },
     "next": "{day} · {time}",
-    "actions": "Actions for {name}",
-    "openCard": "Open the card",
     "book": "New booking",
     "copy": "Copy number",
     "copied": "Number copied",
     "delete": "Delete client",
     "showMore": "Show more",
-    "nothing": "No clients found",
-    "nothingHint": "Type the full number or add a new client.",
-    "clearFilters": "Clear filters",
+    "nothing": "No clients match",
+    "nothingHint": "Check the spelling, or clear the search and filters.",
+    "clearFilters": "Clear all",
     "empty": "No clients yet",
     "sources": {
       "instagram": "Instagram",
@@ -1745,7 +1744,14 @@
       "saving": "Saving the client…",
       "saveAndBook": "Save and book",
       "saved": "Client added"
-    }
+    },
+    "nothingQuery": "No clients match “{q}”",
+    "emptyHint": "Clients appear here after their first booking. You can also add one yourself.",
+    "addClient": "Add a client",
+    "bookFor": "New booking for {name}",
+    "moreTags": "{count, plural, one {# more tag} other {# more tags}}",
+    "visitsCount": "{count, plural, one {# visit} other {# visits}}",
+    "autoTag": "Set automatically from visits"
   },
   "reviews": {
     "summary": {

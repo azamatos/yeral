@@ -1,14 +1,15 @@
 /**
- * Clients — B-Clients (v0.6 round 3, English), in the app's shell over a `fetch` that answers like the api: the rows with
- * their tags, the chips, the search, nothing found, no clients yet, adding a client (a number already saved, Save and
- * book), a phone, a reader who doesn't see revenue.
+ * Clients — B7-Clients B5 (design v0.7, DS-Lists A6), in the app's shell over a `fetch` that answers like the api: one
+ * line per client with the tags and «+N», the chips with their counts, the sortable headers, the row as the link to the
+ * card, the copy icon and the one «New booking» icon, the search, no results, no clients yet, adding a client (a number
+ * already saved, Save and book), the phone's list items, a reader who doesn't see revenue.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { ClientRow } from '@yeral/contract/clients'
 import type { Workspace } from '@yeral/contract/team'
 import { addDays, today } from '@yeral/domain/time'
-import { expect, screen as page, userEvent, waitFor, within } from 'storybook/test'
+import { expect, screen as page, spyOn, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { ClientsPage } from './clients-page'
@@ -61,11 +62,34 @@ const rows = [
   client(1, 'Gözel Annaýewa', {
     segments: ['regular'],
     tags: ['VIP'],
+    visits: 11,
     next: { code: 'YR-48001', date: addDays(DAY, 1), start: 660, status: 'confirmed', holdUntil: null },
   }),
   client(2, 'Ogulnabat Ç.', { segments: ['flagged'], phoneOnly: true }),
   client(3, null, { visits: 0, lastVisit: null, total: 0 }),
+  client(4, 'Mähribangül Nurmuhammedowa-Allaberdiýewa', {
+    segments: ['regular'],
+    tags: ['VIP', 'Allergy: ammonia', 'Mornings only', 'Colour client'],
+    visits: 14,
+    lastVisit: addDays(DAY, -2),
+    total: 1680,
+  }),
 ]
+const SORTS = {
+  name: (r: ClientRow) => r.name ?? '',
+  visits: (r: ClientRow) => r.visits,
+  lastVisit: (r: ClientRow) => r.lastVisit ?? '',
+  total: (r: ClientRow) => r.total ?? 0,
+  nextBooking: (r: ClientRow) => r.next?.date ?? '9999',
+} as const
+const sorted = (items: ClientRow[], url: URL) => {
+  const by = SORTS[url.searchParams.get('sort') as keyof typeof SORTS]
+  if (!by) return items
+  const dir =
+    url.searchParams.get('dir') ??
+    (url.searchParams.get('sort') === 'name' || url.searchParams.get('sort') === 'nextBooking' ? 'asc' : 'desc')
+  return [...items].sort((a, b) => (by(a) < by(b) ? -1 : by(a) > by(b) ? 1 : 0) * (dir === 'asc' ? 1 : -1))
+}
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
@@ -86,7 +110,7 @@ const answer = async (request: Request, level: Workspace['level'], none: boolean
     const segment = url.searchParams.get('segment')
     const items = none
       ? []
-      : rows
+      : sorted(rows, url)
           .filter((r) => !q || r.name?.toLowerCase().includes(q))
           .filter((r) => !segment || r.segments.includes(segment as never))
           .map((r) => (level === 'specialist' ? { ...r, total: null, avgCheck: null } : r))
@@ -129,27 +153,73 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The rows: tags with Phone only and Reported, an unnamed client, Total, the next booking. */
+/** One line per client: the tags with «+N», the counts on the chips, the name as the row's link, Total. */
 export const List: Story = {
   play: async ({ canvas }) => {
     const table = within(await canvas.findByRole('table', { name: 'Clients' }))
-    await expect(table.getByText('Gözel Annaýewa')).toBeVisible()
-    await expect(table.getByText('VIP')).toBeVisible()
+    await expect(table.getByRole('link', { name: 'Gözel Annaýewa' })).toHaveAttribute('href', `/w/glow-studio/clients/${id(1)}`)
+    await expect(table.getAllByText('VIP')[0]).toBeVisible()
     await expect(table.getByText('Phone only')).toBeVisible()
     await expect(table.getByText('Unnamed client')).toBeVisible()
-    await expect(table.getByRole('columnheader', { name: 'Total' })).toBeVisible()
+    await expect(table.getByRole('columnheader', { name: 'Total' })).toHaveAttribute('aria-sort', 'none')
+    await expect(table.queryByRole('button', { name: /Actions for/ })).toBeNull()
+    await expect(canvas.getByRole('radio', { name: 'Regular 2' })).toBeVisible()
+    await userEvent.click(table.getByRole('button', { name: '3 more tags' }))
+    await waitFor(() => expect(page.getByRole('dialog', { name: '3 more tags' })).toHaveTextContent('Colour client'))
   },
 }
 
-/** A chip, the search, nothing found and back. */
+/** The headers sort through the address: Visits most first, then fewest first; Name A → Z. */
+export const Sorting: Story = {
+  play: async ({ canvas }) => {
+    const table = within(await canvas.findByRole('table', { name: 'Clients' }))
+    const visits = table.getByRole('columnheader', { name: 'Visits' })
+    await userEvent.click(within(visits).getByRole('button'))
+    await waitFor(() => expect(visits).toHaveAttribute('aria-sort', 'descending'))
+    await waitFor(() => expect(table.getAllByRole('link')[0]).toHaveTextContent('Mähribangül'))
+    await userEvent.click(within(visits).getByRole('button'))
+    await waitFor(() => expect(visits).toHaveAttribute('aria-sort', 'ascending'))
+    await waitFor(() => expect(table.getAllByRole('link')[0]).toHaveTextContent('Unnamed client'))
+    const name = table.getByRole('columnheader', { name: 'Name' })
+    await userEvent.click(within(name).getByRole('button'))
+    await waitFor(() => expect(name).toHaveAttribute('aria-sort', 'ascending'))
+    await expect(visits).toHaveAttribute('aria-sort', 'none')
+  },
+}
+
+/** Sorted by Last visit, newest first, straight from the address. */
+export const SortedFromAddress: Story = {
+  args: { path: '/w/glow-studio/clients?sort=lastVisit' },
+  play: async ({ canvas }) => {
+    const table = within(await canvas.findByRole('table', { name: 'Clients' }))
+    await expect(table.getByRole('columnheader', { name: 'Last visit' })).toHaveAttribute('aria-sort', 'descending')
+    await waitFor(() => expect(table.getAllByRole('link')[0]).toHaveTextContent('Mähribangül'))
+  },
+}
+
+/** The copy icon copies the grouped number and never opens the row; the one row action opens a new booking. */
+export const RowActions: Story = {
+  play: async ({ canvas }) => {
+    const table = within(await canvas.findByRole('table', { name: 'Clients' }))
+    const write = spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
+    await userEvent.click(table.getAllByRole('button', { name: 'Copy number' })[0]!)
+    await page.findByText('Number copied')
+    await expect(write).toHaveBeenCalledWith('+993 65 12 34 51')
+    await expect(canvas.getByRole('table', { name: 'Clients' })).toBeVisible()
+    await userEvent.click(table.getByRole('button', { name: 'New booking for Gözel Annaýewa' }))
+    await expect(await canvas.findByText('The calendar')).toBeVisible()
+  },
+}
+
+/** A chip, the search, no results and back. */
 export const Filters: Story = {
   play: async ({ canvas }) => {
     await canvas.findByRole('table', { name: 'Clients' })
-    await userEvent.click(canvas.getByRole('radio', { name: 'Reported' }))
+    await userEvent.click(canvas.getByRole('radio', { name: /^Reported/ }))
     await waitFor(() => expect(canvas.queryByText('Gözel Annaýewa')).toBeNull())
     await userEvent.type(canvas.getByRole('textbox', { name: 'Name or phone number' }), 'zzz')
-    await expect(await canvas.findByText('No clients found')).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: 'Clear filters' }))
+    await expect(await canvas.findByText('No clients match “zzz”')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear all' }))
     await expect(await canvas.findByText('Gözel Annaýewa')).toBeVisible()
   },
 }
@@ -158,6 +228,8 @@ export const NoClients: Story = {
   args: { server: fakeApi('owner', { none: true }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('No clients yet')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Add a client' }))
+    await waitFor(() => expect(page.getByRole('dialog', { name: 'New client' })).toBeVisible())
   },
 }
 
@@ -202,11 +274,14 @@ export const NoRevenue: Story = {
   },
 }
 
+/** 390: 68-high list items, the whole item opens the card, no row action. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByText('Gözel Annaýewa')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Actions for Gözel Annaýewa' })).toBeVisible()
+    const list = within(await canvas.findByRole('list', { name: 'Clients' }))
+    await expect(list.getByRole('link', { name: /Gözel Annaýewa/ })).toHaveAttribute('href', `/w/glow-studio/clients/${id(1)}`)
+    await expect(list.getAllByText(/11 visits/)[0]).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: /New booking for/ })).toBeNull()
   },
 }
 
