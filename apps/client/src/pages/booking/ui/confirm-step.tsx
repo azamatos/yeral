@@ -7,7 +7,7 @@ import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { textLink } from '@yeral/ui/text-link'
 import { TimeSlot } from '@yeral/ui/time-slots'
-import { CircleCheck } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { NOTE_MAX } from '@/entities/booking'
@@ -78,13 +78,17 @@ export function ConfirmStep({
       <div className="mt-6">
         <Part title={t('details')} titleRef={details}>
           {person ? (
-            <div className="flex items-center gap-3.5">
+            // the account row (C7-Booking C4.5 `AccountRow`): the number with a «Verified» badge, not a loose check (#50)
+            <div className="flex items-center gap-3 rounded-ctl-l border border-n-200 bg-n-0 py-3.5 pr-3 pl-4">
               <Avatar name={person.name ?? ''} size={44} decorative />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-body font-semibold">{person.name}</span>
-                <span className="inline-flex items-center gap-1.5 text-dense text-n-600">
+                <span className="truncate text-[15px] leading-5 font-semibold">{person.name}</span>
+                <span className="text-n-700 flex flex-wrap items-center gap-2 text-small">
                   {fmt.phone(person.phone)}
-                  <CircleCheck role="img" aria-label={t('verified')} className="size-3.5 text-st-completed-dot" strokeWidth={2} />
+                  <span className="inline-flex h-5 flex-none items-center gap-1 rounded-pill border border-st-completed-line bg-st-completed-bg pr-[7px] pl-[5px] text-[12px] leading-4 font-semibold whitespace-nowrap text-st-completed-ink">
+                    <Check aria-hidden className="size-3" strokeWidth={3} />
+                    {t('verified')}
+                  </span>
                 </span>
               </div>
             </div>

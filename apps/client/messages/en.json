@@ -423,8 +423,7 @@
       "services": "Services",
       "staff": "Specialist",
       "time": "Time",
-      "confirm": "Confirmation",
-      "chosen": "{name} · Change"
+      "confirm": "Confirmation"
     },
     "back": "Back",
     "close": "Close",
@@ -467,13 +466,13 @@
     "loadFailed": "Couldn't load the free times.",
     "services": {
       "title": "Choose services",
-      "lead": "You can choose several services.",
+      "lead": "Pick a service and the booking moves on. You can add another one later.",
       "max": "Up to {max} services in one booking.",
-      "theirs": "The services {name} does",
-      "allShown": "All the services",
-      "seeAll": "See all services",
-      "onlyTheirs": "Only {name}'s",
-      "notTheirs": "{name} doesn't do {services}, so any free specialist takes this booking. Take {count, plural, one {it} other {them}} off to book with {name}."
+      "theirs": "{name} does {count, plural, one {# service} other {# services}}",
+      "notTheirs": "{name} doesn't do {services}, so any free specialist takes this booking. Take {count, plural, one {it} other {them}} off to book with {name}.",
+      "doneLabel": "Specialist",
+      "change": "Change",
+      "changeLabel": "Change the specialist"
     },
     "staff": {
       "title": "Choose a specialist",
@@ -516,7 +515,7 @@
       "details": "Your details",
       "detailsLead": "Confirm your phone number to send the booking. No password needed.",
       "confirmNumber": "Confirm your number",
-      "verified": "Number confirmed",
+      "verified": "Verified",
       "note": "Note for the business",
       "optional": "(optional)",
       "notePlaceholder": "For example: my hair is long, I'd like help choosing a colour",
@@ -574,7 +573,22 @@
       "pickTime": "Choose a time to continue.",
       "bar": "{count, plural, one {# service} other {# services}} · {total}",
       "barTime": "{count, plural, one {# service} other {# services}} · {total} · {time}",
-      "barNone": "No service chosen"
+      "barNone": "No service chosen",
+      "clear": "Clear",
+      "clearLabel": "Clear the booking",
+      "cleared": "Booking cleared",
+      "undo": "Undo",
+      "add": "Add a service",
+      "remove": "Remove {name}",
+      "change": "Change",
+      "changeStaff": "Change the specialist",
+      "changeTime": "Change the date and time",
+      "specialist": "Specialist",
+      "dateTime": "Date and time",
+      "directions": "Get directions",
+      "services": "{count, plural, one {Service} other {Services}}",
+      "servicePrice": "{name} · {price}",
+      "duration": "Duration"
     }
   },
   "myBookings": {
