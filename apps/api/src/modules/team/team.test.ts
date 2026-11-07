@@ -106,9 +106,6 @@ describe('the team (book chapter 3, ADR 0025)', () => {
         .set({ verification: 'pending', verificationReason: null, hiddenAt: null, hiddenReason: null })
         .where(eq(businesses.id, glow!.id))
       expect(await mine(maysa)).toMatchObject({ status: 'in_review', statusReason: null })
-      // the shared demo workspace says so, whatever its review (F-242)
-      await db.update(businesses).set({ sandbox: true }).where(eq(businesses.id, glow!.id))
-      expect(await mine(maysa)).toMatchObject({ status: 'demo', statusReason: null })
     } finally {
       await db
         .update(businesses)
@@ -117,7 +114,6 @@ describe('the team (book chapter 3, ADR 0025)', () => {
           verificationReason: glow!.verificationReason,
           hiddenAt: glow!.hiddenAt,
           hiddenReason: glow!.hiddenReason,
-          sandbox: false,
         })
         .where(eq(businesses.id, glow!.id))
     }

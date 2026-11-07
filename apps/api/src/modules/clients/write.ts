@@ -22,7 +22,6 @@ import { setOnlineBlocked } from './online'
 
 interface Business {
   id: string
-  sandbox: boolean
 }
 type ClientInput = z.infer<typeof clientInputSchema>
 type ClientUpdate = z.infer<typeof clientUpdateSchema>
@@ -66,7 +65,7 @@ export async function addClient(deps: Deps, business: Business, actor: Actor, in
         birthday: input.birthday ?? null,
         source: input.source ?? null,
         tags: input.tags,
-        userId: (await accountFor(tx, business, input.phone, now))?.id ?? null,
+        userId: (await accountFor(tx, input.phone, now))?.id ?? null,
         createdAt: new Date(now),
       })
       .onConflictDoNothing({ target: [clients.businessId, clients.phone] })
@@ -114,7 +113,7 @@ export async function updateClient(deps: Deps, business: Business, actor: Actor,
       const set = Object.fromEntries(
         Object.entries({
           phone,
-          userId: phone ? ((await accountFor(tx, business, phone, now))?.id ?? null) : undefined,
+          userId: phone ? ((await accountFor(tx, phone, now))?.id ?? null) : undefined,
           name: change.name,
           // a name the team typed is theirs: a booking's undo no longer takes it back (B-24)
           nameSetBy: change.name !== undefined ? null : undefined,

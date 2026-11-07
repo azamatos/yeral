@@ -44,12 +44,10 @@ export function SettingsProfilePage() {
   const { workspace } = useWorkspace()
   if (!workspace) return null
   // another business's page starts afresh: nothing typed or said about one shows under the other
-  return (
-    <ProfileSection key={workspace.slug} slug={workspace.slug} owner={workspace.level === 'owner'} demo={workspace.status === 'demo'} />
-  )
+  return <ProfileSection key={workspace.slug} slug={workspace.slug} owner={workspace.level === 'owner'} />
 }
 
-function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; demo: boolean }) {
+function ProfileSection({ slug, owner }: { slug: string; owner: boolean }) {
   const t = useTranslations('settings')
   const errorText = useErrorText()
   const profile = useProfileForm(slug)
@@ -112,8 +110,8 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
       <AboutSection profile={details} />
       <PhotosSection slug={slug} />
       <ContactSection profile={details} />
-      <AddressSection address={address} disabled={saving} demo={demo} />
-      <PauseSection profile={details} owner={owner && !demo} />
+      <AddressSection address={address} disabled={saving} />
+      <PauseSection profile={details} owner={owner} />
       {dirty && (
         <SaveBar
           message={t('save.question')}
@@ -138,7 +136,7 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
  * `layout="settings"`), «Moved? Change the address here…» and, for a second place at the same time, «Create a
  * business» (a workspace of its own).
  */
-function AddressSection({ address, disabled, demo }: { address: AddressFormState | null; disabled: boolean; demo: boolean }) {
+function AddressSection({ address, disabled }: { address: AddressFormState | null; disabled: boolean }) {
   const t = useTranslations('settings.profile.address')
   const brand = useTranslations('common')('brand')
   const titleId = useId()
@@ -158,18 +156,15 @@ function AddressSection({ address, disabled, demo }: { address: AddressFormState
       <Callout tone="neutral" size="s" icon={<Info aria-hidden />} live={false}>
         {t.rich('moved', { brand, b: (words) => <b>{words}</b> })}
       </Callout>
-      {/* the demo workspace can't start a business of its own */}
-      {!demo && (
-        <p className="m-0 text-dense text-n-600">
-          {t.rich('another', {
-            link: (words) => (
-              <Link to="/setup/$step" params={{ step: 'business' }} search={{ another: true }} className={textLink}>
-                {words}
-              </Link>
-            ),
-          })}
-        </p>
-      )}
+      <p className="m-0 text-dense text-n-600">
+        {t.rich('another', {
+          link: (words) => (
+            <Link to="/setup/$step" params={{ step: 'business' }} search={{ another: true }} className={textLink}>
+              {words}
+            </Link>
+          ),
+        })}
+      </p>
     </SettingsSection>
   )
 }
@@ -384,7 +379,7 @@ function ContactSection({ profile }: { profile: ProfileFormState }) {
 
 /**
  * «Pause online booking» (a booking rule, switched here) and, for the owner, «Close this workspace»: there's no
- * delete, Ýeral closes it (design §28.5). The demo workspace's owner has no one to ask, so it's left out there.
+ * delete, Ýeral closes it (design §28.5).
  */
 function PauseSection({ profile, owner }: { profile: ProfileFormState; owner: boolean }) {
   const t = useTranslations()

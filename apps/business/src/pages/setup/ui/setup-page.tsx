@@ -41,7 +41,7 @@ export function SetupPage() {
   const sdk = useSdk()
   const { step = '' } = useParams({ strict: false })
   const me = useQuery(sdk.me.get())
-  // asked with the account, so step 1's demo note is there when the number opens
+  // asked with the account, so step 1's code-on-screen lead is there when the number opens
   useCodeOnScreen()
   // an unknown step opens where the person is in the wizard
   const asked = isWizardStep(step) ? step : 'phone'

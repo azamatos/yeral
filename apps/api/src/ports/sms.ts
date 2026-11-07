@@ -25,8 +25,8 @@ export interface SmsPort {
 export const hideLinkTokens = (text: string) => text.replace(/(\/|\\\/|%2F)l(\/|\\\/|%2F)[\w-]+/gi, '$1l$2…')
 
 /**
- * Every adapter sends nothing to the market's unused range: the demo workspace's numbers, nobody's (book F-242), the
- * Ýeral team's notices to its owner included.
+ * Every adapter sends nothing to the market's unused range (nobody's numbers), the Ýeral team's notices to a business's
+ * owner included.
  */
 const goesNowhere = (message: SmsMessage) => isUnusedNumber(message.to)
 

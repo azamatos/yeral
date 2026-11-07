@@ -24,7 +24,7 @@ const modeRoute = createRoute({
   path: '/auth/mode',
   tags: ['auth'],
   summary:
-    'How the sign-in’s code will reach the person: on the screen (the first launch, book Q-036; the screens then say it’s a demo), by SMS, or through our Telegram bot (ADR 0029)',
+    'How the sign-in’s code will reach the person: on the screen (the first launch, book Q-036; the screens then say so), by SMS, or through our Telegram bot (ADR 0029)',
   responses: { 200: json(authModeSchema) },
 })
 

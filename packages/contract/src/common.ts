@@ -61,7 +61,7 @@ export const bookingCodeSchema = z.string().refine(isBookingCode, 'Expected a bo
 export const phoneInputSchema = z.string().max(32).refine(isPhone, 'Expected a phone number').transform(toE164)
 /**
  * A number that can receive an SMS (login codes): one of the market's mobiles (`MARKET.phone.mobilePrefixes`;
- * Turkmenistan: starting with 6 or 7), never the unused range the demo's numbers live in (`isMobile`).
+ * Turkmenistan: starting with 6 or 7), never the market's unused range (`isMobile`).
  */
 export const mobileInputSchema = z
   .string()

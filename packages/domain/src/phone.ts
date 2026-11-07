@@ -31,8 +31,8 @@ export function isPhone(raw: string): boolean {
 }
 
 /**
- * A number in the market's unused range (`unusedPrefix`): no operator gives it out, so it's nobody's; the demo
- * workspace's numbers (book F-242). Nothing is sent to one, and nobody signs in with one.
+ * A number in the market's unused range (`unusedPrefix`): no operator gives it out, so it's nobody's. Nothing is sent
+ * to one, and nobody signs in with one.
  */
 export function isUnusedNumber(raw: string): boolean {
   return isPhone(raw) && nationalDigits(raw).startsWith(RULES.unusedPrefix)
@@ -40,7 +40,7 @@ export function isUnusedNumber(raw: string): boolean {
 
 /**
  * Only mobile numbers can receive the sign-in code: those that start with one of the market's `mobilePrefixes`, but
- * not the unused range's, which no phone has (so no account but the demo's ever holds one).
+ * not the unused range's, which no phone has (so no account ever holds one).
  */
 export function isMobile(raw: string): boolean {
   return isPhone(raw) && RULES.mobile.test(nationalDigits(raw)) && !isUnusedNumber(raw)

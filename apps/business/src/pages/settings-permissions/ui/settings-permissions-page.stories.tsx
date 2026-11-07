@@ -22,7 +22,6 @@ const me: Me = {
   notifications: { confirmation: true, reminderDay: true, reminder2h: true, reviewAsk: false },
   hasBusiness: true,
   canChangePhone: true,
-  demo: false,
   photo: null,
 }
 

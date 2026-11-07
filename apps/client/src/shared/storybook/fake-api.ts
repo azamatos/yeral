@@ -7,7 +7,7 @@ import type { Me } from '@yeral/contract/account'
 
 const notifications = { confirmation: true, reminderDay: true, reminder2h: true, reviewAsk: false }
 
-/** A signed-up client (the client site's demo people, Account-Profile's Aýjemal). */
+/** A signed-up client (the client site's sample people, Account-Profile's Aýjemal). */
 export function person(phone: string, firstName: string | null, surname: string | null = null): Me {
   return {
     id: `u-${phone}`,
@@ -20,7 +20,6 @@ export function person(phone: string, firstName: string | null, surname: string 
     hasBusiness: false,
     // the first launch shows the sign-in code on the screen, so a number can't be changed (book Q-036)
     canChangePhone: false,
-    demo: false,
     photo: null,
   }
 }

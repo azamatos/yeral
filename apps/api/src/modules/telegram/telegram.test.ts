@@ -287,7 +287,7 @@ describe('sign-in codes through our Telegram bot (ADR 0029)', () => {
     ])
   })
 
-  it('every other text on the SMS port reaches a linked phone through the bot, an unlinked one the log; the demo’s numbers nothing', async () => {
+  it('every other text on the SMS port reaches a linked phone through the bot, an unlinked one the log; the unused range’s numbers nothing', async () => {
     const t = testApp(db, { telegram: true })
     await linkUp(t, '+99365000051', 1015)
     expect(t.deps.sms.delivers).toBe(true)

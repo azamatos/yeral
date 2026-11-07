@@ -41,7 +41,7 @@ export async function hasWorkspace(db: Queryable, userId: string): Promise<boole
   return !!row
 }
 
-/** Does anyone sign in to this workspace (a business with a team answers its own requests, even in the demo)? */
+/** Does anyone sign in to this workspace (a business with a team answers its own requests, an example too)? */
 export async function hasSignedInTeam(db: Queryable, businessId: string): Promise<boolean> {
   const [row] = await db
     .select({ id: staff.id })

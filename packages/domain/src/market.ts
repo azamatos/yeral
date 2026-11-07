@@ -28,8 +28,8 @@ export interface PhoneRules {
   /** How the national digits are grouped on screen: `+993 65 12 34 56` is [2, 2, 2, 2]. */
   groups: readonly number[]
   /**
-   * National digits no operator gives out yet (`69` in Turkmenistan): every number in the demo workspace starts with
-   * them, so none is a real person's (book F-242). Checked again before a market launches.
+   * National digits no operator gives out yet (`69` in Turkmenistan): a number starting with them is nobody's, so
+   * nothing is sent to it and nobody signs in with it. Checked again before a market launches.
    */
   unusedPrefix: string
 }

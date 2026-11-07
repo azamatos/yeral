@@ -38,25 +38,20 @@ export const logoOf = (deps: Pick<Deps, 'media'>, b: { logo: StoredPhoto | null;
 export const coverOf = (deps: Pick<Deps, 'media'>, b: { photos: StoredPhoto[]; name: string }, lang: Locale) =>
   b.photos[0] ? photoOf(deps, b.photos[0], lang, b.name) : null
 
-/**
- * What visitors may see: verified (ADR 0018), not hidden by the Ýeral team (book Q-012), not closed (Q-213) and not the
- * business app's demo workspace (F-242).
- */
-export const isPublic = () =>
-  and(eq(businesses.verification, 'verified'), isNull(businesses.hiddenAt), isNull(businesses.closedAt), eq(businesses.sandbox, false))!
-export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt' | 'closedAt' | 'sandbox'>) =>
-  b.verification === 'verified' && !b.hiddenAt && !b.closedAt && !b.sandbox
+/** What visitors may see: verified (ADR 0018), not hidden by the Ýeral team (book Q-012) and not closed (Q-213). */
+export const isPublic = () => and(eq(businesses.verification, 'verified'), isNull(businesses.hiddenAt), isNull(businesses.closedAt))!
+export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt' | 'closedAt'>) =>
+  b.verification === 'verified' && !b.hiddenAt && !b.closedAt
 
 /**
- * A page's state as its team's banner says it (B-Shell BusinessStatusBanner): the demo workspace first (it's never
- * public), then hidden by the Ýeral team (over a verified page too), then its review, with the Ýeral team's reason for
- * `not_approved` and `hidden`. Every review state is named, so a new one can't pass for live.
+ * A page's state as its team's banner says it (B-Shell BusinessStatusBanner): hidden by the Ýeral team first (over a
+ * verified page too), then its review, with the Ýeral team's reason for `not_approved` and `hidden`. Every review state
+ * is named, so a new one can't pass for live.
  */
-export function pageStateOf(b: Pick<BusinessRow, 'verification' | 'verificationReason' | 'hiddenAt' | 'hiddenReason' | 'sandbox'>): {
-  state: 'live' | 'in_review' | 'not_approved' | 'hidden' | 'demo'
+export function pageStateOf(b: Pick<BusinessRow, 'verification' | 'verificationReason' | 'hiddenAt' | 'hiddenReason'>): {
+  state: 'live' | 'in_review' | 'not_approved' | 'hidden'
   reason: string | null
 } {
-  if (b.sandbox) return { state: 'demo', reason: null }
   if (b.hiddenAt) return { state: 'hidden', reason: b.hiddenReason }
   switch (b.verification) {
     case 'verified':

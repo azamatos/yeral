@@ -115,15 +115,13 @@ for backups and accounts for error tracking and uptime checks (owner, 2026-10-22
   gave meanwhile stays). Opening needs the code on the screen (the api's rule: `SIGN_IN_CODE_ON_SCREEN=true` and no
   SMS gateway) and a business in review: refused for one still being set up, closed, hidden, or verified or sent back
   by the team; `--off` works at any time (take them back before the real SMS sign-in: nothing else removes the mark).
-  Both refuse the demo workspace and a business with no owner who signs in (the seeded examples, whose phone the
+  Both refuse a business with no owner who signs in (the seeded examples, whose phone the
   examples step keeps up; it leaves a business with a team alone). A change of verification goes in the business's
   verification history, and its team's banner and page follow at once (`business.reviewed`). Locally
   `pnpm --filter @yeral/api make:example <slug> [--off]`.
-- The business app's demo workspace (book F-242): `DEMO_WORKSPACE=true` makes the jobs (every minute in the api) create
-  it when it's missing and again after every 04:00, Ashgabat time: the design's Glow Studio at `/w/demo`, its numbers in
-  the market's unused range (`MARKET.phone.unusedPrefix`), each a team member uses held by a demo account (`users.demo`),
-  kept from night to night. It's never public, sends no SMS and links nothing to a real account (`businesses.sandbox`).
-  Turn it on with the examples when the first launch opens.
+- The business app's demo workspace (book F-242) was removed on 2026-11-07 (owner, design v0.7): no `DEMO_WORKSPACE`
+  in `compose.yml`. Its rows on the server are cleaned by hand (`log/2026-11-07-no-demo.md`), then a migration drops
+  `users.demo` and `businesses.sandbox`.
 - The end-to-end flows' hook (`apps/api/src/modules/e2e`): `E2E_HOOKS=true` opens `POST /v1/e2e/bookings/{code}/elapse`,
   which lets one booking's time pass (a waiting request's hold ends now; a confirmed visit moves to the same time on an
   earlier day) and runs the real jobs, so the flows see what expiry and completion really show. Off (404) unless set; on

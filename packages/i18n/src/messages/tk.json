@@ -99,8 +99,6 @@
     "admin_unavailable": "Dolandyryş guraly bu serwerde entek sazlanmady.",
     "address_search_unavailable": "Salgy gözlegi häzir işlemeýär. Belligi kartada özüňiz goýuň.",
     "verify_unavailable": "Giriş kody ekranda görkezilýärkä hiç bir biznes tassyklanmaýar.",
-    "not_in_demo": "Bu demo görnüşe girmeýär. Muny etmek üçin öz biznesiňizi dörediň.",
-    "demo_number": "Demo görnüşde {prefix} bilen başlaýan oýlanyp tapylan belgi ulanyň.",
     "rate_limited": "Haýyş köp boldy. {retryAfterMin} minutdan soň täzeden synanyşyň.",
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",
     "network": "Baglanyşyk ýok. Gaýtadan synanyşyň."

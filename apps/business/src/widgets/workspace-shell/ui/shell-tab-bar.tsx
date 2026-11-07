@@ -115,7 +115,7 @@ export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | n
         <MoreSheetRow
           danger
           icon={<LogOut />}
-          label={t(me?.demo ? 'account.logIn' : 'account.logout')}
+          label={t('account.logout')}
           onClick={() => {
             setMore(false)
             account.logout()

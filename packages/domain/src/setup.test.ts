@@ -36,7 +36,7 @@ describe('the page address a business writes (chapter 9, 25.10.2026)', () => {
       expect(slugProblem(bad)).toBe('chars')
   })
   it('never a reserved word or a booking code’s start', () => {
-    for (const word of ['admin', 'api', 'login', 'setup', 'yeral', 'help', 'support', 'demo', 'yr-48213'])
+    for (const word of ['admin', 'api', 'login', 'setup', 'yeral', 'help', 'support', 'yr-48213'])
       expect(slugProblem(word)).toBe('reserved')
     expect(slugProblem('support-2')).toBeNull()
     expect(slugProblem('yrma')).toBeNull()

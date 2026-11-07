@@ -61,8 +61,8 @@ comes. The api side (`apps/api/src/modules/telegram`, `ports/telegram.ts`, ADR 0
 
 - `SIGN_IN_CODE_ON_SCREEN` goes off on the server once the bot is set up. With it off: the Ýeral team can verify real
   businesses; "Change number" works; the 6-month "Is this you?" check runs and "No" lets an account go;
-  `make-example` refuses to open new examples (`--off` still works); `DEMO_WORKSPACE` and `EXAMPLE_BUSINESSES` don't
-  depend on it and stay as they are; e2e's `signInWithCode` keeps reading the code from the screen on CI's stack, which
+  `make-example` refuses to open new examples (`--off` still works); `EXAMPLE_BUSINESSES` doesn't depend on it
+  and stays as it is; e2e's `signInWithCode` keeps reading the code from the screen on CI's stack, which
   has no bot.
 - The sign-in screens get two states (the link to open; the code on its way to Telegram) — the next PR, built on the
   `delivery` union; until then they treat `telegram` and `telegram_link` as "sent".

@@ -44,11 +44,6 @@ const envSchema = z.object({
    */
   EXAMPLE_PHONE: z.string().regex(E164, "the market's number, such as +99312345678").optional(),
   /**
-   * The business app's demo workspace (book F-242): the jobs make it when it's missing and again every night at 04:00.
-   * Off unless set.
-   */
-  DEMO_WORKSPACE: z.enum(['true', 'false']).default('false'),
-  /**
    * The end-to-end flows' hooks (`POST /v1/e2e/…`, e2e/): a test lets one booking's time pass instead of waiting for
    * its hold to run out or its visit to end. Off unless set; refused in production.
    */
@@ -117,8 +112,6 @@ export interface Config {
   exampleBusinesses: boolean
   /** `EXAMPLE_PHONE`, or the support phone; never null while `exampleBusinesses` is on. */
   examplePhone: string | null
-  /** `DEMO_WORKSPACE`: the business app's demo workspace (book F-242). */
-  demoWorkspace: boolean
   /** `E2E_HOOKS`: the end-to-end flows' hooks (`/v1/e2e/…`); never in production. */
   e2eHooks: boolean
   /** `GEOCODER_URL`: the address search's Photon server; null when it's off (ADR 0027). */
@@ -154,7 +147,6 @@ export function loadConfig(source: Record<string, unknown>): Config {
     bookingTypes: env.BOOKING_TYPES,
     exampleBusinesses: env.EXAMPLE_BUSINESSES === 'true',
     examplePhone,
-    demoWorkspace: env.DEMO_WORKSPACE === 'true',
     e2eHooks: env.E2E_HOOKS === 'true',
     geocoderUrl: env.GEOCODER_URL === 'off' ? null : env.GEOCODER_URL,
     adminKey: env.ADMIN_SECRET_KEY

@@ -167,9 +167,6 @@ export function HomePage() {
               <Button asChild variant="primary" size="l">
                 <a href={site.urls.business}>{t('businessAction')}</a>
               </Button>
-              <Button asChild variant="secondary" size="l">
-                <a href={`${site.urls.business}/try`}>{t('businessTry')}</a>
-              </Button>
             </div>
           </div>
           <ul className="m-0 flex list-none flex-col gap-5 p-0">

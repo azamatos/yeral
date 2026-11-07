@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSdk } from '@/shared/api'
 import { placeFor, targetRoute } from '../model/sections'
 import { useWorkspace } from '../model/use-workspace'
-import { DemoBanner } from './demo-banner'
 import { OfflineBanner } from './offline-banner'
 import { ProfileDrawer } from './profile-drawer'
 import { RequestArrivals } from './request-arrivals'
@@ -69,7 +68,6 @@ export function WorkspaceShell() {
         style={{ '--tab-bar': TAB_BAR_HEIGHT } as CSSProperties}
       >
         <OfflineBanner />
-        {me?.demo && <DemoBanner />}
         <Outlet />
       </div>
       <ShellTabBar onProfile={openProfile} />

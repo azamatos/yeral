@@ -23,7 +23,7 @@ export function LoginPage() {
   const sdk = useSdk()
   const errorText = useErrorText()
   const me = useQuery(sdk.me.get())
-  // asked with the account, so the phone step's demo note is there when it opens
+  // asked with the account, so the phone step's code-on-screen lead is there when it opens
   useCodeOnScreen()
   const logout = useMutation(sdk.auth.logout())
   const [identity, setIdentity] = useState<{ name: string | null; ticket: string } | null>(null)

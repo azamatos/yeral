@@ -3,7 +3,7 @@ import { ORIGIN } from './app'
 
 type App = ReturnType<typeof createApp>
 
-/** A browser-like client: keeps its cookies (the session's, the demo's), sends our Origin and JSON. */
+/** A browser-like client: keeps its cookies (the session's), sends our Origin and JSON. */
 export function browser(app: App) {
   const jar = new Map<string, string>()
   const cookieHeader = () => [...jar].map(([name, value]) => `${name}=${value}`).join('; ')
