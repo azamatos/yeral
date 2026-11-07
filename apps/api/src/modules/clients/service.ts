@@ -10,7 +10,6 @@ import {
   type clientListQuerySchema,
   type clientLookupQuerySchema,
   type ClientRow,
-  type ClientSegmentCounts,
   type clientMatchSchema,
 } from '@yeral/contract/clients'
 import { effectiveStatus } from '@yeral/domain/lifecycle'
@@ -33,11 +32,13 @@ import {
   bookingsByIds,
   clientFacts,
   doneAt,
+  listFacets,
   ownOnly,
   phoneOnlyOf,
-  segmentCounts,
+  taggedSql,
   withStaff,
   type ClientFacts,
+  type ListFacets,
 } from './facts'
 
 interface Business {
@@ -68,15 +69,24 @@ export async function clientList(
   actor: Actor,
   q: ListQuery,
   now: number,
-): Promise<{ items: ClientRow[]; total: number; cursor: string | null; counts: ClientSegmentCounts }> {
+): Promise<{ items: ClientRow[]; total: number; cursor: string | null } & ListFacets> {
   const offset = Number(q.cursor ?? 0) || 0
   const sums = seesSums(actor)
   // no totals, no order by them: a reader without "See revenue" gets the usual order, its direction included
   const order = q.sort === 'total' && !sums ? {} : { sort: q.sort, dir: q.dir }
-  const where = searchOf(q.q)
-  const [{ rows, total }, counts, rules] = await all(db, [
-    () => clientFacts(db, business.id, actor, now, { where, segment: q.segment, ...order, limit: q.limit, offset }),
-    () => segmentCounts(db, business.id, actor, now, { where }),
+  const search = searchOf(q.q)
+  const tagged = taggedSql(q.tag)
+  const [{ rows, total }, facets, rules] = await all(db, [
+    () =>
+      clientFacts(db, business.id, actor, now, {
+        where: and(search, tagged),
+        segment: q.segment,
+        upcoming: q.upcoming,
+        ...order,
+        limit: q.limit,
+        offset,
+      }),
+    () => listFacets(db, business.id, actor, now, { search, tagged, segment: q.segment, upcoming: q.upcoming }),
     () => rulesOf(db, business.id),
   ])
   const [phoneOnly, next] = await all(db, [
@@ -119,7 +129,7 @@ export async function clientList(
     }),
     total,
     cursor: offset + q.limit < total ? String(offset + q.limit) : null,
-    counts,
+    ...facets,
   }
 }
 

@@ -91,14 +91,16 @@ import { audienceOf, inWorkspace, keys, type Audience, type BookingTab } from '.
  * Query strings are text and the api's schemas coerce them; the RPC types describe the coerced values, so calls that
  * pass numbers or flags as text cast with `as never` (the parameters themselves are typed from the contract).
  */
-type Query = Record<string, string | undefined>
+type Query = Record<string, string | string[] | undefined>
+/**
+ * What a query sends: blanks and empty lists dropped, a list as the key repeated (`tag=VIP&tag=Bride`, so a comma inside
+ * a tag stays; the bookings filters' `queryList` reads repeated keys too). Ids for `idListQuery` arrive joined already.
+ */
 const clean = (q: Record<string, string | number | boolean | readonly string[] | undefined | null>): Query =>
   Object.fromEntries(
-    Object.entries(q).flatMap(([k, v]) => {
-      // a list filter goes comma-separated (`staff=a,b`); an empty one is no filter
-      const value = Array.isArray(v) ? v.join(',') : v
-      return value === undefined || value === null || value === '' ? [] : [[k, String(value)]]
-    }),
+    Object.entries(q).flatMap(([k, v]) =>
+      v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length) ? [] : [[k, Array.isArray(v) ? [...v] : String(v)]],
+    ),
   )
 
 /** A query's parameters as its contract schema reads them: `K` must be given, the rest may be. */
@@ -1122,7 +1124,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const clients = {
     /**
      * "Müşderiler" (book B-32): pages of the clients the reader sees, the most recently seen first unless `sort` and
-     * `dir` say otherwise; each page carries the chips' `counts` for the same `q`.
+     * `dir` say otherwise, filtered by `q`, `segment`, `tag` (any of them) and `upcoming`; each page carries what the
+     * menus count under the other filters (`counts`, `upcoming`, `tags`) and `everyone`.
      */
     list: (slug: string, p: Partial<Omit<z.output<typeof clientListQuerySchema>, 'cursor'>> = {}) => {
       const query = clean(p)

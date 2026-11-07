@@ -31,7 +31,8 @@ const listRoute = createRoute({
   method: 'get',
   path: '/w/{slug}/clients',
   tags,
-  summary: '"Müşderiler": the clients the reader may see, by name, number or chip, sorted as asked, with each chip’s count',
+  summary:
+    '"Müşderiler": the clients the reader may see, by name, number, chip, tags and upcoming booking, sorted as asked, with each menu’s counts',
   request: { params: workspaceParamSchema, query: clientListQuerySchema },
   responses: { 200: json(clientListSchema), 400: errors[400], 401: errors[401], 404: errors[404] },
 })

@@ -6,7 +6,14 @@
  * counts. A
  * visit is completed as people see it now: stored so, or confirmed and ended (`effectiveStatus`).
  */
-import { CLIENT_SORT_DIR, type ClientSegmentCounts, type ClientSort, type SortDir } from '@yeral/contract/clients'
+import {
+  CLIENT_SORT_DIR,
+  type ClientSegmentCounts,
+  type ClientSort,
+  type ClientTagCount,
+  type ClientUpcoming,
+  type SortDir,
+} from '@yeral/contract/clients'
 import { LAPSED_DAYS, NEW_DAYS, REGULAR_MIN_VISITS, REGULAR_WINDOW_DAYS, segmentsOf, type ClientSegment } from '@yeral/domain/clients'
 import { MARKET } from '@yeral/domain/market'
 import { scopeOf, type Actor } from '@yeral/domain/permissions'
@@ -86,6 +93,8 @@ export interface FactsScope {
 
 export interface FactsQuery extends FactsScope {
   segment?: ClientSegment
+  /** With a waiting request or a visit ahead (as the reader sees the bookings), or without. */
+  upcoming?: ClientUpcoming
   /** `recent` without one (`CLIENT_SORTS`). */
   sort?: ClientSort
   /** The sort's own direction without one (`CLIENT_SORT_DIR`). */
@@ -115,6 +124,7 @@ function factsOf(businessId: string, actor: Actor, now: number, q: FactsScope) {
     lapsed: sql<boolean>`${lastVisit} <= ${addDays(today, -LAPSED_DAYS)}`,
     flagged: sql<boolean>`${reports} > 0`,
   }
+  const ahead = sql<boolean>`count(*) filter (where ${aheadAt(now)}) > 0`
   const keys: Record<ClientSort, SQL> = {
     // the latest booking's day, ahead or past, else the day the business added them
     recent: sql`coalesce(max(${bookings.date}), ${added})`,
@@ -145,9 +155,24 @@ function factsOf(businessId: string, actor: Actor, now: number, q: FactsScope) {
     where: and(eq(clients.businessId, businessId), q.where),
     visible: own ? hersSql(own) : undefined,
     chip,
+    ahead,
     keys,
   }
 }
+
+/** The client has any of these tags, whatever their case (the Tag filter). */
+export function taggedSql(tags: readonly string[] | undefined): SQL | undefined {
+  if (!tags?.length) return undefined
+  const lowered = [...new Set(tags.map((tag) => tag.toLowerCase()))]
+  return sql`exists (select 1 from unnest(${clients.tags}) as t(v) where lower(t.v) in (${sql.join(
+    lowered.map((tag) => sql`${tag}`),
+    sql`, `,
+  )}))`
+}
+
+/** Has a booking ahead, or hasn't: the `ahead` flag as `upcoming` asks. */
+const upcomingOf = (ahead: SQL, upcoming: ClientUpcoming | undefined) =>
+  upcoming === 'yes' ? ahead : upcoming === 'no' ? sql`not (${ahead})` : undefined
 
 /** `key asc|desc`, a client without the thing last either way. */
 const ordered = (key: SQL, dir: SortDir) => sql`${key} ${dir === 'asc' ? sql`asc` : sql`desc`} nulls last`
@@ -173,7 +198,7 @@ export async function clientFacts(
     .where(f.where)
     .groupBy(clients.id)
     .$dynamic()
-  const having = and(f.visible, q.segment ? f.chip[q.segment] : undefined)
+  const having = and(f.visible, q.segment ? f.chip[q.segment] : undefined, upcomingOf(f.ahead, q.upcoming))
   if (having) query = query.having(having)
   query = query.orderBy(
     ordered(f.keys[sort], dir),
@@ -201,42 +226,78 @@ export async function clientFacts(
   }
 }
 
+export interface ListFilters {
+  /** The search (`q`). */
+  search?: SQL
+  /** The Tag filter (`taggedSql`). */
+  tagged?: SQL
+  segment?: ClientSegment
+  upcoming?: ClientUpcoming
+}
+
+export interface ListFacets {
+  counts: ClientSegmentCounts
+  upcoming: { yes: number; no: number }
+  tags: ClientTagCount[]
+  everyone: number
+}
+
 /**
- * How many of the business's clients matching `where` each chip shows the reader ("Ählisi" and the four segments):
- * one query over the same rows as the list, whatever chip the list is on.
+ * What the list's menus count, each under the other filters but not its own (a chip's count holds the search, the
+ * tags and Upcoming booking, whatever chip is on): the chips, Upcoming booking yes/no, every tag on the clients the
+ * reader sees (a case-insensitive tag under its most used spelling, the most held first), and the clients the reader
+ * sees in all. One query over one row per client.
  */
-export async function segmentCounts(
-  db: Queryable,
-  businessId: string,
-  actor: Actor,
-  now: number,
-  q: FactsScope = {},
-): Promise<ClientSegmentCounts> {
-  const f = factsOf(businessId, actor, now, q)
+export async function listFacets(db: Queryable, businessId: string, actor: Actor, now: number, q: ListFilters): Promise<ListFacets> {
+  const f = factsOf(businessId, actor, now, {})
+  const yes = sql`true`
   const each = db
     .select({
+      tags: sql<string[]>`${clients.tags}`.as('tags'),
+      searched: sql<boolean>`coalesce(${q.search ?? yes}, false)`.as('searched'),
+      tagged: sql<boolean>`${q.tagged ?? yes}`.as('tagged'),
       regular: f.chip.regular.as('regular'),
       new: f.chip.new.as('new'),
       lapsed: f.chip.lapsed.as('lapsed'),
       flagged: f.chip.flagged.as('flagged'),
+      ahead: f.ahead.as('ahead'),
     })
     .from(clients)
     .leftJoin(bookings, f.join)
     .where(f.where)
     .groupBy(clients.id)
     .having(f.visible)
-    .as('each')
-  const of = (flag: SQL.Aliased<boolean>) => sql<number>`count(*) filter (where ${flag})::int`
-  const [row] = await db
-    .select({
-      all: sql<number>`count(*)::int`,
-      regular: of(each.regular),
-      new: of(each.new),
-      lapsed: of(each.lapsed),
-      flagged: of(each.flagged),
-    })
-    .from(each)
-  return row ?? { all: 0, regular: 0, new: 0, lapsed: 0, flagged: 0 }
+  // the flags are the subquery's columns from here on; a missing chip is `null` (no visit yet), so each is coalesced
+  const flag = (name: string) => sql`coalesce(e.${sql.identifier(name)}, false)`
+  const segment = q.segment ? flag(q.segment) : yes
+  const upcoming = upcomingOf(flag('ahead'), q.upcoming) ?? yes
+  const count = (...when: SQL[]) => sql`(count(*) filter (where ${sql.join(when, sql` and `)}))::int`
+  const base = [sql`e.searched`, sql`e.tagged`]
+  const { rows } = await db.execute<ClientSegmentCounts & { yes: number; no: number; tags: ClientTagCount[]; everyone: number }>(sql`
+    with e as (${each})
+    select
+      count(*)::int as everyone,
+      ${count(...base, upcoming)} as "all",
+      ${count(...base, upcoming, flag('regular'))} as "regular",
+      ${count(...base, upcoming, flag('new'))} as "new",
+      ${count(...base, upcoming, flag('lapsed'))} as "lapsed",
+      ${count(...base, upcoming, flag('flagged'))} as "flagged",
+      ${count(...base, segment, flag('ahead'))} as "yes",
+      ${count(...base, segment, sql`not ${flag('ahead')}`)} as "no",
+      (select coalesce(json_agg(json_build_object('name', x.name, 'count', x.count) order by x.count desc, lower(x.name)), '[]')
+        from (
+          select mode() within group (order by t.v) as name, ${count(sql`e.searched`, segment, upcoming)} as count
+          from e cross join unnest(e.tags) as t(v)
+          group by lower(t.v)
+        ) x) as tags
+    from e`)
+  const r = rows[0]!
+  return {
+    counts: { all: r.all, regular: r.regular, new: r.new, lapsed: r.lapsed, flagged: r.flagged },
+    upcoming: { yes: r.yes, no: r.no },
+    tags: r.tags,
+    everyone: r.everyone,
+  }
 }
 
 /** The average check: the completed visits with a price; null before one. */

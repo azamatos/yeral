@@ -76,6 +76,15 @@ describe('sdk', () => {
     expect(Object.fromEntries(f.calls[0]!.url.searchParams)).toEqual({ lang: 'tk', lat: '37.95', lng: '58.38', openNow: '1' })
   })
 
+  it('the clients list sends each chosen tag as its own parameter and drops an empty list', async () => {
+    const f = fixture(() => json(200, { items: [], total: 0, cursor: null }))
+    await f.queryClient.fetchInfiniteQuery(f.sdk.clients.list('glow-studio', { tag: ['VIP', 'Bride'], upcoming: 'yes', q: '' }))
+    expect(f.calls[0]!.url.searchParams.getAll('tag')).toEqual(['VIP', 'Bride'])
+    expect(f.calls[0]!.url.searchParams.get('upcoming')).toBe('yes')
+    await f.queryClient.fetchInfiniteQuery(f.sdk.clients.list('glow-studio', { tag: [] }))
+    expect(f.calls[1]!.url.search).toBe('')
+  })
+
   it('a sent booking is cached and refreshes my lists and that business’s free times', async () => {
     const detail = { code: 'YR-48213', business: { slug: 'glow-studio' }, status: 'pending' }
     const f = fixture(() => json(201, detail))
