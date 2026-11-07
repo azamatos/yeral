@@ -14,7 +14,6 @@ test('«Try the business app» opens the demo without a sign-in, and «Log in» 
     await page.waitForURL('**/w/*/calendar**', { timeout: 5_000 })
   }).toPass({ timeout: 90_000 })
 
-  await page.getByRole('button', { name: 'Got it' }).click()
   await expect(page.getByText('A workspace to try Ýeral. Changes reset every night.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Account menu' })).toBeHidden()
 
