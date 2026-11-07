@@ -1,8 +1,9 @@
 /**
  * The admin tool's businesses (book F-179, S-17, B-11; Q-274, Q-275, Q-276, Q-012, Q-215): the queue to review, a
  * business to check, verified or sent back with a reason (a live one too: that un-verifies it), hidden from visitors
- * with a reason and shown again, a move checked. Each change is written down (`admin_actions`) and the owner hears it:
- * the workspace's screens at once, and a Ýeral SMS that never goes at night.
+ * with a reason and shown again, what a verified one changed checked again, its new name approved or turned down with
+ * a reason. Each change is written down (`admin_actions`) and the owner hears it: the workspace's screens at once, and a
+ * Ýeral SMS that never goes at night.
  */
 import type { AdminBusiness, AdminBusinessItem, AdminBusinessView } from '@yeral/contract/admin'
 import { businessSmsAt } from '@yeral/domain/lifecycle'
@@ -53,10 +54,11 @@ const VIEWS: Record<AdminBusinessView, { where: SQL; order: SQL[] }> = {
     where: and(finished, open, eq(businesses.verification, 'pending'))!,
     order: [asc(sql`coalesce(${businesses.sentForReviewAt}, ${businesses.createdAt})`)],
   },
-  // a verified business that moved, to check again (Q-215)
+  // a verified business to check again (Q-215, Q-275): it changed its address, About, photos or logo, or a new name
+  // waits; the longest waiting first
   moved: {
-    where: and(open, eq(businesses.verification, 'verified'), isNotNull(businesses.addressChangedAt))!,
-    order: [asc(businesses.addressChangedAt)],
+    where: and(open, eq(businesses.verification, 'verified'), or(isNotNull(businesses.recheckAt), isNotNull(businesses.pendingNameAt)))!,
+    order: [asc(sql`least(${businesses.recheckAt}, ${businesses.pendingNameAt})`)],
   },
   rejected: { where: and(finished, open, eq(businesses.verification, 'rejected'))!, order: [desc(businesses.createdAt)] },
   hidden: { where: and(open, isNotNull(businesses.hiddenAt))!, order: [desc(businesses.hiddenAt)] },
@@ -102,7 +104,9 @@ async function itemsOf(db: Queryable, rows: BusinessRow[], lang: Locale): Promis
       reason: b.verificationReason,
       hidden: b.hiddenAt ? { at: b.hiddenAt.getTime(), reason: b.hiddenReason ?? '' } : null,
       closed: b.closedAt ? { at: b.closedAt.getTime(), reason: b.closedReason ?? '' } : null,
-      addressChangedAt: b.addressChangedAt?.getTime() ?? null,
+      recheck: b.recheckAt ? { at: b.recheckAt.getTime(), what: b.recheck } : null,
+      addressChangedAt: b.recheckAt && b.recheck.includes('address') ? b.recheckAt.getTime() : null,
+      pendingName: b.pendingName ? { name: b.pendingName, at: (b.pendingNameAt ?? b.createdAt).getTime() } : null,
       sentForReviewAt: (b.sentForReviewAt ?? b.createdAt).getTime(),
       setupStep: b.setupStep,
       createdAt: b.createdAt.getTime(),
@@ -120,7 +124,14 @@ export async function adminBusinesses(db: Queryable, query: { view: AdminBusines
     .where(
       and(
         view.where,
-        q ? or(ilike(businesses.name, likeOf(q)), ilike(businesses.slug, likeOf(q)), ilike(businesses.phone, likeOf(q))) : undefined,
+        q
+          ? or(
+              ilike(businesses.name, likeOf(q)),
+              ilike(businesses.pendingName, likeOf(q)),
+              ilike(businesses.slug, likeOf(q)),
+              ilike(businesses.phone, likeOf(q)),
+            )
+          : undefined,
       ),
     )
     .orderBy(...view.order, asc(businesses.id))
@@ -177,7 +188,7 @@ export async function adminBusiness(deps: Deps, id: string, lang: Locale): Promi
   }
 }
 
-type Told = 'verified' | 'rejected' | 'hidden' | 'shown' | 'closed' | 'reopened'
+type Told = 'verified' | 'rejected' | 'hidden' | 'shown' | 'closed' | 'reopened' | 'nameApproved' | 'nameRejected'
 const SMS_KEY = {
   verified: 'pageVerified',
   rejected: 'pageRejected',
@@ -185,7 +196,11 @@ const SMS_KEY = {
   shown: 'pageShown',
   closed: 'pageClosed',
   reopened: 'pageReopened',
+  nameApproved: 'nameApproved',
+  nameRejected: 'nameRejected',
 } as const
+/** Told with a link to the workspace, where there is something to do; the others link the page. */
+const TO_WORKSPACE: Told[] = ['rejected', 'reopened', 'nameRejected']
 
 /** The reason as an SMS carries it: the start of a long one (the workspace shows it whole). */
 const smsReason = (reason: string) => (reason.length > SMS_REASON_MAX ? `${reason.slice(0, SMS_REASON_MAX - 1).trimEnd()}…` : reason)
@@ -204,15 +219,16 @@ async function tellOwner(
   deps: Pick<Deps, 'now' | 'site'>,
   b: BusinessRow,
   told: Told,
-  o: { reason?: string; sms?: boolean } = {},
+  o: { reason?: string; sms?: boolean; name?: string } = {},
 ) {
   await emit(tx, { type: 'business.reviewed', businessId: b.id })
   const [owner] = await ownerOf(tx, [b.id])
   if (!owner || o.sms === false) return
   const t = createT(owner.lang)
-  const link = bare(told === 'rejected' || told === 'reopened' ? deps.site.urls.business : `${deps.site.urls.client}/b/${b.slug}`)
+  const link = bare(TO_WORKSPACE.includes(told) ? deps.site.urls.business : `${deps.site.urls.client}/b/${b.slug}`)
   const runAt = businessSmsAt(deps.now())
-  const dedupeKey = `business-review:${b.id}:${runAt}`
+  // a new name's verdict is its own word: it doesn't replace the page's waiting one, nor the page's it
+  const dedupeKey = `${told === 'nameApproved' || told === 'nameRejected' ? 'business-name' : 'business-review'}:${b.id}:${runAt}`
   await tx
     .delete(jobs)
     .where(
@@ -220,30 +236,42 @@ async function tellOwner(
     )
   await queueSms(tx, {
     to: owner.phone,
-    text: t(`sms.${SMS_KEY[told]}`, { brand: t('common.brand'), business: b.name, reason: smsReason(o.reason ?? ''), link }),
+    text: t(`sms.${SMS_KEY[told]}`, {
+      brand: t('common.brand'),
+      business: b.name,
+      name: o.name ?? '',
+      reason: smsReason(o.reason ?? ''),
+      link,
+    }),
     runAt: new Date(runAt),
     dedupeKey,
   })
 }
 
 /**
- * Verified (S-17): public in search, at its link and among similar places, and the owner told. A verified business that
- * moved is checked again the same way: it stays public, and nobody is told; `moved` is the move the team looked at
- * (its `addressChangedAt`), so a newer one isn't checked by mistake. While the sign-in code shows on the screen a number
- * proves nothing, so nothing is verified: the first launch has only the example businesses (book Q-036).
+ * Verified (S-17): public in search, at its link and among similar places, and the owner told. What a verified business
+ * changed (a move, a new About, photo or logo: Q-215, Q-275) is checked again the same way: it stays public, and nobody
+ * is told; `moved` is the check the team looked at (its `recheckAt`), so a newer change isn't cleared by mistake. A new
+ * name waiting isn't part of it (`approveName`). While the sign-in code shows on the screen a number proves nothing, so
+ * nothing is verified: the first launch has only the example businesses (book Q-036).
  */
 export async function verifyBusiness(deps: Deps, by: Admin, id: string, moved?: number): Promise<void> {
   await deps.db.transaction(async (tx) => {
     await holdActor(tx, by)
     const b = await rowOf(tx, id, true)
     const recheck = b.verification === 'verified'
-    if (recheck && (!b.addressChangedAt || b.addressChangedAt.getTime() !== moved)) throw new ApiError('invalid_status')
+    if (recheck && (!b.recheckAt || b.recheckAt.getTime() !== moved)) throw new ApiError('invalid_status')
     if (!recheck && deps.codeOnScreen) throw new ApiError('verify_unavailable')
     await tx
       .update(businesses)
-      .set({ verification: 'verified', verificationReason: null, addressChangedAt: null })
+      .set({ verification: 'verified', verificationReason: null, recheckAt: null, recheck: [] })
       .where(eq(businesses.id, b.id))
-    await recordAction(tx, by, recheck ? 'business.move_checked' : 'business.verified', { businessId: b.id })
+    await recordAction(
+      tx,
+      by,
+      recheck ? 'business.rechecked' : 'business.verified',
+      recheck ? { businessId: b.id, details: { what: b.recheck } } : { businessId: b.id },
+    )
     await emit(tx, { type: 'business.updated', businessId: b.id })
     if (recheck) return
     await tx.insert(verificationHistory).values({ businessId: b.id, status: 'verified', at: new Date(deps.now()) })
@@ -263,7 +291,7 @@ export async function rejectBusiness(deps: Deps, by: Admin, id: string, reason: 
     if (b.verification === 'rejected') throw new ApiError('invalid_status')
     await tx
       .update(businesses)
-      .set({ verification: 'rejected', verificationReason: reason, addressChangedAt: null })
+      .set({ verification: 'rejected', verificationReason: reason, recheckAt: null, recheck: [] })
       .where(eq(businesses.id, b.id))
     await tx.insert(verificationHistory).values({ businessId: b.id, status: 'rejected', reason, at: new Date(deps.now()) })
     await recordAction(tx, by, b.verification === 'verified' ? 'business.unverified' : 'business.rejected', { businessId: b.id, reason })
@@ -301,6 +329,46 @@ export async function showBusiness(deps: Deps, by: Admin, id: string): Promise<v
     await emit(tx, { type: 'business.updated', businessId: b.id })
     // not verified: "open again" waits for the verification
     await tellOwner(tx, deps, b, 'shown', { sms: publicRow({ ...b, hiddenAt: null }) })
+  })
+}
+
+/**
+ * A verified business's new name approved (book Q-275 as changed 07.11.2026): clients, its page, search and every SMS
+ * take it from now on, and the owner is told. `seen` is the waiting name the team looked at, so a newer one isn't
+ * approved by mistake (`invalid_status`).
+ */
+export async function approveName(deps: Deps, by: Admin, id: string, seen: string): Promise<void> {
+  await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
+    const b = await rowOf(tx, id, true)
+    if (!b.pendingName || b.pendingName !== seen) throw new ApiError('invalid_status')
+    const [saved] = await tx
+      .update(businesses)
+      .set({ name: b.pendingName, pendingName: null, pendingNameAt: null })
+      .where(eq(businesses.id, b.id))
+      .returning()
+    await recordAction(tx, by, 'business.name_approved', { businessId: b.id, details: { from: b.name, to: b.pendingName } })
+    await emit(tx, { type: 'business.updated', businessId: b.id })
+    await tellOwner(tx, deps, saved!, 'nameApproved')
+  })
+}
+
+/**
+ * A new name turned down with a reason (Q-275): the business keeps its name, and the owner reads the reason in the
+ * workspace (as a page sent back shows its own, Q-274) and by SMS. `seen` as for `approveName`.
+ */
+export async function rejectName(deps: Deps, by: Admin, id: string, seen: string, reason: string): Promise<void> {
+  await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
+    const b = await rowOf(tx, id, true)
+    if (!b.pendingName || b.pendingName !== seen) throw new ApiError('invalid_status')
+    await tx
+      .update(businesses)
+      .set({ pendingName: null, pendingNameAt: null, rejectedName: b.pendingName, rejectedNameReason: reason })
+      .where(eq(businesses.id, b.id))
+    await recordAction(tx, by, 'business.name_rejected', { businessId: b.id, reason, details: { name: b.pendingName } })
+    await emit(tx, { type: 'business.updated', businessId: b.id })
+    await tellOwner(tx, deps, b, 'nameRejected', { reason, name: b.pendingName })
   })
 }
 

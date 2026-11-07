@@ -544,6 +544,8 @@ describe('account', () => {
         '/v1/admin/businesses/{id}/verify',
         '/v1/admin/businesses/{id}/reject',
         '/v1/admin/businesses/{id}/hide',
+        '/v1/admin/businesses/{id}/name/approve',
+        '/v1/admin/businesses/{id}/name/reject',
         '/v1/admin/businesses/{id}/show',
         '/v1/admin/businesses/{id}/close',
         '/v1/admin/businesses/{id}/reopen',

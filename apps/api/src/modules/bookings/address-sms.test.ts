@@ -176,7 +176,8 @@ describe('a new address (book Q-215)', () => {
     await moveTo(maysa, { lat: before.lat + 0.001 })
     expect(await waitingFor(code)).toHaveLength(0)
     const after = await glow()
-    expect(after.addressChangedAt!.getTime()).toBeGreaterThan(before.addressChangedAt!.getTime())
+    expect(after.recheckAt!.getTime()).toBeGreaterThan(before.recheckAt!.getTime())
+    expect(after.recheck).toEqual(['address'])
     expect(after.movedAt).toEqual(before.movedAt)
   })
 

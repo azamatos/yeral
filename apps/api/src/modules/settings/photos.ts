@@ -1,6 +1,7 @@
 /**
  * The business's gallery (book B-37, Q-115, F-101): up to 20 photos, the first the cover on every card and page. The
- * owner and administrators add, remove and order them ("change business settings"); the page follows at once.
+ * owner and administrators add, remove and order them ("change business settings"); the page follows at once, and a
+ * new photo puts a verified business on the Ýeral team's «check again» list (Q-275, `recheckOf`).
  */
 import type { gallerySchema } from '@yeral/contract/settings'
 import type { Locale } from '@yeral/domain/model'
@@ -14,6 +15,7 @@ import { ApiError, invalid } from '../../http/errors'
 import { emit } from '../../notify'
 import { photoOf } from '../catalog/map'
 import { dropPhoto, photoIdOf, savePhoto } from '../media/photos'
+import { recheckOf } from './recheck'
 
 type Gallery = z.infer<typeof gallerySchema>
 interface Business {
@@ -52,7 +54,10 @@ export async function addPhoto(deps: Deps, business: Business, file: File, lang:
       const b = await lockedBusiness(tx, business.id)
       if (b.photos.length >= GALLERY_MAX) throw new ApiError('gallery_full')
       const photos = [...b.photos, { key, alt: {} }]
-      await tx.update(businesses).set({ photos }).where(eq(businesses.id, b.id))
+      await tx
+        .update(businesses)
+        .set({ photos, ...recheckOf(b, ['photos'], deps.now()) })
+        .where(eq(businesses.id, b.id))
       await emit(tx, { type: 'business.updated', businessId: b.id })
       return viewOf(deps, { photos, name: b.name }, lang)
     })

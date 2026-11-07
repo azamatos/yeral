@@ -80,6 +80,13 @@ export const VERIFICATION_STATUSES = ['pending', 'verified', 'rejected'] as cons
 export type VerificationStatus = (typeof VERIFICATION_STATUSES)[number]
 
 /**
+ * What a verified business changed that the Ýeral team checks again (book Q-215, Q-275 as changed 07.11.2026): the
+ * change is live at once, and the business waits on the admin tool's «check again» list until the team has looked.
+ */
+export const RECHECK_CHANGES = ['address', 'about', 'photos', 'logo'] as const
+export type RecheckChange = (typeof RECHECK_CHANGES)[number]
+
+/**
  * What a business offers on its page's About section (book B-37). The demo's four; the design names no longer list yet,
  * so more join here when it does.
  */

@@ -936,6 +936,8 @@
       "nameCaption": "Clients see this name in search and when they book.",
       "nameEmpty": "Enter the business name.",
       "nameLong": "Too long: up to {max, number} characters.",
+      "nameWaiting": "Waiting for {brand}’s check. Until it’s approved, clients see “{name}”.",
+      "nameRejected": "{brand} didn’t approve “{name}”",
       "counter": "{count, number} / {max, number}",
       "category": "Category",
       "categoryCaption": "Helps clients find you in search.",

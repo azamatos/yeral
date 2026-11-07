@@ -9,6 +9,8 @@ import type {
   adminAddBusinessSchema,
   adminBusinessesQuerySchema,
   adminInviteSchema,
+  adminNameApproveSchema,
+  adminNameRejectSchema,
   adminNewRecoveryCodesSchema,
   adminPasswordChangeSchema,
   adminReasonSchema,
@@ -144,7 +146,7 @@ export function createAdmin(client: Client, queryClient: QueryClient) {
         queryKey: keys.adminBusiness(id),
         queryFn: ({ signal }) => ask(admin.businesses[':id'].$get({ param: { id }, query: {} }, abortWith(signal))),
       }),
-    /** `moved`: the `addressChangedAt` the team looked at, for a move checked again. */
+    /** `moved`: the `recheck.at` the team looked at, for what a verified business changed checked again. */
     verify: (id: string) =>
       mutationOptions({
         mutationFn: (moved?: number) =>
@@ -165,6 +167,20 @@ export function createAdmin(client: Client, queryClient: QueryClient) {
     show: (id: string) =>
       mutationOptions({
         mutationFn: () => ask(admin.businesses[':id'].show.$post({ param: { id } })),
+        onSuccess: () => businessChanged(id),
+      }),
+    /** A verified business's new name approved (Q-275); `name` is the waiting one the team looked at. */
+    approveName: (id: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof adminNameApproveSchema>) =>
+          ask(admin.businesses[':id'].name.approve.$post({ param: { id }, json })),
+        onSuccess: () => businessChanged(id),
+      }),
+    /** A new name turned down with a reason the owner reads (Q-275). */
+    rejectName: (id: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof adminNameRejectSchema>) =>
+          ask(admin.businesses[':id'].name.reject.$post({ param: { id }, json })),
         onSuccess: () => businessChanged(id),
       }),
     /** As its owner asked (Q-213): says how many bookings ahead were cancelled. */

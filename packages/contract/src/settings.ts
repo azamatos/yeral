@@ -78,7 +78,7 @@ export const locationSchema = latLngSchema.extend({
 export const businessProfileSchema = z
   .object({
     slug: slugSchema,
-    /** As clients see it in search, on bookings and in SMS. */
+    /** As clients see it in search, on bookings and in SMS: the approved one while a new one waits (`pendingName`). */
     name: z.string(),
     /** Square; null: the apps draw a letter tile. */
     logo: photoSchema.nullable(),
@@ -104,11 +104,21 @@ export const businessProfileSchema = z
     verificationReason: z.string().nullable(),
     /** Hidden by the Ýeral team, and why (Q-012): out of search and closed to visitors until shown again. */
     hidden: z.object({ reason: z.string() }).nullable(),
+    /**
+     * A verified business's new name waiting for the Ýeral team's check (Q-275 as changed 07.11.2026): clients see `name`
+     * until it's approved. Renamed again it's replaced; back to `name` it goes.
+     */
+    pendingName: z.string().nullable(),
+    /** The last new name the Ýeral team turned down, and why (Q-275): shown until the business is renamed again. */
+    nameRejected: z.object({ name: z.string(), reason: z.string() }).nullable(),
   })
   .meta({ id: 'BusinessProfile' })
 export type BusinessProfile = z.infer<typeof businessProfileSchema>
 
-/** Change some of the profile; a new location is given whole. */
+/**
+ * Change some of the profile; a new location is given whole. A verified business's new name waits for the Ýeral team
+ * (`pendingName`); a new address or About puts it on the team's «check again» list, live meanwhile (Q-215, Q-275).
+ */
 export const businessProfileUpdateSchema = z
   .object({
     name: z.string().trim().min(1).max(80),

@@ -3,7 +3,7 @@
  * authenticator code. Two roles (Q-011, owner 04.11.2026): the superadmin changes the team; admins do everything else.
  */
 import { ADMIN_ROLES } from '@yeral/domain/admin-roles'
-import { REVIEW_REPORT_REASONS, VERIFICATION_STATUSES } from '@yeral/domain/model'
+import { RECHECK_CHANGES, REVIEW_REPORT_REASONS, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { z } from 'zod'
 import { NAME_MAX } from '@yeral/domain/names'
 import { SETUP_STEPS } from '@yeral/domain/setup'
@@ -117,7 +117,7 @@ export const adminPasswordChangeSchema = z
 
 /**
  * The lists: `review` the finished businesses waiting (the longest waiting first), `moved` verified ones to check again
- * after a move, `rejected` sent back, `hidden` hidden by the team, `verified` the live ones (public), `closed` those closed
+ * (they moved, have a new About, photo or logo, or a new name waits: Q-215, Q-275), `rejected` sent back, `hidden` hidden by the team, `verified` the live ones (public), `closed` those closed
  * as their owner asked, `setup` drafts still being set up (one the team added for its owner, F-238), `all` a search
  * across the finished ones.
  */
@@ -129,7 +129,10 @@ export const adminBusinessesQuerySchema = langQuerySchema.extend({
   q: z.string().trim().max(80).optional(),
 })
 export const adminBusinessParamSchema = z.object({ id: idSchema })
-/** `moved`: the `addressChangedAt` the team looked at, for a move checked again (a newer move is `invalid_status`). */
+/**
+ * `moved`: the `recheck.at` the team looked at, for what a verified business changed checked again (a newer change is
+ * `invalid_status`); named for the first thing checked again, a move.
+ */
 export const adminVerifyQuerySchema = z.object({ moved: z.coerce.number().int().optional() })
 
 export const adminBusinessItemSchema = z
@@ -149,8 +152,15 @@ export const adminBusinessItemSchema = z
     hidden: z.object({ at: epochSchema, reason: z.string() }).nullable(),
     /** Closed as its owner asked (Q-213). */
     closed: z.object({ at: epochSchema, reason: z.string() }).nullable(),
-    /** A verified business moved: check it again (Q-215). */
+    /**
+     * A verified business changed what the team checked (Q-215, Q-275 as changed 07.11.2026): the newest change's time,
+     * and what changed since the last check. It's live; check it again.
+     */
+    recheck: z.object({ at: epochSchema, what: z.array(z.enum(RECHECK_CHANGES)) }).nullable(),
+    /** @deprecated `recheck`: its time when a move is among what changed. */
     addressChangedAt: epochSchema.nullable(),
+    /** A verified business's new name waiting for the team, and since when (Q-275): clients see `name` until it's approved. */
+    pendingName: z.object({ name: z.string(), at: epochSchema }).nullable(),
     /** When it was finished or sent again: the queue's order. */
     sentForReviewAt: epochSchema,
     /** A draft: the wizard's step its owner reopens at (Q-200); null once finished. */
@@ -206,6 +216,13 @@ export const adminReasonSchema = z
   .object({ reason: z.string().trim().min(1).max(500) })
   .strict()
   .meta({ id: 'AdminReason' })
+
+/** The waiting name the team looked at (Q-275): a newer one waiting meanwhile is `invalid_status`. */
+const seenNameSchema = z.string().min(1).max(200)
+/** A new name approved. */
+export const adminNameApproveSchema = z.object({ name: seenNameSchema }).strict().meta({ id: 'AdminNameApprove' })
+/** A new name turned down, and why: the owner reads it as written. */
+export const adminNameRejectSchema = adminReasonSchema.extend({ name: seenNameSchema }).strict().meta({ id: 'AdminNameReject' })
 
 // ── reported reviews (book ROUND6 F2, Q-261, Q-262) ──
 
