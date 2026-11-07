@@ -26,6 +26,8 @@ export function tabSearch(id: SectionId) {
  * (the reviews loaded, the group picked) while another is open. The panel area keeps at least the window's height under
  * the bar, so a short panel never pulls the page up. Switching while the bar is stuck jumps (instantly) to where the
  * new panel starts right under it; otherwise the scroll stays. ← → Home End move between the tabs (Radix Tabs).
+ * `--tabs-end`, where the stuck bar ends, is for whatever sticks under it or jumps up to it (the services' index and
+ * rail): 16 + 44 (8 + 44 on the phone), under the page's 56 px bar on the phone (and up to 1024 with a cover).
  */
 export function SectionTabs({
   ids,
@@ -39,7 +41,7 @@ export function SectionTabs({
   current: SectionId
   counts: Partial<Record<SectionId, number>>
   label: string
-  /** Phones with a cover: the bar sticks under the folded cover's 56 px bar. */
+  /** A cover: up to 1024 the bar sticks under the cover's 56 px bar (the phone always has one, folded or not). */
   belowBar: boolean
   children: Record<SectionId, ReactNode>
 }) {
@@ -57,9 +59,13 @@ export function SectionTabs({
     void navigate({ to: '.', search: tabSearch(id), replace: true, resetScroll: false })
   }
   return (
-    <Tabs value={current} onValueChange={open}>
+    <Tabs
+      value={current}
+      onValueChange={open}
+      className={cn('[--tabs-end:60px] max-sm:[--tabs-end:108px]', belowBar && 'max-md:[--tabs-end:116px]')}
+    >
       <div ref={top} aria-hidden />
-      <div ref={bar} className={cn('sticky top-0 z-10 bg-n-0 pt-4 max-sm:pt-2', belowBar && 'max-md:top-14')}>
+      <div ref={bar} className={cn('sticky top-0 z-10 bg-n-0 pt-4 max-sm:top-14 max-sm:pt-2', belowBar && 'max-md:top-14')}>
         <TabsList aria-label={label}>
           {ids.map((id) => (
             <TabsTrigger key={id} value={id} className="flex-none">
@@ -70,7 +76,7 @@ export function SectionTabs({
           ))}
         </TabsList>
       </div>
-      <div className={cn('min-h-[calc(100dvh-60px)]', belowBar && 'max-md:min-h-[calc(100dvh-108px)]')}>
+      <div className="min-h-[calc(100dvh-var(--tabs-end))]">
         {ids.map((id) => (
           <TabsContent key={id} value={id} forceMount aria-labelledby={`tab-${id}-label`} className="data-[state=inactive]:hidden">
             {children[id]}

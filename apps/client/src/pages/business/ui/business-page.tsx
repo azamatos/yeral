@@ -1,15 +1,13 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
+import { Link, useParams, useSearch } from '@tanstack/react-router'
 import type { BusinessDetail } from '@yeral/contract/catalog'
 import { useSdk } from '@yeral/sdk/react'
 import { Breadcrumbs, Crumb } from '@yeral/ui/breadcrumbs'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
-import { toast } from '@yeral/ui/toast'
 import { Clock } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { wrap } from '@/shared/ui'
 import { About } from './about'
 import { BookingBar, BookingCard, ConfirmCallout } from './booking-card'
@@ -17,6 +15,7 @@ import { Hero } from './hero'
 import { Nearby } from './nearby'
 import { Reviews } from './reviews'
 import { pickTab, Section, SECTIONS, SectionTabs } from './sections'
+import { ServicesBrowser } from './services'
 import { Specialists } from './specialists'
 
 /**
@@ -33,35 +32,25 @@ export function bookingState(detail: Pick<BusinessDetail, 'preview' | 'onlineEna
 }
 
 /**
- * `/{lang}/b/{slug}` — the business page (Venue v0.7 · C2, book C-06–C-11, C-15): the breadcrumbs, the cover hero with
- * the identity on the photo; under it the tabs as panels (`?tab=`): the services to pick from (kept in `?services=`),
- * the specialists, the reviews and About, with the booking card beside them (a bar under 1024); the places nearby
- * across the foot. The route's loader has the page (and the first
- * reviews) in the cache, or has already turned an unknown, hidden or not yet open business into the 404 page (C-10).
+ * `/{lang}/b/{slug}` — the business page (Venue v0.7 · C2, C3, book C-06–C-11, C-15): the breadcrumbs, the cover hero
+ * with the identity on the photo (on the phone, with Back, in place of the site header); under it the tabs as panels
+ * (`?tab=`): the services, each with its own «Book» into the booking (nothing is picked on the page itself, C3), the
+ * specialists, the reviews and About, with the booking card beside them (a bar under 1024); the places nearby across
+ * the foot. The route's loader has the page (and the first reviews) in the cache, or has already turned an unknown,
+ * hidden or not yet open business into the 404 page (C-10).
  */
 export function BusinessPage() {
   const { slug = '' } = useParams({ strict: false })
   const lang = useLocale()
   const sdk = useSdk()
   const { data: detail } = useSuspenseQuery(sdk.catalog.business(slug, lang))
-  const search: { services?: string; tab?: string } = useSearch({ strict: false })
-  const navigate = useNavigate()
+  const search: { tab?: string } = useSearch({ strict: false })
   const t = useTranslations('business')
-  const tb = useTranslations('booking')
   const home = useTranslations('notFound')('home')
   const state = bookingState(detail)
   // a page with nobody to pick (tables, classes) has no Specialists part
   const sections = SECTIONS.filter((s) => s !== 'specialists' || detail.specialists.length > 0)
   const tab = pickTab(search.tab, sections)
-  const ids = state === 'online' || state === 'preview' ? parseServiceIds(search.services) : []
-  const picked = pickedServices(detail, ids)
-  const pick = (next: string[]) =>
-    void navigate({
-      to: '.',
-      search: (prev: Record<string, unknown>) => ({ ...prev, services: serviceIdsParam(next) }),
-      replace: true,
-      resetScroll: false,
-    })
   return (
     <>
       {detail.preview && <PreviewBanner preview={detail.preview} />}
@@ -95,24 +84,17 @@ export function BusinessPage() {
             >
               {{
                 services: (
-                  <Section id="services" title={t('services.title')}>
+                  <Section
+                    id="services"
+                    title={t('services.title')}
+                    className="flex flex-col gap-5 pt-6 pb-12 max-sm:gap-3 max-sm:pt-4 max-sm:pb-10"
+                  >
                     {/* the phone has no card: how the business confirms opens the panel in one line (C2) */}
                     {(state === 'online' || state === 'preview') && <ConfirmCallout detail={detail} compact className="md:hidden" />}
-                    <ServicePicker
-                      groups={detail.serviceGroups}
-                      picked={picked.map((s) => s.id)}
-                      onToggle={(id) => {
-                        const next = toggleService(ids, id)
-                        // one booking takes up to 10 services (the api's limit)
-                        if (next.length > SERVICES_MAX) toast(tb('services.max', { max: SERVICES_MAX }))
-                        else pick(next)
-                      }}
-                      canPick={state === 'online' || state === 'preview'}
-                      groupHeading="h3"
-                    />
+                    <ServicesBrowser detail={detail} state={state} />
                   </Section>
                 ),
-                specialists: <Specialists detail={detail} state={state} picked={picked.map((s) => s.id)} />,
+                specialists: <Specialists detail={detail} state={state} />,
                 reviews: <Reviews detail={detail} />,
                 about: <About detail={detail} />,
               }}
@@ -125,18 +107,12 @@ export function BusinessPage() {
               state === 'phone-only' ? 'max-md:order-first max-md:basis-full max-md:pt-0' : 'max-md:hidden',
             )}
           >
-            <BookingCard
-              detail={detail}
-              state={state}
-              picked={picked}
-              onRemove={(id) => pick(ids.filter((x) => x !== id))}
-              onClear={() => pick([])}
-            />
+            <BookingCard detail={detail} state={state} />
           </aside>
         </div>
       </div>
       <Nearby places={detail.similar} />
-      <BookingBar detail={detail} state={state} picked={picked} />
+      <BookingBar detail={detail} state={state} />
     </>
   )
 }

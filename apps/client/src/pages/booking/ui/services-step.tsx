@@ -6,7 +6,7 @@ import { Callout } from '@yeral/ui/callout'
 import { Rating } from '@yeral/ui/rating'
 import { Check, UserRound } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { ServicePicker } from '@/features/pick-services'
+import { ServicePicker } from './service-picker'
 import { namedSpecialist, notDoneBy, servicesOf } from '../model/flow'
 import { StepTitle } from './step-title'
 

@@ -6,16 +6,14 @@ import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
-import { CalendarX2, Clock, Phone, Wallet, X, Zap } from 'lucide-react'
+import { CalendarX2, Clock, Phone, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { selectionTotal } from '@/features/pick-services'
 import { nextFreeText } from '../model/when'
 import type { BookingState } from './business-page'
 import { FavouriteButton } from './favourite'
 
 type Detail = BusinessDetail
-type Service = Detail['serviceGroups'][number]['services'][number]
 
 function CallLink({
   phone,
@@ -50,19 +48,25 @@ function useNextFree(next: Detail['nextFree']): string | null {
 
 /**
  * How this business confirms (Venue v0.7 · C2 BookingCard): one Info callout, a clock for by hand (with the usual wait
- * when the business has one), a zap for at once. `compact` is the phone's one line at the top of the Services panel.
+ * when the business has one), a zap for at once. `compact` is the phone's one line at the top of the Services panel
+ * (`.co.cp`: 10 / 12 around a 16 icon and one 14/20 line).
  */
 export function ConfirmCallout({ detail, compact = false, className }: { detail: Detail; compact?: boolean; className?: string }) {
   const t = useTranslations('business.card.confirm')
   const fmt = useFmt()
   const instant = detail.confirmMode === 'instant'
-  const icon = instant ? <Zap aria-hidden /> : <Clock aria-hidden />
   if (compact)
     return (
-      <Callout tone="accent" size="s" icon={icon} className={cn('font-medium', className)}>
+      <Callout
+        tone="accent"
+        size="s"
+        icon={instant ? <Zap aria-hidden className="size-4" /> : <Clock aria-hidden className="size-4" />}
+        className={cn('px-3 py-2.5 font-medium', className)}
+      >
         {instant ? t('instantShort') : t('byHandShort', { name: detail.name })}
       </Callout>
     )
+  const icon = instant ? <Zap aria-hidden /> : <Clock aria-hidden />
   const lead = instant
     ? t('instantLead')
     : detail.typicalConfirmMinutes
@@ -75,18 +79,8 @@ export function ConfirmCallout({ detail, compact = false, className }: { detail:
   )
 }
 
-/** The booking flow's address with what's picked: the services step with nothing, the specialist step with some. */
-function BookLink({
-  slug,
-  picked,
-  children,
-  disabled,
-}: {
-  slug: string
-  picked: readonly Service[]
-  children: ReactNode
-  disabled: boolean
-}) {
+/** «Book» into the booking flow, which opens on its services step (a service's own Book on a row opens it on the specialist). */
+function BookLink({ slug, children, disabled }: { slug: string; children: ReactNode; disabled: boolean }) {
   const lang = useLocale()
   if (disabled)
     return (
@@ -96,11 +90,7 @@ function BookLink({
     )
   return (
     <Button asChild size="l" variant="primary" className="w-full">
-      <Link
-        to="/$lang/b/$slug/book"
-        params={{ lang, slug }}
-        search={picked.length > 0 ? { services: picked.map((s) => s.id).join(','), step: 'staff' } : {}}
-      >
+      <Link to="/$lang/b/$slug/book" params={{ lang, slug }}>
         {children}
       </Link>
     </Button>
@@ -108,24 +98,12 @@ function BookLink({
 }
 
 /**
- * The sticky card beside the page (Venue aside, ≥ 1024): the next free time and «Book» before anything is picked; the
- * picked services with their total, «Continue» and «Clear» after (book C-06, C-15); the call card for a client the
- * business books by phone only (C-11, Mobile 15: first on narrower screens); the paused card while online booking is
- * off (C-09, States 05). On an owner's preview nothing can be booked (Q-153): the buttons stay, disabled.
+ * The sticky card beside the page (Venue v0.7 aside, ≥ 1024), the same in every state: the next free time, «Book» and
+ * how the business confirms (nothing is picked on the page, C3); the call card for a client the business books by
+ * phone only (C-11, Mobile 15: first on narrower screens); the paused card while online booking is off (C-09, States
+ * 05). On an owner's preview nothing can be booked (Q-153): the buttons stay, disabled.
  */
-export function BookingCard({
-  detail,
-  state,
-  picked,
-  onRemove,
-  onClear,
-}: {
-  detail: Detail
-  state: BookingState
-  picked: readonly Service[]
-  onRemove: (id: string) => void
-  onClear: () => void
-}) {
+export function BookingCard({ detail, state }: { detail: Detail; state: BookingState }) {
   const t = useTranslations('business')
   const fmt = useFmt()
   const next = useNextFree(detail.nextFree)
@@ -166,107 +144,31 @@ export function BookingCard({
         </div>
       </div>
     )
-  const disabled = state === 'preview'
-  if (picked.length === 0) {
-    return (
-      <div className={card}>
-        {/* Venue v0.7 · C2 `.bkc`: the same in every state, Next free time, Book and how the business confirms */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-label text-n-500 uppercase">{t('card.nextFree')}</span>
-            <span className={cn(next ? 'text-[22px] leading-7 font-semibold tracking-[-0.01em]' : 'text-body-l font-semibold text-n-600')}>
-              {next ?? t('card.noFree')}
-            </span>
-          </div>
-          <BookLink slug={detail.slug} picked={picked} disabled={disabled}>
-            {t('card.book')}
-          </BookLink>
-          <ConfirmCallout detail={detail} />
-        </div>
-      </div>
-    )
-  }
-  const total = selectionTotal(picked)
   return (
     <div className={card}>
+      {/* Venue v0.7 · C2 `.bkc`: Next free time, Book and how the business confirms */}
       <div className="flex flex-col gap-4">
-        {/* C7-Booking C4.4 (#41): Clear is a Tertiary S in the head, not a bold line between Continue and the pay line */}
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex min-w-0 items-baseline gap-2">
-            <span className="text-[19px] leading-6 font-bold tracking-[-0.01em]">{t('card.chosen')}</span>
-            <span className="text-dense whitespace-nowrap text-n-600">{t('card.count', { count: picked.length })}</span>
-          </span>
-          <Button variant="tertiary" size="s" className="-mr-2.5" onClick={onClear}>
-            {t('card.clear')}
-          </Button>
-        </div>
-        <ul className="m-0 flex list-none flex-col p-0">
-          {picked.map((s) => (
-            <li key={s.id} className="flex items-start gap-3 border-t border-n-200 py-3.5">
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-body font-semibold">{s.name}</span>
-                <span className="text-dense text-n-600">{fmt.duration(s.durationMin)}</span>
-              </div>
-              <span
-                className={cn(
-                  s.price.type === 'hidden'
-                    ? 'max-w-26 text-right text-dense font-medium text-n-600'
-                    : 'text-body font-semibold whitespace-nowrap',
-                )}
-              >
-                {fmt.price(s.price)}
-              </span>
-              <button
-                type="button"
-                aria-label={t('card.remove', { name: s.name })}
-                onClick={() => onRemove(s.id)}
-                className="-mt-1.5 -mr-2 inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-ctl-s border-0 bg-transparent text-n-600 hover:bg-group hover:text-n-900 focus-visible:shadow-focus focus-visible:outline-none"
-              >
-                <X aria-hidden className="size-4" strokeWidth={1.75} />
-              </button>
-            </li>
-          ))}
-        </ul>
-        <div className="-mt-4 h-px bg-n-200" />
-        {/* the total one row (duration muted), «Pay at the place» 4 under it with an icon, the action 24 below */}
         <div className="flex flex-col gap-1">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <span className="whitespace-nowrap">
-              <span className="text-[16px] leading-6 font-semibold">{t('card.total')}</span>
-              <span className="ml-2 text-small text-n-600">{fmt.duration(total.minutes)}</span>
-            </span>
-            <span
-              className={cn(
-                'ml-auto',
-                total.price.type === 'hidden'
-                  ? 'text-right text-body font-medium text-n-600'
-                  : 'text-[24px] leading-8 font-bold tracking-[-0.01em] whitespace-nowrap',
-              )}
-            >
-              {fmt.price(total.price)}
-            </span>
-          </div>
-          <span className="text-n-700 flex items-center gap-2 text-dense">
-            <Wallet aria-hidden className="size-4 flex-none" strokeWidth={1.75} />
-            {t('card.payAtPlace')}
+          <span className="text-label text-n-500 uppercase">{t('card.nextFree')}</span>
+          <span className={cn(next ? 'text-[22px] leading-7 font-semibold tracking-[-0.01em]' : 'text-body-l font-semibold text-n-600')}>
+            {next ?? t('card.noFree')}
           </span>
         </div>
-        <div className="mt-2">
-          <BookLink slug={detail.slug} picked={picked} disabled={disabled}>
-            {t('card.continue')}
-          </BookLink>
-        </div>
+        <BookLink slug={detail.slug} disabled={state === 'preview'}>
+          {t('card.book')}
+        </BookLink>
+        <ConfirmCallout detail={detail} />
       </div>
     </div>
   )
 }
 
 /**
- * The bar at the bottom under 1024 (Venue `.mbar`, Mobile 4): the next free time or the picked services' count,
- * minutes and total beside «Book» / «Continue»; the business's name and number beside «Call» for a phone-only client
- * (Mobile 15) and while online booking is paused (States 05, with the heart).
+ * The bar at the bottom under 1024 (Venue v0.7 `ActionBar`, Mobile 4): the next free time beside «Book», never
+ * changing (a service's own Book on its row opens the booking instead); the business's name and number beside «Call»
+ * for a phone-only client (Mobile 15) and while online booking is paused (States 05, with the heart).
  */
-export function BookingBar({ detail, state, picked }: { detail: Detail; state: BookingState; picked: readonly Service[] }) {
+export function BookingBar({ detail, state }: { detail: Detail; state: BookingState }) {
   const t = useTranslations('business')
   const fmt = useFmt()
   const next = useNextFree(detail.nextFree)
@@ -284,31 +186,17 @@ export function BookingBar({ detail, state, picked }: { detail: Detail; state: B
         </div>
       </div>
     )
-  const total = selectionTotal(picked)
   return (
     <div role="region" aria-label={t('card.label')} className={bar}>
       <div className="flex min-w-0 flex-col">
-        <span className="text-dense text-n-600">
-          {picked.length === 0 ? t('card.nextFree') : `${t('card.count', { count: picked.length })} · ${fmt.duration(total.minutes)}`}
+        <span className="text-dense text-n-600">{t('card.nextFree')}</span>
+        <span className={cn('whitespace-nowrap', next ? 'text-[17px] leading-[22px] font-bold' : 'text-body font-semibold text-n-600')}>
+          {next ?? t('card.noFree')}
         </span>
-        {picked.length === 0 ? (
-          <span className={cn('whitespace-nowrap', next ? 'text-[17px] leading-[22px] font-bold' : 'text-body font-semibold text-n-600')}>
-            {next ?? t('card.noFree')}
-          </span>
-        ) : (
-          <span
-            className={cn(
-              'whitespace-nowrap',
-              total.price.type === 'hidden' ? 'text-body font-semibold text-n-600' : 'text-[17px] leading-[22px] font-bold',
-            )}
-          >
-            {fmt.price(total.price)}
-          </span>
-        )}
       </div>
       <div className="flex-none">
-        <BookLink slug={detail.slug} picked={picked} disabled={state === 'preview'}>
-          {picked.length === 0 ? t('card.book') : t('card.continue')}
+        <BookLink slug={detail.slug} disabled={state === 'preview'}>
+          {t('card.book')}
         </BookLink>
       </div>
     </div>

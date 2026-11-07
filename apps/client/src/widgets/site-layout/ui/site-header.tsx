@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useLocation, useRouter } from '@tanstack/react-router'
+import { Link, useLocation, useMatches, useRouter } from '@tanstack/react-router'
 import { useSdk } from '@yeral/sdk/react'
 import { Logo } from '@yeral/ui/brand'
 import { Button } from '@yeral/ui/button'
+import { cn } from '@yeral/ui/cn'
 import { LanguageSwitcher } from '@yeral/ui/language-switcher'
 import { NavLink } from '@yeral/ui/nav-link'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
@@ -19,7 +20,8 @@ const LoginModal = lazy(() => import('@/features/log-in').then((m) => ({ default
 /**
  * The marketing header (Home, Auth «Logged-in header», States 09): the logo home, «For business», the language (none
  * with one language) and «Log in», or the avatar and its menu once someone is signed in. 72 high; 56 with a 24 logo on
- * phones (Mobile frame 1), where «For business» goes (Home `.hide-xs`).
+ * phones (Mobile frame 1), where «For business» goes (Home `.hide-xs`). A page with its own bar on the phone (the
+ * business page's cover with Back, Venue v0.7) has no header there (`staticData.phoneHeader`).
  */
 export function SiteHeader() {
   const t = useTranslations()
@@ -27,6 +29,7 @@ export function SiteHeader() {
   const sdk = useSdk()
   const router = useRouter()
   const { href } = useLocation()
+  const noPhoneHeader = useMatches().some((m) => m.staticData.phoneHeader === 'none')
   const me = useQuery(sdk.me.get())
   const switchLanguage = useSwitchLanguage()
   const [loggingIn, setLoggingIn] = useState(false)
@@ -45,7 +48,7 @@ export function SiteHeader() {
   }, [signedIn, loginUsed])
 
   return (
-    <header className="border-b border-n-200 bg-n-0">
+    <header className={cn('border-b border-n-200 bg-n-0', noPhoneHeader && 'max-sm:hidden')}>
       <div className={`${wrap} flex h-18 items-center gap-4 max-sm:h-14`}>
         <Link
           to="/$lang"

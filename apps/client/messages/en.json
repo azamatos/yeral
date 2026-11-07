@@ -319,8 +319,25 @@
       "close": "Close"
     },
     "services": {
-      "title": "Services"
+      "title": "Services",
+      "none": "No services yet.",
+      "search": "Search {count, plural, one {# service} other {# services}}",
+      "clear": "Clear",
+      "matches": "{count, plural, one {# service matches} other {# services match}} “{q}” · in {groups, plural, one {# group} other {# groups}}",
+      "noMatch": "No services match",
+      "nothing": "Nothing matches “{q}”",
+      "nothingLead": "Check the spelling, or clear the search to see all {count, plural, one {# service} other {# services}}.",
+      "clearSearch": "Clear search",
+      "groupIndex": "Service groups",
+      "groupsCount": "{count, plural, one {# group} other {# groups}}",
+      "matchesByGroup": "Matches by group",
+      "ofTotal": "{count} of {total}",
+      "groups": "Groups",
+      "close": "Close",
+      "book": "Book",
+      "bookLabel": "Book {name}"
     },
+    "back": "Back",
     "sections": {
       "services": "Services",
       "specialists": "Specialists",
@@ -400,13 +417,6 @@
         "instantLead": "Your time is set as soon as you book. You’ll find it in My bookings.",
         "instantShort": "Bookings are confirmed at once."
       },
-      "chosen": "Selected services",
-      "count": "{count, plural, one {# service} other {# services}}",
-      "remove": "Remove: {name}",
-      "total": "Total",
-      "continue": "Continue",
-      "clear": "Clear",
-      "payAtPlace": "Pay at the place",
       "call": "Call",
       "callLabel": "Call {phone}"
     },
